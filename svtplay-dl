@@ -11,11 +11,16 @@ def getdata(url):
 argv = sys.argv[1]
 text = getdata(argv)
 m = re.search('dynamicStreams=(.*)\&amp\;background', text)
-new = m.group(1)
-tmp = new.split("|")
-m = re.search('url:(.*)\,',tmp[0])
+if m:
+	new = m.group(1)
+	tmp = new.split("|")
+	m = re.search('url:(.*)\,',tmp[0])
+else:
+	m = re.search('pathflv=(.*)\&amp\;background',text)
+	if not m:
+		print "Err: cant find stream"
+		sys.exit(2)
 stream = m.group(1)
 output = os.path.basename(stream)
 command = ["/usr/bin/rtmpdump","-r",stream,"-o",output]
 subprocess.call(command)
-print output
