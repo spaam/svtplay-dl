@@ -8,9 +8,40 @@ def getdata(url):
 	response.close();
 	return data
 
+def calc_data(bytes,total):
+	percent = float(bytes) / total
+ 	percent = round(percent*100, 2)
+	sys.stdout.write("Downloaded %d of %d bytes (%.2f%%)\r" % (bytes, total, percent))
+	if bytes >= total:
+		sys.stdout.write('\n')
+
+def getrtmp(url,output):
+	command = ["/usr/bin/rtmpdump","-r",url,"-o",output]
+	subprocess.call(command)
+
+def gethttp(url,output):
+	response = urllib2.urlopen(url);
+	total_size = response.info().getheader('Content-Length').strip()
+	total_size = int(total_size)
+	bytes_so_far = 0
+	fd = open(output,"wb")
+
+	while 1:
+		chunk = response.read(8192)
+		bytes_so_far += len(chunk)
+		
+		if not chunk:
+			break
+
+		fd.write(chunk)
+		calc_data(bytes_so_far, total_size)
+
+	fd.close()
+
 argv = sys.argv[1]
 text = getdata(argv)
 m = re.search('dynamicStreams=(.*)\&amp\;background', text)
+
 if m:
 	new = m.group(1)
 	tmp = new.split("|")
@@ -20,7 +51,11 @@ else:
 	if not m:
 		print "Err: cant find stream"
 		sys.exit(2)
+
 stream = m.group(1)
 output = os.path.basename(stream)
-command = ["/usr/bin/rtmpdump","-r",stream,"-o",output]
-subprocess.call(command)
+
+if stream[0:4] == "rtmp":
+	getrtmp(stream,output)
+else:
+	gethttp(stream,output)
