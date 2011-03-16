@@ -6,6 +6,7 @@ import os
 import subprocess
 
 def getdata(url):
+    """ Get the page to parse it for streams """
     request = urllib2.Request(url)
     request.add_header = [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
     response = urllib2.urlopen(request)
@@ -14,6 +15,7 @@ def getdata(url):
     return data
 
 def calc_data(byte, total):
+    """ Print some info about how much we have downloaded """
     percent = float(byte) / total
     percent = round(percent*100, 2)
     sys.stdout.write("Downloaded %d of %d bytes (%.2f%%)\r" % (byte, total, percent))
@@ -21,10 +23,12 @@ def calc_data(byte, total):
         sys.stdout.write('\n')
 
 def getrtmp(url, output):
+    """ Get the stream from RTMP """
     command = ["/usr/bin/rtmpdump", "-r", url, "-o", output]
     subprocess.call(command)
 
 def gethttp(url, output):
+    """ Get the stream from HTTP """
     response = urllib2.urlopen(url)
     total_size = response.info().getheader('Content-Length').strip()
     total_size = int(total_size)
