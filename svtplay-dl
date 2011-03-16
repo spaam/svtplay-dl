@@ -11,7 +11,7 @@ def getdata(url):
     request.add_header = [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
     response = urllib2.urlopen(request)
     data = response.read()
-    response.close();
+    response.close()
     return data
 
 def calc_data(byte, total):
@@ -48,23 +48,22 @@ def gethttp(url, output):
     fd.close()
 
 argv = sys.argv[1]
-text = getdata(argv)
-m = re.search('dynamicStreams=(.*)\&amp\;background', text)
-
-if m:
-    new = m.group(1)
+DATA = getdata(argv)
+MATCH = re.search('dynamicStreams=(.*)\&amp\;background', DATA)
+if MATCH:
+    new = MATCH.group(1)
     tmp = new.split("|")
-    m = re.search('url:(.*)\,', tmp[0])
+    MATCH = re.search('url:(.*)\,', tmp[0])
 else:
-    m = re.search('pathflv=(.*)\&amp\;background', text)
-    if not m:
+    MATCH = re.search('pathflv=(.*)\&amp\;background', DATA)
+    if not MATCH:
         print "Err: cant find stream"
         sys.exit(2)
 
-stream = m.group(1)
-output = os.path.basename(stream)
+STREAM = MATCH.group(1)
+OUTPUT = os.path.basename(STREAM)
 
-if stream[0:4] == "rtmp":
-    getrtmp(stream, output)
+if STREAM[0:4] == "rtmp":
+    getrtmp(STREAM, OUTPUT)
 else:
-    gethttp(stream, output)
+    gethttp(STREAM, OUTPUT)
