@@ -26,8 +26,8 @@ def getrtmp(url, output):
     """ Get the stream from RTMP """
     other = ""
     if url[4:5] == "e":
-		""" For encrypted streams """
-		other = "-l 2"
+        # For encrypted streams
+        other = "-l 2"
 
     command = ["/usr/bin/rtmpdump", "-r", url, "-o", output, other]
     subprocess.call(command)
@@ -38,7 +38,7 @@ def gethttp(url, output):
     total_size = response.info().getheader('Content-Length').strip()
     total_size = int(total_size)
     bytes_so_far = 0
-    fd = open(output,"wb")
+    file_d = open(output,"wb")
 
     while 1:
         chunk = response.read(8192)
@@ -47,32 +47,33 @@ def gethttp(url, output):
         if not chunk:
             break
 
-        fd.write(chunk)
+        file_d.write(chunk)
         calc_data(bytes_so_far, total_size)
 
-    fd.close()
+    file_d.close()
 
 def main():
+    """ Main program """
     argv = sys.argv[1]
-    DATA = getdata(argv)
-    MATCH = re.search('dynamicStreams=(.*)\&amp\;background', DATA)
-    if MATCH:
-        new = MATCH.group(1)
+    data = getdata(argv)
+    match = re.search('dynamicStreams=(.*)\&amp\;background', data)
+    if match:
+        new = match.group(1)
         tmp = new.split("|")
-        MATCH = re.search('url:(.*)\,', tmp[0])
+        match = re.search('url:(.*)\,', tmp[0])
     else:
-        MATCH = re.search('pathflv=(.*)\&amp\;background', DATA)
-        if not MATCH:
+        match = re.search('pathflv=(.*)\&amp\;background', data)
+        if not match:
             print "Err: cant find stream"
             sys.exit(2)
 
-    STREAM = MATCH.group(1)
-    OUTPUT = os.path.basename(STREAM)
+    stream = match.group(1)
+    output = os.path.basename(stream)
 
-    if STREAM[0:4] == "rtmp":
-        getrtmp(STREAM, OUTPUT)
+    if stream[0:4] == "rtmp":
+        getrtmp(stream, output)
     else:
-        gethttp(STREAM, OUTPUT)
+        gethttp(stream, output)
 
 if __name__ == "__main__":
     main()
