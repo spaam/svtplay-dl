@@ -24,7 +24,7 @@ def calc_data(byte, total):
 
 def getrtmp(url, output):
     """ Get the stream from RTMP """
-	other = ""
+    other = ""
     if url[4:5] == "e":
 		""" For encrypted streams """
 		other = "-l 2"
@@ -52,23 +52,27 @@ def gethttp(url, output):
 
     fd.close()
 
-argv = sys.argv[1]
-DATA = getdata(argv)
-MATCH = re.search('dynamicStreams=(.*)\&amp\;background', DATA)
-if MATCH:
-    new = MATCH.group(1)
-    tmp = new.split("|")
-    MATCH = re.search('url:(.*)\,', tmp[0])
-else:
-    MATCH = re.search('pathflv=(.*)\&amp\;background', DATA)
-    if not MATCH:
-        print "Err: cant find stream"
-        sys.exit(2)
+def main():
+    argv = sys.argv[1]
+    DATA = getdata(argv)
+    MATCH = re.search('dynamicStreams=(.*)\&amp\;background', DATA)
+    if MATCH:
+        new = MATCH.group(1)
+        tmp = new.split("|")
+        MATCH = re.search('url:(.*)\,', tmp[0])
+    else:
+        MATCH = re.search('pathflv=(.*)\&amp\;background', DATA)
+        if not MATCH:
+            print "Err: cant find stream"
+            sys.exit(2)
 
-STREAM = MATCH.group(1)
-OUTPUT = os.path.basename(STREAM)
+    STREAM = MATCH.group(1)
+    OUTPUT = os.path.basename(STREAM)
 
-if STREAM[0:4] == "rtmp":
-    getrtmp(STREAM, OUTPUT)
-else:
-    gethttp(STREAM, OUTPUT)
+    if STREAM[0:4] == "rtmp":
+        getrtmp(STREAM, OUTPUT)
+    else:
+        gethttp(STREAM, OUTPUT)
+
+if __name__ == "__main__":
+    main()
