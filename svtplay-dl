@@ -23,14 +23,16 @@ def calc_data(byte, total):
     if byte >= total:
         sys.stdout.write('\n')
 
-def getrtmp(url, output):
+def getrtmp(url, output, live):
     """ Get the stream from RTMP """
-    other = ""
+    other, other2 = ""
     if url[4:5] == "e":
         # For encrypted streams
         other = "-l 2"
+    if live:
+       other2 = "-v"
 
-    command = ["/usr/bin/rtmpdump", "-r", url, "-o", output, other]
+    command = ["/usr/bin/rtmpdump", "-r", url, "-o", output, other, other2]
     subprocess.call(command)
 
 def gethttp(url, output):
@@ -59,10 +61,14 @@ def main():
     parser = OptionParser(usage=usage)
     parser.add_option("-o", "--output",
         metavar="OUTPUT", help="Outputs to the given filename.")
+    parser.add_option("-l", "--live",
+        action="store_true", dest="live", default=False,
+        help="Enable for live streams")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
     output = options.output
+    live = options.live
     data = getdata(args[0])
     match = re.search('dynamicStreams=(.*)\&amp\;background', data)
     if match:
@@ -81,7 +87,7 @@ def main():
        print "Outfile: ", output
 
     if stream[0:4] == "rtmp":
-        getrtmp(stream, output)
+        getrtmp(stream, output, live)
     else:
         gethttp(stream, output)
 
