@@ -4,6 +4,7 @@ import urllib2
 import sys
 import os
 import subprocess
+from optparse import OptionParser
 
 def getdata(url):
     """ Get the page to parse it for streams """
@@ -54,8 +55,15 @@ def gethttp(url, output):
 
 def main():
     """ Main program """
-    argv = sys.argv[1]
-    data = getdata(argv)
+    usage = "usage: %prog [options] arg1"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-o", "--output",
+        metavar="OUTPUT", help="Outputs to the given filename.")
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    output = options.output
+    data = getdata(args[0])
     match = re.search('dynamicStreams=(.*)\&amp\;background', data)
     if match:
         new = match.group(1)
@@ -68,7 +76,9 @@ def main():
             sys.exit(2)
 
     stream = match.group(1)
-    output = os.path.basename(stream)
+    if not output:
+       output = os.path.basename(stream)
+       print "Outfile: ", output
 
     if stream[0:4] == "rtmp":
         getrtmp(stream, output)
