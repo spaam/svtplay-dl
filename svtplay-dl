@@ -87,10 +87,10 @@ def main():
             try:
                 stream = streams[int(quality)]
             except ValueError:
-                print "Err: Cant find that quality. try 2400 (HD), 1200 (high), 850 (mid) or 320 (low)"
+                print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
                 sys.exit(2)
             except KeyError:
-                print "Err: Cant find that quality. try 2400 (HD), 1200 (high), 850 (mid) or 320 (low)"
+                print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
                 sys.exit(2)
     else:
         match = re.search('pathflv=(.*)\&amp\;background', data)
