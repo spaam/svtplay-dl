@@ -57,31 +57,48 @@ def gethttp(url, output):
 
 def main():
     """ Main program """
-    usage = "usage: %prog [options] arg1"
+    usage = "usage: %prog [options] url"
     parser = OptionParser(usage=usage)
     parser.add_option("-o", "--output",
         metavar="OUTPUT", help="Outputs to the given filename.")
     parser.add_option("-l", "--live",
         action="store_true", dest="live", default=False,
         help="Enable for live streams")
+    parser.add_option("-q", "--quality",
+        metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
     output = options.output
     live = options.live
+    quality = options.quality
     data = getdata(args[0])
     match = re.search('dynamicStreams=(.*)\&amp\;background', data)
     if match:
         new = match.group(1)
         tmp = new.split("|")
-        match = re.search('url:(.*)\,', tmp[0])
+        streams = {}
+        for f in tmp:
+            match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
+            streams[int(match.group(2))] = match.group(1)
+        if not quality:
+            stream = streams[sorted(streams.keys()).pop()]
+        else:
+            try:
+                stream = streams[int(quality)]
+            except ValueError:
+                print "Err: Cant find that quality. try 2400 (HD), 1200 (high), 850 (mid) or 320 (low)"
+                sys.exit(2)
+            except KeyError:
+                print "Err: Cant find that quality. try 2400 (HD), 1200 (high), 850 (mid) or 320 (low)"
+                sys.exit(2)
     else:
         match = re.search('pathflv=(.*)\&amp\;background', data)
         if not match:
             print "Err: cant find stream"
             sys.exit(2)
+        stream = match.group(1)
 
-    stream = match.group(1)
     if not output:
        output = os.path.basename(stream)
        print "Outfile: ", output
