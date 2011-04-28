@@ -25,7 +25,8 @@ def calc_data(byte, total):
 
 def getrtmp(url, output, live):
     """ Get the stream from RTMP """
-    other, other2 = ""
+    other =""
+    other2 = ""
     if url[4:5] == "e":
         # For encrypted streams
         other = "-l 2"
@@ -86,10 +87,7 @@ def main():
         else:
             try:
                 stream = streams[int(quality)]
-            except ValueError:
-                print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
-                sys.exit(2)
-            except KeyError:
+            except (ValueError, KeyError):
                 print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
                 sys.exit(2)
     else:
