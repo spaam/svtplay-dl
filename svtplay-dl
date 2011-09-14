@@ -33,7 +33,7 @@ def getrtmp(url, output, live):
     if live:
        other2 = "-v"
 
-    command = ["/usr/bin/rtmpdump", "-r", url, "-o", output, other, other2]
+    command = ["rtmpdump", "-r", url, "-o", output, other, other2]
     subprocess.call(command)
 
 def gethttp(url, output):
