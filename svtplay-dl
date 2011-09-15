@@ -5,56 +5,145 @@ import sys
 import os
 import subprocess
 from optparse import OptionParser
+import urlparse
+import xml.etree.ElementTree as ET
+import shlex
 
-def getdata(url):
-    """ Get the page to parse it for streams """
-    request = urllib2.Request(url)
-    request.add_header = [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
-    response = urllib2.urlopen(request)
-    data = response.read()
-    response.close()
-    return data
+class Common(object):
+    def getdata(self, url):
+        """ Get the page to parse it for streams """
+        request = urllib2.Request(url)
+        request.add_header = [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError:
+            print "Something wrong with that url"
+            sys.exit(2)
 
-def calc_data(byte, total):
-    """ Print some info about how much we have downloaded """
-    percent = float(byte) / total
-    percent = round(percent*100, 2)
-    sys.stdout.write("Downloaded %d of %d bytes (%.2f%%)\r" % (byte, total, percent))
-    if byte >= total:
-        sys.stdout.write('\n')
+        data = response.read()
+        response.close()
+        return data
 
-def getrtmp(url, output, live):
-    """ Get the stream from RTMP """
-    other =""
-    other2 = ""
-    if url[4:5] == "e":
-        # For encrypted streams
-        other = "-l 2"
-    if live:
-       other2 = "-v"
+    def calc_data(self, byte, total):
+        """ Print some info about how much we have downloaded """
+        percent = float(byte) / total
+        percent = round(percent*100, 2)
+        sys.stdout.write("Downloaded %d of %d bytes (%.2f%%)\r" % (byte, total, percent))
+        if byte >= total:
+            sys.stdout.write('\n')
 
-    command = ["rtmpdump", "-r", url, "-o", output, other, other2]
-    subprocess.call(command)
+    def getrtmp(self, url, output, live, other):
+        """ Get the stream from RTMP """
+        encrypted =""
+        live = ""
+        if url[4:5] == "e":
+            # For encrypted streams
+            encrypted = "-l 2"
+        if live:
+           live = "-v"
 
-def gethttp(url, output):
-    """ Get the stream from HTTP """
-    response = urllib2.urlopen(url)
-    total_size = response.info().getheader('Content-Length').strip()
-    total_size = int(total_size)
-    bytes_so_far = 0
-    file_d = open(output,"wb")
+        rtmpdump = "rtmpdump -r %s -o %s %s %s %s" % (url, output, encrypted, other, live)
+        command = shlex.split(rtmpdump)
+        subprocess.call(command)
 
-    while 1:
-        chunk = response.read(8192)
-        bytes_so_far += len(chunk)
+    def gethttp(self, url, output):
+        """ Get the stream from HTTP """
+        response = urllib2.urlopen(url)
+        total_size = response.info().getheader('Content-Length').strip()
+        total_size = int(total_size)
+        bytes_so_far = 0
+        file_d = open(output,"wb")
+
+        while 1:
+            chunk = response.read(8192)
+            bytes_so_far += len(chunk)
+
+            if not chunk:
+                break
+
+            file_d.write(chunk)
+            calc_data(bytes_so_far, total_size)
+
+        file_d.close()
+
+class Tv4play(Common):
+    def __init__(self, output, quality, live):
+        self.output = output
+        self.quality = quality
+        self.live = live
+
+    def get(self, url):
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        ss = xml.find("items")
+        sa = list(ss.iter("item"))
+        streams = {}
+        sa.pop(len(sa)-1)
+
+        for i in sa:
+            stream = {}
+            stream["uri"] = i.find("base").text
+            stream["path"] = i.find("url").text
+            streams[i.find("bitrate").text] = stream
         
-        if not chunk:
-            break
+        sort = []
+        for key in sorted(streams.iterkeys()):
+            sort.append(int(key))
+            sort = sorted(sort)
 
-        file_d.write(chunk)
-        calc_data(bytes_so_far, total_size)
+        if not self.quality:
+            self.quality = sort.pop()
 
-    file_d.close()
+        try:
+            other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
+        except (ValueError, KeyError):
+            print "Err: Cant find that quality. try 2500, 1500, 800 or 300"
+            sys.exit(2)
+
+        if not self.output:
+           self.output = os.path.basename(streams[str(self.quality)]["path"])
+           print "Outfile: ", self.output
+        self.getrtmp(streams[str(self.quality)]["uri"], self.output, self.live, other)
+
+class Svtplay(Common):
+    def __init__(self, output, quality, live):
+        self.output = output
+        self.quality = quality
+        self.live = live
+
+    def get(self, url):
+        data = self.getdata(url)
+        match = re.search('dynamicStreams=(.*)\&amp\;background', data)
+        if match:
+            new = match.group(1)
+            tmp = new.split("|")
+            streams = {}
+            for f in tmp:
+                match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
+                streams[int(match.group(2))] = match.group(1)
+            if not self.quality:
+                stream = streams[sorted(streams.keys()).pop()]
+            else:
+                try:
+                    stream = streams[int(self.quality)]
+                except (ValueError, KeyError):
+                    print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
+                    sys.exit(2)
+        else:
+            match = re.search('pathflv=(.*)\&amp\;background', data)
+            if not match:
+                print "Err: cant find stream"
+                sys.exit(2)
+            stream = match.group(1)
+
+        if not self.output:
+           self.output = os.path.basename(stream)
+           print "Outfile: ", self.output
+
+        if stream[0:4] == "rtmp":
+            self.getrtmp(stream, self.output, self.live, other)
+        else:
+            self.gethttp(stream,self.output)
 
 def main():
     """ Main program """
@@ -73,38 +162,22 @@ def main():
     output = options.output
     live = options.live
     quality = options.quality
-    data = getdata(args[0])
-    match = re.search('dynamicStreams=(.*)\&amp\;background', data)
-    if match:
-        new = match.group(1)
-        tmp = new.split("|")
-        streams = {}
-        for f in tmp:
-            match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
-            streams[int(match.group(2))] = match.group(1)
-        if not quality:
-            stream = streams[sorted(streams.keys()).pop()]
-        else:
-            try:
-                stream = streams[int(quality)]
-            except (ValueError, KeyError):
-                print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
-                sys.exit(2)
-    else:
-        match = re.search('pathflv=(.*)\&amp\;background', data)
-        if not match:
-            print "Err: cant find stream"
+    url = args[0]
+
+    if re.findall("tv4play", url):
+        parse = urlparse.urlparse(url)
+        try:
+            vid = urlparse.parse_qs(parse[4])["videoid"][0]
+        except KeyError:
+            print "Something wrong with that url"
             sys.exit(2)
-        stream = match.group(1)
-
-    if not output:
-       output = os.path.basename(stream)
-       print "Outfile: ", output
-
-    if stream[0:4] == "rtmp":
-        getrtmp(stream, output, live)
+        url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
+        tv4play = Tv4play(output, quality, live)
+        tv4play.get(url)
     else:
-        gethttp(stream, output)
+        svtplay = Svtplay(output, quality, live)
+        svtplay.get(url)
+
 
 if __name__ == "__main__":
     main()
