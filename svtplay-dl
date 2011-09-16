@@ -84,6 +84,7 @@ class Viaplay(Common):
         if not self.output:
             self.output = os.path.basename(ss)
             print "Outfile: ", self.output
+        other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         self.getrtmp(ss, self.output, self.live, other)
 
 class Tv4play(Common):
@@ -206,6 +207,16 @@ def main():
         viaplay.get(url)
 
     elif re.findall("tv6play", url):
+        parse = urlparse.urlparse(url)
+        match = re.search('\/play\/(.*)/', parse.path)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
+        viaplay = Viaplay(output, quality, live)
+        viaplay.get(url)
+
+    elif re.findall("tv8play", url):
         parse = urlparse.urlparse(url)
         match = re.search('\/play\/(.*)/', parse.path)
         if not match:
