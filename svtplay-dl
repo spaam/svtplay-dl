@@ -77,6 +77,10 @@ class Viaplay(Common):
         data = self.getdata(url)
         xml = ET.XML(data)
         ss = xml.find("Product").find("Videos").find("Video").find("Url").text
+        if ss[:4] == "http":
+            data = self.getdata(ss)
+            xml = ET.XML(data)
+            ss = xml.find("Url").text
         if not self.output:
             self.output = os.path.basename(ss)
             print "Outfile: ", self.output
@@ -192,6 +196,16 @@ def main():
         tv4play.get(url)
 
     elif re.findall("tv3play", url):
+        parse = urlparse.urlparse(url)
+        match = re.search('\/play\/(.*)/', parse.path)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
+        viaplay = Viaplay(output, quality, live)
+        viaplay.get(url)
+
+    elif re.findall("tv6play", url):
         parse = urlparse.urlparse(url)
         match = re.search('\/play\/(.*)/', parse.path)
         if not match:
