@@ -226,6 +226,22 @@ def main():
         viaplay = Viaplay(output, quality, live)
         viaplay.get(url)
 
+    elif re.findall("viaplay", url):
+        common = Common()
+        parse = urlparse.urlparse(url)
+        match = re.search('\/Tv/channels\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(.*)/', parse.path)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        url = "http://viasat.web.entriq.net/nw/article/view/%s/?tf=players/TV6.tpl" % match.group(1)
+        data = common.getdata(url)
+        match = re.search("id:'(.*)'", data)
+        if not match:
+            print "Something wrong with that url"
+        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
+        viaplay = Viaplay(output, quality, live)
+        viaplay.get(url)
+
     else:
         svtplay = Svtplay(output, quality, live)
         svtplay.get(url)
