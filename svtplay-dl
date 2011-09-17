@@ -76,16 +76,16 @@ class Viaplay(Common):
         other = ""
         data = self.getdata(url)
         xml = ET.XML(data)
-        ss = xml.find("Product").find("Videos").find("Video").find("Url").text
-        if ss[:4] == "http":
-            data = self.getdata(ss)
+        filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+        if filename[:4] == "http":
+            data = self.getdata(filename)
             xml = ET.XML(data)
-            ss = xml.find("Url").text
+            filename = xml.find("Url").text
         if not self.output:
-            self.output = os.path.basename(ss)
+            self.output = os.path.basename(filename)
             print "Outfile: ", self.output
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
-        self.getrtmp(ss, self.output, self.live, other)
+        self.getrtmp(filename, self.output, self.live, other)
 
 class Tv4play(Common):
     def __init__(self, output, quality, live):
@@ -143,10 +143,10 @@ class Svtplay(Common):
                 match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
                 streams[int(match.group(2))] = match.group(1)
             if not self.quality:
-                stream = streams[sorted(streams.keys()).pop()]
+                filename = streams[sorted(streams.keys()).pop()]
             else:
                 try:
-                    stream = streams[int(self.quality)]
+                    filename = streams[int(self.quality)]
                 except (ValueError, KeyError):
                     print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
                     sys.exit(2)
@@ -155,16 +155,16 @@ class Svtplay(Common):
             if not match:
                 print "Err: cant find stream"
                 sys.exit(2)
-            stream = match.group(1)
+            filename = match.group(1)
 
         if not self.output:
-           self.output = os.path.basename(stream)
+           self.output = os.path.basename(filename)
            print "Outfile: ", self.output
 
         if stream[0:4] == "rtmp":
-            self.getrtmp(stream, self.output, self.live, other)
+            self.getrtmp(filename, self.output, self.live, other)
         else:
-            self.gethttp(stream,self.output)
+            self.gethttp(filename, self.output)
 
 def main():
     """ Main program """
