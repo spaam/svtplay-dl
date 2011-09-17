@@ -62,7 +62,7 @@ class Common(object):
                 break
 
             file_d.write(chunk)
-            calc_data(bytes_so_far, total_size)
+            self.calc_data(bytes_so_far, total_size)
 
         file_d.close()
 
