@@ -133,6 +133,7 @@ class Svtplay(Common):
         self.live = live
 
     def get(self, url):
+        other = ""
         data = self.getdata(url)
         match = re.search('dynamicStreams=(.*)\&amp\;background', data)
         if match:
@@ -161,7 +162,7 @@ class Svtplay(Common):
            self.output = os.path.basename(filename)
            print "Outfile: ", self.output
 
-        if stream[0:4] == "rtmp":
+        if filename[0:4] == "rtmp":
             self.getrtmp(filename, self.output, self.live, other)
         else:
             self.gethttp(filename, self.output)
