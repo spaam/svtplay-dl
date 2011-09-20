@@ -35,7 +35,6 @@ class Common(object):
     def getrtmp(self, url, output, live, other):
         """ Get the stream from RTMP """
         encrypted =""
-        live = ""
         if url[4:5] == "e":
             # For encrypted streams
             encrypted = "-l 2"
