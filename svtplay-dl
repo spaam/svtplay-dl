@@ -66,6 +66,47 @@ class Common(object):
 
         file_d.close()
 
+class Expressen(Common):
+    def __init__(self, output, quality, live):
+        self.output = output
+        self.quality = quality
+        self.live = live
+
+    def get(self, url):
+        other = ""
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        ss = xml.find("vurls")
+        sa = list(ss.iter("vurl"))
+        streams = {}
+
+        for i in sa:
+            stream = {}
+            streams[i.attrib["bitrate"]] = i.text
+
+        sort = []
+        for key in sorted(streams.iterkeys()):
+            sort.append(int(key))
+            sort = sorted(sort)
+
+        if not self.quality:
+            self.quality = sort.pop()
+
+        if not self.output:
+            self.output = os.path.basename(streams[str(self.quality)])
+            print "Outfile: ", self.output
+        try:
+            filename = streams[str(self.quality)]
+            match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
+
+            filename = "rtmp://%s" % match.group(1)
+            other = "-y %s" % match.group(2)
+
+            self.getrtmp(filename, self.output, self.live, other)
+        except (ValueError, KeyError):
+            print "Err: Cant find that quality. try 1200, 800 or 300"
+            sys.exit(2)
+
 class Aftonbladet(Common):
     def __init__(self, output, quality, live):
         self.output = output
@@ -261,6 +302,17 @@ def main():
         url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
         aftonbladet = Aftonbladet(output, quality, live)
         aftonbladet.get(url, start)
+
+    elif re.findall("expressen", url):
+        parse = urlparse.urlparse(url)
+        match = re.search("/(.*[\/\+].*)/", urllib.unquote_plus(parse.path))
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % urllib.quote_plus(match.group(1))
+        print match.group(1)
+        expressen = Expressen(output, quality, live)
+        expressen.get(url)
 
     else:
         svtplay = Svtplay(output, quality, live)
