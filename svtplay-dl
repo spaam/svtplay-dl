@@ -35,12 +35,12 @@ class Common(object):
 
     def getrtmp(self, url, output, live, other):
         """ Get the stream from RTMP """
-        encrypted =""
+        encrypted = ""
         if url[4:5] == "e":
             # For encrypted streams
             encrypted = "-l 2"
         if live:
-           live = "-v"
+            live = "-v"
 
         rtmpdump = "rtmpdump -r %s -o %s %s %s %s" % (url, output, encrypted, other, live)
         command = shlex.split(rtmpdump)
@@ -81,7 +81,6 @@ class Expressen(Common):
         streams = {}
 
         for i in sa:
-            stream = {}
             streams[i.attrib["bitrate"]] = i.text
 
         sort = []
@@ -188,8 +187,9 @@ class Tv4play(Common):
             sys.exit(2)
 
         if not self.output:
-           self.output = os.path.basename(streams[str(self.quality)]["path"])
-           print "Outfile: ", self.output
+            self.output = os.path.basename(streams[str(self.quality)]["path"])
+            print "Outfile: ", self.output
+
         self.getrtmp(streams[str(self.quality)]["uri"], self.output, self.live, other)
 
 class Svtplay(Common):
@@ -225,8 +225,8 @@ class Svtplay(Common):
             filename = match.group(1)
 
         if not self.output:
-           self.output = os.path.basename(filename)
-           print "Outfile: ", self.output
+            self.output = os.path.basename(filename)
+            print "Outfile: ", self.output
 
         if filename[0:4] == "rtmp":
             self.getrtmp(filename, self.output, self.live, other)
