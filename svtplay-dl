@@ -145,20 +145,25 @@ class Expressen(Common):
         if not self.quality:
             self.quality = sort.pop()
 
+        try:
+            test = streams[str(self.quality)]
+        except:
+            print "Err: cant find that quality. try: "
+            for i in sort:
+                print i
+            sys.exit(2)
+
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)])
             print "Outfile: ", self.output
-        try:
-            filename = streams[str(self.quality)]
-            match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
 
-            filename = "rtmp://%s" % match.group(1)
-            other = "-y %s" % match.group(2)
+        filename = streams[str(self.quality)]
+        match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
 
-            self.getrtmp(filename, self.output, self.live, other)
-        except (ValueError, KeyError):
-            print "Err: Cant find that quality. try 1200, 800 or 300"
-            sys.exit(2)
+        filename = "rtmp://%s" % match.group(1)
+        other = "-y %s" % match.group(2)
+
+        self.getrtmp(filename, self.output, self.live, other)
 
 class Aftonbladet(Common):
     def __init__(self, output, quality, live):
@@ -235,10 +240,14 @@ class Tv4play(Common):
             self.quality = sort.pop()
 
         try:
-            other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
-        except (ValueError, KeyError):
-            print "Err: Cant find that quality. try 2500, 1500, 800 or 300"
+            test = streams[str(self.quality)]
+        except:
+            print "Err: cant find that quality. try: "
+            for i in sort:
+                print i
             sys.exit(2)
+
+        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)]["path"])
