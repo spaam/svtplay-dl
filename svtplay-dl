@@ -368,7 +368,7 @@ def main():
         expressen = Expressen(output, quality, live)
         expressen.get(url)
 
-    elif re.findall("kanal5play", url):
+    elif re.findall("(kanal5play|kanal9play)", url):
         common = Common()
         data = common.getdata(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
