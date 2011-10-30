@@ -9,7 +9,6 @@ from optparse import OptionParser
 import urlparse
 import xml.etree.ElementTree as ET
 import shlex
-from pyamf import remoting
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
@@ -70,55 +69,6 @@ class Common(object):
             self.calc_data(bytes_so_far, total_size)
 
         file_d.close()
-
-class Kanal5(Common):
-    def __init__(self, output, quality, live, other):
-        self.output = output
-        self.quality = quality
-        self.live = live
-        self.other = other
-
-    def get(self, url):
-        player_id = 811317479001
-        publisher_id = 22710239001
-        const = "9f79dd85c3703b8674de883265d8c9e606360c2e"
-        env = remoting.Envelope(amfVersion=3)
-        env.bodies.append(("/1", remoting.Request(target="com.brightcove.player.runtime.PlayerMediaFacade.findMediaById", body=[const, player_id, self.other, publisher_id], envelope=env)))
-        env = str(remoting.encode(env).read())
-        url = "http://" + url + "/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk"
-        header = "application/x-amf"
-        data = self.getdata(url, "POST", header, env)
-        streams = {}
-
-        for i in remoting.decode(data).bodies[0][1].body['renditions']:
-            stream = {}
-            stream["uri"] = i["defaultURL"]
-            streams[i["encodingRate"]] = stream
-
-        sort = []
-        for key in sorted(streams.iterkeys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            test = streams[int(self.quality)]
-        except:
-            print "Err: cant find that quality. try: "
-            for i in sort:
-                print i
-            sys.exit(2)
-
-        if not self.output:
-            self.output = os.path.basename(streams[int(self.quality)]["uri"])
-            print "Outfile: ", self.output
-
-        filename = streams[int(self.quality)]["uri"]
-        match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
-        other = "-y %s -W %s" % (match.group(2), "http://admin.brightcove.com/viewer/us1.25.04.01.2011-05-24182704/connection/ExternalConnection_2.swf")
-        self.getrtmp(match.group(1), self.output, self.live, other)
 
 class Expressen(Common):
     def __init__(self, output, quality, live):
@@ -376,16 +326,6 @@ def main():
         print match.group(1)
         expressen = Expressen(output, quality, live)
         expressen.get(url)
-
-    elif re.findall("(kanal5play|kanal9play)", url):
-        common = Common()
-        data = common.getdata(url)
-        match = re.search("@videoPlayer\" value=\"(.*)\"", data)
-        if not match:
-            print "Something wrong with that url"
-            sys.exit(2)
-        kanal5 = Kanal5(output, quality, live, match.group(1))
-        kanal5.get("c.brightcove.com")
 
     else:
         svtplay = Svtplay(output, quality, live)
