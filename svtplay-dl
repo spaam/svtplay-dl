@@ -9,7 +9,6 @@ from optparse import OptionParser
 import urlparse
 import xml.etree.ElementTree as ET
 import shlex
-from pyamf import remoting
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
@@ -79,6 +78,13 @@ class Kanal5(Common):
         self.other = other
 
     def get(self, url):
+        try:
+            from pyamf import remoting
+        except ImportError:
+            print "You need to install pyamf to download content from kanal5 and kanal9"
+            print "In debian the package is called python-pyamf"
+            sys.exit(2)
+
         player_id = 811317479001
         publisher_id = 22710239001
         const = "9f79dd85c3703b8674de883265d8c9e606360c2e"
