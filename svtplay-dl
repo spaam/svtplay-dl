@@ -71,6 +71,50 @@ class Common(object):
 
         file_d.close()
 
+class Dn(Common):
+    def __init__(self, output, quality, live, other):
+        self.output = output
+        self.quality = quality
+        self.live = live
+        self.other = other
+
+    def get(self, url):
+        url = url + "/rest/v3/getsingleplayer/" + self.other
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        server = xml.find("head").find("meta").attrib["base"]
+        streams = xml.find("body").find("switch")
+        sa = list(streams.iter("video"))
+        streams = {}
+        for i in sa:
+            streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
+
+        sort = []
+        for key in sorted(streams.iterkeys()):
+            sort.append(int(key))
+            sort = sorted(sort)
+
+        if not self.quality:
+            self.quality = sort.pop()
+
+        try:
+            path = streams[int(self.quality)]
+        except:
+            print "Err: cant find that quality. try: "
+            for i in sort:
+                print i
+            sys.exit(2)
+
+        if not self.output:
+            self.output = os.path.basename(streams[int(self.quality)])
+            print "Outfile: ", self.output
+
+        other = "-y %s" % path
+        self.getrtmp(server, self.output, self.live, other)
+
 class Kanal5(Common):
     def __init__(self, output, quality, live, other):
         self.output = output
@@ -396,6 +440,16 @@ def main():
             sys.exit(2)
         kanal5 = Kanal5(output, quality, live, match.group(1))
         kanal5.get("c.brightcove.com")
+
+    elif re.findall("dn.se", url):
+        common = Common()
+        data = common.getdata(url)
+        match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\" data-qbrick", data)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        dn = Dn(output, quality, live, match.group(1))
+        dn.get("http://vms.api.qbrick.com")
 
     else:
         svtplay = Svtplay(output, quality, live)
