@@ -273,7 +273,7 @@ class Svtplay(Common):
         self.live = live
 
     def get(self, url):
-        other = ""
+        other = "-W http://svtplay.se/flash/svtplayer-2011.13.swf"
         data = self.getdata(url)
         match = re.search('dynamicStreams=(.*)\&amp\;background', data)
         if match:
