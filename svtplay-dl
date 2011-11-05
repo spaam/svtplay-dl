@@ -21,8 +21,9 @@ class Common(object):
             request.add_data(data)
         try:
             response = urllib2.urlopen(request)
-        except urllib2.HTTPError:
+        except (urllib2.HTTPError, urllib2.URLError), e:
             print "Something wrong with that url"
+            print "Error code:", e.code
             sys.exit(2)
 
         data = response.read()
@@ -185,6 +186,10 @@ class Aftonbladet(Common):
         other = "-y %s" % path
         if start > 0:
             other = other + " -A %s" % str(start)
+
+        if url == None:
+            print "Error: Cant find any video on that page"
+            sys.exit(2)
 
         if not self.output:
             self.output = os.path.basename(path)
@@ -379,9 +384,18 @@ def main():
             print "Something wrong with that url"
             sys.exit(2)
         url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % urllib.quote_plus(match.group(1))
-        print match.group(1)
         expressen = Expressen(output, quality, live)
         expressen.get(url)
+
+    elif re.findall("(kanal5play|kanal9play)", url):
+        common = Common()
+        data = common.getdata(url)
+        match = re.search("@videoPlayer\" value=\"(.*)\"", data)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+        kanal5 = Kanal5(output, quality, live, match.group(1))
+        kanal5.get("c.brightcove.com")
 
     else:
         svtplay = Svtplay(output, quality, live)
