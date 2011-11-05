@@ -74,6 +74,25 @@ class Common(object):
 
         file_d.close()
 
+class Sr(Common):
+    def __init__(self, output, quality, live, other):
+        self.output = output
+        self.quality = quality
+        self.live = live
+        self.other = other
+
+    def get(self, url):
+        url = url + self.other
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        url = xml.find("entry").find("ref").attrib["href"]
+
+        if not self.output:
+            self.output = os.path.basename(url)
+            print "Outfile: ", self.output
+
+        self.gethttp(url, self.output)
+
 class Urplay(Common):
     def __init__(self, output, quality, live):
         self.output = output
@@ -482,6 +501,17 @@ def main():
     elif re.findall("urplay.se", url):
         urplay = Urplay(output, quality, live)
         urplay.get(url)
+
+    elif re.findall("sverigesradio", url):
+        common = Common()
+        data = common.getdata(url)
+        match = re.search("linkUrl=(.*)\;isButton=", data)
+        if not match:
+            print "Something wrong with that url"
+            sys.exit(2)
+
+        sr = Sr(output, quality, live, urllib.unquote_plus(match.group(1)))
+        sr.get("http://sverigesradio.se")
 
     else:
         svtplay = Svtplay(output, quality, live)
