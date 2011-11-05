@@ -70,6 +70,25 @@ class Common(object):
             self.calc_data(bytes_so_far, total_size)
 
         file_d.close()
+class Urplay(Common):
+    def __init__(self, output, quality, live):
+        self.output = output
+        self.quality = quality
+        self.live = live
+
+    def get(self, url):
+        other = "-a ondemand"
+        data = self.getdata(url)
+        match = re.search('file=(.*)\&plugins', data)
+        if match:
+            path = "mp" + match.group(1)[-1] + ":" + match.group(1)
+            other = "-a ondemand -y %s" % path
+
+            if not self.output:
+                self.output = os.path.basename(path)
+                print "Outfile: ", self.output
+
+            self.getrtmp("rtmp://streaming.ur.se/", self.output, self.live, other)
 
 class Dn(Common):
     def __init__(self, output, quality, live, other):
@@ -450,6 +469,10 @@ def main():
             sys.exit(2)
         dn = Dn(output, quality, live, match.group(1))
         dn.get("http://vms.api.qbrick.com")
+
+    elif re.findall("urplay.se", url):
+        urplay = Urplay(output, quality, live)
+        urplay.get(url)
 
     else:
         svtplay = Svtplay(output, quality, live)
