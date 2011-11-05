@@ -15,6 +15,7 @@ class Common(object):
         """ Get the page to parse it for streams """
         request = urllib2.Request(url)
         request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+
         if len(header) > 0:
             request.add_header('Content-Type', header)
         if len(data) > 0:
@@ -35,12 +36,14 @@ class Common(object):
         percent = float(byte) / total
         percent = round(percent*100, 2)
         sys.stdout.write("Downloaded %d of %d bytes (%.2f%%)\r" % (byte, total, percent))
+
         if byte >= total:
             sys.stdout.write('\n')
 
     def getrtmp(self, url, output, live, other):
         """ Get the stream from RTMP """
         encrypted = ""
+
         if url[4:5] == "e":
             # For encrypted streams
             encrypted = "-l 2"
@@ -70,6 +73,7 @@ class Common(object):
             self.calc_data(bytes_so_far, total_size)
 
         file_d.close()
+
 class Urplay(Common):
     def __init__(self, output, quality, live):
         self.output = output
@@ -107,6 +111,7 @@ class Dn(Common):
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")
         sa = list(streams.iter("video"))
+
         streams = {}
         for i in sa:
             streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
@@ -247,6 +252,7 @@ class Aftonbladet(Common):
         url = xml.find("articleElement").find("mediaElement").find("baseUrl").text
         path = xml.find("articleElement").find("mediaElement").find("media").attrib["url"]
         other = "-y %s" % path
+
         if start > 0:
             other = other + " -A %s" % str(start)
 
@@ -275,13 +281,16 @@ class Viaplay(Common):
         data = self.getdata(url)
         xml = ET.XML(data)
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+
         if filename[:4] == "http":
             data = self.getdata(filename)
             xml = ET.XML(data)
             filename = xml.find("Url").text
+
         if not self.output:
             self.output = os.path.basename(filename)
             print "Outfile: ", self.output
+
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         self.getrtmp(filename, self.output, self.live, other)
 
