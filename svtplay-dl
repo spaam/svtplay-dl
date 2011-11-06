@@ -522,7 +522,6 @@ def main():
             sys.exit(2)
         qbrick = Qbrick(output, quality, live, match.group(1))
         qbrick.get("http://vms.api.qbrick.com")
-a
 
     elif re.findall("svd.se", url):
         match = re.search("_([0-9]+)\.svd", url)
