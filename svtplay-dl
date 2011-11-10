@@ -470,8 +470,10 @@ def main():
         viaplay.get(url)
 
     elif re.findall("aftonbladet", url):
+        common = Common()
         parse = urlparse.urlparse(url)
-        match = re.search(".*/article([0-9]+)\.ab", parse.path)
+        data = common.getdata(url)
+        match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
         if not match:
             print "Something wrong with that url"
             sys.exit(2)
