@@ -22,11 +22,11 @@ class Common(object):
             request.add_data(data)
         try:
             response = urllib2.urlopen(request)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             print "Something wrong with that url"
             print "Error code:", e.code
             sys.exit(2)
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             print "Something wrong with that url"
             print "Error code:", e.reason
             sys.exit(2)
@@ -160,7 +160,7 @@ class Qbrick(Common):
 
         try:
             path = streams[int(self.quality)]
-        except:
+        except KeyError:
             print "Err: cant find that quality. try: "
             for i in sort:
                 print i
@@ -214,7 +214,7 @@ class Kanal5(Common):
 
         try:
             test = streams[int(self.quality)]
-        except:
+        except KeyError:
             print "Err: cant find that quality. try: "
             for i in sort:
                 print i
@@ -256,7 +256,7 @@ class Expressen(Common):
 
         try:
             test = streams[str(self.quality)]
-        except:
+        except KeyError:
             print "Err: cant find that quality. try: "
             for i in sort:
                 print i
@@ -358,7 +358,7 @@ class Tv4play(Common):
 
         try:
             test = streams[str(self.quality)]
-        except:
+        except KeyError:
             print "Err: cant find that quality. try: "
             for i in sort:
                 print i
