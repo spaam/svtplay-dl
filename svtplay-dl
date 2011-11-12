@@ -1,19 +1,25 @@
 #!/usr/bin/env python
-import re
-import urllib
-import urllib2
 import sys
+if sys.version_info > (3, 0):
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError, URLError
+    from urllib.parse import urlparse, parse_qs, unquote_plus
+else:
+    from urllib2 import Request, urlopen, HTTPError, URLError
+    from urlparse import urlparse, parse_qs
+    from urllib import unquote_plus
+
+import re
 import os
 import subprocess
 from optparse import OptionParser
-import urlparse
 import xml.etree.ElementTree as ET
 import shlex
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
         """ Get the page to parse it for streams """
-        request = urllib2.Request(url)
+        request = Request(url)
         request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
 
         if len(header) > 0:
@@ -21,17 +27,19 @@ class Common(object):
         if len(data) > 0:
             request.add_data(data)
         try:
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError as e:
-            print "Something wrong with that url"
-            print "Error code:", e.code
+            response = urlopen(request)
+        except HTTPError as e:
+            print("Something wrong with that url")
+            print("Error code:", e.code)
             sys.exit(2)
-        except urllib2.URLError as e:
-            print "Something wrong with that url"
-            print "Error code:", e.reason
+        except URLError as e:
+            print("Something wrong with that url")
+            print("Error code:", e.reason)
             sys.exit(2)
-
-        data = response.read()
+        if sys.version_info > (3, 0):
+            data = response.read().decode('utf-8')
+        else:
+            data = response.read()
         response.close()
         return data
 
@@ -60,8 +68,8 @@ class Common(object):
 
     def gethttp(self, url, output):
         """ Get the stream from HTTP """
-        response = urllib2.urlopen(url)
-        total_size = response.info().getheader('Content-Length').strip()
+        response = urlopen(url)
+        total_size = response.info()['Content-Length']
         total_size = int(total_size)
         bytes_so_far = 0
         file_d = open(output,"wb")
@@ -93,7 +101,7 @@ class Sr(Common):
 
         if not self.output:
             self.output = os.path.basename(url)
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         self.gethttp(url, self.output)
 
@@ -113,7 +121,7 @@ class Urplay(Common):
 
             if not self.output:
                 self.output = os.path.basename(path)
-                print "Outfile: ", self.output
+                print("Outfile: ", self.output)
 
             self.getrtmp("rtmp://streaming.ur.se/", self.output, self.live, other)
 
@@ -137,7 +145,7 @@ class Qbrick(Common):
             try:
                 host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
             except AttributeError:
-                print "Error"
+                print("Error")
                 sys.exit(2)
 
         data = self.getdata(host)
@@ -151,7 +159,7 @@ class Qbrick(Common):
             streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
 
         sort = []
-        for key in sorted(streams.iterkeys()):
+        for key in sorted(streams.keys()):
             sort.append(int(key))
             sort = sorted(sort)
 
@@ -161,14 +169,14 @@ class Qbrick(Common):
         try:
             path = streams[int(self.quality)]
         except KeyError:
-            print "Err: cant find that quality. try: "
+            print("Err: cant find that quality. try: ")
             for i in sort:
-                print i
+                print(i)
             sys.exit(2)
 
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)])
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         other = "-y %s" % path
         self.getrtmp(server, self.output, self.live, other)
@@ -184,8 +192,8 @@ class Kanal5(Common):
         try:
             from pyamf import remoting
         except ImportError:
-            print "You need to install pyamf to download content from kanal5 and kanal9"
-            print "In debian the package is called python-pyamf"
+            print("You need to install pyamf to download content from kanal5 and kanal9")
+            print("In debian the package is called python-pyamf")
             sys.exit(2)
 
         player_id = 811317479001
@@ -205,7 +213,7 @@ class Kanal5(Common):
             streams[i["encodingRate"]] = stream
 
         sort = []
-        for key in sorted(streams.iterkeys()):
+        for key in sorted(streams.keys()):
             sort.append(int(key))
             sort = sorted(sort)
 
@@ -215,14 +223,14 @@ class Kanal5(Common):
         try:
             test = streams[int(self.quality)]
         except KeyError:
-            print "Err: cant find that quality. try: "
+            print("Err: cant find that quality. try: ")
             for i in sort:
-                print i
+                print(i)
             sys.exit(2)
 
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)]["uri"])
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         filename = streams[int(self.quality)]["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
@@ -247,7 +255,7 @@ class Expressen(Common):
             streams[i.attrib["bitrate"]] = i.text
 
         sort = []
-        for key in sorted(streams.iterkeys()):
+        for key in sorted(streams.keys()):
             sort.append(int(key))
             sort = sorted(sort)
 
@@ -257,14 +265,14 @@ class Expressen(Common):
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            print "Err: cant find that quality. try: "
+            print("Err: cant find that quality. try: ")
             for i in sort:
-                print i
+                print(i)
             sys.exit(2)
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)])
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         filename = streams[str(self.quality)]
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
@@ -291,12 +299,12 @@ class Aftonbladet(Common):
             other = other + " -A %s" % str(start)
 
         if url == None:
-            print "Error: Cant find any video on that page"
+            print("Error: Cant find any video on that page")
             sys.exit(2)
 
         if not self.output:
             self.output = os.path.basename(path)
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         if url[0:4] == "rtmp":
             self.getrtmp(url, self.output, self.live, other)
@@ -323,7 +331,7 @@ class Viaplay(Common):
 
         if not self.output:
             self.output = os.path.basename(filename)
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         self.getrtmp(filename, self.output, self.live, other)
@@ -349,7 +357,7 @@ class Tv4play(Common):
             streams[i.find("bitrate").text] = stream
         
         sort = []
-        for key in sorted(streams.iterkeys()):
+        for key in sorted(streams.keys()):
             sort.append(int(key))
             sort = sorted(sort)
 
@@ -359,16 +367,16 @@ class Tv4play(Common):
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            print "Err: cant find that quality. try: "
+            print("Err: cant find that quality. try: ")
             for i in sort:
-                print i
+                print(i)
             sys.exit(2)
 
         other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)]["path"])
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         self.getrtmp(streams[str(self.quality)]["uri"], self.output, self.live, other)
 
@@ -395,18 +403,18 @@ class Svtplay(Common):
                 try:
                     filename = streams[int(self.quality)]
                 except (ValueError, KeyError):
-                    print "Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)"
+                    print("Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
                     sys.exit(2)
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
-                print "Err: cant find stream"
+                print("Err: cant find stream")
                 sys.exit(2)
             filename = match.group(1)
 
         if not self.output:
             self.output = os.path.basename(filename)
-            print "Outfile: ", self.output
+            print("Outfile: ", self.output)
 
         if filename[0:4] == "rtmp":
             self.getrtmp(filename, self.output, self.live, other)
@@ -433,21 +441,21 @@ def main():
     url = args[0]
 
     if re.findall("tv4play", url):
-        parse = urlparse.urlparse(url)
+        parse = urlparse(url)
         try:
-            vid = urlparse.parse_qs(parse[4])["videoid"][0]
+            vid = parse_qs(parse[4])["videoid"][0]
         except KeyError:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         tv4play = Tv4play(output, quality, live)
         tv4play.get(url)
 
     elif re.findall("(tv3play|tv6play|tv8play)", url):
-        parse = urlparse.urlparse(url)
+        parse = urlparse(url)
         match = re.search('\/play\/(.*)/', parse.path)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         viaplay = Viaplay(output, quality, live)
@@ -455,30 +463,30 @@ def main():
 
     elif re.findall("viaplay", url):
         common = Common()
-        parse = urlparse.urlparse(url)
+        parse = urlparse(url)
         match = re.search('\/Tv/channels\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(.*)/', parse.path)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         url = "http://viasat.web.entriq.net/nw/article/view/%s/?tf=players/TV6.tpl" % match.group(1)
         data = common.getdata(url)
         match = re.search("id:'(.*)'", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         viaplay = Viaplay(output, quality, live)
         viaplay.get(url)
 
     elif re.findall("aftonbladet", url):
         common = Common()
-        parse = urlparse.urlparse(url)
+        parse = urlparse(url)
         data = common.getdata(url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         try:
-            start = urlparse.parse_qs(parse[4])["start"][0]
+            start = parse_qs(parse[4])["start"][0]
         except KeyError:
             start = 0
         url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
@@ -486,12 +494,12 @@ def main():
         aftonbladet.get(url, start)
 
     elif re.findall("expressen", url):
-        parse = urlparse.urlparse(url)
-        match = re.search("/(.*[\/\+].*)/", urllib.unquote_plus(parse.path))
+        parse = urlparse(url)
+        match = re.search("/(.*[\/\+].*)/", unquote_plus(parse.path))
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
-        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % urllib.quote_plus(match.group(1))
+        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
         expressen = Expressen(output, quality, live)
         expressen.get(url)
 
@@ -500,7 +508,7 @@ def main():
         data = common.getdata(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         kanal5 = Kanal5(output, quality, live, match.group(1))
         kanal5.get("c.brightcove.com")
@@ -510,7 +518,7 @@ def main():
         data = common.getdata(url)
         match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\" data-qbrick", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         qbrick = Qbrick(output, quality, live, match.group(1))
         qbrick.get("http://vms.api.qbrick.com")
@@ -520,7 +528,7 @@ def main():
         data = common.getdata(url)
         match = re.search("ccid: \"(.*)\"\,", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         qbrick = Qbrick(output, quality, live, match.group(1))
         qbrick.get("http://vms.api.qbrick.com")
@@ -528,7 +536,7 @@ def main():
     elif re.findall("svd.se", url):
         match = re.search("_([0-9]+)\.svd", url)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
 
         common = Common()
@@ -536,7 +544,7 @@ def main():
         match = re.search("mcid=([A-F0-9]+)\&width=", data)
 
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
 
         qbrick = Qbrick(output, quality, live, match.group(1))
@@ -551,10 +559,10 @@ def main():
         data = common.getdata(url)
         match = re.search("linkUrl=(.*)\;isButton=", data)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
 
-        sr = Sr(output, quality, live, urllib.unquote_plus(match.group(1)))
+        sr = Sr(output, quality, live, unquote_plus(match.group(1)))
         sr.get("http://sverigesradio.se")
 
     else:
