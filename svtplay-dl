@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.6
 import sys
 if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen
@@ -152,8 +152,10 @@ class Qbrick(Common):
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")
-        sa = list(streams.iter("video"))
-
+        if sys.version_info < (2, 7):
+            sa = list(ss.getiterator("video"))
+        else:
+            sa = list(ss.iter("video"))
         streams = {}
         for i in sa:
             streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
@@ -248,7 +250,10 @@ class Expressen(Common):
         data = self.getdata(url)
         xml = ET.XML(data)
         ss = xml.find("vurls")
-        sa = list(ss.iter("vurl"))
+        if sys.version_info < (2, 7):
+            sa = list(ss.getiterator("vurl"))
+        else:
+            sa = list(ss.iter("vurl"))
         streams = {}
 
         for i in sa:
@@ -346,7 +351,10 @@ class Tv4play(Common):
         data = self.getdata(url)
         xml = ET.XML(data)
         ss = xml.find("items")
-        sa = list(ss.iter("item"))
+        if sys.version_info < (2, 7):
+            sa = list(ss.getiterator("item"))
+        else:
+            sa = list(ss.iter("item"))
         streams = {}
         sa.pop(len(sa)-1)
 
