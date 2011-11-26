@@ -3,11 +3,11 @@ import sys
 if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen
     from urllib.error import HTTPError, URLError
-    from urllib.parse import urlparse, parse_qs, unquote_plus
+    from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
 else:
     from urllib2 import Request, urlopen, HTTPError, URLError
     from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus
+    from urllib import unquote_plus, quote_plus
 
 import re
 import os
