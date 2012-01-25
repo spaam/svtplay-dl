@@ -36,6 +36,9 @@ class Common(object):
             print("Something wrong with that url")
             print("Error code:", e.reason)
             sys.exit(2)
+        except ValueError as e:
+            print("Try adding http:// before the url")
+            sys.exit(2)
         if sys.version_info > (3, 0):
             data = response.read().decode('utf-8')
         else:
@@ -534,7 +537,7 @@ def main():
         if not match:
             print("Something wrong with that url")
             sys.exit(2)
-        kanal5 = Kanal5(output, quality, live, match.group(1))
+        kanal5 = Kanal5(output, quality, live, match.group(1), resume)
         kanal5.get("c.brightcove.com")
 
     elif re.findall("dn.se", url):
@@ -575,7 +578,7 @@ def main():
         qbrick.get("http://vms.api.qbrick.com")
 
     elif re.findall("urplay.se", url):
-        urplay = Urplay(output, quality, live)
+        urplay = Urplay(output, quality, live, resume)
         urplay.get(url)
 
     elif re.findall("sverigesradio", url):
