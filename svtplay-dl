@@ -16,6 +16,8 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
+__version__ = "0.5.2012.01.26"
+
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
         """ Get the page to parse it for streams """
@@ -447,7 +449,7 @@ class Svtplay(Common):
 def main():
     """ Main program """
     usage = "usage: %prog [options] url"
-    parser = OptionParser(usage=usage)
+    parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--output",
         metavar="OUTPUT", help="Outputs to the given filename.")
     parser.add_option("-r", "--resume",
