@@ -1,4 +1,5 @@
-You need to install rtmpdump and python-pyamf to make it work..
+You need to install rtmpdump to make it work
+and you need python-pyamf for kanal5play
 
 this script works for:
 svtplay.se
@@ -7,8 +8,8 @@ tv4play.se
 tv6play.se
 tv8play.se
 viaplay.se
-kanal5.se
-kanal9.se
+kanal5play.se
+kanal9play.se
 aftonbladet.se
 expressen.se
 dn.se
