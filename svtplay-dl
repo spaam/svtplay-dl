@@ -466,7 +466,7 @@ def main():
     output = options.output
     live = options.live
     quality = options.quality
-    resume = options    .resume
+    resume = options.resume
     url = args[0]
 
     if re.findall("tv4play", url):
