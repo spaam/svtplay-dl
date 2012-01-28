@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.5.2012.01.28"
+__version__ = "0.6.2012.01.28"
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
@@ -64,6 +64,16 @@ class Common(object):
 
         if resume:
             resume = "-e"
+
+        extension = re.search("(\....)$", url)
+        if not extension:
+            extension = re.search("-y (.+):[-_a-z0-9\/]", other)
+            if not extension:
+                output = output + ".flv"
+            else:
+                output = output + "." + extension.group(1)
+        else:
+            output = output + extension.group(1)
 
         rtmpdump = "rtmpdump -r %s -o %s %s %s %s" % (url, output, other, live, resume)
         command = shlex.split(str(rtmpdump))
@@ -227,7 +237,7 @@ class Kanal5(Common):
 
         filename = streams[int(self.quality)]["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
-        other = "-y %s -W %s" % (match.group(2), "http://admin.brightcove.com/viewer/us1.25.04.01.2011-05-24182704/connection/ExternalConnection_2.swf")
+        other = "-W %s -y %s " % ("http://admin.brightcove.com/viewer/us1.25.04.01.2011-05-24182704/connection/ExternalConnection_2.swf", match.group(2))
         self.getrtmp(match.group(1), self.output, self.live, other, self.resume)
 
 class Expressen(Common):
@@ -446,7 +456,15 @@ def main():
     live = options.live
     quality = options.quality
     resume = options.resume
+    common = Common()
+
     url = args[0]
+    if not output:
+        data = common.getdata(url)
+        match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
+        if match:
+            title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
+            output = unicode(re.sub('[-\s]+', '-', title))
 
     if re.findall("tv4play", url):
         parse = urlparse(url)
@@ -470,7 +488,6 @@ def main():
         viaplay.get(url)
 
     elif re.findall("viaplay", url):
-        common = Common()
         parse = urlparse(url)
         match = re.search('\/Tv/channels\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(.*)/', parse.path)
         if not match:
@@ -486,7 +503,6 @@ def main():
         viaplay.get(url)
 
     elif re.findall("aftonbladet", url):
-        common = Common()
         parse = urlparse(url)
         data = common.getdata(url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
@@ -512,7 +528,6 @@ def main():
         expressen.get(url)
 
     elif re.findall("(kanal5play|kanal9play)", url):
-        common = Common()
         data = common.getdata(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
@@ -522,7 +537,6 @@ def main():
         kanal5.get("c.brightcove.com")
 
     elif re.findall("dn.se", url):
-        common = Common()
         data = common.getdata(url)
         match = re.search("mediaId = \'([0-9A-F]+)\';", data)
         if not match:
@@ -540,7 +554,6 @@ def main():
         qbrick.get(url)
 
     elif re.findall("di.se", url):
-        common = Common()
         data = common.getdata(url)
         match = re.search("ccid: \"(.*)\"\,", data)
         if not match:
@@ -563,7 +576,6 @@ def main():
             print("Something wrong with that url")
             sys.exit(2)
 
-        common = Common()
         data = common.getdata("http://www.svd.se/?service=ajax&type=webTvClip&articleId=" + match.group(1))
         match = re.search("mcid=([A-F0-9]+)\&width=", data)
 
@@ -587,7 +599,6 @@ def main():
         urplay.get(url)
 
     elif re.findall("sverigesradio", url):
-        common = Common()
         data = common.getdata(url)
         match = re.search("linkUrl=(.*)\;isButton=", data)
         if not match:
