@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.5.2012.01.26"
+__version__ = "0.5.2012.01.28"
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
@@ -59,18 +59,13 @@ class Common(object):
 
     def getrtmp(self, url, output, live, other, resume):
         """ Get the stream from RTMP """
-        encrypted = ""
-
-        if url[4:5] == "e":
-            # For encrypted streams
-            encrypted = "-l 2"
         if live:
             live = "-v"
 
         if resume:
             resume = "-e"
 
-        rtmpdump = "rtmpdump -r %s -o %s %s %s %s %s" % (url, output, encrypted, other, live, resume)
+        rtmpdump = "rtmpdump -r %s -o %s %s %s %s" % (url, output, other, live, resume)
         command = shlex.split(str(rtmpdump))
         subprocess.call(command)
 
