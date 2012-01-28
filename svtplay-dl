@@ -131,30 +131,14 @@ class Urplay(Common):
             self.getrtmp("rtmp://streaming.ur.se/", self.output, self.live, other, self.resume)
 
 class Qbrick(Common):
-    def __init__(self, output, quality, live, other, resume):
+    def __init__(self, output, quality, live, resume):
         self.output = output
         self.quality = quality
         self.live = live
-        self.other = other
         self.resume = resume
 
     def get(self, url):
-        host = url + "/rest/v3/getsingleplayer/" + self.other
-        data = self.getdata(host)
-        xml = ET.XML(data)
-        try:
-            host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
-        except AttributeError:
-            host = url + "/rest/v3/getplayer/" + self.other
-            data = self.getdata(host)
-            xml = ET.XML(data)
-            try:
-                host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
-            except AttributeError:
-                print("Error")
-                sys.exit(2)
-
-        data = self.getdata(host)
+        data = self.getdata(url)
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")
@@ -544,8 +528,16 @@ def main():
         if not match:
             print("Something wrong with that url")
             sys.exit(2)
-        qbrick = Qbrick(output, quality, live, match.group(1) + "DE1BA107", resume)
-        qbrick.get("http://vms.api.qbrick.com")
+        qbrick = Qbrick(output, quality, live, resume)
+        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1) + "DE1BA107"
+        data = common.getdata(host)
+        xml = ET.XML(data)
+        try:
+            url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
+        except AttributeError:
+            print("Cant find stream")
+            sys.exit(2)
+        qbrick.get(url)
 
     elif re.findall("di.se", url):
         common = Common()
@@ -554,8 +546,16 @@ def main():
         if not match:
             print("Something wrong with that url")
             sys.exit(2)
-        qbrick = Qbrick(output, quality, live, match.group(1), resume)
-        qbrick.get("http://vms.api.qbrick.com")
+        qbrick = Qbrick(output, quality, live, resume)
+        host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
+        data = common.getdata(host)
+        xml = ET.XML(data)
+        try:
+            host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
+        except AttributeError:
+            print("Cant find stream")
+            sys.exit(2)
+        qbrick.get(host)
 
     elif re.findall("svd.se", url):
         match = re.search("_([0-9]+)\.svd", url)
@@ -571,8 +571,16 @@ def main():
             print("Something wrong with that url")
             sys.exit(2)
 
-        qbrick = Qbrick(output, quality, live, match.group(1), resume)
-        qbrick.get("http://vms.api.qbrick.com")
+        qbrick = Qbrick(output, quality, live, resume)
+        host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
+        data = common.getdata(host)
+        xml = ET.XML(data)
+        try:
+            host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
+        except AttributeError:
+            print("Cant find stream")
+            sys.exit(2)
+        qbrick.get(host)
 
     elif re.findall("urplay.se", url):
         urplay = Urplay(output, quality, live, resume)
