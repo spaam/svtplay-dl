@@ -119,7 +119,6 @@ class Hbo(Common):
         else:
             sa = list(ss.iter("size"))
         streams = {}
-        print sa
         for i in sa:
             stream = {}
             stream["path"] = i.find("tv14").find("path").text
