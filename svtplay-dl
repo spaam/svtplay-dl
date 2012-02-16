@@ -602,10 +602,15 @@ def main():
         data = common.getdata(url)
         match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
         if not match:
-            print("Something wrong with that url")
-            sys.exit(2)
+            match = re.search("mediaId = \'([0-9A-F]+)\';", data)
+            if not match:
+                print("Something wrong with that url")
+                sys.exit(2)
+            mcid = match.group(1) + "DE1BA107"
+        else:
+            mcid = match.group(1)
         qbrick = Qbrick(output, quality, live, resume)
-        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1)
+        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + mcid
         data = common.getdata(host)
         xml = ET.XML(data)
         try:
