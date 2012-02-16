@@ -651,7 +651,7 @@ def main():
             sys.exit(2)
 
         qbrick = Qbrick(output, quality, live, resume)
-        host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
+        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1)
         data = common.getdata(host)
         xml = ET.XML(data)
         try:
