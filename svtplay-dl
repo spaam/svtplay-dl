@@ -568,8 +568,12 @@ def main():
         data = common.getdata(url)
         match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
         if match:
-            title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
-            output = unicode(re.sub('[-\s]+', '-', title))
+            if sys.version_info > (3, 0):
+                title = re.sub('[^\w\s-]', '', match.group(1)).strip().lower()
+                output = re.sub('[-\s]+', '-', title)
+            else:
+                title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
+                output = unicode(re.sub('[-\s]+', '-', title))
 
     if re.findall("(twitch|justin).tv", url):
         parse = urlparse(url)
@@ -585,7 +589,7 @@ def main():
                 data = common.getdata(url)
                 match = re.search("embedSWF\(\"(.*)\", \"live",data)
                 if not match:
-                    print "Error: Cant find swf file."
+                    print("Error: Cant find swf file.")
                 other = match.group(1)
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 live = True
@@ -597,11 +601,11 @@ def main():
         try:
             other = parse[5]
         except KeyError:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         match = re.search("^/(.*).html", other)
         if not match:
-            print "Something wrong with that url"
+            print("Something wrong with that url")
             sys.exit(2)
         url = "http://www.hbo.com/data/content/" + match.group(1) + ".xml"
         hbo = Hbo(output, quality, live, resume)
