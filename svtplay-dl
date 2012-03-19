@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.6.2012.03.19"
+__version__ = "0.6.2012.03.20"
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
