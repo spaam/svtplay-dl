@@ -138,7 +138,7 @@ class Justin(Common):
                 print(i)
             sys.exit(2)
 
-        other = "-j %s -W %s" % (test["token"], self.resume)
+        other = "-j '%s' -W %s" % (test["token"], self.resume)
         self.resume = False
         self.getrtmp(test["url"], self.output, self.live, other, self.resume)
 
