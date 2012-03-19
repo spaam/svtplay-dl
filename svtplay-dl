@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.6.2012.02.16"
+__version__ = "0.6.2012.03.19"
 
 class Common(object):
     def getdata(self, url, method="GET", header="", data=""):
@@ -98,6 +98,64 @@ class Common(object):
             self.calc_data(bytes_so_far, total_size)
 
         file_d.close()
+
+class Justin(Common):
+    def __init__(self, output, quality, live, other):
+        self.output = output
+        self.quality = quality
+        self.live = other
+        self.resume = other
+
+    def get(self, url):
+        other = "-a ondemand"
+        data = self.getdata(url)
+        data = re.sub("<(\d+)", "<_\g<1>", data)
+        data = re.sub("</(\d+)", "</_\g<1>", data)
+        xml = ET.XML(data)
+        if sys.version_info < (2, 7):
+            sa = list(xml)
+        else:
+            sa = list(xml)
+        streams = {}
+        for i in sa:
+            if i.tag[1:][:-1] != "iv":
+                stream = {}
+                stream["url"] = i.find("connect").text + "/" + i.find("play").text
+                stream["token"] = i.find("token").text
+                streams[i.find("video_height").text] = stream
+        sort = []
+        for key in sorted(streams.keys()):
+            sort.append(int(key))
+            sort = sorted(sort)
+
+        if not self.quality:
+            self.quality = sort.pop()
+        try:
+            test = streams[str(self.quality)]
+        except KeyError:
+            print("Err: cant find that quality. try: ")
+            for i in sort:
+                print(i)
+            sys.exit(2)
+
+        other = "-j %s -W %s" % (test["token"], self.resume)
+        self.resume = False
+        self.getrtmp(test["url"], self.output, self.live, other, self.resume)
+
+class Justin2(Common):
+    def __init__(self, output, quality, live, resume):
+        self.output = output
+        self.quality = quality
+        self.live = live
+        self.resume = resume
+
+    def get(self, url):
+        other = "-a ondemand"
+        data = self.getdata(url)
+        xml = ET.XML(data)
+        url = xml.find("archive").find("video_file_url").text
+        self.output = self.output + url[-4:]
+        self.gethttp(url, self.output)
 
 class Hbo(Common):
     def __init__(self, output, quality, live, resume):
@@ -512,6 +570,27 @@ def main():
         if match:
             title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
             output = unicode(re.sub('[-\s]+', '-', title))
+
+    if re.findall("(twitch|justin).tv", url):
+        parse = urlparse(url)
+        match = re.search("/b/(\d+)", parse.path)
+        if match:
+            url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
+            justin = Justin2(output, quality, live, resume)
+            justin.get(url)
+        else:
+            match = re.search("/(.*)", parse.path)
+            if match:
+                user = match.group(1)
+                data = common.getdata(url)
+                match = re.search("embedSWF\(\"(.*)\", \"live",data)
+                if not match:
+                    print "Error: Cant find swf file."
+                other = match.group(1)
+                url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
+                live = True
+                justin = Justin(output, quality, live, other)
+                justin.get(url)
 
     if re.findall("hbo.com", url):
         parse = urlparse(url)
