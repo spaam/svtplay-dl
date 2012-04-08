@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.7.2012.04.08"
+__version__ = "0.7.2012.04.09"
 
 class Common(object):
     logtosderr = False
@@ -82,7 +82,7 @@ class Common(object):
                     output = output + "." + extension.group(1)
             else:
                 output = output + extension.group(1)
-            args = args + "-o %s" % output
+            args = args + " -o %s" % output
         if self.silent or output == "-":
             args = "%s -q" % args
         rtmpdump = "rtmpdump -r %s %s %s" % (url, args, other)
