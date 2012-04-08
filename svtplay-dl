@@ -16,7 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 
-__version__ = "0.7.2012.04.07"
+__version__ = "0.7.2012.04.08"
 
 class Common(object):
     logtosderr = False
@@ -34,11 +34,11 @@ class Common(object):
             response = urlopen(request)
         except HTTPError as e:
             self.to_console("Something wrong with that url")
-            self.to_console("Error code:", e.code)
+            self.to_console("Error code: %s" % e.code)
             sys.exit(5)
         except URLError as e:
             self.to_console("Something wrong with that url")
-            self.to_console("Error code:", e.reason)
+            self.to_console("Error code: %s" % e.reason)
             sys.exit(5)
         except ValueError as e:
             self.to_console("Try adding http:// before the url")
@@ -803,12 +803,17 @@ def main():
 
     elif re.findall("sverigesradio", url):
         data = common.getdata(url)
-        match = re.search("linkUrl=(.*)\;isButton=", data)
-        if not match:
-            common.to_console("Cant find video file")
-            sys.exit(2)
-
-        sr = Sr(common, output, quality, live, unquote_plus(match.group(1)), resume)
+        parse = urlparse(url)
+        try:
+            metafile = parse_qs(parse[4])["metafile"][0]
+            other = "%s?%s" % (parse[2], parse[4])
+        except KeyError:
+            match = re.search("linkUrl=(.*)\;isButton=", data)
+            if not match:
+                common.to_console("Cant find video file")
+                sys.exit(2)
+            other = unquote_plus(match.group(1))
+        sr = Sr(common, output, quality, live, other, resume)
         sr.get("http://sverigesradio.se")
 
     else:
