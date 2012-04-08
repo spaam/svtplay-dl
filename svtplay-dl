@@ -153,10 +153,13 @@ class Justin():
         streams = {}
         for i in sa:
             if i.tag[1:][:-1] != "iv":
-                stream = {}
-                stream["url"] = i.find("connect").text + "/" + i.find("play").text
-                stream["token"] = i.find("token").text
-                streams[i.find("video_height").text] = stream
+                try:
+                    stream = {}
+                    stream["token"] = i.find("token").text
+                    stream["url"] = i.find("connect").text + "/" + i.find("play").text
+                    streams[i.find("video_height").text] = stream
+                except AttributeError:
+                    None
         sort = []
         for key in sorted(streams.keys()):
             sort.append(int(key))
@@ -169,7 +172,7 @@ class Justin():
         except KeyError:
             self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                self.common.to_console(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         other = "-j '%s' -W %s" % (test["token"], self.resume)
@@ -231,7 +234,7 @@ class Hbo():
         except KeyError:
             self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                self.common.to_console(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         if not self.output:
@@ -317,7 +320,7 @@ class Qbrick():
         except KeyError:
             self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                self.common.to_console(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         if not self.output:
@@ -373,7 +376,7 @@ class Kanal5():
         except KeyError:
             self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                print(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         if not self.output:
@@ -419,14 +422,14 @@ class Expressen():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            print("Err: cant find that quality. try: ")
+            self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                print(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)])
-            print("Outfile: ", self.output)
+            self.common.to_console("Outfile: %s" % self.output)
 
         filename = streams[str(self.quality)]
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
@@ -455,12 +458,12 @@ class Aftonbladet():
             other = other + " -A %s" % str(start)
 
         if url == None:
-            print("Error: Cant find any video on that page")
+            self.common.to_console("Error: Cant find any video on that page")
             sys.exit(3)
 
         if not self.output:
             self.output = os.path.basename(path)
-            print("Outfile: ", self.output)
+            self.common.to_console("Outfile: %s " % self.output)
 
         if url[0:4] == "rtmp":
             self.common.getrtmp(url, self.output, self.live, other, self.resume)
@@ -489,7 +492,7 @@ class Viaplay(Common):
 
         if not self.output:
             self.output = os.path.basename(filename)
-            print("Outfile: ", self.output)
+            self.common.to_console("Outfile: %s" % self.output)
 
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         self.common.getrtmp(filename, self.output, self.live, other, self.resume)
@@ -530,16 +533,16 @@ class Tv4play():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            print("Err: cant find that quality. try: ")
+            self.common.to_console("Err: cant find that quality. try: ")
             for i in sort:
-                print(i)
+                self.common.to_console(str(i))
             sys.exit(4)
 
         other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)]["path"])
-            print("Outfile: ", self.output)
+            self.common.to_console("Outfile: %s" % self.output)
 
         self.common.getrtmp(streams[str(self.quality)]["uri"], self.output, self.live, other, self.resume)
 
@@ -568,18 +571,18 @@ class Svtplay():
                 try:
                     filename = streams[int(self.quality)]
                 except (ValueError, KeyError):
-                    print("Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
+                    self.common.to_console("Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
                     sys.exit(4)
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
-                print("Err: cant find stream")
+                self.common.to_console("Err: cant find stream")
                 sys.exit(3)
             filename = match.group(1)
 
         if not self.output:
             self.output = os.path.basename(filename)
-            print("Outfile: ", self.output)
+            self.common.to_console("Outfile: %s" % self.output)
 
         if filename[0:4] == "rtmp":
             self.common.getrtmp(filename, self.output, self.live, other, self.resume)
