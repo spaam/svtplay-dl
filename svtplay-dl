@@ -113,6 +113,8 @@ class Common(object):
             if extension:
                 output = output + extension.group(1)
             file_d = open(output,"wb")
+        else:
+            file_d = sys.stdout
 
         lastprogress = 0
         while 1:
@@ -122,14 +124,12 @@ class Common(object):
             if not chunk:
                 break
 
+            file_d.write(chunk)
             if output != "-":
-                file_d.write(chunk)
                 now = time.time()
                 if lastprogress + 1 < now:
                     lastprogress = now
                     self.progress(bytes_so_far, total_size)
-            else:
-                self.to_consoleb(chunk)
 
         if output != "-":
             file_d.close()
@@ -140,12 +140,6 @@ class Common(object):
             message = message + term
             console = [sys.stdout, sys.stderr][self.logtosderr]
             console.write(message)
-
-    def to_consoleb(self, data):
-        try:
-            sys.stdout.write(data)
-        except IOError as e:
-            sys.exit(5)
 
 
 class Justin():
