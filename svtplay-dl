@@ -17,11 +17,11 @@ import xml.etree.ElementTree as ET
 import shlex
 import json
 import time
+import logging
 
 __version__ = "0.7.2012.05.19"
 
 class Common(object):
-    logtosderr = False
     silent = False
     def getdata(self, url, method="GET", header="", data=""):
         """ Get the page to parse it for streams """
@@ -35,15 +35,15 @@ class Common(object):
         try:
             response = urlopen(request)
         except HTTPError as e:
-            self.to_console("Something wrong with that url")
-            self.to_console("Error code: %s" % e.code)
+            logging.error("Something wrong with that url")
+            logging.error("Error code: %s" % e.code)
             sys.exit(5)
         except URLError as e:
-            self.to_console("Something wrong with that url")
-            self.to_console("Error code: %s" % e.reason)
+            logging.error("Something wrong with that url")
+            logging.error("Error code: %s" % e.reason)
             sys.exit(5)
         except ValueError as e:
-            self.to_console("Try adding http:// before the url")
+            logging.error("Try adding http:// before the url")
             sys.exit(5)
         if sys.version_info > (3, 0):
             data = response.read().decode('utf-8')
@@ -51,7 +51,7 @@ class Common(object):
             try:
                 data = response.read()
             except socket.error as e:
-                self.to_console("Lost the connection to the server")
+                logging.error("Lost the connection to the server")
                 sys.exit(5)
         response.close()
         return data
@@ -134,13 +134,6 @@ class Common(object):
         if output != "-":
             file_d.close()
 
-    def to_console(self, message, endl=True):
-        if not self.silent:
-            term = [u'',  u'\n'][endl]
-            message = message + term
-            console = [sys.stdout, sys.stderr][self.logtosderr]
-            console.write(message)
-
 
 class Justin():
     def __init__(self, common, output, quality, live, resume):
@@ -180,9 +173,8 @@ class Justin():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         other = "-j '%s' -W %s" % (test["token"], self.resume)
@@ -204,6 +196,7 @@ class Justin2():
         url = xml.find("archive").find("video_file_url").text
         if self.output != '-':
             self.output = self.output + url[-4:]
+            logging.info("Outfile: %s", self.output)
         self.common.gethttp(url, self.output)
 
 class Hbo():
@@ -243,14 +236,13 @@ class Hbo():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)]["path"])
-            self.common.to_console("Outfile: ", self.output)
+            logging.info("Outfile: %s", self.output)
 
         self.common.getrtmp(streams[str(self.quality)]["path"], self.output, self.live, "", self.resume)
 
@@ -271,7 +263,7 @@ class Sr():
 
         if not self.output:
             self.output = os.path.basename(url)
-            self.common.to_console("Outfile: ", self.output)
+            logging.info("Outfile: %s", self.output)
 
         self.common.gethttp(url, self.output)
 
@@ -293,7 +285,7 @@ class Urplay():
 
             if not self.output:
                 self.output = os.path.basename(path)
-                self.common.to_console("Outfile: ", self.output)
+                logging.info("Outfile: %s", self.output)
 
             self.common.getrtmp("rtmp://streaming.ur.se/", self.output, self.live, other, self.resume)
 
@@ -329,14 +321,13 @@ class Qbrick():
         try:
             path = streams[int(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)])
-            self.common.to_console("Outfile: ", self.output)
+            logging.info("Outfile: %s", self.output)
 
         other = "-y %s" % path
         self.common.getrtmp(server, self.output, self.live, other, self.resume)
@@ -399,8 +390,8 @@ class Kanal9():
         try:
             from pyamf import remoting
         except ImportError:
-            self.common.to_console("You need to install pyamf to download content from kanal5 and kanal9")
-            self.common.to_console("In debian the package is called python-pyamf")
+            logging.error("You need to install pyamf to download content from kanal5 and kanal9")
+            logging.info("In debian the package is called python-pyamf")
             sys.exit(2)
 
         player_id = 811317479001
@@ -430,14 +421,13 @@ class Kanal9():
         try:
             test = streams[int(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)]["uri"])
-            self.common.to_console("Outfile: ", self.output)
+            logging.info("Outfile: %s", self.output)
 
         filename = streams[int(self.quality)]["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
@@ -477,14 +467,13 @@ class Expressen():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)])
-            self.common.to_console("Outfile: %s" % self.output)
+            logging.info("Outfile: %s", self.output)
 
         filename = streams[str(self.quality)]
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
@@ -513,12 +502,12 @@ class Aftonbladet():
             other = other + " -A %s" % str(start)
 
         if url == None:
-            self.common.to_console("Error: Cant find any video on that page")
+            logging.error("Can't find any video on that page")
             sys.exit(3)
 
         if not self.output:
             self.output = os.path.basename(path)
-            self.common.to_console("Outfile: %s " % self.output)
+            logging.info("Outfile: %s", self.output)
 
         if url[0:4] == "rtmp":
             self.common.getrtmp(url, self.output, self.live, other, self.resume)
@@ -547,7 +536,7 @@ class Viaplay(Common):
 
         if not self.output:
             self.output = os.path.basename(filename)
-            self.common.to_console("Outfile: %s" % self.output)
+            logging.info("Outfile: %s", self.output)
 
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         self.common.getrtmp(filename, self.output, self.live, other, self.resume)
@@ -588,16 +577,15 @@ class Tv4play():
         try:
             test = streams[str(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
 
         if not self.output:
             self.output = os.path.basename(streams[str(self.quality)]["path"])
-            self.common.to_console("Outfile: %s" % self.output)
+            logging.info("Outfile: %s", self.output)
 
         self.common.getrtmp(streams[str(self.quality)]["uri"], self.output, self.live, other, self.resume)
 
@@ -626,18 +614,18 @@ class Svtplay():
                 try:
                     filename = streams[int(self.quality)]
                 except (ValueError, KeyError):
-                    self.common.to_console("Err: Cant find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
+                    logging.error("Can't find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
                     sys.exit(4)
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
-                self.common.to_console("Err: cant find stream")
+                logging.error("Can't find stream")
                 sys.exit(3)
             filename = match.group(1)
 
         if not self.output:
             self.output = os.path.basename(filename)
-            self.common.to_console("Outfile: %s" % self.output)
+            logging.info("Outfile: %s", self.output)
 
         if filename[0:4] == "rtmp":
             self.common.getrtmp(filename, self.output, self.live, other, self.resume)
@@ -670,6 +658,10 @@ def main():
     silent = options.silent
     common = Common()
     common.silent = silent
+    if silent:
+        logging.basicConfig(format='%(levelname)s %(message)s', level=logging.WARNING, stream=sys.stderr)
+    else:
+        logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO, stream=sys.stdout)
 
     url = args[0]
     if not output:
@@ -682,9 +674,6 @@ def main():
             else:
                 title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
                 output = unicode(re.sub('[-\s]+', '-', title))
-
-    if output == "-":
-        common.logtosderr = True
 
     if re.findall("(twitch|justin).tv", url):
         parse = urlparse(url)
@@ -700,7 +689,7 @@ def main():
                 data = common.getdata(url)
                 match = re.search("embedSWF\(\"(.*)\", \"live", data)
                 if not match:
-                    common.to_console("Error: Cant find swf file.")
+                    logging.error("Can't find swf file.")
                 other = match.group(1)
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 live = True
@@ -712,11 +701,11 @@ def main():
         try:
             other = parse[5]
         except KeyError:
-            common.to_console("Something wrong with that url")
+            logging.error("Something wrong with that url")
             sys.exit(2)
         match = re.search("^/(.*).html", other)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Cant find video file")
             sys.exit(2)
         url = "http://www.hbo.com/data/content/" + match.group(1) + ".xml"
         hbo = Hbo(common, output, quality, live, resume)
@@ -727,7 +716,7 @@ def main():
         try:
             vid = parse_qs(parse[4])["videoid"][0]
         except KeyError:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         tv4play = Tv4play(common, output, quality, live, resume)
@@ -737,7 +726,7 @@ def main():
         parse = urlparse(url)
         match = re.search('\/play\/(.*)/', parse.path)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Cant find video file")
             sys.exit(2)
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         viaplay = Viaplay(common, output, quality, live, resume)
@@ -747,13 +736,13 @@ def main():
         parse = urlparse(url)
         match = re.search('\/Tv/channels\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(.*)/', parse.path)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         url = "http://viasat.web.entriq.net/nw/article/view/%s/?tf=players/TV6.tpl" % match.group(1)
         data = common.getdata(url)
         match = re.search("id:'(.*)'", data)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         viaplay = Viaplay(common, output, quality, live, resume)
@@ -764,7 +753,7 @@ def main():
         data = common.getdata(url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         try:
             start = parse_qs(parse[4])["start"][0]
@@ -778,7 +767,7 @@ def main():
         parse = urlparse(url)
         match = re.search("/(.*[\/\+].*)/", unquote_plus(parse.path))
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
         expressen = Expressen(common, output, quality, live, resume)
@@ -798,7 +787,7 @@ def main():
         data = common.getdata(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         kanal9 = Kanal9(common, output, quality, live, match.group(1), resume)
         kanal9.get("c.brightcove.com")
@@ -809,7 +798,7 @@ def main():
         if not match:
             match = re.search("mediaId = \'([0-9A-F]+)\';", data)
             if not match:
-                common.to_console("Cant find video file")
+                logging.error("Can't find video file")
                 sys.exit(2)
             mcid = match.group(1) + "DE1BA107"
         else:
@@ -821,7 +810,7 @@ def main():
         try:
             url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
         except AttributeError:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         qbrick.get(url)
 
@@ -829,7 +818,7 @@ def main():
         data = common.getdata(url)
         match = re.search("ccid: \"(.*)\"\,", data)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         qbrick = Qbrick(common, output, quality, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
@@ -838,21 +827,21 @@ def main():
         try:
             host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
         except AttributeError:
-            common.to_console("Cant find stream")
+            logging.error("Can't find stream")
             sys.exit(2)
         qbrick.get(host)
 
     elif re.findall("svd.se", url):
         match = re.search("_([0-9]+)\.svd", url)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
 
         data = common.getdata("http://www.svd.se/?service=ajax&type=webTvClip&articleId=" + match.group(1))
         match = re.search("mcid=([A-F0-9]+)\&width=", data)
 
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
 
         qbrick = Qbrick(common, output, quality, live, resume)
@@ -862,7 +851,7 @@ def main():
         try:
             host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
         except AttributeError:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         qbrick.get(host)
 
@@ -879,7 +868,7 @@ def main():
         except KeyError:
             match = re.search("linkUrl=(.*)\;isButton=", data)
             if not match:
-                common.to_console("Cant find video file")
+                logging.error("Can't find video file")
                 sys.exit(2)
             other = unquote_plus(match.group(1))
         sr = Sr(common, output, quality, live, other, resume)
