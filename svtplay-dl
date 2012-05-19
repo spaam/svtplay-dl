@@ -21,41 +21,43 @@ import logging
 
 __version__ = "0.7.2012.05.19"
 
+def get_http_data(url, method="GET", header="", data=""):
+    """ Get the page to parse it for streams """
+    request = Request(url)
+    request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+
+    if len(header) > 0:
+        request.add_header('Content-Type', header)
+    if len(data) > 0:
+        request.add_data(data)
+    try:
+        response = urlopen(request)
+    except HTTPError as e:
+        logging.error("Something wrong with that url")
+        logging.error("Error code: %s" % e.code)
+        sys.exit(5)
+    except URLError as e:
+        logging.error("Something wrong with that url")
+        logging.error("Error code: %s" % e.reason)
+        sys.exit(5)
+    except ValueError as e:
+        logging.error("Try adding http:// before the url")
+        sys.exit(5)
+    if sys.version_info > (3, 0):
+        data = response.read().decode('utf-8')
+    else:
+        try:
+            data = response.read()
+        except socket.error as e:
+            logging.error("Lost the connection to the server")
+            sys.exit(5)
+    response.close()
+    return data
+
+
+
 class Common(object):
     silent = False
-    def getdata(self, url, method="GET", header="", data=""):
-        """ Get the page to parse it for streams """
-        request = Request(url)
-        request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-
-        if len(header) > 0:
-            request.add_header('Content-Type', header)
-        if len(data) > 0:
-            request.add_data(data)
-        try:
-            response = urlopen(request)
-        except HTTPError as e:
-            logging.error("Something wrong with that url")
-            logging.error("Error code: %s" % e.code)
-            sys.exit(5)
-        except URLError as e:
-            logging.error("Something wrong with that url")
-            logging.error("Error code: %s" % e.reason)
-            sys.exit(5)
-        except ValueError as e:
-            logging.error("Try adding http:// before the url")
-            sys.exit(5)
-        if sys.version_info > (3, 0):
-            data = response.read().decode('utf-8')
-        else:
-            try:
-                data = response.read()
-            except socket.error as e:
-                logging.error("Lost the connection to the server")
-                sys.exit(5)
-        response.close()
-        return data
-
     def progress(self, byte, total):
         """ Print some info about how much we have downloaded """
         ratio = float(byte) / total
@@ -146,7 +148,7 @@ class Justin():
 
     def get(self, url):
         other = "-a ondemand"
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         data = re.sub("<(\d+)", "<_\g<1>", data)
         data = re.sub("</(\d+)", "</_\g<1>", data)
         xml = ET.XML(data)
@@ -192,7 +194,7 @@ class Justin2():
 
     def get(self, url):
         other = "-a ondemand"
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
         if self.output != '-':
@@ -209,11 +211,11 @@ class Hbo():
         self.resume = resume
 
     def get(self, url):
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         videoid = xml.find("content")[1].find("videoId").text
         url = "http://render.cdn.hbo.com/data/content/global/videos/data/%s.xml" % videoid
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("videos")
         if sys.version_info < (2, 7):
@@ -258,7 +260,7 @@ class Sr():
 
     def get(self, url):
         url = url + self.other
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("entry").find("ref").attrib["href"]
 
@@ -278,7 +280,7 @@ class Urplay():
 
     def get(self, url):
         other = "-a ondemand"
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         match = re.search('file=(.*)\&plugins', data)
         if match:
             path = "mp" + match.group(1)[-1] + ":" + match.group(1)
@@ -299,7 +301,7 @@ class Qbrick():
         self.resume = resume
 
     def get(self, url):
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")
@@ -342,7 +344,7 @@ class Kanal5():
         self.resume = resume
 
     def get(self, url):
-        data = json.loads(self.common.getdata(url))
+        data = json.loads(get_http_data(url))
         steambaseurl = data["streamBaseUrl"]
         streams = {}
 
@@ -362,14 +364,13 @@ class Kanal5():
         try:
             test = streams[int(self.quality)]
         except KeyError:
-            self.common.to_console("Err: cant find that quality. try: ")
-            for i in sort:
-                self.common.to_console(str(i))
+            logging.error("Can't find that quality. (Try one of: %s)",
+                          ",".join(map(str,sort)))
             sys.exit(4)
 
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)]["source"])
-            self.common.to_console("Outfile: ", self.output)
+            logging.info("Outfile: %s", self.output)
 
 
         filename = streams[int(self.quality)]["source"]
@@ -403,7 +404,7 @@ class Kanal9():
         env = str(remoting.encode(env).read())
         url = "http://" + url + "/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk"
         header = "application/x-amf"
-        data = self.common.getdata(url, "POST", header, env)
+        data = get_http_data(url, "POST", header, env)
         streams = {}
 
         for i in remoting.decode(data).bodies[0][1].body['renditions']:
@@ -445,7 +446,7 @@ class Expressen():
 
     def get(self, url):
         other = ""
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("vurls")
         if sys.version_info < (2, 7):
@@ -493,7 +494,7 @@ class Aftonbladet():
         self.resume = resume
 
     def get(self, url, start):
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("articleElement").find("mediaElement").find("baseUrl").text
         path = xml.find("articleElement").find("mediaElement").find("media").attrib["url"]
@@ -526,12 +527,12 @@ class Viaplay(Common):
 
     def get(self, url):
         other = ""
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
 
         if filename[:4] == "http":
-            data = self.common.getdata(filename)
+            data = get_http_data(filename)
             xml = ET.XML(data)
             filename = xml.find("Url").text
 
@@ -551,7 +552,7 @@ class Tv4play():
         self.resume = resume
 
     def get(self, url):
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("items")
         if sys.version_info < (2, 7):
@@ -600,7 +601,7 @@ class Svtplay():
 
     def get(self, url):
         other = "-W http://svtplay.se/flash/svtplayer-2012.1.swf"
-        data = self.common.getdata(url)
+        data = get_http_data(url)
         match = re.search('dynamicStreams=(.*)\&amp\;background', data)
         if match:
             new = match.group(1)
@@ -666,7 +667,7 @@ def main():
 
     url = args[0]
     if not output:
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
         if match:
             if sys.version_info > (3, 0):
@@ -687,7 +688,7 @@ def main():
             match = re.search("/(.*)", parse.path)
             if match:
                 user = match.group(1)
-                data = common.getdata(url)
+                data = get_http_data(url)
                 match = re.search("embedSWF\(\"(.*)\", \"live", data)
                 if not match:
                     logging.error("Can't find swf file.")
@@ -740,7 +741,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
         url = "http://viasat.web.entriq.net/nw/article/view/%s/?tf=players/TV6.tpl" % match.group(1)
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("id:'(.*)'", data)
         if not match:
             logging.error("Can't find video file")
@@ -751,7 +752,7 @@ def main():
 
     elif re.findall("aftonbladet", url):
         parse = urlparse(url)
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
         if not match:
             logging.error("Can't find video file")
@@ -777,7 +778,7 @@ def main():
     elif re.findall("kanal5play", url):
         match = re.search(".*video/([0-9]+)", url)
         if not match:
-            common.to_console("Cant find video file")
+            logging.error("Can't find video file")
             sys.exit(2)
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
         kanal5 = Kanal5(common, output, quality, live, resume)
@@ -785,7 +786,7 @@ def main():
 
 
     elif re.findall("kanal9play", url):
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
             logging.error("Can't find video file")
@@ -794,7 +795,7 @@ def main():
         kanal9.get("c.brightcove.com")
 
     elif re.findall("dn.se", url):
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
         if not match:
             match = re.search("mediaId = \'([0-9A-F]+)\';", data)
@@ -806,7 +807,7 @@ def main():
             mcid = match.group(1)
         qbrick = Qbrick(common, output, quality, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + mcid
-        data = common.getdata(host)
+        data = get_http_data(host)
         xml = ET.XML(data)
         try:
             url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
@@ -816,14 +817,14 @@ def main():
         qbrick.get(url)
 
     elif re.findall("di.se", url):
-        data = common.getdata(url)
+        data = get_http_data(url)
         match = re.search("ccid: \"(.*)\"\,", data)
         if not match:
             logging.error("Can't find video file")
             sys.exit(2)
         qbrick = Qbrick(common, output, quality, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
-        data = common.getdata(host)
+        data = get_http_data(host)
         xml = ET.XML(data)
         try:
             host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
@@ -838,7 +839,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
 
-        data = common.getdata("http://www.svd.se/?service=ajax&type=webTvClip&articleId=" + match.group(1))
+        data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=" + match.group(1))
         match = re.search("mcid=([A-F0-9]+)\&width=", data)
 
         if not match:
@@ -847,7 +848,7 @@ def main():
 
         qbrick = Qbrick(common, output, quality, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1)
-        data = common.getdata(host)
+        data = get_http_data(host)
         xml = ET.XML(data)
         try:
             host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
@@ -861,7 +862,7 @@ def main():
         urplay.get(url)
 
     elif re.findall("sverigesradio", url):
-        data = common.getdata(url)
+        data = get_http_data(url)
         parse = urlparse(url)
         try:
             metafile = parse_qs(parse[4])["metafile"][0]
