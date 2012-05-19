@@ -122,13 +122,12 @@ class Common(object):
         if not self.silent:
             term = [u'',  u'\n'][endl]
             message = message + term
-            self.console = [sys.stdout, sys.stderr][self.logtosderr]
-            self.console.write(message)
+            console = [sys.stdout, sys.stderr][self.logtosderr]
+            console.write(message)
 
     def to_consoleb(self, data):
-        self.console = sys.stdout
         try:
-            self.console.write(data)
+            sys.stdout.write(data)
         except IOError as e:
             sys.exit(5)
 
