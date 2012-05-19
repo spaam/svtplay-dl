@@ -15,8 +15,9 @@ import subprocess
 from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
+import json
 
-__version__ = "0.7.2012.04.09"
+__version__ = "0.7.2012.05.19"
 
 class Common(object):
     logtosderr = False
@@ -133,12 +134,12 @@ class Common(object):
 
 
 class Justin():
-    def __init__(self, common, output, quality, live, other):
+    def __init__(self, common, output, quality, live, resume):
         self.common = common
         self.output = output
         self.quality = quality
-        self.live = other
-        self.resume = other
+        self.live = live
+        self.resume = resume
 
     def get(self, url):
         other = "-a ondemand"
@@ -331,6 +332,51 @@ class Qbrick():
         self.common.getrtmp(server, self.output, self.live, other, self.resume)
 
 class Kanal5():
+    def __init__(self, common, output, quality, live, resume):
+        self.common = common
+        self.output = output
+        self.quality = quality
+        self.live = live
+        self.resume = resume
+
+    def get(self, url):
+        data = json.loads(self.common.getdata(url))
+        steambaseurl = data["streamBaseUrl"]
+        streams = {}
+
+        for i in data["streams"]:
+            stream = {}
+            stream["source"] = i["source"]
+            streams[i["bitrate"]] = stream
+
+        sort = []
+        for key in sorted(streams.keys()):
+            sort.append(int(key))
+            sort = sorted(sort)
+
+        if not self.quality:
+            self.quality = sort.pop()
+
+        try:
+            test = streams[int(self.quality)]
+        except KeyError:
+            self.common.to_console("Err: cant find that quality. try: ")
+            for i in sort:
+                self.common.to_console(str(i))
+            sys.exit(4)
+
+        if not self.output:
+            self.output = os.path.basename(streams[int(self.quality)]["source"])
+            self.common.to_console("Outfile: ", self.output)
+
+
+        filename = streams[int(self.quality)]["source"]
+        match = re.search("^(.*):", filename)
+        self.output  = "%s.%s" % (self.output, match.group(1))
+        other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
+        self.common.getrtmp(steambaseurl, self.output, self.live, other, self.resume)
+
+class Kanal9():
     def __init__(self, common, output, quality, live, other, resume):
         self.common = common
         self.output = output
@@ -382,7 +428,6 @@ class Kanal5():
         if not self.output:
             self.output = os.path.basename(streams[int(self.quality)]["uri"])
             self.common.to_console("Outfile: ", self.output)
-
 
         filename = streams[int(self.quality)]["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
@@ -636,7 +681,7 @@ def main():
         match = re.search("/b/(\d+)", parse.path)
         if match:
             url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
-            justin = Justin2(output, quality, live, resume)
+            justin = Justin2(common, output, quality, live, resume)
             justin.get(url)
         else:
             match = re.search("/(.*)", parse.path)
@@ -728,14 +773,25 @@ def main():
         expressen = Expressen(common, output, quality, live, resume)
         expressen.get(url)
 
-    elif re.findall("(kanal5play|kanal9play)", url):
+    elif re.findall("kanal5play", url):
+        match = re.search(".*video/([0-9]+)", url)
+        if not match:
+            common.to_console("Cant find video file")
+            sys.exit(2)
+        url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
+        print url
+        kanal5 = Kanal5(common, output, quality, live, resume)
+        kanal5.get(url)
+
+
+    elif re.findall("kanal9play", url):
         data = common.getdata(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
             common.to_console("Cant find video file")
             sys.exit(2)
-        kanal5 = Kanal5(common, output, quality, live, match.group(1), resume)
-        kanal5.get("c.brightcove.com")
+        kanal9 = Kanal9(common, output, quality, live, match.group(1), resume)
+        kanal9.get("c.brightcove.com")
 
     elif re.findall("dn.se", url):
         data = common.getdata(url)
