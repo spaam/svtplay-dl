@@ -16,6 +16,7 @@ from optparse import OptionParser
 import xml.etree.ElementTree as ET
 import shlex
 import json
+import time
 
 __version__ = "0.7.2012.05.19"
 
@@ -55,14 +56,25 @@ class Common(object):
         response.close()
         return data
 
-    def calc_data(self, byte, total):
+    def progress(self, byte, total):
         """ Print some info about how much we have downloaded """
-        percent = float(byte) / total
-        percent = round(percent*100, 2)
-        self.to_console("Downloaded %d of %d bytes (%.2f%%)\r" % (byte, total, percent), False)
+        ratio = float(byte) / total
+        percent = round(ratio*100, 2)
+        tlen = str(len(str(total)))
+        fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
+        progresstr = fmt % (byte >> 10, total >> 10, percent)
+
+        columns = int(os.getenv("COLUMNS", "80"))
+        if len(progresstr) < columns - 13:
+            p = int((columns - len(progresstr) - 3) * ratio)
+            q = int((columns - len(progresstr) - 3) * (1 - ratio))
+            progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
+        sys.stderr.write(progresstr + '\r')
 
         if byte >= total:
-            self.to_console('\n')
+            sys.stderr.write('\n')
+
+        sys.stderr.flush()
 
     def getrtmp(self, url, output, live, other, resume):
         """ Get the stream from RTMP """
@@ -102,6 +114,7 @@ class Common(object):
                 output = output + extension.group(1)
             file_d = open(output,"wb")
 
+        lastprogress = 0
         while 1:
             chunk = response.read(8192)
             bytes_so_far += len(chunk)
@@ -111,7 +124,10 @@ class Common(object):
 
             if output != "-":
                 file_d.write(chunk)
-                self.calc_data(bytes_so_far, total_size)
+                now = time.time()
+                if lastprogress + 1 < now:
+                    lastprogress = now
+                    self.progress(bytes_so_far, total_size)
             else:
                 self.to_consoleb(chunk)
 
