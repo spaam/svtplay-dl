@@ -208,7 +208,8 @@ class Justin2():
         data = self.common.getdata(url)
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
-        self.output = self.output + url[-4:]
+        if self.output != '-':
+            self.output = self.output + url[-4:]
         self.common.gethttp(url, self.output)
 
 class Hbo():
