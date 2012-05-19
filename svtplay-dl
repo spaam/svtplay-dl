@@ -779,7 +779,6 @@ def main():
             common.to_console("Cant find video file")
             sys.exit(2)
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
-        print url
         kanal5 = Kanal5(common, output, quality, live, resume)
         kanal5.get(url)
 
