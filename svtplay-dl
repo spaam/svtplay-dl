@@ -133,28 +133,27 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     command = ["rtmpdump", "-r", url] + args
     subprocess.call(command)
 
-def select_quality(obj, streams):
-    sort = []
-    for key in sorted(streams.keys()):
-        sort.append(int(key))
-        sort = sorted(sort)
+def select_quality(options, streams):
+    sort = sorted(streams.keys(), key=int)
 
-    if not obj.quality:
-        obj.quality = sort.pop()
+    if options.quality:
+        quality = options.quality
+    else:
+        quality = sort.pop()
+
     try:
-        test = streams[str(obj.quality)]
+        selected = streams[quality]
     except KeyError:
         logging.error("Can't find that quality. (Try one of: %s)",
-                      ",".join(map(str,sort)))
+                      ",".join(sort))
         sys.exit(4)
 
-    return test
+    return selected
 
 class Justin():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -179,16 +178,15 @@ class Justin():
                 except AttributeError:
                     None
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
         other = "-j '%s' -W %s" % (test["token"], self.resume)
         self.resume = False
         download_rtmp(self.options, test["url"], self.output, self.live, other, self.resume)
 
 class Justin2():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -203,10 +201,9 @@ class Justin2():
         download_http(url, self.output)
 
 class Hbo():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -228,7 +225,7 @@ class Hbo():
             stream["path"] = i.find("tv14").find("path").text
             streams[i.attrib["width"]] = stream
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
 
         if not self.output:
             self.output = os.path.basename(test["path"])
@@ -237,10 +234,9 @@ class Hbo():
         download_rtmp(self.options, test["path"], self.output, self.live, "", self.resume)
 
 class Sr():
-    def __init__(self, options, output, quality, live, other, resume):
+    def __init__(self, options, output, live, other, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.other = other
         self.resume = resume
@@ -258,10 +254,9 @@ class Sr():
         download_http(url, self.output)
 
 class Urplay():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -280,10 +275,9 @@ class Urplay():
             download_rtmp(self.options, "rtmp://streaming.ur.se/", self.output, self.live, other, self.resume)
 
 class Qbrick():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -300,7 +294,7 @@ class Qbrick():
         for i in sa:
             streams[i.attrib["system-bitrate"]] = i.attrib["src"]
 
-        path = select_quality(self, streams)
+        path = select_quality(self.options, streams)
 
         if not self.output:
             self.output = os.path.basename(path)
@@ -310,10 +304,9 @@ class Qbrick():
         download_rtmp(self.options, server, self.output, self.live, other, self.resume)
 
 class Kanal5():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -327,7 +320,7 @@ class Kanal5():
             stream["source"] = i["source"]
             streams[i["bitrate"]] = stream
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
 
         if not self.output:
             self.output = os.path.basename(test["source"])
@@ -341,10 +334,9 @@ class Kanal5():
         download_rtmp(self.options, steambaseurl, self.output, self.live, other, self.resume)
 
 class Kanal9():
-    def __init__(self, options, output, quality, live, other, resume):
+    def __init__(self, options, output, live, other, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.other = other
         self.resume = resume
@@ -373,7 +365,7 @@ class Kanal9():
             stream["uri"] = i["defaultURL"]
             streams[i["encodingRate"]] = stream
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
         if not self.output:
             self.output = os.path.basename(test["uri"])
             logging.info("Outfile: %s", self.output)
@@ -384,10 +376,9 @@ class Kanal9():
         download_rtmp(self.options, match.group(1), self.output, self.live, other, self.resume)
 
 class Expressen():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -405,7 +396,7 @@ class Expressen():
         for i in sa:
             streams[i.attrib["bitrate"]] = i.text
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
 
         if not self.output:
             self.output = os.path.basename(test)
@@ -420,10 +411,9 @@ class Expressen():
         download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
 
 class Aftonbladet():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -452,10 +442,9 @@ class Aftonbladet():
             download_http(filename, self.output)
 
 class Viaplay():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -478,10 +467,9 @@ class Viaplay():
         download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
 
 class Tv4play():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -502,7 +490,7 @@ class Tv4play():
             stream["path"] = i.find("url").text
             streams[i.find("bitrate").text] = stream
 
-        test = select_quality(self, streams)
+        test = select_quality(self.options, streams)
 
         other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % test["path"]
 
@@ -513,10 +501,9 @@ class Tv4play():
         download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
 
 class Svtplay():
-    def __init__(self, options, output, quality, live, resume):
+    def __init__(self, options, output, live, resume):
         self.options = options
         self.output = output
-        self.quality = quality
         self.live = live
         self.resume = resume
 
@@ -532,7 +519,7 @@ class Svtplay():
                 match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
                 streams[match.group(2)] = match.group(1)
 
-            filename = select_quality(self, streams)
+            filename = select_quality(self.options, streams)
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
@@ -570,7 +557,6 @@ def main():
         parser.error("incorrect number of arguments")
     output = options.output
     live = options.live
-    quality = options.quality
     resume = options.resume
     silent = options.silent
     if silent:
@@ -595,7 +581,7 @@ def main():
         match = re.search("/b/(\d+)", parse.path)
         if match:
             url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
-            justin = Justin2(options, output, quality, live, resume)
+            justin = Justin2(options, output, live, resume)
             justin.get(url)
         else:
             match = re.search("/(.*)", parse.path)
@@ -608,7 +594,7 @@ def main():
                 other = match.group(1)
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 live = True
-                justin = Justin(options, output, quality, live, other)
+                justin = Justin(options, output, live, other)
                 justin.get(url)
 
     if re.findall("hbo.com", url):
@@ -623,7 +609,7 @@ def main():
             logging.error("Cant find video file")
             sys.exit(2)
         url = "http://www.hbo.com/data/content/" + match.group(1) + ".xml"
-        hbo = Hbo(options, output, quality, live, resume)
+        hbo = Hbo(options, output, live, resume)
         hbo.get(url)
 
     if re.findall("tv4play", url):
@@ -634,7 +620,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        tv4play = Tv4play(options, output, quality, live, resume)
+        tv4play = Tv4play(options, output, live, resume)
         tv4play.get(url)
 
     elif re.findall("(tv3play|tv6play|tv8play)", url):
@@ -644,7 +630,7 @@ def main():
             logging.error("Cant find video file")
             sys.exit(2)
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
-        viaplay = Viaplay(options, output, quality, live, resume)
+        viaplay = Viaplay(options, output, live, resume)
         viaplay.get(url)
 
     elif re.findall("viaplay", url):
@@ -660,7 +646,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
         url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
-        viaplay = Viaplay(options, output, quality, live, resume)
+        viaplay = Viaplay(options, output, live, resume)
         viaplay.get(url)
 
     elif re.findall("aftonbladet", url):
@@ -675,7 +661,7 @@ def main():
         except KeyError:
             start = 0
         url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
-        aftonbladet = Aftonbladet(options, output, quality, live, resume)
+        aftonbladet = Aftonbladet(options, output, live, resume)
         aftonbladet.get(url, start)
 
     elif re.findall("expressen", url):
@@ -685,7 +671,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
         url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
-        expressen = Expressen(options, output, quality, live, resume)
+        expressen = Expressen(options, output, live, resume)
         expressen.get(url)
 
     elif re.findall("kanal5play", url):
@@ -694,7 +680,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
-        kanal5 = Kanal5(options, output, quality, live, resume)
+        kanal5 = Kanal5(options, output, live, resume)
         kanal5.get(url)
 
 
@@ -704,7 +690,7 @@ def main():
         if not match:
             logging.error("Can't find video file")
             sys.exit(2)
-        kanal9 = Kanal9(options, output, quality, live, match.group(1), resume)
+        kanal9 = Kanal9(options, output, live, match.group(1), resume)
         kanal9.get("c.brightcove.com")
 
     elif re.findall("dn.se", url):
@@ -718,7 +704,7 @@ def main():
             mcid = match.group(1) + "DE1BA107"
         else:
             mcid = match.group(1)
-        qbrick = Qbrick(options, output, quality, live, resume)
+        qbrick = Qbrick(options, output, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + mcid
         data = get_http_data(host)
         xml = ET.XML(data)
@@ -735,7 +721,7 @@ def main():
         if not match:
             logging.error("Can't find video file")
             sys.exit(2)
-        qbrick = Qbrick(options, output, quality, live, resume)
+        qbrick = Qbrick(options, output, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
         data = get_http_data(host)
         xml = ET.XML(data)
@@ -759,7 +745,7 @@ def main():
             logging.error("Can't find video file")
             sys.exit(2)
 
-        qbrick = Qbrick(options, output, quality, live, resume)
+        qbrick = Qbrick(options, output, live, resume)
         host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1)
         data = get_http_data(host)
         xml = ET.XML(data)
@@ -771,7 +757,7 @@ def main():
         qbrick.get(host)
 
     elif re.findall("urplay.se", url):
-        urplay = Urplay(options, output, quality, live, resume)
+        urplay = Urplay(options, output, live, resume)
         urplay.get(url)
 
     elif re.findall("sverigesradio", url):
@@ -786,11 +772,11 @@ def main():
                 logging.error("Can't find video file")
                 sys.exit(2)
             other = unquote_plus(match.group(1))
-        sr = Sr(options, output, quality, live, other, resume)
+        sr = Sr(options, output, live, other, resume)
         sr.get("http://sverigesradio.se")
 
     else:
-        svtplay = Svtplay(options, output, quality, live, resume)
+        svtplay = Svtplay(options, output, live, resume)
         svtplay.get(url)
 
 
