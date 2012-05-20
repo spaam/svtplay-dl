@@ -133,6 +133,22 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     command = ["rtmpdump", "-r", url] + args
     subprocess.call(command)
 
+def select_quality(obj, streams):
+    sort = []
+    for key in sorted(streams.keys()):
+        sort.append(int(key))
+        sort = sorted(sort)
+
+    if not obj.quality:
+        obj.quality = sort.pop()
+    try:
+        test = streams[str(obj.quality)]
+    except KeyError:
+        logging.error("Can't find that quality. (Try one of: %s)",
+                      ",".join(map(str,sort)))
+        sys.exit(4)
+
+    return test
 
 class Justin():
     def __init__(self, options, output, quality, live, resume):
@@ -162,20 +178,8 @@ class Justin():
                     streams[i.find("video_height").text] = stream
                 except AttributeError:
                     None
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
 
-        if not self.quality:
-            self.quality = sort.pop()
-        try:
-            test = streams[str(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
-
+        test = select_quality(self, streams)
         other = "-j '%s' -W %s" % (test["token"], self.resume)
         self.resume = False
         download_rtmp(self.options, test["url"], self.output, self.live, other, self.resume)
@@ -224,26 +228,13 @@ class Hbo():
             stream["path"] = i.find("tv14").find("path").text
             streams[i.attrib["width"]] = stream
 
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            test = streams[str(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
+        test = select_quality(self, streams)
 
         if not self.output:
-            self.output = os.path.basename(streams[str(self.quality)]["path"])
+            self.output = os.path.basename(test["path"])
             logging.info("Outfile: %s", self.output)
 
-        download_rtmp(self.options, streams[str(self.quality)]["path"], self.output, self.live, "", self.resume)
+        download_rtmp(self.options, test["path"], self.output, self.live, "", self.resume)
 
 class Sr():
     def __init__(self, options, output, quality, live, other, resume):
@@ -307,25 +298,12 @@ class Qbrick():
             sa = list(streams.iter("video"))
         streams = {}
         for i in sa:
-            streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
+            streams[i.attrib["system-bitrate"]] = i.attrib["src"]
 
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            path = streams[int(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
+        path = select_quality(self, streams)
 
         if not self.output:
-            self.output = os.path.basename(streams[int(self.quality)])
+            self.output = os.path.basename(path)
             logging.info("Outfile: %s", self.output)
 
         other = "-y %s" % path
@@ -349,27 +327,14 @@ class Kanal5():
             stream["source"] = i["source"]
             streams[i["bitrate"]] = stream
 
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            test = streams[int(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
+        test = select_quality(self, streams)
 
         if not self.output:
-            self.output = os.path.basename(streams[int(self.quality)]["source"])
+            self.output = os.path.basename(test["source"])
             logging.info("Outfile: %s", self.output)
 
 
-        filename = streams[int(self.quality)]["source"]
+        filename = test["source"]
         match = re.search("^(.*):", filename)
         self.output  = "%s.%s" % (self.output, match.group(1))
         other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
@@ -408,26 +373,12 @@ class Kanal9():
             stream["uri"] = i["defaultURL"]
             streams[i["encodingRate"]] = stream
 
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            test = streams[int(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
-
+        test = select_quality(self, streams)
         if not self.output:
-            self.output = os.path.basename(streams[int(self.quality)]["uri"])
+            self.output = os.path.basename(test["uri"])
             logging.info("Outfile: %s", self.output)
 
-        filename = streams[int(self.quality)]["uri"]
+        filename = test["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
         other = "-W %s -y %s " % ("http://admin.brightcove.com/viewer/us1.25.04.01.2011-05-24182704/connection/ExternalConnection_2.swf", match.group(2))
         download_rtmp(self.options, match.group(1), self.output, self.live, other, self.resume)
@@ -454,26 +405,13 @@ class Expressen():
         for i in sa:
             streams[i.attrib["bitrate"]] = i.text
 
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
-
-        if not self.quality:
-            self.quality = sort.pop()
-
-        try:
-            test = streams[str(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
+        test = select_quality(self, streams)
 
         if not self.output:
-            self.output = os.path.basename(streams[str(self.quality)])
+            self.output = os.path.basename(test)
             logging.info("Outfile: %s", self.output)
 
-        filename = streams[str(self.quality)]
+        filename = test
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
 
         filename = "rtmp://%s" % match.group(1)
@@ -563,29 +501,16 @@ class Tv4play():
             stream["uri"] = i.find("base").text
             stream["path"] = i.find("url").text
             streams[i.find("bitrate").text] = stream
-        
-        sort = []
-        for key in sorted(streams.keys()):
-            sort.append(int(key))
-            sort = sorted(sort)
 
-        if not self.quality:
-            self.quality = sort.pop()
+        test = select_quality(self, streams)
 
-        try:
-            test = streams[str(self.quality)]
-        except KeyError:
-            logging.error("Can't find that quality. (Try one of: %s)",
-                          ",".join(map(str,sort)))
-            sys.exit(4)
-
-        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % streams[str(self.quality)]["path"]
+        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % test["path"]
 
         if not self.output:
-            self.output = os.path.basename(streams[str(self.quality)]["path"])
+            self.output = os.path.basename(test["path"])
             logging.info("Outfile: %s", self.output)
 
-        download_rtmp(self.options, streams[str(self.quality)]["uri"], self.output, self.live, other, self.resume)
+        download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
 
 class Svtplay():
     def __init__(self, options, output, quality, live, resume):
