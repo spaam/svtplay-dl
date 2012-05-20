@@ -530,15 +530,9 @@ class Svtplay():
             streams = {}
             for f in tmp:
                 match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
-                streams[int(match.group(2))] = match.group(1)
-            if not self.quality:
-                filename = streams[sorted(streams.keys()).pop()]
-            else:
-                try:
-                    filename = streams[int(self.quality)]
-                except (ValueError, KeyError):
-                    logging.error("Can't find that quality. try 2400 (720p), 1400 (high), 850 (mid) or 320 (low)")
-                    sys.exit(4)
+                streams[match.group(2)] = match.group(1)
+
+            filename = select_quality(self, streams)
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
