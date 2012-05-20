@@ -54,29 +54,62 @@ def get_http_data(url, method="GET", header="", data=""):
     response.close()
     return data
 
+def progress(byte, total):
+    """ Print some info about how much we have downloaded """
+    ratio = float(byte) / total
+    percent = round(ratio*100, 2)
+    tlen = str(len(str(total)))
+    fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
+    progresstr = fmt % (byte >> 10, total >> 10, percent)
+
+    columns = int(os.getenv("COLUMNS", "80"))
+    if len(progresstr) < columns - 13:
+        p = int((columns - len(progresstr) - 3) * ratio)
+        q = int((columns - len(progresstr) - 3) * (1 - ratio))
+        progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
+    sys.stderr.write(progresstr + '\r')
+
+    if byte >= total:
+        sys.stderr.write('\n')
+
+    sys.stderr.flush()
+
+def download_http(url, output):
+    """ Get the stream from HTTP """
+    response = urlopen(url)
+    total_size = response.info()['Content-Length']
+    total_size = int(total_size)
+    bytes_so_far = 0
+    if output != "-":
+        extension = re.search("(\....)$", url)
+        if extension:
+            output = output + extension.group(1)
+        file_d = open(output,"wb")
+    else:
+        file_d = sys.stdout
+
+    lastprogress = 0
+    while 1:
+        chunk = response.read(8192)
+        bytes_so_far += len(chunk)
+
+        if not chunk:
+            break
+
+        file_d.write(chunk)
+        if output != "-":
+            now = time.time()
+            if lastprogress + 1 < now:
+                lastprogress = now
+                progress(bytes_so_far, total_size)
+
+    if output != "-":
+        file_d.close()
+
 
 
 class Common(object):
     silent = False
-    def progress(self, byte, total):
-        """ Print some info about how much we have downloaded """
-        ratio = float(byte) / total
-        percent = round(ratio*100, 2)
-        tlen = str(len(str(total)))
-        fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
-        progresstr = fmt % (byte >> 10, total >> 10, percent)
-
-        columns = int(os.getenv("COLUMNS", "80"))
-        if len(progresstr) < columns - 13:
-            p = int((columns - len(progresstr) - 3) * ratio)
-            q = int((columns - len(progresstr) - 3) * (1 - ratio))
-            progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
-        sys.stderr.write(progresstr + '\r')
-
-        if byte >= total:
-            sys.stderr.write('\n')
-
-        sys.stderr.flush()
 
     def getrtmp(self, url, output, live, extra_args, resume):
         """ Get the stream from RTMP """
@@ -104,38 +137,6 @@ class Common(object):
             args += shlex.split(extra_args)
         command = ["rtmpdump", "-r", url] + args
         subprocess.call(command)
-
-    def gethttp(self, url, output):
-        """ Get the stream from HTTP """
-        response = urlopen(url)
-        total_size = response.info()['Content-Length']
-        total_size = int(total_size)
-        bytes_so_far = 0
-        if output != "-":
-            extension = re.search("(\....)$", url)
-            if extension:
-                output = output + extension.group(1)
-            file_d = open(output,"wb")
-        else:
-            file_d = sys.stdout
-
-        lastprogress = 0
-        while 1:
-            chunk = response.read(8192)
-            bytes_so_far += len(chunk)
-
-            if not chunk:
-                break
-
-            file_d.write(chunk)
-            if output != "-":
-                now = time.time()
-                if lastprogress + 1 < now:
-                    lastprogress = now
-                    self.progress(bytes_so_far, total_size)
-
-        if output != "-":
-            file_d.close()
 
 
 class Justin():
@@ -200,7 +201,7 @@ class Justin2():
         if self.output != '-':
             self.output = self.output + url[-4:]
             logging.info("Outfile: %s", self.output)
-        self.common.gethttp(url, self.output)
+        download_http(url, self.output)
 
 class Hbo():
     def __init__(self, common, output, quality, live, resume):
@@ -268,7 +269,7 @@ class Sr():
             self.output = os.path.basename(url)
             logging.info("Outfile: %s", self.output)
 
-        self.common.gethttp(url, self.output)
+        download_http(url, self.output)
 
 class Urplay():
     def __init__(self, common, output, quality, live, resume):
@@ -515,7 +516,7 @@ class Aftonbladet():
             self.common.getrtmp(url, self.output, self.live, other, self.resume)
         else:
             filename = url + path
-            self.common.gethttp(filename, self.output)
+            download_http(filename, self.output)
 
 class Viaplay(Common):
     def __init__(self, common, output, quality, live, resume):
@@ -632,7 +633,7 @@ class Svtplay():
         if filename[0:4] == "rtmp":
             self.common.getrtmp(filename, self.output, self.live, other, self.resume)
         else:
-            self.common.gethttp(filename, self.output)
+            download_http(filename, self.output)
 
 def main():
     """ Main program """
