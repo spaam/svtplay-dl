@@ -536,6 +536,31 @@ class Svtplay():
         else:
             download_http(filename, self.output)
 
+class Svtplay2():
+    def __init__(self, options, output, live, resume):
+        self.options = options
+        self.output = output
+        self.live = live
+        self.resume = resume
+
+    def get(self, url):
+        url = url + "?type=embed&output=json"
+        data = json.loads(get_http_data(url))
+        self.live = data["video"]["live"]
+        streams = {}
+
+        for i in data["video"]["videoReferences"]:
+            if i["playerType"] == "flash":
+                stream = {}
+                stream["url"] = i["url"]
+                streams[i["bitrate"]] = stream
+
+        test = select_quality(self.options, streams)
+        if test["url"][0:4] == "rtmp":
+            download_rtmp(self.options, test["url"], self.output, self.live, "", self.resume)
+        else:
+            download_http(test["url"], self.output)
+
 def main():
     """ Main program """
     usage = "usage: %prog [options] url"
@@ -774,6 +799,10 @@ def main():
             other = unquote_plus(match.group(1))
         sr = Sr(options, output, live, other, resume)
         sr.get("http://sverigesradio.se")
+
+    elif re.findall("beta.svtplay.se", url):
+        svtplay = Svtplay2(options, output, live, resume)
+        svtplay.get(url)
 
     else:
         svtplay = Svtplay(options, output, live, resume)
