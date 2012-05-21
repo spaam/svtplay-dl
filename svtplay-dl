@@ -145,7 +145,7 @@ def select_quality(options, streams):
         selected = streams[quality]
     except KeyError:
         logging.error("Can't find that quality. (Try one of: %s)",
-                      ",".join(sort))
+                      ", ".join(map(str, sort)))
         sys.exit(4)
 
     return selected
