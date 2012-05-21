@@ -19,7 +19,7 @@ import json
 import time
 import logging
 
-__version__ = "0.7.2012.05.19"
+__version__ = "0.7.2012.05.22"
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
