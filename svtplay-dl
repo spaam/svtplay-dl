@@ -142,7 +142,7 @@ def select_quality(options, streams):
         quality = sort.pop()
 
     try:
-        selected = streams[quality]
+        selected = streams[int(quality)]
     except KeyError:
         logging.error("Can't find that quality. (Try one of: %s)",
                       ", ".join(map(str, sort)))
