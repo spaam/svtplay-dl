@@ -517,7 +517,7 @@ class Svtplay():
             streams = {}
             for f in tmp:
                 match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
-                streams[match.group(2)] = match.group(1)
+                streams[int(match.group(2))] = match.group(1)
 
             filename = select_quality(self.options, streams)
         else:
