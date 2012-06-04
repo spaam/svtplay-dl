@@ -19,7 +19,7 @@ import json
 import time
 import logging
 
-__version__ = "0.7.2012.05.22"
+__version__ = "0.7.2012.06.04"
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
@@ -508,42 +508,6 @@ class Svtplay():
         self.resume = resume
 
     def get(self, url):
-        other = "-W http://svtplay.se/flash/svtplayer-2012.1.swf"
-        data = get_http_data(url)
-        match = re.search('dynamicStreams=(.*)\&amp\;background', data)
-        if match:
-            new = match.group(1)
-            tmp = new.split("|")
-            streams = {}
-            for f in tmp:
-                match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
-                streams[int(match.group(2))] = match.group(1)
-
-            filename = select_quality(self.options, streams)
-        else:
-            match = re.search('pathflv=(.*)\&amp\;background', data)
-            if not match:
-                logging.error("Can't find stream")
-                sys.exit(3)
-            filename = match.group(1)
-
-        if not self.output:
-            self.output = os.path.basename(filename)
-            logging.info("Outfile: %s", self.output)
-
-        if filename[0:4] == "rtmp":
-            download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
-        else:
-            download_http(filename, self.output)
-
-class Svtplay2():
-    def __init__(self, options, output, live, resume):
-        self.options = options
-        self.output = output
-        self.live = live
-        self.resume = resume
-
-    def get(self, url):
         url = url + "?type=embed&output=json"
         data = json.loads(get_http_data(url))
         self.live = data["video"]["live"]
@@ -801,7 +765,7 @@ def main():
         sr.get("http://sverigesradio.se")
 
     elif re.findall("beta.svtplay.se", url):
-        svtplay = Svtplay2(options, output, live, resume)
+        svtplay = Svtplay(options, output, live, resume)
         svtplay.get(url)
 
     else:
