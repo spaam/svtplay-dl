@@ -19,7 +19,7 @@ import json
 import time
 import logging
 
-__version__ = "0.7.2012.06.04"
+__version__ = "0.7.2012.06.07"
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
@@ -143,7 +143,7 @@ def select_quality(options, streams):
 
     try:
         selected = streams[int(quality)]
-    except KeyError:
+    except (KeyError, ValueError):
         logging.error("Can't find that quality. (Try one of: %s)",
                       ", ".join(map(str, sort)))
         sys.exit(4)
@@ -174,7 +174,7 @@ class Justin():
                     stream = {}
                     stream["token"] = i.find("token").text
                     stream["url"] = i.find("connect").text + "/" + i.find("play").text
-                    streams[i.find("video_height").text] = stream
+                    streams[int(i.find("video_height").text)] = stream
                 except AttributeError:
                     None
 
@@ -223,7 +223,7 @@ class Hbo():
         for i in sa:
             stream = {}
             stream["path"] = i.find("tv14").find("path").text
-            streams[i.attrib["width"]] = stream
+            streams[int(i.attrib["width"])] = stream
 
         test = select_quality(self.options, streams)
 
@@ -292,7 +292,7 @@ class Qbrick():
             sa = list(streams.iter("video"))
         streams = {}
         for i in sa:
-            streams[i.attrib["system-bitrate"]] = i.attrib["src"]
+            streams[int(i.attrib["system-bitrate"])] = i.attrib["src"]
 
         path = select_quality(self.options, streams)
 
@@ -312,13 +312,14 @@ class Kanal5():
 
     def get(self, url):
         data = json.loads(get_http_data(url))
+        self.live = data["isLive"]
         steambaseurl = data["streamBaseUrl"]
         streams = {}
 
         for i in data["streams"]:
             stream = {}
             stream["source"] = i["source"]
-            streams[i["bitrate"]] = stream
+            streams[int(i["bitrate"])] = stream
 
         test = select_quality(self.options, streams)
 
@@ -394,7 +395,7 @@ class Expressen():
         streams = {}
 
         for i in sa:
-            streams[i.attrib["bitrate"]] = i.text
+            streams[int(i.attrib["bitrate"])] = i.text
 
         test = select_quality(self.options, streams)
 
@@ -488,7 +489,7 @@ class Tv4play():
             stream = {}
             stream["uri"] = i.find("base").text
             stream["path"] = i.find("url").text
-            streams[i.find("bitrate").text] = stream
+            streams[int(i.find("bitrate").text)] = stream
 
         test = select_quality(self.options, streams)
 
@@ -517,13 +518,49 @@ class Svtplay():
             if i["playerType"] == "flash":
                 stream = {}
                 stream["url"] = i["url"]
-                streams[i["bitrate"]] = stream
+                streams[int(i["bitrate"])] = stream
 
         test = select_quality(self.options, streams)
         if test["url"][0:4] == "rtmp":
             download_rtmp(self.options, test["url"], self.output, self.live, "", self.resume)
         else:
             download_http(test["url"], self.output)
+
+class Svt():
+    def __init__(self, options, output, live, resume):
+        self.options = options
+        self.output = output
+        self.live = live
+        self.resume = resume
+
+    def get(self, url):
+        other = "-W http://svtplay.se/flash/svtplayer-2012.1.swf"
+        data = get_http_data(url)
+        match = re.search('SgFlashVideoMeta (.*)\" href=\"http\:\/', data)
+        if match:
+            new = match.group(1)
+            tmp = new.split("|")
+            streams = {}
+            for f in tmp:
+                match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
+                streams[int(match.group(2))] = match.group(1)
+
+            filename = select_quality(self.options, streams)
+        else:
+            match = re.search('pathflv=(.*)\&amp\;background', data)
+            if not match:
+                logging.error("Can't find streams")
+                sys.exit(3)
+            filename = match.group(1)
+
+        if not self.output:
+            self.output = os.path.basename(filename)
+            logging.info("Outfile: %s", self.output)
+
+        if filename[0:4] == "rtmp":
+            download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
+        else:
+            download_http(filename, self.output)
 
 def main():
     """ Main program """
@@ -763,6 +800,10 @@ def main():
             other = unquote_plus(match.group(1))
         sr = Sr(options, output, live, other, resume)
         sr.get("http://sverigesradio.se")
+
+    elif re.findall("svt.se", url):
+        svt = Svt(options, output, live, resume)
+        svt.get(url)
 
     elif re.findall("beta.svtplay.se", url):
         svtplay = Svtplay(options, output, live, resume)
