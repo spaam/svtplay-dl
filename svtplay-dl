@@ -19,7 +19,7 @@ import json
 import time
 import logging
 
-__version__ = "0.7.2012.07.27"
+__version__ = "0.7.2012.07.28"
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
@@ -509,9 +509,12 @@ class Svtplay():
         self.resume = resume
 
     def get(self, url):
-        url = url + "?type=embed&output=json"
+        url = url + "?type=embed"
+        data = get_http_data(url)
+        match = re.search("value=\"(/public/swf/video/svtplayer-[0-9\.]+swf)\"", data)
+        other = "-W http://www.svtplay.se" + match.group(1)
+        url = url + "&output=json"
         data = json.loads(get_http_data(url))
-	other = "-W http://www.svtplay.se/public/swf/video/svtplayer-2012.28.swf"
         self.live = data["video"]["live"]
         streams = {}
 
