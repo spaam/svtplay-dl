@@ -655,7 +655,7 @@ def main():
 
     elif re.findall("(tv3play|tv6play|tv8play)", url):
         parse = urlparse(url)
-        match = re.search('\/play\/(.*)/', parse.path)
+        match = re.search('\/play\/(.*)/?', parse.path)
         if not match:
             logging.error("Cant find video file")
             sys.exit(2)
