@@ -131,7 +131,10 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     if extra_args:
         args += shlex.split(extra_args)
     command = ["rtmpdump", "-r", url] + args
-    subprocess.call(command)
+    try:
+        subprocess.call(command)
+    except OSError as e:
+        logging.error("Can't find rtmpdump. You need to install that")
 
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
