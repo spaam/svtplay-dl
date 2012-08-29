@@ -19,7 +19,7 @@ import json
 import time
 import logging
 
-__version__ = "0.7.2012.07.28"
+__version__ = "0.7.2012.08.29"
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
@@ -81,7 +81,7 @@ def download_http(url, output):
     total_size = int(total_size)
     bytes_so_far = 0
     if output != "-":
-        extension = re.search("(\....)$", url)
+        extension = re.search("(\.[a-z0-9]+)$", url)
         if extension:
             output = output + extension.group(1)
         file_d = open(output,"wb")
@@ -115,7 +115,7 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     if resume:
         args.append("-e")
 
-    extension = re.search("(\....)$", url)
+    extension = re.search("(\.[a-z0-9]+)$", url)
     if output != "-":
         if not extension:
             extension = re.search("-y (.+):[-_a-z0-9\/]", extra_args)
