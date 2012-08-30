@@ -134,7 +134,7 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     try:
         subprocess.call(command)
     except OSError as e:
-        logging.error("Can't find rtmpdump. You need to install that")
+        logging.error("Could not execute rtmpdump: " + e.strerror)
 
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
