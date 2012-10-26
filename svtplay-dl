@@ -287,6 +287,9 @@ def download_hds(options, url, output, swf):
 
     while i <= antal[1]["total"]:
         url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
+        if output != "-":
+            progresstr = "Downloading %s/%s fragments" % (i, antal[1]["total"])
+            sys.stderr.write(progresstr + '\r')
         data = get_http_data(url)
         number = decode_f4f(i, data)
         file_d.write(data[number:])
@@ -294,6 +297,7 @@ def download_hds(options, url, output, swf):
 
     if output != "-":
         file_d.close()
+        sys.stderr.write('\n')
 
 def download_http(url, output):
     """ Get the stream from HTTP """
