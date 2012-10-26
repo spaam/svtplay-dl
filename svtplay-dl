@@ -18,8 +18,187 @@ import shlex
 import json
 import time
 import logging
+import base64
+import struct
+import binascii
+import StringIO
+import hashlib
 
-__version__ = "0.7.2012.08.29"
+__version__ = "0.8.2012.10.26"
+
+def readbyte(data, pos):
+    return struct.unpack("B", data[pos])[0]
+
+def read16(data, pos):
+    endpos = pos + 2
+    return struct.unpack(">H", data[pos:endpos])[0]
+
+def read24(data, pos):
+    end = pos + 3
+    return struct.unpack(">L", "\x00" + data[pos:end])[0]
+
+def read32(data, pos):
+    end = pos + 4
+    return struct.unpack(">i", data[pos:end])[0]
+
+def read64(data, pos):
+    end = pos + 8
+    return struct.unpack(">Q", data[pos:end])[0]
+
+def readstring(data, pos):
+    length = 0
+    while (data[pos + length] != "\x00"):
+        length += 1
+    endpos = pos + length
+    string = data[pos:endpos]
+    pos += length + 1
+    return pos, string
+
+def readboxtype(data, pos):
+    boxsize = read32(data, pos)
+    tpos = pos + 4
+    endpos = tpos + 4
+    boxtype = data[tpos:endpos]
+    if boxsize > 1:
+        boxsize -= 8
+        pos += 8
+        return pos, boxsize, boxtype
+
+def readbox(data, pos):
+    version = readbyte(data, pos)
+    pos += 1
+    flags = read24(data, pos)
+    pos += 3
+    bootstrapversion = read32(data, pos)
+    pos += 4
+    byte = readbyte(data, pos)
+    pos += 1
+    profile = (byte & 0xC0) >> 6
+    live = (byte & 0x20) >> 5
+    update = (byte & 0x10) >> 4
+    timescale = read32(data, pos)
+    pos += 4
+    currentmediatime = read64(data, pos)
+    pos += 8
+    smptetimecodeoffset = read64(data, pos)
+    pos += 8
+    temp = readstring(data, pos)
+    movieidentifier = temp[1]
+    pos = temp[0]
+    serverentrycount = readbyte(data, pos)
+    pos += 1
+    serverentrytable = []
+    i = 0
+    while i < serverentrycount:
+        temp = readstring(data, pos)
+        serverentrytable.append(temp[1])
+        pos = temp[0]
+        i += 1
+    qualityentrycount = readbyte(data, pos)
+    pos += 1
+    qualityentrytable = []
+    i = 0
+    while i < qualityentrycount:
+        temp = readstring(data, pos)
+        qualityentrytable.append(temp[1])
+        pos = temp[0]
+        i += 1
+
+    tmp = readstring(data, pos)
+    drm = tmp[1]
+    pos = tmp[0]
+    tmp = readstring(data, pos)
+    metadata = tmp[1]
+    pos = tmp[0]
+    segmentruntable = readbyte(data, pos)
+    pos += 1
+    if segmentruntable > 0:
+        tmp = readboxtype(data, pos)
+        boxtype = tmp[2]
+        boxsize = tmp[1]
+        pos = tmp[0]
+        if boxtype == "asrt":
+            antal = readasrtbox(data, pos)
+            pos += boxsize
+    fragRunTableCount = readbyte(data, pos)
+    pos += 1
+    i = 0
+    while i < fragRunTableCount:
+        tmp = readboxtype(data, pos)
+        boxtype = tmp[2]
+        boxsize = tmp[1]
+        pos = tmp[0]
+        if boxtype == "afrt":
+            readafrtbox(data, pos)
+            pos += boxsize
+        i += 1
+    return antal
+
+def readafrtbox(data, pos):
+    version = readbyte(data, pos)
+    pos += 1
+    flags = read24(data, pos)
+    pos += 3
+    timescale = read32(data, pos)
+    pos += 4
+    qualityentry = readbyte(data, pos)
+    pos += 1
+    i = 0
+    while i < qualityentry:
+        temp = readstring(data, pos)
+        qualitysegmulti = temp[1]
+        pos = temp[0]
+        i += 1
+    fragrunentrycount = read32(data, pos)
+    pos += 4
+    i = 0
+    while i < fragrunentrycount:
+        firstfragment = read32(data, pos)
+        pos += 4
+        timestamp = read64(data, pos)
+        pos += 8
+        duration = read32(data, pos)
+        pos += 4
+        i += 1
+
+def readasrtbox(data, pos):
+    version = readbyte(data, pos)
+    pos += 1
+    flags = read24(data, pos)
+    pos += 3
+    qualityentrycount = readbyte(data, pos)
+    pos += 1
+    qualitysegmentmodifers = []
+    i = 0
+    while i < qualityentrycount:
+        temp = readstring(data, pos)
+        qualitysegmentmodifers.append(temp[1])
+        pos = temp[0]
+        i += 1
+
+    seqCount = read32(data, pos)
+    pos += 4
+    ret = {}
+    i = 0
+
+    while i < seqCount:
+        firstseg = read32(data, pos)
+        pos += 4
+        fragPerSeg = read32(data, pos)
+        pos += 4
+        tmp = i + 1
+        ret[tmp] = {"first": firstseg, "total": fragPerSeg}
+        i += 1
+    return ret
+
+def decode_f4f(fragID, fragData ):
+    start = fragData.find( "mdat" ) + 4
+    if (fragID > 1):
+        for dummy in range( 2 ):
+            tagLen, = struct.unpack_from( ">L", fragData, start )
+            tagLen &= 0x00ffffff
+            start  += tagLen + 11 + 4
+    return start
 
 def get_http_data(url, method="GET", header="", data=""):
     """ Get the page to parse it for streams """
@@ -73,6 +252,48 @@ def progress(byte, total):
         sys.stderr.write('\n')
 
     sys.stderr.flush()
+
+def download_hds(options, url, output, swf):
+    data = get_http_data(url)
+    streams = {}
+    bootstrap = {}
+    xml = ET.XML(data)
+    prefix = xml.find("{http://ns.adobe.com/f4m/1.0}id").text
+
+    for i in xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo"):
+        bootstrap[i.attrib["id"]] = i.text
+
+    for i in xml.iter("{http://ns.adobe.com/f4m/1.0}media"):
+        streams[int(i.attrib["bitrate"])] = {"url": i.attrib["url"], "bootstrapInfoId": i.attrib["bootstrapInfoId"], "metadata": i.find("{http://ns.adobe.com/f4m/1.0}metadata").text}
+
+    test = select_quality(options, streams)
+
+    bootstrap = base64.b64decode(bootstrap[test["bootstrapInfoId"]])
+    box = readboxtype(bootstrap, 0)
+    if box[2] == "abst":
+        antal = readbox(bootstrap, box[0])
+
+    baseurl = url[0:url.rfind("/")]
+    i = 1
+
+    if output != "-":
+        file_d = open(output, "wb")
+    else:
+        file_d = sys.stdout
+
+    file_d.write(binascii.a2b_hex( "464c56010500000009000000001200010c00000000000000" ) )
+    file_d.write(base64.b64decode(test["metadata"]))
+    file_d.write(binascii.a2b_hex("00000000"))
+
+    while i <= antal[1]["total"]:
+        url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
+        data = get_http_data(url)
+        number = decode_f4f(i, data)
+        file_d.write(data[number:])
+        i += 1
+
+    if output != "-":
+        file_d.close()
 
 def download_http(url, output):
     """ Get the stream from HTTP """
@@ -515,7 +736,8 @@ class Svtplay():
         url = url + "?type=embed"
         data = get_http_data(url)
         match = re.search("value=\"(/public/swf/video/svtplayer-[0-9\.]+swf)\"", data)
-        other = "-W http://www.svtplay.se" + match.group(1)
+        swf = "http://www.svtplay.se" + match.group(1)
+        other = "-W " + swf
         url = url + "&output=json"
         data = json.loads(get_http_data(url))
         self.live = data["video"]["live"]
@@ -527,9 +749,16 @@ class Svtplay():
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
 
-        test = select_quality(self.options, streams)
+        if len(streams) == 1:
+            test = streams[0]
+        else:
+            test = select_quality(self.options, streams)
+
         if test["url"][0:4] == "rtmp":
             download_rtmp(self.options, test["url"], self.output, self.live, other, self.resume)
+        elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
+            manifest = "%s?hdcore=2.8.0&g=hejsan" % test["url"]
+            download_hds(self.options, manifest, self.output, swf)
         else:
             download_http(test["url"], self.output)
 
