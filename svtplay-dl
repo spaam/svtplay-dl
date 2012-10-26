@@ -717,7 +717,7 @@ class Tv4play():
 
         test = select_quality(self.options, streams)
 
-        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % test["path"]
+        other = "-W http://www.tv4play.se/flash/tv4video.swf -y %s" % test["path"]
 
         if not self.output:
             self.output = os.path.basename(test["path"])
@@ -877,7 +877,7 @@ def main():
     if re.findall("tv4play", url):
         parse = urlparse(url)
         try:
-            vid = parse_qs(parse[4])["videoid"][0]
+            vid = parse_qs(parse[4])["video_id"][0]
         except KeyError:
             logging.error("Can't find video file")
             sys.exit(2)
