@@ -24,7 +24,7 @@ import binascii
 import StringIO
 import hashlib
 
-__version__ = "0.8.2012.10.26"
+__version__ = "0.8.2012.11.08"
 
 def readbyte(data, pos):
     return struct.unpack("B", data[pos])[0]
@@ -191,6 +191,38 @@ def readasrtbox(data, pos):
         i += 1
     return ret
 
+def parsem3u(data):
+    if not data.startswith("#EXTM3U"):
+        raise ValueError("Does not apprear to be a ext m3u file")
+
+    files=[]
+    streaminfo={}
+    globdata={}
+
+    data=data.replace("\r","\n")
+    for l in data.split("\n")[1:]:
+        if not l:
+            continue
+        if l.startswith("#EXT-X-STREAM-INF:"):
+            #not a proper parser
+            kalle = [x.strip().split("=",1) for x in l[18:].split(",")]
+            streaminfo.update({kalle[1][0]: kalle[1][1]})
+        elif l.startswith("#EXT-X-ENDLIST"):
+            break
+        elif l.startswith("#EXT-X-"):
+            globdata.update(dict([l[7:].strip().split(":",1)]))
+        elif l.startswith("#EXTINF:"):
+            dur, title=l[8:].strip().split(",",1)
+            streaminfo['duration'] = dur
+            streaminfo['title'] = title
+        elif l[0]=='#':
+            pass
+        else:
+            files.append((l, streaminfo))
+            streaminfo={}
+
+    return globdata,files
+
 def decode_f4f(fragID, fragData ):
     start = fragData.find( "mdat" ) + 4
     if (fragID > 1):
@@ -304,6 +336,63 @@ def download_hds(options, url, output, swf):
         number = decode_f4f(i, data)
         file_d.write(data[number:])
         i += 1
+
+    if output != "-":
+        file_d.close()
+        sys.stderr.write('\n')
+
+def download_hls(options, url, output, live, other):
+    data = get_http_data(url)
+    globaldata, files = parsem3u(data)
+    streams ={}
+    for i in files:
+        streams[int(i[1]["BANDWIDTH"])] = i[0]
+
+    test = select_quality(options, streams)
+    m3u8 = get_http_data(test)
+    globaldata, files = parsem3u(m3u8)
+    encrypted = False
+    key = None
+    try:
+        keydata = globaldata["KEY"]
+        encrypted = True
+        match = re.search("URI=\"(http://.*)\"", keydata)
+        key = get_http_data(match.group(1))
+        rand = os.urandom(16)
+    except:
+        pass
+
+    try:
+        from Crypto.Cipher import AES
+        decryptor = AES.new(key, AES.MODE_CBC, rand)
+    except ImportError:
+        logging.error("You need to install pycrypto to download encrypted HLS streams")
+        sys.exit(2)
+    n=1
+    if output != "-":
+        file_d = open(output + ".ts", "wb")
+    else:
+        file_d = sys.stdout
+
+    for i in files:
+        if output != "-":
+            progresstr = "Downloading %s/%s fragments" % (n, len(files))
+            sys.stderr.write(progresstr + '\r')
+        data = get_http_data(i[0])
+        if encrypted:
+            lots = StringIO.StringIO(data)
+
+            plain = ""
+            crypt = lots.read(1024)
+            decrypted = decryptor.decrypt(crypt)
+            while decrypted:
+                plain += decrypted
+                crypt = lots.read(1024)
+                decrypted = decryptor.decrypt(crypt)
+            data = plain
+
+        file_d.write(data)
+        n += 1
 
     if output != "-":
         file_d.close()
@@ -758,7 +847,11 @@ class Svtplay():
         streams = {}
 
         for i in data["video"]["videoReferences"]:
-            if i["playerType"] == "flash":
+            if self.options.hls and i["playerType"] == "ios":
+                stream = {}
+                stream["url"] = i["url"]
+                streams[int(i["bitrate"])] = stream
+            elif not self.options.hls and i["playerType"] == "flash":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
@@ -770,7 +863,13 @@ class Svtplay():
 
         if test["url"][0:4] == "rtmp":
             download_rtmp(self.options, test["url"], self.output, self.live, other, self.resume)
+        elif self.options.hls:
+            download_hls(self.options, test["url"], self.output, self.live, other)
         elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
+            match = re.search("\/se\/secure\/", test["url"])
+            if match:
+                logging.error("This stream is encrypted. Use --hls option")
+                sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["url"]
             download_hds(self.options, manifest, self.output, swf)
         else:
@@ -828,6 +927,8 @@ def main():
         action="store_true", dest="silent", default=False)
     parser.add_option("-q", "--quality",
         metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
+    parser.add_option("-H", "--hls",
+        action="store_true", dest="hls", default=False)
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
@@ -835,6 +936,8 @@ def main():
     live = options.live
     resume = options.resume
     silent = options.silent
+    hls = options.hls
+
     if silent:
         logging.basicConfig(format='%(levelname)s %(message)s', level=logging.WARNING, stream=sys.stderr)
     else:
