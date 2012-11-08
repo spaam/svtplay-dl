@@ -205,8 +205,8 @@ def parsem3u(data):
             continue
         if l.startswith("#EXT-X-STREAM-INF:"):
             #not a proper parser
-            kalle = [x.strip().split("=",1) for x in l[18:].split(",")]
-            streaminfo.update({kalle[1][0]: kalle[1][1]})
+            info = [x.strip().split("=",1) for x in l[18:].split(",")]
+            streaminfo.update({info[1][0]: info[1][1]})
         elif l.startswith("#EXT-X-ENDLIST"):
             break
         elif l.startswith("#EXT-X-"):
