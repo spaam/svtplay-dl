@@ -1162,9 +1162,12 @@ def main():
         svtplay = Svtplay(options, output, live, resume)
         svtplay.get(url)
 
-    else:
+    elif re.findall("svtplay.se", url):
         svtplay = Svtplay(options, output, live, resume)
         svtplay.get(url)
+    else:
+        logging.error("That site is not supported. Make a ticket or send a message")
+        sys.exit(2)
 
 
 if __name__ == "__main__":
