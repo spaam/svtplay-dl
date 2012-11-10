@@ -24,7 +24,7 @@ import binascii
 import StringIO
 import hashlib
 
-__version__ = "0.8.2012.11.08"
+__version__ = "0.8.2012.11.10"
 
 def readbyte(data, pos):
     return struct.unpack("B", data[pos])[0]
@@ -820,7 +820,7 @@ class Tv4play():
 
         test = select_quality(self.options, streams)
 
-        other = "-W http://www.tv4play.se/flash/tv4video.swf -y %s" % test["path"]
+        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % test["path"]
 
         if not self.output:
             self.output = os.path.basename(test["path"])
