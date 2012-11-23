@@ -24,7 +24,7 @@ import binascii
 import StringIO
 import hashlib
 
-__version__ = "0.8.2012.11.10"
+__version__ = "0.8.2012.11.23"
 
 def readbyte(data, pos):
     return struct.unpack("B", data[pos])[0]
@@ -857,7 +857,7 @@ class Svtplay():
                 streams[int(i["bitrate"])] = stream
 
         if len(streams) == 1:
-            test = streams[0]
+            test = streams[streams.keys()[0]]
         else:
             test = select_quality(self.options, streams)
 
