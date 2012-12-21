@@ -330,8 +330,7 @@ def download_hds(options, url, output, swf):
     while i <= antal[1]["total"]:
         url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
         if output != "-":
-            progresstr = "Downloading %s/%s fragments" % (i, antal[1]["total"])
-            sys.stderr.write(progresstr + '\r')
+            progressbar(antal[1]["total"], i)
         data = get_http_data(url)
         number = decode_f4f(i, data)
         file_d.write(data[number:])
@@ -376,8 +375,7 @@ def download_hls(options, url, output, live, other):
 
     for i in files:
         if output != "-":
-            progresstr = "Downloading %s/%s fragments" % (n, len(files))
-            sys.stderr.write(progresstr + '\r')
+            progressbar(len(files), n)
         data = get_http_data(i[0])
         if encrypted:
             lots = StringIO.StringIO(data)
@@ -910,6 +908,40 @@ class Svt():
             download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
         else:
             download_http(filename, self.output)
+
+def progressbar(total, pos, msg=""):
+    """
+    Given a total and a progress position, output a progress bar
+    to stderr. It is important to not output anything else while
+    using this, as it relies soley on the behavior of carriage
+    return (\\r).
+
+    Can also take an optioal message to add after the
+    progressbar. It must not contain newliens.
+
+    The progress bar will look something like this:
+
+    [099/500][=========...............................] ETA: 13:36:59
+
+    Of course, the ETA part should be supplied be the calling
+    function.
+    """
+    width = 50 # TODO hardcoded progressbar width
+    rel_pos = int(float(pos)/total*width)
+    bar = str()
+
+    # FIXME ugly generation of bar
+    for i in range(0, rel_pos):
+        bar += "="
+    for i in range(rel_pos, width):
+        bar += "."
+
+    # Determine how many digits in total (base 10)
+    digits_total = len(str(total))
+    fmt_width = "%0" + str(digits_total) + "d"
+    fmt = "\r[" + fmt_width + "/" + fmt_width + "][%s] %s"
+
+    sys.stderr.write(fmt % (pos, total, bar, msg))
 
 def main():
     """ Main program """
