@@ -4,10 +4,12 @@ if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
+    from io import StringIO
 else:
     from urllib2 import Request, urlopen, HTTPError, URLError
     from urlparse import urlparse, parse_qs
     from urllib import unquote_plus, quote_plus
+    import StringIO
 
 import re
 import os
@@ -21,7 +23,6 @@ import logging
 import base64
 import struct
 import binascii
-import StringIO
 import hashlib
 
 __version__ = "0.8.2012.12.23"
@@ -353,6 +354,7 @@ def download_hds(options, url, output, swf):
         extension = re.search("(\.[a-z0-9]+)$", output)
         if not extension:
                 output = output + ".flv"
+        log.info("Outfile: %s", output)
         file_d = open(output, "wb")
     else:
         file_d = sys.stdout
@@ -403,7 +405,11 @@ def download_hls(options, url, output, live, other):
         sys.exit(2)
     n=1
     if output != "-":
-        file_d = open(output + ".ts", "wb")
+        extension = re.search("(\.[a-z0-9]+)$", output)
+        if not extension:
+                output = output + ".ts"
+        log.info("Outfile: %s", output)
+        file_d = open(output, "wb")
     else:
         file_d = sys.stdout
 
@@ -440,6 +446,7 @@ def download_http(url, output):
         extension = re.search("(\.[a-z0-9]+)$", url)
         if extension:
             output = output + extension.group(1)
+        log.info("Outfile: %s", output)
         file_d = open(output,"wb")
     else:
         file_d = sys.stdout
@@ -481,6 +488,7 @@ def download_rtmp(options, url, output, live, extra_args, resume):
                 output = output + "." + extension.group(1)
         else:
             output = output + extension.group(1)
+        log.info("Outfile: %s", output)
         args += ["-o", output]
     if options.silent or output == "-":
         args.append("-q")
@@ -554,9 +562,7 @@ class Justin2():
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
-        if self.output != '-':
-            self.output = self.output + url[-4:]
-            log.info("Outfile: %s", self.output)
+
         download_http(url, self.output)
 
 class Hbo():
@@ -586,10 +592,6 @@ class Hbo():
 
         test = select_quality(self.options, streams)
 
-        if not self.output:
-            self.output = os.path.basename(test["path"])
-            log.info("Outfile: %s", self.output)
-
         download_rtmp(self.options, test["path"], self.output, self.live, "", self.resume)
 
 class Sr():
@@ -605,10 +607,6 @@ class Sr():
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("entry").find("ref").attrib["href"]
-
-        if not self.output:
-            self.output = os.path.basename(url)
-            log.info("Outfile: %s", self.output)
 
         download_http(url, self.output)
 
@@ -626,10 +624,6 @@ class Urplay():
         if match:
             path = "mp" + match.group(1)[-1] + ":" + match.group(1)
             other = "-a ondemand -y %s" % path
-
-            if not self.output:
-                self.output = os.path.basename(path)
-                log.info("Outfile: %s", self.output)
 
             download_rtmp(self.options, "rtmp://streaming.ur.se/", self.output, self.live, other, self.resume)
 
@@ -655,10 +649,6 @@ class Qbrick():
 
         path = select_quality(self.options, streams)
 
-        if not self.output:
-            self.output = os.path.basename(path)
-            log.info("Outfile: %s", self.output)
-
         other = "-y %s" % path
         download_rtmp(self.options, server, self.output, self.live, other, self.resume)
 
@@ -681,11 +671,6 @@ class Kanal5():
             streams[int(i["bitrate"])] = stream
 
         test = select_quality(self.options, streams)
-
-        if not self.output:
-            self.output = os.path.basename(test["source"])
-            log.info("Outfile: %s", self.output)
-
 
         filename = test["source"]
         match = re.search("^(.*):", filename)
@@ -726,9 +711,6 @@ class Kanal9():
             streams[i["encodingRate"]] = stream
 
         test = select_quality(self.options, streams)
-        if not self.output:
-            self.output = os.path.basename(test["uri"])
-            log.info("Outfile: %s", self.output)
 
         filename = test["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
@@ -757,10 +739,6 @@ class Expressen():
             streams[int(i.attrib["bitrate"])] = i.text
 
         test = select_quality(self.options, streams)
-
-        if not self.output:
-            self.output = os.path.basename(test)
-            log.info("Outfile: %s", self.output)
 
         filename = test
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
@@ -791,10 +769,6 @@ class Aftonbladet():
             log.error("Can't find any video on that page")
             sys.exit(3)
 
-        if not self.output:
-            self.output = os.path.basename(path)
-            log.info("Outfile: %s", self.output)
-
         if url[0:4] == "rtmp":
             download_rtmp(self.options, url, self.output, self.live, other, self.resume)
         else:
@@ -818,10 +792,6 @@ class Viaplay():
             data = get_http_data(filename)
             xml = ET.XML(data)
             filename = xml.find("Url").text
-
-        if not self.output:
-            self.output = os.path.basename(filename)
-            log.info("Outfile: %s", self.output)
 
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
@@ -861,10 +831,6 @@ class Tv4play():
 
         swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
         other = "-W %s -y %s" % (swf, test["path"])
-
-        if not self.output:
-            self.output = os.path.basename(test["path"])
-            log.info("Outfile: %s", self.output)
 
         if test["uri"][0:4] == "rtmp":
             download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
@@ -953,10 +919,6 @@ class Svt():
                 sys.exit(3)
             filename = match.group(1)
 
-        if not self.output:
-            self.output = os.path.basename(filename)
-            log.info("Outfile: %s", self.output)
-
         if filename[0:4] == "rtmp":
             download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
         else:
@@ -1003,16 +965,22 @@ def get_media(url, options):
     silent = options.silent
     hls = options.hls
 
-    if not output:
+    if not output or os.path.isdir(output):
         data = get_http_data(url)
         match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
         if match:
             if sys.version_info > (3, 0):
                 title = re.sub('[^\w\s-]', '', match.group(1)).strip().lower()
-                output = re.sub('[-\s]+', '-', title)
+                if output:
+                    output = output + re.sub('[-\s]+', '-', title)
+                else:
+                    output = re.sub('[-\s]+', '-', title)
             else:
                 title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
-                output = unicode(re.sub('[-\s]+', '-', title))
+                if output:
+                    output = unicode(output + re.sub('[-\s]+', '-', title))
+                else:
+                    output = unicode(re.sub('[-\s]+', '-', title))
 
     if re.findall("(twitch|justin).tv", url):
         parse = urlparse(url)
