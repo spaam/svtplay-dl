@@ -850,15 +850,27 @@ class Tv4play():
             stream["path"] = i.find("url").text
             streams[int(i.find("bitrate").text)] = stream
 
-        test = select_quality(self.options, streams)
+        if len(streams) == 1:
+            test = streams[streams.keys()[0]]
+        else:
+            test = select_quality(self.options, streams)
 
-        other = "-W http://www.tv4play.se/flash/tv4playflashlets.swf -y %s" % test["path"]
+        swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
+        other = "-W %s -y %s" % (swf, test["path"])
 
         if not self.output:
             self.output = os.path.basename(test["path"])
             log.info("Outfile: %s", self.output)
 
-        download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
+        if test["uri"][0:4] == "rtmp":
+            download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
+        elif test["uri"][len(test["uri"])-3:len(test["uri"])] == "f4m":
+            match = re.search("\/se\/secure\/", test["uri"])
+            if match:
+                log.error("This stream is encrypted. Use --hls option")
+                sys.exit(2)
+            manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
+            download_hds(self.options, manifest, self.output, swf)
 
 class Svtplay():
     def __init__(self, options, output, live, resume):
