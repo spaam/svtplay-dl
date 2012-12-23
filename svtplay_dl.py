@@ -888,7 +888,10 @@ class Svtplay():
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
 
-        if len(streams) == 1:
+        if len(streams) == 0:
+            log.error("Can't find any streams.")
+            sys.exit(2)
+        elif len(streams) == 1:
             test = streams[streams.keys()[0]]
         else:
             test = select_quality(self.options, streams)
