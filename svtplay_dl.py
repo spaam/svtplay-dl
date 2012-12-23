@@ -278,15 +278,15 @@ def get_http_data(url, method="GET", header="", data=""):
     try:
         response = urlopen(request)
     except HTTPError as e:
-        logging.error("Something wrong with that url")
-        logging.error("Error code: %s" % e.code)
+        log.error("Something wrong with that url")
+        log.error("Error code: %s" % e.code)
         sys.exit(5)
     except URLError as e:
-        logging.error("Something wrong with that url")
-        logging.error("Error code: %s" % e.reason)
+        log.error("Something wrong with that url")
+        log.error("Error code: %s" % e.reason)
         sys.exit(5)
     except ValueError as e:
-        logging.error("Try adding http:// before the url")
+        log.error("Try adding http:// before the url")
         sys.exit(5)
     if sys.version_info > (3, 0):
         data = response.read().decode('utf-8')
@@ -294,7 +294,7 @@ def get_http_data(url, method="GET", header="", data=""):
         try:
             data = response.read()
         except socket.error as e:
-            logging.error("Lost the connection to the server")
+            log.error("Lost the connection to the server")
             sys.exit(5)
     response.close()
     return data
@@ -399,7 +399,7 @@ def download_hls(options, url, output, live, other):
         from Crypto.Cipher import AES
         decryptor = AES.new(key, AES.MODE_CBC, rand)
     except ImportError:
-        logging.error("You need to install pycrypto to download encrypted HLS streams")
+        log.error("You need to install pycrypto to download encrypted HLS streams")
         sys.exit(2)
     n=1
     if output != "-":
@@ -490,7 +490,7 @@ def download_rtmp(options, url, output, live, extra_args, resume):
     try:
         subprocess.call(command)
     except OSError as e:
-        logging.error("Could not execute rtmpdump: " + e.strerror)
+        log.error("Could not execute rtmpdump: " + e.strerror)
 
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
@@ -503,7 +503,7 @@ def select_quality(options, streams):
     try:
         selected = streams[int(quality)]
     except (KeyError, ValueError):
-        logging.error("Can't find that quality. (Try one of: %s)",
+        log.error("Can't find that quality. (Try one of: %s)",
                       ", ".join(map(str, sort)))
         sys.exit(4)
 
@@ -556,7 +556,7 @@ class Justin2():
         url = xml.find("archive").find("video_file_url").text
         if self.output != '-':
             self.output = self.output + url[-4:]
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
         download_http(url, self.output)
 
 class Hbo():
@@ -588,7 +588,7 @@ class Hbo():
 
         if not self.output:
             self.output = os.path.basename(test["path"])
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         download_rtmp(self.options, test["path"], self.output, self.live, "", self.resume)
 
@@ -608,7 +608,7 @@ class Sr():
 
         if not self.output:
             self.output = os.path.basename(url)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         download_http(url, self.output)
 
@@ -629,7 +629,7 @@ class Urplay():
 
             if not self.output:
                 self.output = os.path.basename(path)
-                logging.info("Outfile: %s", self.output)
+                log.info("Outfile: %s", self.output)
 
             download_rtmp(self.options, "rtmp://streaming.ur.se/", self.output, self.live, other, self.resume)
 
@@ -657,7 +657,7 @@ class Qbrick():
 
         if not self.output:
             self.output = os.path.basename(path)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         other = "-y %s" % path
         download_rtmp(self.options, server, self.output, self.live, other, self.resume)
@@ -684,7 +684,7 @@ class Kanal5():
 
         if not self.output:
             self.output = os.path.basename(test["source"])
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
 
         filename = test["source"]
@@ -705,8 +705,8 @@ class Kanal9():
         try:
             from pyamf import remoting
         except ImportError:
-            logging.error("You need to install pyamf to download content from kanal5 and kanal9")
-            logging.info("In debian the package is called python-pyamf")
+            log.error("You need to install pyamf to download content from kanal5 and kanal9")
+            log.error("In debian the package is called python-pyamf")
             sys.exit(2)
 
         player_id = 811317479001
@@ -728,7 +728,7 @@ class Kanal9():
         test = select_quality(self.options, streams)
         if not self.output:
             self.output = os.path.basename(test["uri"])
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         filename = test["uri"]
         match = re.search("(rtmp[e]{0,1}://.*)\&(.*)$", filename)
@@ -760,7 +760,7 @@ class Expressen():
 
         if not self.output:
             self.output = os.path.basename(test)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         filename = test
         match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
@@ -788,12 +788,12 @@ class Aftonbladet():
             other = other + " -A %s" % str(start)
 
         if url == None:
-            logging.error("Can't find any video on that page")
+            log.error("Can't find any video on that page")
             sys.exit(3)
 
         if not self.output:
             self.output = os.path.basename(path)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         if url[0:4] == "rtmp":
             download_rtmp(self.options, url, self.output, self.live, other, self.resume)
@@ -821,7 +821,7 @@ class Viaplay():
 
         if not self.output:
             self.output = os.path.basename(filename)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
@@ -856,7 +856,7 @@ class Tv4play():
 
         if not self.output:
             self.output = os.path.basename(test["path"])
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         download_rtmp(self.options, test["uri"], self.output, self.live, other, self.resume)
 
@@ -900,7 +900,7 @@ class Svtplay():
         elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
             match = re.search("\/se\/secure\/", test["url"])
             if match:
-                logging.error("This stream is encrypted. Use --hls option")
+                log.error("This stream is encrypted. Use --hls option")
                 sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["url"]
             download_hds(self.options, manifest, self.output, swf)
@@ -930,13 +930,13 @@ class Svt():
         else:
             match = re.search('pathflv=(.*)\&amp\;background', data)
             if not match:
-                logging.error("Can't find streams")
+                log.error("Can't find streams")
                 sys.exit(3)
             filename = match.group(1)
 
         if not self.output:
             self.output = os.path.basename(filename)
-            logging.info("Outfile: %s", self.output)
+            log.info("Outfile: %s", self.output)
 
         if filename[0:4] == "rtmp":
             download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
