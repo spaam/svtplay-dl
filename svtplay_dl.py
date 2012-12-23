@@ -841,6 +841,10 @@ class Tv4play():
             sa = list(ss.getiterator("item"))
         else:
             sa = list(ss.iter("item"))
+        
+        if xml.find("live").text:
+            self.live = True
+
         streams = {}
         sa.pop(len(sa)-1)
 
