@@ -852,10 +852,10 @@ class Svtplay():
     def get(self, url):
         url = url + "?type=embed"
         data = get_http_data(url)
-        match = re.search("value=\"(/public/swf/video/svtplayer-[0-9\.]+swf)\"", data)
+        match = re.search("value=\"(/(public)?(statiskt)?/swf/video/svtplayer-[0-9\.]+swf)\"", data)
         swf = "http://www.svtplay.se" + match.group(1)
         other = "-W " + swf
-        url = url + "&output=json"
+        url = url + "&output=json&format=json"
         data = json.loads(get_http_data(url))
         self.live = data["video"]["live"]
         streams = {}
@@ -891,38 +891,6 @@ class Svtplay():
             download_hds(self.options, manifest, self.output, swf)
         else:
             download_http(test["url"], self.output)
-
-class Svt():
-    def __init__(self, options, output, live, resume):
-        self.options = options
-        self.output = output
-        self.live = live
-        self.resume = resume
-
-    def get(self, url):
-        other = "-W http://svtplay.se/flash/svtplayer-2012.28.swf"
-        data = get_http_data(url)
-        match = re.search('SgFlashVideoMeta (.*)\" href=\"http\:\/', data)
-        if match:
-            new = match.group(1)
-            tmp = new.split("|")
-            streams = {}
-            for f in tmp:
-                match = re.search('url:(.*)\,bitrate:([0-9]+)', f)
-                streams[int(match.group(2))] = match.group(1)
-
-            filename = select_quality(self.options, streams)
-        else:
-            match = re.search('pathflv=(.*)\&amp\;background', data)
-            if not match:
-                log.error("Can't find streams")
-                sys.exit(3)
-            filename = match.group(1)
-
-        if filename[0:4] == "rtmp":
-            download_rtmp(self.options, filename, self.output, self.live, other, self.resume)
-        else:
-            download_http(filename, self.output)
 
 def progressbar(total, pos, msg=""):
     """
@@ -1182,10 +1150,14 @@ def get_media(url, options):
         sr.get("http://sverigesradio.se")
 
     elif re.findall("svt.se", url):
-        svt = Svt(options, output, live, resume)
-        svt.get(url)
-
-    elif re.findall("beta.svtplay.se", url):
+        data = get_http_data(url)
+        match = re.search("data-json-href=\"(.*)\"", data)
+        if match:
+            filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
+            url = "http://www.svt.se%s" % filename
+        else:
+            log.error("Can't find video file")
+            sys.exit(2)
         svtplay = Svtplay(options, output, live, resume)
         svtplay.get(url)
 
