@@ -23,7 +23,6 @@ import logging
 import base64
 import struct
 import binascii
-import hashlib
 
 __version__ = "0.8.2012.12.23"
 
@@ -230,33 +229,33 @@ def parsem3u(data):
     if not data.startswith("#EXTM3U"):
         raise ValueError("Does not apprear to be a ext m3u file")
 
-    files=[]
-    streaminfo={}
-    globdata={}
+    files = []
+    streaminfo = {}
+    globdata = {}
 
-    data=data.replace("\r","\n")
+    data = data.replace("\r","\n")
     for l in data.split("\n")[1:]:
         if not l:
             continue
         if l.startswith("#EXT-X-STREAM-INF:"):
             #not a proper parser
-            info = [x.strip().split("=",1) for x in l[18:].split(",")]
+            info = [x.strip().split("=", 1) for x in l[18:].split(",")]
             streaminfo.update({info[1][0]: info[1][1]})
         elif l.startswith("#EXT-X-ENDLIST"):
             break
         elif l.startswith("#EXT-X-"):
-            globdata.update(dict([l[7:].strip().split(":",1)]))
+            globdata.update(dict([l[7:].strip().split(":", 1)]))
         elif l.startswith("#EXTINF:"):
-            dur, title=l[8:].strip().split(",",1)
+            dur, title = l[8:].strip().split(",", 1)
             streaminfo['duration'] = dur
             streaminfo['title'] = title
-        elif l[0]=='#':
+        elif l[0] == '#':
             pass
         else:
             files.append((l, streaminfo))
-            streaminfo={}
+            streaminfo = {}
 
-    return globdata,files
+    return globdata, files
 
 def decode_f4f(fragID, fragData ):
     start = fragData.find( "mdat" ) + 4
@@ -353,7 +352,7 @@ def download_hds(options, url, output, swf):
     if output != "-":
         extension = re.search("(\.[a-z0-9]+)$", output)
         if not extension:
-                output = output + ".flv"
+            output = output + ".flv"
         log.info("Outfile: %s", output)
         file_d = open(output, "wb")
     else:
@@ -379,7 +378,7 @@ def download_hds(options, url, output, swf):
 def download_hls(options, url, output, live, other):
     data = get_http_data(url)
     globaldata, files = parsem3u(data)
-    streams ={}
+    streams = {}
     for i in files:
         streams[int(i[1]["BANDWIDTH"])] = i[0]
 
@@ -403,11 +402,11 @@ def download_hls(options, url, output, live, other):
     except ImportError:
         log.error("You need to install pycrypto to download encrypted HLS streams")
         sys.exit(2)
-    n=1
+    n = 1
     if output != "-":
         extension = re.search("(\.[a-z0-9]+)$", output)
         if not extension:
-                output = output + ".ts"
+            output = output + ".ts"
         log.info("Outfile: %s", output)
         file_d = open(output, "wb")
     else:
@@ -558,7 +557,6 @@ class Justin2():
         self.resume = resume
 
     def get(self, url):
-        other = "-a ondemand"
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
