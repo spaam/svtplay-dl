@@ -353,7 +353,7 @@ def download_hds(options, url, swf):
     if options.output != "-":
         extension = re.search("(\.[a-z0-9]+)$", options.output)
         if not extension:
-            options.output = options.output + ".flv"
+            options.output = "%s.flv" % options.output
         log.info("Outfile: %s", options.output)
         file_d = open(options.output, "wb")
     else:
@@ -408,7 +408,7 @@ def download_hls(options, url):
     if options.output != "-":
         extension = re.search("(\.[a-z0-9]+)$", options.output)
         if not extension:
-            options.output = options.output + ".ts"
+            options.output = "%s.ts" % options.output
         log.info("Outfile: %s", options.output)
         file_d = open(options.output, "wb")
     else:
@@ -484,9 +484,9 @@ def download_rtmp(options, url):
         if not extension:
             extension = re.search("-y (.+):[-_a-z0-9\/]", options.other)
             if not extension:
-                options.output = options.output + ".flv"
+                options.output = "%s.flv" % options.output
             else:
-                options.output = options.output + "." + extension.group(1)
+                options.output = "%s%s" % (options.output, extension.group(1))
         else:
             options.output = options.output + extension.group(1)
         log.info("Outfile: %s", options.output)
@@ -535,7 +535,7 @@ class Justin():
                 try:
                     stream = {}
                     stream["token"] = i.find("token").text
-                    stream["url"] = i.find("connect").text + "/" + i.find("play").text
+                    stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
                     streams[int(i.find("video_height").text)] = stream
                 except AttributeError:
                     pass
@@ -590,7 +590,7 @@ class Urplay():
         data = get_http_data(url)
         match = re.search('file=(.*)\&plugins', data)
         if match:
-            path = "mp" + match.group(1)[-1] + ":" + match.group(1)
+            path = "mp%s:%s" % (match.group(1)[-1], match.group(1))
             options.other = "-a ondemand -y %s" % path
 
             download_rtmp(options, "rtmp://streaming.ur.se/")
@@ -649,7 +649,7 @@ class Kanal9():
         env = remoting.Envelope(amfVersion=3)
         env.bodies.append(("/1", remoting.Request(target="com.brightcove.player.runtime.PlayerMediaFacade.findMediaById", body=[const, player_id, options.other, publisher_id], envelope=env)))
         env = str(remoting.encode(env).read())
-        url = "http://" + url + "/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk"
+        url = "http://%s/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk" % url
         header = "application/x-amf"
         data = get_http_data(url, "POST", header, env)
         streams = {}
@@ -700,7 +700,7 @@ class Aftonbladet():
         options.other = "-y %s" % path
 
         if start > 0:
-            options.other = options.other + " -A %s" % str(start)
+            options.other = "%s -A %s" % (options.other, str(start))
 
         if url == None:
             log.error("Can't find any video on that page")
@@ -769,12 +769,12 @@ class Tv4play():
 
 class Svtplay():
     def get(self, options, url):
-        url = url + "?type=embed"
+        url = "%s?type=embed" % url
         data = get_http_data(url)
         match = re.search("value=\"(/(public)?(statiskt)?/swf/video/svtplayer-[0-9\.]+swf)\"", data)
-        swf = "http://www.svtplay.se" + match.group(1)
-        options.other = "-W " + swf
-        url = url + "&output=json&format=json"
+        swf = "http://www.svtplay.se%s" % match.group(1)
+        options.other = "-W %s" % swf
+        url = "%s&output=json&format=json" % url
         data = json.loads(get_http_data(url))
         options.live = data["video"]["live"]
         streams = {}
@@ -893,7 +893,7 @@ def get_media(url, options):
         if not match:
             log.error("Cant find video file")
             sys.exit(2)
-        url = "http://www.hbo.com/data/content/" + match.group(1) + ".xml"
+        url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
         Hbo().get(options, url)
 
     if re.findall("tv4play", url):
@@ -978,10 +978,10 @@ def get_media(url, options):
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
-            mcid = match.group(1) + "DE1BA107"
+            mcid = "%sDE1BA107" % match.group(1)
         else:
             mcid = match.group(1)
-        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + mcid
+        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         data = get_http_data(host)
         xml = ET.XML(data)
         try:
@@ -997,7 +997,7 @@ def get_media(url, options):
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
-        host = "http://vms.api.qbrick.com/rest/v3/getplayer/" + match.group(1)
+        host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
         data = get_http_data(host)
         xml = ET.XML(data)
         try:
@@ -1013,14 +1013,14 @@ def get_media(url, options):
             log.error("Can't find video file")
             sys.exit(2)
 
-        data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=" + match.group(1))
+        data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=%s" % match.group(1))
         match = re.search("mcid=([A-F0-9]+)\&width=", data)
 
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
 
-        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/" + match.group(1)
+        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % match.group(1)
         data = get_http_data(host)
         xml = ET.XML(data)
         try:
