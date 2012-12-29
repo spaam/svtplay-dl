@@ -845,12 +845,6 @@ def progressbar(total, pos, msg=""):
     progress_stream.write(fmt % (pos, total, bar, msg))
 
 def get_media(url, options):
-    output = options.output
-    live = options.live
-    resume = options.resume
-    silent = options.silent
-    hls = options.hls
-
     if not options.output or os.path.isdir(options.output):
         data = get_http_data(url)
         match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
