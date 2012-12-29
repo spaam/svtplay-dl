@@ -757,7 +757,7 @@ class Tv4play():
         options.other = "-W %s -y %s" % (swf, test["path"])
 
         if test["uri"][0:4] == "rtmp":
-            download_rtmp(options, test["uri"], options.output, options.live, options.other, options.resume)
+            download_rtmp(options, test["uri"])
         elif test["uri"][len(test["uri"])-3:len(test["uri"])] == "f4m":
             match = re.search("\/se\/secure\/", test["uri"])
             if match:
@@ -797,9 +797,9 @@ class Svtplay():
             test = select_quality(options, streams)
 
         if test["url"][0:4] == "rtmp":
-            download_rtmp(options, test["url"], options.output, options.live, options.other, options.resume)
+            download_rtmp(options, test["url"])
         elif options.hls:
-            download_hls(options, test["url"], options.output, options.live, options.other)
+            download_hls(options, test["url"])
         elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
             match = re.search("\/se\/secure\/", test["url"])
             if match:
