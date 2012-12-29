@@ -259,7 +259,7 @@ def parsem3u(data):
     return globdata, files
 
 def decode_f4f(fragID, fragData ):
-    start = fragData.find( "mdat" ) + 4
+    start = fragData.find("mdat") + 4
     if (fragID > 1):
         for dummy in range( 2 ):
             tagLen, = struct.unpack_from( ">L", fragData, start )
@@ -359,7 +359,7 @@ def download_hds(options, url, swf):
     else:
         file_d = sys.stdout
 
-    file_d.write(binascii.a2b_hex( "464c56010500000009000000001200010c00000000000000" ) )
+    file_d.write(binascii.a2b_hex("464c56010500000009000000001200010c00000000000000"))
     file_d.write(base64.b64decode(test["metadata"]))
     file_d.write(binascii.a2b_hex("00000000"))
 
@@ -538,7 +538,7 @@ class Justin():
                     stream["url"] = i.find("connect").text + "/" + i.find("play").text
                     streams[int(i.find("video_height").text)] = stream
                 except AttributeError:
-                    None
+                    pass
 
         test = select_quality(options, streams)
         options.other = "-j '%s' -W %s" % (test["token"], options.resume)
