@@ -397,12 +397,13 @@ def download_hls(options, url):
     except:
         pass
 
-    try:
-        from Crypto.Cipher import AES
-        decryptor = AES.new(key, AES.MODE_CBC, rand)
-    except ImportError:
-        log.error("You need to install pycrypto to download encrypted HLS streams")
-        sys.exit(2)
+    if encrypted:
+        try:
+            from Crypto.Cipher import AES
+            decryptor = AES.new(key, AES.MODE_CBC, rand)
+        except ImportError:
+            log.error("You need to install pycrypto to download encrypted HLS streams")
+            sys.exit(2)
     n = 1
     if options.output != "-":
         extension = re.search("(\.[a-z0-9]+)$", options.output)
