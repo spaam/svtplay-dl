@@ -520,7 +520,6 @@ def select_quality(options, streams):
 
 class Justin():
     def get(self, options, url):
-        options.other = "-a ondemand"
         data = get_http_data(url)
         data = re.sub("<(\d+)", "<_\g<1>", data)
         data = re.sub("</(\d+)", "</_\g<1>", data)
@@ -541,7 +540,7 @@ class Justin():
                     pass
 
         test = select_quality(options, streams)
-        options.other = "-j '%s' -W %s" % (test["token"], options.resume)
+        options.other = "-j '%s' -W %s" % (test["token"], options.other)
         options.resume = False
         download_rtmp(options, test["url"])
 
