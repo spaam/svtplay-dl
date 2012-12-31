@@ -24,7 +24,7 @@ import base64
 import struct
 import binascii
 
-__version__ = "0.8.2012.12.23"
+__version__ = "0.8.2012.12.30"
 
 class Options:
     """
