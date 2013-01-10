@@ -23,6 +23,7 @@ import logging
 import base64
 import struct
 import binascii
+from datetime import timedelta
 
 __version__ = "0.8.2012.12.30"
 
@@ -300,7 +301,7 @@ def get_http_data(url, method="GET", header="", data=""):
     response.close()
     return data
 
-def progress(byte, total):
+def progress(byte, total, extra = ""):
     """ Print some info about how much we have downloaded """
     ratio = float(byte) / total
     percent = round(ratio*100, 2)
@@ -313,7 +314,7 @@ def progress(byte, total):
         p = int((columns - len(progresstr) - 3) * ratio)
         q = int((columns - len(progresstr) - 3) * (1 - ratio))
         progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
-    progress_stream.write(progresstr + '\r')
+    progress_stream.write(progresstr + ' ' + extra + '\r')
 
     if byte >= total:
         progress_stream.write('\n')
@@ -450,15 +451,26 @@ def download_m3u8(options, url, base_url = None):
     else:
         file_d = sys.stdout
 
-    for i in files:
+    start = time.time()
+    estimated = ""
+    for n, i in enumerate( files ):
         if options.output != "-":
-            progressbar(len(files), n)
+            progressbar(len(files), n, estimated)
         file_url = i[0]
         if not file_url.startswith( "http" ) and base_url :
             file_url = base_url + "/" + file_url
-        data = get_http_data(file_url)
-        file_d.write(data)
-        n += 1
+        response = urlopen( file_url )
+        while True :
+            chunk = response.read( 8192 )
+            if not chunk :
+                break
+            file_d.write( chunk )
+        now = time.time()
+        dt = now - start
+        et = dt / ( n + 1 ) * len( files )
+        rt = et - dt
+        td = timedelta( seconds = int( rt ) )
+        estimated = "Estimated Remaining: " + str( td )
 
     if options.output != "-":
         file_d.close()
