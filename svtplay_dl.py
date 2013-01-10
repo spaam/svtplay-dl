@@ -437,6 +437,34 @@ def download_hls(options, url):
         file_d.close()
         progress_stream.write('\n')
 
+def download_m3u8(options, url, base_url = None):
+    data = get_http_data(url)
+    globaldata, files = parsem3u(data)
+    n = 1
+    if options.output != "-":
+        extension = re.search("(\.[a-z0-9]+)$", options.output)
+        if not extension:
+            options.output = "%s.ts" % options.output
+        log.info("Outfile: %s", options.output)
+        file_d = open(options.output, "wb")
+    else:
+        file_d = sys.stdout
+
+    for i in files:
+        if options.output != "-":
+            progressbar(len(files), n)
+        file_url = i[0]
+        if not file_url.startswith( "http" ) and base_url :
+            file_url = base_url + "/" + file_url
+        data = get_http_data(file_url)
+        file_d.write(data)
+        n += 1
+
+    if options.output != "-":
+        file_d.close()
+        progress_stream.write('\n')
+
+
 def download_http(options, url):
     """ Get the stream from HTTP """
     response = urlopen(url)
@@ -810,6 +838,49 @@ class Svtplay():
         else:
             download_http(options, test["url"])
 
+class Nrk ( object ) :
+    def get ( self, options, url ) :
+        data = get_http_data( url )
+        match = re.search( r'data-media="(.*manifest.f4m)"', data )
+        manifest_url = match.group( 1 )
+        manifest_url = manifest_url.replace( "/z/", "/i/" ).replace( "manifest.f4m", "index_4_av.m3u8" )
+        manifest = get_http_data( manifest_url )
+        download_m3u8( options, manifest_url )
+
+class Dr ( object ) :
+    def get ( self, options, url ) :
+        data = get_http_data( url )
+        match = re.search( r'resource:[ ]*"([^"]*)",', data )
+        resource_url = match.group( 1 )
+        resource_data = get_http_data( resource_url )
+        resource = json.loads( resource_data )
+        streams = {}
+        for stream in resource['links'] :
+            streams[stream['bitrateKbps']] = stream['uri']
+        if len(streams) == 1:
+            uri = streams[streams.keys()[0]]
+        else:
+            uri = select_quality(options, streams)
+        # need -v ?
+        options.other = "-v -y '" + uri.replace( "rtmp://vod.dr.dk/cms/", "" ) + "'"
+        download_rtmp( options, uri )
+
+class Ruv ( object ) :
+    def get ( self, options, url ) :
+        data = get_http_data( url )
+        match = re.search( r'(http://load.cache.is/vodruv.*)"', data )
+        js_url = match.group( 1 )
+        js = get_http_data( js_url )
+        tengipunktur = js.split( '"' )[1]
+        match = re.search( r"http.*tengipunktur [+] '([:]1935.*)'", data )
+        m3u8_url = "http://" + tengipunktur + match.group( 1 )
+        m3u8_data = get_http_data( m3u8_url )
+        g, f = parsem3u( m3u8_data )
+        if len( f ) == 1 :
+            m3u8_url = f[0][0]
+        base_url = m3u8_url.rsplit( "/", 1 )[0]
+        download_m3u8( options, m3u8_url, base_url )
+
 def progressbar(total, pos, msg=""):
     """
     Given a total and a progress position, output a progress bar
@@ -1059,6 +1130,12 @@ def get_media(url, options):
 
     elif re.findall("svtplay.se", url):
         Svtplay().get(options, url)
+    elif re.findall( "tv.nrk.no", url ) :
+        Nrk().get( options, url )
+    elif re.findall( "dr.dk/TV", url ) :
+        Dr().get( options, url )
+    elif re.findall( "ruv.is", url ) :
+        Ruv().get( options, url )
     else:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
