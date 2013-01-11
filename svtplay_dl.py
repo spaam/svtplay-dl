@@ -24,7 +24,7 @@ import base64
 import struct
 import binascii
 
-__version__ = "0.8.2012.12.30"
+__version__ = "0.8.2013.01.11"
 
 class Options:
     """
@@ -737,7 +737,8 @@ class Tv4play():
             sa = list(ss.iter("item"))
         
         if xml.find("live").text:
-            options.live = True
+            if xml.find("live").text != "false":
+                options.live = True
 
         streams = {}
         sa.pop(len(sa)-1)
