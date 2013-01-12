@@ -1100,13 +1100,13 @@ def get_media(url, options):
         parse = urlparse(url)
         try:
             metafile = parse_qs(parse[4])["metafile"][0]
-            other = "%s?%s" % (parse[2], parse[4])
+            options.other = "%s?%s" % (parse[2], parse[4])
         except KeyError:
             match = re.search("linkUrl=(.*)\;isButton=", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
-            other = unquote_plus(match.group(1))
+            options.other = unquote_plus(match.group(1))
         Sr().get(options, "http://sverigesradio.se")
 
     elif re.findall("svt.se", url):
