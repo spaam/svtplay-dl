@@ -364,13 +364,22 @@ def download_hds(options, url, swf=None):
     file_d.write(base64.b64decode(test["metadata"]))
     file_d.write(binascii.a2b_hex("00000000"))
 
-    while i <= antal[1]["total"]:
+    total = antal[1]["total"]
+    start = time.time()
+    estimated = ""
+    while i <= total:
         url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
         if options.output != "-":
-            progressbar(antal[1]["total"], i)
+            progressbar(total, i, estimated)
         data = get_http_data(url)
         number = decode_f4f(i, data)
         file_d.write(data[number:])
+        now = time.time()
+        dt = now - start
+        et = dt / ( i + 1 ) * total
+        rt = et - dt
+        td = timedelta( seconds = int( rt ) )
+        estimated = "Estimated Remaining: " + str( td )
         i += 1
 
     if options.output != "-":
@@ -415,9 +424,11 @@ def download_hls(options, url):
     else:
         file_d = sys.stdout
 
+    start = time.time()
+    estimated = ""
     for i in files:
         if options.output != "-":
-            progressbar(len(files), n)
+            progressbar(len(files), n, estimated)
         data = get_http_data(i[0])
         if encrypted:
             lots = StringIO.StringIO(data)
@@ -432,6 +443,12 @@ def download_hls(options, url):
             data = plain
 
         file_d.write(data)
+        now = time.time()
+        dt = now - start
+        et = dt / ( n + 1 ) * len( files )
+        rt = et - dt
+        td = timedelta( seconds = int( rt ) )
+        estimated = "Estimated Remaining: " + str( td )
         n += 1
 
     if options.output != "-":
