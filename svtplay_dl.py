@@ -571,7 +571,7 @@ class Justin2():
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
 
-        download_http(url, options.output)
+        download_http(options, url)
 
 class Hbo():
     def get(self, url):
@@ -602,8 +602,7 @@ class Sr():
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("entry").find("ref").attrib["href"]
-
-        download_http(url, options.output)
+        download_http(options, url)
 
 class Urplay():
     def get(self, options, url):
