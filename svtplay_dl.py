@@ -482,7 +482,7 @@ def download_http(options, url):
             break
 
         file_d.write(chunk)
-        if output != "-":
+        if options.output != "-":
             now = time.time()
             if lastprogress + 1 < now:
                 lastprogress = now
