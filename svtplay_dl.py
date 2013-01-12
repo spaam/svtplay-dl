@@ -915,7 +915,7 @@ def get_media(url, options):
         if match:
             if sys.version_info > (3, 0):
                 title = re.sub('[^\w\s-]', '', match.group(1)).strip().lower()
-                if output:
+                if options.output:
                     options.output = options.output + re.sub('[-\s]+', '-', title)
                 else:
                     options.output = re.sub('[-\s]+', '-', title)
