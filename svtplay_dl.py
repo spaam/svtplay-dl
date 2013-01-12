@@ -321,7 +321,7 @@ def progress(byte, total, extra = ""):
 
     progress_stream.flush()
 
-def download_hds(options, url, swf):
+def download_hds(options, url, swf=None):
     data = get_http_data(url)
     streams = {}
     bootstrap = {}
@@ -856,9 +856,12 @@ class Nrk ( object ) :
         data = get_http_data( url )
         match = re.search( r'data-media="(.*manifest.f4m)"', data )
         manifest_url = match.group( 1 )
-        manifest_url = manifest_url.replace( "/z/", "/i/" ).replace( "manifest.f4m", "index_4_av.m3u8" )
-        manifest = get_http_data( manifest_url )
-        download_m3u8( options, manifest_url )
+        if options.hls:
+            manifest_url = manifest_url.replace( "/z/", "/i/" ).replace( "manifest.f4m", "master.m3u8" )
+            download_hls(options, manifest_url)
+        else:
+            manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
+            download_hds(options, manifest_url)
 
 class Dr ( object ) :
     def get ( self, options, url ) :
