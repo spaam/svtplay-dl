@@ -386,7 +386,7 @@ def download_hds(options, url, swf=None):
         file_d.close()
         progress_stream.write('\n')
 
-def download_hls(options, url):
+def download_hls(options, url, baseurl=None):
     data = get_http_data(url)
     globaldata, files = parsem3u(data)
     streams = {}
@@ -427,9 +427,12 @@ def download_hls(options, url):
     start = time.time()
     estimated = ""
     for i in files:
+        item = i[0]
         if options.output != "-":
             progressbar(len(files), n, estimated)
-        data = get_http_data(i[0])
+        if item[0:5] != "http:":
+            item = "%s/%s" % (baseurl, item)
+        data = get_http_data(item)
         if encrypted:
             lots = StringIO.StringIO(data)
 
@@ -454,45 +457,6 @@ def download_hls(options, url):
     if options.output != "-":
         file_d.close()
         progress_stream.write('\n')
-
-def download_m3u8(options, url, base_url = None):
-    data = get_http_data(url)
-    globaldata, files = parsem3u(data)
-    n = 1
-    if options.output != "-":
-        extension = re.search("(\.[a-z0-9]+)$", options.output)
-        if not extension:
-            options.output = "%s.ts" % options.output
-        log.info("Outfile: %s", options.output)
-        file_d = open(options.output, "wb")
-    else:
-        file_d = sys.stdout
-
-    start = time.time()
-    estimated = ""
-    for n, i in enumerate( files ):
-        if options.output != "-":
-            progressbar(len(files), n, estimated)
-        file_url = i[0]
-        if not file_url.startswith( "http" ) and base_url :
-            file_url = base_url + "/" + file_url
-        response = urlopen( file_url )
-        while True :
-            chunk = response.read( 8192 )
-            if not chunk :
-                break
-            file_d.write( chunk )
-        now = time.time()
-        dt = now - start
-        et = dt / ( n + 1 ) * len( files )
-        rt = et - dt
-        td = timedelta( seconds = int( rt ) )
-        estimated = "Estimated Remaining: " + str( td )
-
-    if options.output != "-":
-        file_d.close()
-        progress_stream.write('\n')
-
 
 def download_http(options, url):
     """ Get the stream from HTTP """
@@ -907,12 +871,8 @@ class Ruv ( object ) :
         tengipunktur = js.split( '"' )[1]
         match = re.search( r"http.*tengipunktur [+] '([:]1935.*)'", data )
         m3u8_url = "http://" + tengipunktur + match.group( 1 )
-        m3u8_data = get_http_data( m3u8_url )
-        g, f = parsem3u( m3u8_data )
-        if len( f ) == 1 :
-            m3u8_url = f[0][0]
         base_url = m3u8_url.rsplit( "/", 1 )[0]
-        download_m3u8( options, m3u8_url, base_url )
+        download_hls( options, m3u8_url, base_url )
 
 def progressbar(total, pos, msg=""):
     """
