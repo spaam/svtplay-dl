@@ -235,7 +235,7 @@ def parsem3u(data):
     streaminfo = {}
     globdata = {}
 
-    data = data.replace("\r","\n")
+    data = data.replace("\r", "\n")
     for l in data.split("\n")[1:]:
         if not l:
             continue
@@ -259,11 +259,11 @@ def parsem3u(data):
 
     return globdata, files
 
-def decode_f4f(fragID, fragData ):
+def decode_f4f(fragID, fragData):
     start = fragData.find("mdat") + 4
     if (fragID > 1):
-        for dummy in range( 2 ):
-            tagLen, = struct.unpack_from( ">L", fragData, start )
+        for dummy in range(2):
+            tagLen, = struct.unpack_from(">L", fragData, start)
             tagLen &= 0x00ffffff
             start  += tagLen + 11 + 4
     return start
@@ -376,10 +376,10 @@ def download_hds(options, url, swf=None):
         file_d.write(data[number:])
         now = time.time()
         dt = now - start
-        et = dt / ( i + 1 ) * total
+        et = dt / (i + 1) * total
         rt = et - dt
-        td = timedelta( seconds = int( rt ) )
-        estimated = "Estimated Remaining: " + str( td )
+        td = timedelta(seconds = int(rt))
+        estimated = "Estimated Remaining: " + str(td)
         i += 1
 
     if options.output != "-":
@@ -448,10 +448,10 @@ def download_hls(options, url, baseurl=None):
         file_d.write(data)
         now = time.time()
         dt = now - start
-        et = dt / ( n + 1 ) * len( files )
+        et = dt / (n + 1) * len(files)
         rt = et - dt
-        td = timedelta( seconds = int( rt ) )
-        estimated = "Estimated Remaining: " + str( td )
+        td = timedelta(seconds = int(rt))
+        estimated = "Estimated Remaining: " + str(td)
         n += 1
 
     if options.output != "-":
@@ -469,7 +469,7 @@ def download_http(options, url):
         if extension:
             options.output = options.output + extension.group(1)
         log.info("Outfile: %s", options.output)
-        file_d = open(options.output,"wb")
+        file_d = open(options.output, "wb")
     else:
         file_d = sys.stdout
 
@@ -755,7 +755,7 @@ class Tv4play():
             sa = list(ss.getiterator("item"))
         else:
             sa = list(ss.iter("item"))
-        
+
         if xml.find("live").text:
             if xml.find("live").text != "false":
                 options.live = True
@@ -831,47 +831,47 @@ class Svtplay():
         else:
             download_http(options, test["url"])
 
-class Nrk ( object ) :
-    def get ( self, options, url ) :
-        data = get_http_data( url )
-        match = re.search( r'data-media="(.*manifest.f4m)"', data )
-        manifest_url = match.group( 1 )
+class Nrk(object):
+    def get(self, options, url):
+        data = get_http_data(url)
+        match = re.search(r'data-media="(.*manifest.f4m)"', data)
+        manifest_url = match.group(1)
         if options.hls:
-            manifest_url = manifest_url.replace( "/z/", "/i/" ).replace( "manifest.f4m", "master.m3u8" )
+            manifest_url = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
             download_hls(options, manifest_url)
         else:
             manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
             download_hds(options, manifest_url)
 
-class Dr ( object ) :
-    def get ( self, options, url ) :
-        data = get_http_data( url )
-        match = re.search( r'resource:[ ]*"([^"]*)",', data )
-        resource_url = match.group( 1 )
-        resource_data = get_http_data( resource_url )
-        resource = json.loads( resource_data )
+class Dr(object):
+    def get(self, options, url):
+        data = get_http_data(url)
+        match = re.search(r'resource:[ ]*"([^"]*)",', data)
+        resource_url = match.group(1)
+        resource_data = get_http_data(resource_url)
+        resource = json.loads(resource_data)
         streams = {}
-        for stream in resource['links'] :
+        for stream in resource['links']:
             streams[stream['bitrateKbps']] = stream['uri']
         if len(streams) == 1:
             uri = streams[streams.keys()[0]]
         else:
             uri = select_quality(options, streams)
         # need -v ?
-        options.other = "-v -y '" + uri.replace( "rtmp://vod.dr.dk/cms/", "" ) + "'"
-        download_rtmp( options, uri )
+        options.other = "-v -y '" + uri.replace("rtmp://vod.dr.dk/cms/", "") + "'"
+        download_rtmp(options, uri)
 
-class Ruv ( object ) :
-    def get ( self, options, url ) :
-        data = get_http_data( url )
-        match = re.search( r'(http://load.cache.is/vodruv.*)"', data )
-        js_url = match.group( 1 )
-        js = get_http_data( js_url )
-        tengipunktur = js.split( '"' )[1]
-        match = re.search( r"http.*tengipunktur [+] '([:]1935.*)'", data )
-        m3u8_url = "http://" + tengipunktur + match.group( 1 )
-        base_url = m3u8_url.rsplit( "/", 1 )[0]
-        download_hls( options, m3u8_url, base_url )
+class Ruv(object):
+    def get(self, options, url):
+        data = get_http_data(url)
+        match = re.search(r'(http://load.cache.is/vodruv.*)"', data)
+        js_url = match.group(1)
+        js = get_http_data(js_url)
+        tengipunktur = js.split('"')[1]
+        match = re.search(r"http.*tengipunktur [+] '([:]1935.*)'", data)
+        m3u8_url = "http://" + tengipunktur + match.group(1)
+        base_url = m3u8_url.rsplit("/", 1)[0]
+        download_hls(options, m3u8_url, base_url)
 
 def progressbar(total, pos, msg=""):
     """
@@ -1023,7 +1023,6 @@ def get_media(url, options):
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
         Kanal5().get(options, url)
 
-
     elif re.findall("kanal9play", url):
         data = get_http_data(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
@@ -1122,12 +1121,12 @@ def get_media(url, options):
 
     elif re.findall("svtplay.se", url):
         Svtplay().get(options, url)
-    elif re.findall( "tv.nrk.no", url ) :
-        Nrk().get( options, url )
-    elif re.findall( "dr.dk/TV", url ) :
-        Dr().get( options, url )
-    elif re.findall( "ruv.is", url ) :
-        Ruv().get( options, url )
+    elif re.findall("tv.nrk.no", url):
+        Nrk().get(options, url)
+    elif re.findall("dr.dk/TV", url):
+        Dr().get(options, url)
+    elif re.findall("ruv.is", url):
+        Ruv().get(options, url)
     else:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
@@ -1139,7 +1138,7 @@ def setup_log(silent):
     else:
         stream = sys.stdout
         level = logging.INFO
-        
+
     fmt = logging.Formatter('%(levelname)s %(message)s')
     hdlr = logging.StreamHandler(stream)
     hdlr.setFormatter(fmt)
