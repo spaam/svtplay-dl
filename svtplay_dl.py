@@ -541,40 +541,63 @@ def select_quality(options, streams):
 
 class Justin():
     def get(self, options, url):
-        data = get_http_data(url)
-        data = re.sub("<(\d+)", "<_\g<1>", data)
-        data = re.sub("</(\d+)", "</_\g<1>", data)
-        xml = ET.XML(data)
-        if sys.version_info < (2, 7):
-            sa = list(xml)
+        parse = urlparse(url)
+        match = re.search("/b/(\d+)", parse.path)
+        if match:
+            url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
+            data = get_http_data(url)
+            xml = ET.XML(data)
+            url = xml.find("archive").find("video_file_url").text
+
+            download_http(options, url)
         else:
-            sa = list(xml)
-        streams = {}
-        for i in sa:
-            if i.tag[1:][:-1] != "iv":
-                try:
-                    stream = {}
-                    stream["token"] = i.find("token").text
-                    stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
-                    streams[int(i.find("video_height").text)] = stream
-                except AttributeError:
-                    pass
+            match = re.search("/(.*)", parse.path)
+            if match:
+                user = match.group(1)
+                data = get_http_data(url)
+                match = re.search("embedSWF\(\"(.*)\", \"live", data)
+                if not match:
+                    log.error("Can't find swf file.")
+                options.other = match.group(1)
+                url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
+                options.live = True
+                data = get_http_data(url)
+                data = re.sub("<(\d+)", "<_\g<1>", data)
+                data = re.sub("</(\d+)", "</_\g<1>", data)
+                xml = ET.XML(data)
+                if sys.version_info < (2, 7):
+                    sa = list(xml)
+                else:
+                    sa = list(xml)
+                streams = {}
+                for i in sa:
+                    if i.tag[1:][:-1] != "iv":
+                        try:
+                            stream = {}
+                            stream["token"] = i.find("token").text
+                            stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
+                            streams[int(i.find("video_height").text)] = stream
+                        except AttributeError:
+                            pass
 
-        test = select_quality(options, streams)
-        options.other = "-j '%s' -W %s" % (test["token"], options.other)
-        options.resume = False
-        download_rtmp(options, test["url"])
-
-class Justin2():
-    def get(self, options, url):
-        data = get_http_data(url)
-        xml = ET.XML(data)
-        url = xml.find("archive").find("video_file_url").text
-
-        download_http(options, url)
+                test = select_quality(options, streams)
+                options.other = "-j '%s' -W %s" % (test["token"], options.other)
+                options.resume = False
+                download_rtmp(options, test["url"])
 
 class Hbo():
     def get(self, url):
+        parse = urlparse(url)
+        try:
+            other = parse[5]
+        except KeyError:
+            log.error("Something wrong with that url")
+            sys.exit(2)
+        match = re.search("^/(.*).html", other)
+        if not match:
+            log.error("Cant find video file")
+            sys.exit(2)
+        url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
         data = get_http_data(url)
         xml = ET.XML(data)
         videoid = xml.find("content")[1].find("videoId").text
@@ -598,7 +621,18 @@ class Hbo():
 
 class Sr():
     def get(self, options, url):
-        url = url + options.other
+        data = get_http_data(url)
+        parse = urlparse(url)
+        try:
+            metafile = parse_qs(parse[4])["metafile"][0]
+            options.other = "%s?%s" % (parse[2], parse[4])
+        except KeyError:
+            match = re.search("linkUrl=(.*)\;isButton=", data)
+            if not match:
+                log.error("Can't find video file")
+                sys.exit(2)
+            options.other = unquote_plus(match.group(1))
+        url = "http://sverigesradio.se%s" % options.other
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("entry").find("ref").attrib["href"]
@@ -616,6 +650,48 @@ class Urplay():
 
 class Qbrick():
     def get(self, options, url):
+        if re.findall("dn.se", url):
+            data = get_http_data(url)
+            match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
+            if not match:
+                match = re.search("mediaId = \'([0-9A-F]+)\';", data)
+                if not match:
+                    log.error("Can't find video file")
+                    sys.exit(2)
+                mcid = "%sDE1BA107" % match.group(1)
+            else:
+                mcid = match.group(1)
+            host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
+        elif re.findall("di.se", url):
+            data = get_http_data(url)
+            match = re.search("ccid: \"(.*)\"\,", data)
+            if not match:
+                log.error("Can't find video file")
+                sys.exit(2)
+            host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
+        elif re.findall("svd.se", url):
+            match = re.search("_([0-9]+)\.svd", url)
+            if not match:
+                log.error("Can't find video file")
+                sys.exit(2)
+            data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=%s" % match.group(1))
+            match = re.search("mcid=([A-F0-9]+)\&width=", data)
+            if not match:
+                log.error("Can't find video file")
+                sys.exit(2)
+            host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % match.group(1)
+        else:
+            log.error("Can't find site")
+            sys.exit(2)
+
+        data = get_http_data(host)
+        xml = ET.XML(data)
+        try:
+            url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
+        except AttributeError:
+            log.error("Can't find video file")
+            sys.exit(2)
+
         data = get_http_data(url)
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
@@ -635,6 +711,11 @@ class Qbrick():
 
 class Kanal5():
     def get(self, options, url):
+        match = re.search(".*video/([0-9]+)", url)
+        if not match:
+            log.error("Can't find video file")
+            sys.exit(2)
+        url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
         data = json.loads(get_http_data(url))
         options.live = data["isLive"]
         steambaseurl = data["streamBaseUrl"]
@@ -655,6 +736,11 @@ class Kanal5():
 
 class Kanal9():
     def get(self, options, url):
+        data = get_http_data(url)
+        match = re.search("@videoPlayer\" value=\"(.*)\"", data)
+        if not match:
+            log.error("Can't find video file")
+            sys.exit(2)
         try:
             from pyamf import remoting
         except ImportError:
@@ -666,9 +752,9 @@ class Kanal9():
         publisher_id = 22710239001
         const = "9f79dd85c3703b8674de883265d8c9e606360c2e"
         env = remoting.Envelope(amfVersion=3)
-        env.bodies.append(("/1", remoting.Request(target="com.brightcove.player.runtime.PlayerMediaFacade.findMediaById", body=[const, player_id, options.other, publisher_id], envelope=env)))
+        env.bodies.append(("/1", remoting.Request(target="com.brightcove.player.runtime.PlayerMediaFacade.findMediaById", body=[const, player_id, match.group(1), publisher_id], envelope=env)))
         env = str(remoting.encode(env).read())
-        url = "http://%s/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk" % url
+        url = "http://c.brightcove.com/services/messagebroker/amf?playerKey=AQ~~,AAAABUmivxk~,SnCsFJuhbr0vfwrPJJSL03znlhz-e9bk"
         header = "application/x-amf"
         data = get_http_data(url, "POST", header, env)
         streams = {}
@@ -687,6 +773,12 @@ class Kanal9():
 
 class Expressen():
     def get(self, options, url):
+        parse = urlparse(url)
+        match = re.search("/(.*[\/\+].*)/", unquote_plus(parse.path))
+        if not match:
+            log.error("Can't find video file")
+            sys.exit(2)
+        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
         other = ""
         data = get_http_data(url)
         xml = ET.XML(data)
@@ -712,6 +804,17 @@ class Expressen():
 
 class Aftonbladet():
     def get(self, options, url, start):
+        parse = urlparse(url)
+        data = get_http_data(url)
+        match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
+        if not match:
+            log.error("Can't find video file")
+            sys.exit(2)
+        try:
+            start = parse_qs(parse[4])["start"][0]
+        except KeyError:
+            start = 0
+        url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
         data = get_http_data(url)
         xml = ET.XML(data)
         url = xml.find("articleElement").find("mediaElement").find("baseUrl").text
@@ -733,6 +836,12 @@ class Aftonbladet():
 
 class Viaplay():
     def get(self, options, url):
+        parse = urlparse(url)
+        match = re.search('\/play\/(.*)/?', parse.path)
+        if not match:
+            log.error("Cant find video file")
+            sys.exit(2)
+        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         options.other = ""
         data = get_http_data(url)
         xml = ET.XML(data)
@@ -748,6 +857,13 @@ class Viaplay():
 
 class Tv4play():
     def get(self, options, url):
+        parse = urlparse(url)
+        try:
+            vid = parse_qs(parse[4])["video_id"][0]
+        except KeyError:
+            log.error("Can't find video file")
+            sys.exit(2)
+        url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("items")
@@ -789,6 +905,15 @@ class Tv4play():
 
 class Svtplay():
     def get(self, options, url):
+        if re.findall("svt.se", url):
+            data = get_http_data(url)
+            match = re.search("data-json-href=\"(.*)\"", data)
+            if match:
+                filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
+                url = "http://www.svt.se%s" % filename
+            else:
+                log.error("Can't find video file")
+                sys.exit(2)
         url = "%s?type=embed" % url
         data = get_http_data(url)
         match = re.search("value=\"(/(public)?(statiskt)?/swf/video/svtplayer-[0-9\.]+swf)\"", data)
@@ -933,207 +1058,50 @@ def get_media(url, options):
                     options.output = unicode(re.sub('[-\s]+', '-', title))
 
     if re.findall("(twitch|justin).tv", url):
-        parse = urlparse(url)
-        match = re.search("/b/(\d+)", parse.path)
-        if match:
-            url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
-            Justin2().get(options, url)
-        else:
-            match = re.search("/(.*)", parse.path)
-            if match:
-                user = match.group(1)
-                data = get_http_data(url)
-                match = re.search("embedSWF\(\"(.*)\", \"live", data)
-                if not match:
-                    log.error("Can't find swf file.")
-                options.other = match.group(1)
-                url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
-                options.live = True
-                Justin().get(options, url)
+        Justin().get(options, url)
 
     if re.findall("hbo.com", url):
-        parse = urlparse(url)
-        try:
-            other = parse[5]
-        except KeyError:
-            log.error("Something wrong with that url")
-            sys.exit(2)
-        match = re.search("^/(.*).html", other)
-        if not match:
-            log.error("Cant find video file")
-            sys.exit(2)
-        url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
         Hbo().get(options, url)
 
     if re.findall("tv4play", url):
-        parse = urlparse(url)
-        try:
-            vid = parse_qs(parse[4])["video_id"][0]
-        except KeyError:
-            log.error("Can't find video file")
-            sys.exit(2)
-        url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         Tv4play().get(options, url)
 
     elif re.findall("(tv3play|tv6play|tv8play)", url):
-        parse = urlparse(url)
-        match = re.search('\/play\/(.*)/?', parse.path)
-        if not match:
-            log.error("Cant find video file")
-            sys.exit(2)
-        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
-        Viaplay().get(options, url)
-
-    elif re.findall("viaplay", url):
-        parse = urlparse(url)
-        match = re.search('\/Tv/channels\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(.*)/', parse.path)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        url = "http://viasat.web.entriq.net/nw/article/view/%s/?tf=players/TV6.tpl" % match.group(1)
-        data = get_http_data(url)
-        match = re.search("id:'(.*)'", data)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
         Viaplay().get(options, url)
 
     elif re.findall("aftonbladet", url):
-        parse = urlparse(url)
-        data = get_http_data(url)
-        match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        try:
-            start = parse_qs(parse[4])["start"][0]
-        except KeyError:
-            start = 0
-        url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
         Aftonbladet().get(options, url, start)
 
     elif re.findall("expressen", url):
-        parse = urlparse(url)
-        match = re.search("/(.*[\/\+].*)/", unquote_plus(parse.path))
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
         Expressen().get(options, url)
 
     elif re.findall("kanal5play", url):
-        match = re.search(".*video/([0-9]+)", url)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
         Kanal5().get(options, url)
 
     elif re.findall("kanal9play", url):
-        data = get_http_data(url)
-        match = re.search("@videoPlayer\" value=\"(.*)\"", data)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        Kanal9().get(options, "c.brightcove.com")
+        Kanal9().get(options, url)
 
-    elif re.findall("dn.se", url):
-        data = get_http_data(url)
-        match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
-        if not match:
-            match = re.search("mediaId = \'([0-9A-F]+)\';", data)
-            if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
-            mcid = "%sDE1BA107" % match.group(1)
-        else:
-            mcid = match.group(1)
-        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
-        data = get_http_data(host)
-        xml = ET.XML(data)
-        try:
-            url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
-        except AttributeError:
-            log.error("Can't find video file")
-            sys.exit(2)
+    elif re.findall("(di|svd|dn).se", url):
         Qbrick().get(options, url)
-
-    elif re.findall("di.se", url):
-        data = get_http_data(url)
-        match = re.search("ccid: \"(.*)\"\,", data)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-        host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
-        data = get_http_data(host)
-        xml = ET.XML(data)
-        try:
-            host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
-        except AttributeError:
-            log.error("Can't find stream")
-            sys.exit(2)
-        Qbrick().get(options, host)
-
-    elif re.findall("svd.se", url):
-        match = re.search("_([0-9]+)\.svd", url)
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-
-        data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=%s" % match.group(1))
-        match = re.search("mcid=([A-F0-9]+)\&width=", data)
-
-        if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
-
-        host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % match.group(1)
-        data = get_http_data(host)
-        xml = ET.XML(data)
-        try:
-            host = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
-        except AttributeError:
-            log.error("Can't find video file")
-            sys.exit(2)
-        Qbrick().get(options, host)
 
     elif re.findall("urplay.se", url):
         Urplay().get(options, url)
 
     elif re.findall("sverigesradio", url):
-        data = get_http_data(url)
-        parse = urlparse(url)
-        try:
-            metafile = parse_qs(parse[4])["metafile"][0]
-            options.other = "%s?%s" % (parse[2], parse[4])
-        except KeyError:
-            match = re.search("linkUrl=(.*)\;isButton=", data)
-            if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
-            options.other = unquote_plus(match.group(1))
-        Sr().get(options, "http://sverigesradio.se")
+        Sr().get(options, url)
 
-    elif re.findall("svt.se", url):
-        data = get_http_data(url)
-        match = re.search("data-json-href=\"(.*)\"", data)
-        if match:
-            filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
-            url = "http://www.svt.se%s" % filename
-        else:
-            log.error("Can't find video file")
-            sys.exit(2)
+    elif re.findall("(svt|svtplay).se", url):
         Svtplay().get(options, url)
 
-    elif re.findall("svtplay.se", url):
-        Svtplay().get(options, url)
     elif re.findall("tv.nrk.no", url):
         Nrk().get(options, url)
+
     elif re.findall("dr.dk/TV", url):
         Dr().get(options, url)
+
     elif re.findall("ruv.is", url):
         Ruv().get(options, url)
+
     else:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
