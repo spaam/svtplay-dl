@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.8.2013.01.11"
+__version__ = "0.8.2013.01.13"
 
 class Options:
     """
@@ -798,7 +798,7 @@ class Svtplay():
         data = json.loads(get_http_data(url))
         options.live = data["video"]["live"]
         streams = {}
-
+        streams2 = {} #hack..
         for i in data["video"]["videoReferences"]:
             if options.hls and i["playerType"] == "ios":
                 stream = {}
@@ -808,8 +808,15 @@ class Svtplay():
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
+            if options.hls and i["playerType"] == "flash":
+                stream = {}
+                stream["url"] = i["url"]
+                streams2[int(i["bitrate"])] = stream
 
-        if len(streams) == 0:
+        if len(streams) == 0 and options.hls:
+            test = streams2[streams2.keys()[0]]
+            test["url"] = test["url"].replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
+        elif len(streams) == 0:
             log.error("Can't find any streams.")
             sys.exit(2)
         elif len(streams) == 1:
