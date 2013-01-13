@@ -820,7 +820,7 @@ class Svtplay():
             log.error("Can't find any streams.")
             sys.exit(2)
         elif len(streams) == 1:
-            test = streams[streams.keys()[0]]
+            test = streams[0]
         else:
             test = select_quality(options, streams)
 
