@@ -660,7 +660,6 @@ class Urplay():
         if match:
             path = "mp%s:%s" % (match.group(1)[-1], match.group(1))
             options.other = "-a ondemand -y %s" % path
-            print(options.other)
             download_rtmp(options, "rtmp://streaming.ur.se/")
 
 class Qbrick():
