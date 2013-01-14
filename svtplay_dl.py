@@ -541,7 +541,7 @@ def select_quality(options, streams):
 
 class Justin():
     def handle(self, url):
-        return ("twitch.com" in url) or ("justin.tv" in url)
+        return ("twitch.tv" in url) or ("justin.tv" in url)
 
     def get(self, options, url):
         parse = urlparse(url)
