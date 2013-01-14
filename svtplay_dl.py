@@ -4,12 +4,12 @@ if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
-    from io import StringIO
+    from io import BytesIO as StringIO
 else:
     from urllib2 import Request, urlopen, HTTPError, URLError
     from urlparse import urlparse, parse_qs
     from urllib import unquote_plus, quote_plus
-    import StringIO
+    from StringIO import StringIO
 
 import re
 import os
@@ -291,7 +291,11 @@ def get_http_data(url, method="GET", header="", data=""):
         log.error("Try adding http:// before the url")
         sys.exit(5)
     if sys.version_info > (3, 0):
-        data = response.read().decode('utf-8')
+        data = response.read()
+        try:
+            data = data.decode("utf-8")
+        except UnicodeDecodeError:
+            pass
     else:
         try:
             data = response.read()
@@ -360,10 +364,9 @@ def download_hds(options, url, swf=None):
     else:
         file_d = sys.stdout
 
-    file_d.write(binascii.a2b_hex("464c56010500000009000000001200010c00000000000000"))
+    file_d.write(binascii.a2b_hex(b"464c56010500000009000000001200010c00000000000000"))
     file_d.write(base64.b64decode(test["metadata"]))
-    file_d.write(binascii.a2b_hex("00000000"))
-
+    file_d.write(binascii.a2b_hex(b"00000000"))
     total = antal[1]["total"]
     start = time.time()
     estimated = ""
@@ -401,19 +404,19 @@ def download_hls(options, url, baseurl=None):
     try:
         keydata = globaldata["KEY"]
         encrypted = True
-        match = re.search("URI=\"(http://.*)\"", keydata)
-        key = get_http_data(match.group(1))
-        rand = os.urandom(16)
     except:
         pass
 
     if encrypted:
         try:
             from Crypto.Cipher import AES
-            decryptor = AES.new(key, AES.MODE_CBC, rand)
         except ImportError:
             log.error("You need to install pycrypto to download encrypted HLS streams")
             sys.exit(2)
+        match = re.search("URI=\"(http://.*)\"", keydata)
+        key = get_http_data(match.group(1))
+        rand = os.urandom(16)
+        decryptor = AES.new(key, AES.MODE_CBC, rand)
     n = 1
     if options.output != "-":
         extension = re.search("(\.[a-z0-9]+)$", options.output)
@@ -434,9 +437,9 @@ def download_hls(options, url, baseurl=None):
             item = "%s/%s" % (baseurl, item)
         data = get_http_data(item)
         if encrypted:
-            lots = StringIO.StringIO(data)
+            lots = StringIO(data)
 
-            plain = ""
+            plain = b""
             crypt = lots.read(1024)
             decrypted = decryptor.decrypt(crypt)
             while decrypted:
@@ -657,7 +660,7 @@ class Urplay():
         if match:
             path = "mp%s:%s" % (match.group(1)[-1], match.group(1))
             options.other = "-a ondemand -y %s" % path
-
+            print(options.other)
             download_rtmp(options, "rtmp://streaming.ur.se/")
 
 class Qbrick():
@@ -919,7 +922,7 @@ class Tv4play():
             streams[int(i.find("bitrate").text)] = stream
 
         if len(streams) == 1:
-            test = streams[streams.keys()[0]]
+            test = streams[0]
         else:
             test = select_quality(options, streams)
 
@@ -975,7 +978,7 @@ class Svtplay():
                 streams2[int(i["bitrate"])] = stream
 
         if len(streams) == 0 and options.hls:
-            test = streams2[streams2.keys()[0]]
+            test = streams2[0]
             test["url"] = test["url"].replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         elif len(streams) == 0:
             log.error("Can't find any streams.")
@@ -1028,7 +1031,7 @@ class Dr(object):
         for stream in resource['links']:
             streams[stream['bitrateKbps']] = stream['uri']
         if len(streams) == 1:
-            uri = streams[streams.keys()[0]]
+            uri = streams[0]
         else:
             uri = select_quality(options, streams)
         # need -v ?
