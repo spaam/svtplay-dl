@@ -1108,7 +1108,7 @@ def get_media(url, options):
 
     if not options.output or os.path.isdir(options.output):
         data = get_http_data(url)
-        match = re.search("(?i)<title>\s*(.*?)\s*</title>", data)
+        match = re.search("(?i)<title.*>\s*(.*?)\s*</title>", data)
         if match:
             if sys.version_info > (3, 0):
                 title = re.sub('[^\w\s-]', '', match.group(1)).strip().lower()
