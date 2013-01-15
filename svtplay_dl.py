@@ -930,7 +930,7 @@ class Tv4play():
             streams[int(i.find("bitrate").text)] = stream
 
         if len(streams) == 1:
-            test = streams[0]
+            test = streams[list(streams.keys())[0]]
         else:
             test = select_quality(options, streams)
 
@@ -986,13 +986,13 @@ class Svtplay():
                 streams2[int(i["bitrate"])] = stream
 
         if len(streams) == 0 and options.hls:
-            test = streams2[0]
+            test = streams2[list(streams.keys())[0]]
             test["url"] = test["url"].replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         elif len(streams) == 0:
             log.error("Can't find any streams.")
             sys.exit(2)
         elif len(streams) == 1:
-            test = streams[0]
+            test = streams[list(streams.keys())[0]]
         else:
             test = select_quality(options, streams)
 
@@ -1039,7 +1039,7 @@ class Dr(object):
         for stream in resource['links']:
             streams[stream['bitrateKbps']] = stream['uri']
         if len(streams) == 1:
-            uri = streams[0]
+            uri = streams[list(streams.keys())[0]]
         else:
             uri = select_quality(options, streams)
         # need -v ?
