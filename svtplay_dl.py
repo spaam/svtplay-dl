@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.8.2013.01.13"
+__version__ = "0.8.2013.01.15"
 
 class Options:
     """
@@ -756,14 +756,16 @@ class Kanal5():
 
 class Kanal9():
     def handle(self, url):
-        return "kanal9play.se" in url
+        return ("kanal9play.se" in url) or ("kanal5.se" in url)
 
     def get(self, options, url):
         data = get_http_data(url)
         match = re.search("@videoPlayer\" value=\"(.*)\"", data)
         if not match:
-            log.error("Can't find video file")
-            sys.exit(2)
+            match = re.search("videoId=(\d+)&player", data)
+            if not match:
+                log.error("Can't find video file")
+                sys.exit(2)
         try:
             from pyamf import remoting
         except ImportError:
