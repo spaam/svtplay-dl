@@ -921,14 +921,13 @@ class Tv4play():
                 options.live = True
 
         streams = {}
-        sa.pop(len(sa)-1)
 
         for i in sa:
-            stream = {}
-            stream["uri"] = i.find("base").text
-            stream["path"] = i.find("url").text
-            streams[int(i.find("bitrate").text)] = stream
-
+            if i.find("mediaFormat").text != "smi":
+                stream = {}
+                stream["uri"] = i.find("base").text
+                stream["path"] = i.find("url").text
+                streams[int(i.find("bitrate").text)] = stream
         if len(streams) == 1:
             test = streams[list(streams.keys())[0]]
         else:
