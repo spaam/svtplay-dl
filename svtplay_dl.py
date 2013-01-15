@@ -889,15 +889,24 @@ class Viaplay():
 
 class Tv4play():
     def handle(self, url):
-        return "tv4play.se" in url
+        return ("tv4play.se" in url) or ("tv4.se" in url)
 
     def get(self, options, url):
         parse = urlparse(url)
-        try:
-            vid = parse_qs(parse[4])["video_id"][0]
-        except KeyError:
-            log.error("Can't find video file")
-            sys.exit(2)
+        if "tv4play.se" in url:
+            try:
+                vid = parse_qs(parse[4])["video_id"][0]
+            except KeyError:
+                log.error("Can't find video file")
+                sys.exit(2)
+        else:
+            match = re.search("-(\d+)$", url)
+            if match:
+                vid = match.group(1)
+            else:
+                log.error("Can't find video file")
+                sys.exit(2)
+
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = get_http_data(url)
         xml = ET.XML(data)
