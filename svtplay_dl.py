@@ -630,7 +630,7 @@ class Hbo():
 
 class Sr():
     def handle(self, url):
-        return "svergesradio.se" in url
+        return "sverigesradio.se" in url
 
     def get(self, options, url):
         data = get_http_data(url)
