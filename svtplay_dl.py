@@ -987,7 +987,7 @@ class Svtplay():
                 streams2[int(i["bitrate"])] = stream
 
         if len(streams) == 0 and options.hls:
-            test = streams2[list(streams.keys())[0]]
+            test = streams2[0]
             test["url"] = test["url"].replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         elif len(streams) == 0:
             log.error("Can't find any streams.")
