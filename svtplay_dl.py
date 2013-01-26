@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.8.2013.01.18"
+__version__ = "0.8.2013.01.26"
 
 class Options:
     """
@@ -850,10 +850,14 @@ class Aftonbladet():
         xml = ET.XML(data)
         url = xml.find("articleElement").find("mediaElement").find("baseUrl").text
         path = xml.find("articleElement").find("mediaElement").find("media").attrib["url"]
+        live = xml.find("articleElement").find("mediaElement").find("isLive").text
         options.other = "-y %s" % path
 
         if start > 0:
             options.other = "%s -A %s" % (options.other, str(start))
+
+        if live == "true":
+            options.live = True
 
         if url == None:
             log.error("Can't find any video on that page")
