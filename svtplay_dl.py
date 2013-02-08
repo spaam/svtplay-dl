@@ -307,21 +307,25 @@ def get_http_data(url, method="GET", header="", data=""):
 
 def progress(byte, total, extra = ""):
     """ Print some info about how much we have downloaded """
-    ratio = float(byte) / total
-    percent = round(ratio*100, 2)
-    tlen = str(len(str(total)))
-    fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
-    progresstr = fmt % (byte >> 10, total >> 10, percent)
+    if total == 0:
+         progresstr = "Downloaded %dkB bytes" % (byte >> 10)
+         progress_stream.write(progresstr + '\r')
+    else:
+        ratio = float(byte) / total
+        percent = round(ratio*100, 2)
+        tlen = str(len(str(total)))
+        fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
+        progresstr = fmt % (byte >> 10, total >> 10, percent)
 
-    columns = int(os.getenv("COLUMNS", "80"))
-    if len(progresstr) < columns - 13:
-        p = int((columns - len(progresstr) - 3) * ratio)
-        q = int((columns - len(progresstr) - 3) * (1 - ratio))
-        progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
-    progress_stream.write(progresstr + ' ' + extra + '\r')
+        columns = int(os.getenv("COLUMNS", "80"))
+        if len(progresstr) < columns - 13:
+            p = int((columns - len(progresstr) - 3) * ratio)
+            q = int((columns - len(progresstr) - 3) * (1 - ratio))
+            progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
+        progress_stream.write(progresstr + ' ' + extra + '\r')
 
-    if byte >= total:
-        progress_stream.write('\n')
+        if byte >= total:
+            progress_stream.write('\n')
 
     progress_stream.flush()
 
@@ -464,7 +468,10 @@ def download_hls(options, url, baseurl=None):
 def download_http(options, url):
     """ Get the stream from HTTP """
     response = urlopen(url)
-    total_size = response.info()['Content-Length']
+    try:
+        total_size = response.info()['Content-Length']
+    except KeyError:
+        total_size = 0
     total_size = int(total_size)
     bytes_so_far = 0
     if options.output != "-":
