@@ -1118,6 +1118,20 @@ class Radioplay(object):
             log.error("Can't find any streams.")
             sys.exit(2)
 
+class generic(object):
+    ''' Videos embed in sites '''
+    def get(self, sites, url):
+        data = get_http_data(url)
+        match = re.search("src=\"(http://www.svt.se/wd.*)\" frameborder", data)
+        stream = None
+        if match:
+            url = match.group(1)
+            for i in sites:
+                if i.handle(url):
+                    stream = i
+                    break
+        return url, stream
+
 def progressbar(total, pos, msg=""):
     """
     Given a total and a progress position, output a progress bar
@@ -1160,10 +1174,13 @@ def get_media(url, options):
         if i.handle(url):
             stream = i
             break
-    if not stream:
-        log.error("That site is not supported. Make a ticket or send a message")
-        sys.exit(2)
 
+    if not stream:
+        url, stream = generic().get(sites, url)
+        if not stream:
+            log.error("That site is not supported. Make a ticket or send a message")
+            sys.exit(2)
+    url = url.replace("&amp;", "&")
     if not options.output or os.path.isdir(options.output):
         data = get_http_data(url)
         match = re.search("(?i)<title.*>\s*(.*?)\s*</title>", data)
