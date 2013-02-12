@@ -10,11 +10,10 @@ from datetime import timedelta
 
 import xml.etree.ElementTree as ET
 
-from lib.svtplay.output import progressbar
+from lib.svtplay.output import progressbar, progress_stream
 from lib.svtplay.utils import get_http_data, select_quality
 
 log = logging.getLogger('svtplay_dl')
-progress_stream = sys.stderr
 
 def download_hds(options, url, swf=None):
     data = get_http_data(url)
