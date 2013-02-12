@@ -2,7 +2,7 @@ class Hbo():
     def handle(self, url):
         return "hbo.com" in url
 
-    def get(self, url):
+    def get(self, options, url):
         parse = urlparse(url)
         try:
             other = parse[5]
