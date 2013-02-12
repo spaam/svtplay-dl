@@ -9,7 +9,7 @@ class Aftonbladet():
     def handle(self, url):
         return "aftonbladet.se" in url
 
-    def get(self, options, url, start):
+    def get(self, options, url):
         parse = urlparse(url)
         data = get_http_data(url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
