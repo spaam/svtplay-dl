@@ -3,9 +3,12 @@ import re
 import json
 
 from lib.svtplay.service import Service
+from lib.svtplay.utils import get_http_data, select_quality
+
 from lib.svtplay.hds import download_hds
 from lib.svtplay.hls import download_hls
-from lib.svtplay.utils import get_http_data, select_quality
+from lib.svtplay.rtmp import download_rtmp
+from lib.svtplay.http import download_http
 
 from lib.svtplay.log import log
 

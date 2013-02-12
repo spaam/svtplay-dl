@@ -1,3 +1,12 @@
+import sys
+import re
+from urlparse import urlparse
+import xml.etree.ElementTree as ET
+
+from lib.svtplay.utils import get_http_data, select_quality
+from lib.svtplay.log import log
+from lib.svtplay.rtmp import download_rtmp
+
 class Hbo():
     def handle(self, url):
         return "hbo.com" in url

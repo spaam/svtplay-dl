@@ -1,3 +1,17 @@
+import sys
+import re
+import xml.etree.ElementTree as ET
+
+from lib.svtplay.utils import get_http_data, select_quality
+from lib.svtplay.log import log
+from lib.svtplay.rtmp import download_rtmp
+from lib.svtplay.hds import download_hds
+
+if sys.version_info > (3, 0):
+    from urllib.parse import urlparse, parse_qs
+else:
+    from urlparse import urlparse, parse_qs
+
 class Tv4play():
     def handle(self, url):
         return ("tv4play.se" in url) or ("tv4.se" in url)

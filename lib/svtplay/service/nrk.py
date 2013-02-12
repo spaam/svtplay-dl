@@ -1,3 +1,9 @@
+import re
+
+from lib.svtplay.utils import get_http_data
+from lib.svtplay.hds import download_hds
+from lib.svtplay.hls import download_hls
+
 class Nrk(object):
     def handle(self, url):
         return "nrk.no" in url

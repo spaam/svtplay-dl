@@ -1,3 +1,11 @@
+import sys
+import re
+import json
+
+from lib.svtplay.utils import get_http_data, select_quality
+from lib.svtplay.log import log
+from lib.svtplay.rtmp import download_rtmp
+
 class Kanal5():
     def handle(self, url):
         return "kanal5play.se" in url

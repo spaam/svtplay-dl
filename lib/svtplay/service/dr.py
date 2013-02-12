@@ -1,3 +1,9 @@
+import re
+import json
+
+from lib.svtplay.utils import get_http_data, select_quality
+from lib.svtplay.rtmp import download_rtmp
+
 class Dr(object):
     def handle(self, url):
         return "dr.dk" in url
