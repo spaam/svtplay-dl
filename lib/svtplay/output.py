@@ -1,8 +1,6 @@
 import sys
 import os
 
-from svtplay.log import log
-
 progress_stream = sys.stderr
 
 def progress(byte, total, extra = ""):
