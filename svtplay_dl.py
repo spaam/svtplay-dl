@@ -659,7 +659,7 @@ class Sr():
 
 class Urplay():
     def handle(self, url):
-        return "urplay.se" in url
+        return ("urplay.se" in url) or ("ur.se" in url)
 
     def get(self, options, url):
         data = get_http_data(url)
