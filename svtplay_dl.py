@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.8.2013.02.14"
+__version__ = "0.8.2013.02.15"
 
 class Options:
     """
@@ -519,7 +519,7 @@ def download_rtmp(options, url):
             if not extension:
                 options.output = "%s.flv" % options.output
             else:
-                options.output = "%s%s" % (options.output, extension.group(1))
+                options.output = "%s.%s" % (options.output, extension.group(1))
         else:
             options.output = options.output + extension.group(1)
         log.info("Outfile: %s", options.output)
