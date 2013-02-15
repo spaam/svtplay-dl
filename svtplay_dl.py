@@ -678,9 +678,8 @@ class Urplay():
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         if options.hls:
             download_hls(options, hls, http)
-        if jsondata["file_flash"][-1] == "3":
+        else:
             download_rtmp(options, rtmp)
-        download_hds(options, hds)
 
 class Qbrick():
     def handle(self, url):
