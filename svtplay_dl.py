@@ -368,7 +368,10 @@ def download_hds(options, url, swf=None):
     else:
         file_d = sys.stdout
 
-    file_d.write(binascii.a2b_hex(b"464c56010500000009000000001200010c00000000000000"))
+    metasize = struct.pack(">L", len(base64.b64decode(test["metadata"])))[1:]
+    file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))
+    file_d.write(metasize)
+    file_d.write(binascii.a2b_hex(b"00000000000000"))
     file_d.write(base64.b64decode(test["metadata"]))
     file_d.write(binascii.a2b_hex(b"00000000"))
     total = antal[1]["total"]
