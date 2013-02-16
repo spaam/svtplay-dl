@@ -401,7 +401,7 @@ def download_hls(options, url, baseurl=None):
         streams[int(i[1]["BANDWIDTH"])] = i[0]
 
     test = select_quality(options, streams)
-    if test[1:4] != "http":
+    if baseurl and test[1:4] != "http":
         test = "%s%s" % (baseurl, test)
     m3u8 = get_http_data(test)
     globaldata, files = parsem3u(m3u8)
