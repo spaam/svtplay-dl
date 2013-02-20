@@ -58,6 +58,7 @@ class Options:
         self.quality = None
         self.hls = False
         self.other = None
+        self.subtitle = False
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -538,6 +539,78 @@ def download_rtmp(options, url):
         subprocess.call(command)
     except OSError as e:
         log.error("Could not execute rtmpdump: " + e.strerror)
+
+def timestr(seconds):
+    total = float(seconds) / 1000
+    hours = int(total / 3600)
+    minutes = int(total / 60)
+    sec = total % 60
+    output = "%02d:%02d:%02.02f" % (hours, minutes, sec)
+    return output.replace(".", ",")
+
+def subtitle_json(options, url):
+    data = json.loads(get_http_data(url))
+    number = 1
+    subs = ""
+    for i in data:
+        subs += "%s\n%s --> %s\n" % (number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
+        subs += "%s\n\n" % i["text"]
+        number += 1
+
+    filename = "%s.srt" % options.output
+    fd = open(filename, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_sami(options, url):
+    data = get_http_data(url)
+    tree = ET.XML(data)
+    subt = tree.find("Font")
+    subs = ""
+    for i in subt.getiterator():
+        if i.tag == "Subtitle":
+            if i.attrib["SpotNumber"] == 1:
+                subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+            else:
+                subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+        else:
+            subs += "%s\n" % i.text
+    filename = "%s.srt" % options.output
+    fd = open(filename, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_smi(options, url):
+    data = get_http_data(url)
+    recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
+    number = 1
+    subs = ""
+    for i in recomp.finditer(data):
+        subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
+        text = "%s\n\n" % i.group(2)
+        subs += text.replace("<br>", "\n")
+        number += 1
+
+    filename = "%s.srt" % options.output
+    fd = open(filename, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_wsrt(options, url):
+    data = get_http_data(url)
+    recomp = re.compile("(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
+    srt = ""
+    for i in recomp.finditer(data):
+        sub = "%s\n%s\n%s\n" % (i.group(1), i.group(2).replace(".", ","), i.group(4))
+        if len(i.group(6)) > 0:
+            sub += "%s\n" % i.group(6)
+        sub += "\n"
+        sub = re.sub('<[^>]*>', '', sub)
+        srt += sub
+    filename = "%s.srt" % options.output
+    fd = open(filename, "w")
+    fd.write(srt)
+    fd.close
 
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
@@ -1250,6 +1323,9 @@ def main():
         metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
     parser.add_option("-H", "--hls",
         action="store_true", dest="hls", default=False)
+    parser.add_option("-S", "--subtitle",
+        action="store_true", dest="subtitle", default=False,
+        help="Download subtitle from the site if available.")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
