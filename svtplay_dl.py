@@ -886,6 +886,8 @@ class Kanal5():
         data = json.loads(get_http_data(url))
         options.live = data["isLive"]
         steambaseurl = data["streamBaseUrl"]
+        if data["hasSubtitle"]:
+            subtitle = "http://www.kanal5play.se/api/subtitles/%s" % match.group(1)
         streams = {}
 
         for i in data["streams"]:
@@ -900,6 +902,8 @@ class Kanal5():
         options.output  = "%s.%s" % (options.output, match.group(1))
         options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
         download_rtmp(options, steambaseurl)
+        if options.subtitle:
+            subtitle_json(options, subtitle)
 
 class Kanal9():
     def handle(self, url):
