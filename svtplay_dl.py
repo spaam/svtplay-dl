@@ -548,6 +548,40 @@ def timestr(seconds):
     output = "%02d:%02d:%02.02f" % (hours, minutes, sec)
     return output.replace(".", ",")
 
+def norm(name):
+    if name[0] == "{":
+        uri, tag = name[1:].split("}")
+        return tag
+    else:
+        return name
+
+def subtitle_tt(options, url):
+    i = 1
+    data = ""
+    skip = False
+    fh = get_http_data(url)
+    tree = ET.parse(fh)
+    for node in tree.iter():
+        tag = norm(node.tag)
+        if tag == "p":
+            if skip:
+                data = data + "\n"
+            data += '%s\n%s,%s --> %s,%s\n' % (i, node.attrib["begin"][:8], node.attrib["begin"][9:], node.attrib["end"][:8], node.attrib["end"][9:])
+            data += '%s\n' % node.text.strip(' \t\n\r')
+            skip = True
+            i += 1
+        if tag == "br":
+            if node.tail:
+                data += '%s\n\n' % node.tail.strip(' \t\n\r')
+                skip = False
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(filename, "w")
+    fd.write(data)
+    fd.close()
+
 def subtitle_json(options, url):
     data = json.loads(get_http_data(url))
     number = 1
