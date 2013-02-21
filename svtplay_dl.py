@@ -875,7 +875,7 @@ class Qbrick():
 
 class Kanal5():
     def handle(self, url):
-        return "kanal5play.se" in url
+        return ("kanal5play.se" in url) or ("kanal9play.se" in url)
 
     def get(self, options, url):
         match = re.search(".*video/([0-9]+)", url)
@@ -907,7 +907,7 @@ class Kanal5():
 
 class Kanal9():
     def handle(self, url):
-        return ("kanal9play.se" in url) or ("kanal5.se" in url)
+        return "kanal5.se" in url
 
     def get(self, options, url):
         data = get_http_data(url)
