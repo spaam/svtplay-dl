@@ -911,13 +911,12 @@ class Expressen():
         return "expressen.se" in url
 
     def get(self, options, url):
-        parse = urlparse(url)
-        match = re.search("/(.*[\/\+].*)/", unquote_plus(parse.path))
+        data = get_http_data(url)
+        match = re.search("xmlUrl: '(http://www.expressen.*)'", data)
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
-        url = "http://tv.expressen.se/%s/?standAlone=true&output=xml" % quote_plus(match.group(1))
-        other = ""
+        url = match.group(1)
         data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("vurls")
@@ -933,7 +932,7 @@ class Expressen():
         test = select_quality(options, streams)
 
         filename = test
-        match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*).flv", filename)
+        match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*)", filename)
 
         filename = "rtmp://%s" % match.group(1)
         options.other = "-y %s" % match.group(2)
