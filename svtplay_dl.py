@@ -557,7 +557,10 @@ def subtitle_json(options, url):
         subs += "%s\n\n" % i["text"]
         number += 1
 
-    filename = "%s.srt" % options.output
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
     fd = open(filename, "w")
     fd.write(subs)
     fd.close()
@@ -575,7 +578,11 @@ def subtitle_sami(options, url):
                 subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
         else:
             subs += "%s\n" % i.text
-    filename = "%s.srt" % options.output
+
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
     fd = open(filename, "w")
     fd.write(subs)
     fd.close()
@@ -591,7 +598,10 @@ def subtitle_smi(options, url):
         subs += text.replace("<br>", "\n")
         number += 1
 
-    filename = "%s.srt" % options.output
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
     fd = open(filename, "w")
     fd.write(subs)
     fd.close()
@@ -607,10 +617,13 @@ def subtitle_wsrt(options, url):
         sub += "\n"
         sub = re.sub('<[^>]*>', '', sub)
         srt += sub
-    filename = "%s.srt" % options.output
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
     fd = open(filename, "w")
     fd.write(srt)
-    fd.close
+    fd.close()
 
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
