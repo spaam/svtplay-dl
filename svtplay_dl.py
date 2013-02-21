@@ -1129,6 +1129,13 @@ class Svtplay():
             download_hds(options, manifest, swf)
         else:
             download_http(options, test["url"])
+        if options.subtitle:
+            try:
+                suburl = data["video"]["subtitleReferences"][0]["url"]
+            except KeyError:
+                sys.exit(1)
+            if len(suburl) > 0:
+                subtitle_wsrt(options, suburl)
 
 class Nrk(object):
     def handle(self, url):
