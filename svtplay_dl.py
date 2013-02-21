@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.8.2013.02.15"
+__version__ = "0.9.2013.02.21"
 
 class Options:
     """
