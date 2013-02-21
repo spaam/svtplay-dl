@@ -807,7 +807,8 @@ class Urplay():
         else:
             download_rtmp(options, rtmp)
         if options.subtitle:
-            subtitle_tt(options, subtitle)
+            if options.output != "-"
+                subtitle_tt(options, subtitle)
 
 class Qbrick():
     def handle(self, url):
@@ -903,7 +904,8 @@ class Kanal5():
         options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
         download_rtmp(options, steambaseurl)
         if options.subtitle:
-            subtitle_json(options, subtitle)
+            if options.output != "-"
+                subtitle_json(options, subtitle)
 
 class Expressen():
     def handle(self, url):
@@ -1002,7 +1004,8 @@ class Viaplay():
         options.other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         download_rtmp(options, filename)
         if options.subtitle and subtitle:
-            subtitle_sami(options, subtitle)
+            if options.output != "-"
+                subtitle_sami(options, subtitle)
 
 class Tv4play():
     def handle(self, url):
@@ -1071,7 +1074,8 @@ class Tv4play():
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
             download_hds(options, manifest, swf)
         if options.subtitle and subtitle:
-            subtitle_smi(options, subtitle)
+            if options.output != "-"
+                subtitle_smi(options, subtitle)
 
 class Svtplay():
     def handle(self, url):
@@ -1141,7 +1145,8 @@ class Svtplay():
             except KeyError:
                 sys.exit(1)
             if len(suburl) > 0:
-                subtitle_wsrt(options, suburl)
+                if options.output != "-"
+                    subtitle_wsrt(options, suburl)
 
 class Nrk(object):
     def handle(self, url):
