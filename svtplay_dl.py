@@ -1042,6 +1042,7 @@ class Tv4play():
                 options.live = True
 
         streams = {}
+        subtitle = False
 
         for i in sa:
             if i.find("mediaFormat").text != "smi":
@@ -1049,6 +1050,8 @@ class Tv4play():
                 stream["uri"] = i.find("base").text
                 stream["path"] = i.find("url").text
                 streams[int(i.find("bitrate").text)] = stream
+            elif i.find("mediaFormat").text == "smi":
+                subtitle = i.find("url").text
         if len(streams) == 1:
             test = streams[list(streams.keys())[0]]
         else:
@@ -1066,6 +1069,8 @@ class Tv4play():
                 sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
             download_hds(options, manifest, swf)
+        if options.subtitle and subtitle:
+            subtitle_smi(options, subtitle)
 
 class Svtplay():
     def handle(self, url):
