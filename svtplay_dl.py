@@ -578,7 +578,7 @@ def subtitle_tt(options, url):
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
-    fd = open(filename, "w")
+    fd = open(options.output, "w")
     fd.write(data)
     fd.close()
 
@@ -595,7 +595,7 @@ def subtitle_json(options, url):
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
-    fd = open(filename, "w")
+    fd = open(options.output, "w")
     fd.write(subs)
     fd.close()
 
@@ -617,7 +617,7 @@ def subtitle_sami(options, url):
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
-    fd = open(filename, "w")
+    fd = open(options.output, "w")
     fd.write(subs)
     fd.close()
 
@@ -636,7 +636,7 @@ def subtitle_smi(options, url):
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
-    fd = open(filename, "w")
+    fd = open(options.output, "w")
     fd.write(subs)
     fd.close()
 
@@ -655,7 +655,7 @@ def subtitle_wsrt(options, url):
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
-    fd = open(filename, "w")
+    fd = open(options.output, "w")
     fd.write(srt)
     fd.close()
 
