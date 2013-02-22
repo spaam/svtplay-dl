@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.9.2013.02.21"
+__version__ = "0.9.2013.02.22"
 
 class Options:
     """
@@ -807,7 +807,7 @@ class Urplay():
         else:
             download_rtmp(options, rtmp)
         if options.subtitle:
-            if options.output != "-"
+            if options.output != "-":
                 subtitle_tt(options, subtitle)
 
 class Qbrick():
@@ -904,7 +904,7 @@ class Kanal5():
         options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
         download_rtmp(options, steambaseurl)
         if options.subtitle:
-            if options.output != "-"
+            if options.output != "-":
                 subtitle_json(options, subtitle)
 
 class Expressen():
@@ -1004,7 +1004,7 @@ class Viaplay():
         options.other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         download_rtmp(options, filename)
         if options.subtitle and subtitle:
-            if options.output != "-"
+            if options.output != "-":
                 subtitle_sami(options, subtitle)
 
 class Tv4play():
@@ -1074,7 +1074,7 @@ class Tv4play():
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
             download_hds(options, manifest, swf)
         if options.subtitle and subtitle:
-            if options.output != "-"
+            if options.output != "-":
                 subtitle_smi(options, subtitle)
 
 class Svtplay():
@@ -1145,7 +1145,7 @@ class Svtplay():
             except KeyError:
                 sys.exit(1)
             if len(suburl) > 0:
-                if options.output != "-"
+                if options.output != "-":
                     subtitle_wsrt(options, suburl)
 
 class Nrk(object):
