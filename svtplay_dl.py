@@ -887,25 +887,33 @@ class Kanal5():
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
-        url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % match.group(1)
+        format = "FLASH"
+        if options.hls:
+            format = "IPHONE"
+        url = "http://www.kanal5play.se/api/getVideo?format=%s&videoId=%s" % (format, match.group(1))
         data = json.loads(get_http_data(url))
         options.live = data["isLive"]
-        steambaseurl = data["streamBaseUrl"]
         if data["hasSubtitle"]:
             subtitle = "http://www.kanal5play.se/api/subtitles/%s" % match.group(1)
-        streams = {}
+        if options.hls:
+            url = data["streams"][0]["source"]
+            baseurl = url[0:url.rfind("/")]
+            download_hls(options, url, baseurl)
+        else:
+            steambaseurl = data["streamBaseUrl"]
+            streams = {}
 
-        for i in data["streams"]:
-            stream = {}
-            stream["source"] = i["source"]
-            streams[int(i["bitrate"])] = stream
+            for i in data["streams"]:
+                stream = {}
+                stream["source"] = i["source"]
+                streams[int(i["bitrate"])] = stream
 
-        test = select_quality(options, streams)
+            test = select_quality(options, streams)
 
-        filename = test["source"]
-        match = re.search("^(.*):", filename)
-        options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
-        download_rtmp(options, steambaseurl)
+            filename = test["source"]
+            match = re.search("^(.*):", filename)
+            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
+            download_rtmp(options, steambaseurl)
         if options.subtitle:
             if options.output != "-":
                 subtitle_json(options, subtitle)
