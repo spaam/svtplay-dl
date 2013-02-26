@@ -915,7 +915,7 @@ class Kanal5():
 
             filename = test["source"]
             match = re.search("^(.*):", filename)
-            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/StandardPlayer.swf", filename)
+            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", filename)
             download_rtmp(options, steambaseurl)
         if options.subtitle:
             if options.output != "-":
