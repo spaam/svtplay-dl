@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.9.2013.02.22"
+__version__ = "0.9.2013.02.26"
 
 class Options:
     """
@@ -404,7 +404,7 @@ def download_hls(options, url, baseurl=None):
         streams[int(i[1]["BANDWIDTH"])] = i[0]
 
     test = select_quality(options, streams)
-    if baseurl and test[1:4] != "http":
+    if baseurl and test[0:4] != "http":
         test = "%s%s" % (baseurl, test)
     m3u8 = get_http_data(test)
     globaldata, files = parsem3u(m3u8)
