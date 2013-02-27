@@ -1263,9 +1263,7 @@ class generic(object):
             url = match.group(1)
             for i in sites:
                 if i.handle(url):
-                    stream = i
-                    break
-        return url, stream
+                    return url, i
 
 def progressbar(total, pos, msg=""):
     """
