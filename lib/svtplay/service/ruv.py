@@ -1,7 +1,7 @@
 import re
 
 from lib.svtplay.utils import get_http_data
-from svtplay.hls import download_hls
+from lib.svtplay.hls import download_hls
 
 class Ruv(object):
     def handle(self, url):
