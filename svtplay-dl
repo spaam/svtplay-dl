@@ -7,22 +7,8 @@ import logging
 
 from svtplay.log import log
 from svtplay.utils import get_http_data, select_quality
+from svtplay.service import service_handler
 
-from svtplay.service.aftonbladet import Aftonbladet
-from svtplay.service.dr import Dr
-from svtplay.service.expressen import Expressen
-from svtplay.service.hbo import Hbo
-from svtplay.service.justin import Justin
-from svtplay.service.kanal5 import Kanal5
-from svtplay.service.kanal9 import Kanal9
-from svtplay.service.nrk import Nrk
-from svtplay.service.qbrick import Qbrick
-from svtplay.service.ruv import Ruv
-from svtplay.service.sr import Sr
-from svtplay.service.svtplay import Svtplay
-from svtplay.service.tv4play import Tv4play
-from svtplay.service.urplay import Urplay
-from svtplay.service.viaplay import Viaplay
 
 __version__ = "0.8.2013.01.15"
 
@@ -58,13 +44,8 @@ class Options:
         self.other = None
 
 def get_media(url, options):
-    sites = [Aftonbladet(), Dr(), Expressen(), Hbo(), Justin(), Kanal5(), Kanal9(),
-             Nrk(), Qbrick(), Ruv(), Sr(), Svtplay(), Tv4play(), Urplay(), Viaplay()]
-    stream = None
-    for i in sites:
-        if i.handle(url):
-            stream = i
-            break
+    stream = service_handler(url)
+
     if not stream:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
