@@ -29,13 +29,13 @@ __version__ = "0.8.2013.01.15"
 class Options:
     """
     Options used when invoking the script from another Python script.
-    
+
     Simple container class used when calling get_media() from another Python
     script. The variables corresponds to the command line parameters parsed
     in main() when the script is called directly.
-    
+
     When called from a script there are a few more things to consider:
-    
+
     * Logging is done to 'log'. main() calls setup_log() which sets the
       logging to either stdout or stderr depending on the silent level.
       A user calling get_media() directly can either also use setup_log()
@@ -43,10 +43,9 @@ class Options:
 
     * Progress information is printed to 'progress_stream' which defaults to
       sys.stderr but can be changed to any stream.
-    
+
     * Many errors results in calls to system.exit() so catch 'SystemExit'-
       Exceptions to prevent the entire application from exiting if that happens.
-    
     """
 
     def __init__(self):
