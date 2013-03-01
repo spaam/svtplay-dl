@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import subprocess
 import re
 import shlex
 
-from lib.svtplay.log import log
+from svtplay.log import log
 
 def download_rtmp(options, url):
     """ Get the stream from RTMP """

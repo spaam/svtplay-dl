@@ -1,21 +1,23 @@
+from __future__ import absolute_import
+
 class Service(object):
     pass
 
-from aftonbladet import Aftonbladet
-from dr import Dr
-from expressen import Expressen
-from hbo import Hbo
-from justin import Justin
-from kanal5 import Kanal5
-from kanal9 import Kanal9
-from nrk import Nrk
-from qbrick import Qbrick
-from ruv import Ruv
-from sr import Sr
-from svtplay import Svtplay
-from tv4play import Tv4play
-from urplay import Urplay
-from viaplay import Viaplay
+from svtplay.service.aftonbladet import Aftonbladet
+from svtplay.service.dr import Dr
+from svtplay.service.expressen import Expressen
+from svtplay.service.hbo import Hbo
+from svtplay.service.justin import Justin
+from svtplay.service.kanal5 import Kanal5
+from svtplay.service.kanal9 import Kanal9
+from svtplay.service.nrk import Nrk
+from svtplay.service.qbrick import Qbrick
+from svtplay.service.ruv import Ruv
+from svtplay.service.sr import Sr
+from svtplay.service.svtplay import Svtplay
+from svtplay.service.tv4play import Tv4play
+from svtplay.service.urplay import Urplay
+from svtplay.service.viaplay import Viaplay
 
 
 def service_handler(url):

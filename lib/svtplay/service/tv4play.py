@@ -1,11 +1,12 @@
+from __future__ import absolute_import
 import sys
 import re
 import xml.etree.ElementTree as ET
 
-from lib.svtplay.utils import get_http_data, select_quality
-from lib.svtplay.log import log
-from lib.svtplay.rtmp import download_rtmp
-from lib.svtplay.hds import download_hds
+from svtplay.utils import get_http_data, select_quality
+from svtplay.log import log
+from svtplay.rtmp import download_rtmp
+from svtplay.hds import download_hds
 
 if sys.version_info > (3, 0):
     from urllib.parse import urlparse, parse_qs

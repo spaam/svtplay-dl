@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 import re
 
-from lib.svtplay.utils import get_http_data
-from lib.svtplay.rtmp import download_rtmp
+from svtplay.utils import get_http_data
+from svtplay.rtmp import download_rtmp
 
 class Urplay():
     def handle(self, url):

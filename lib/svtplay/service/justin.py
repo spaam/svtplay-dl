@@ -1,12 +1,13 @@
+from __future__ import absolute_import
 import sys
 import re
 from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
-from lib.svtplay.utils import get_http_data, select_quality
-from lib.svtplay.log import log
-from lib.svtplay.rtmp import download_rtmp
-from lib.svtplay.http import download_http
+from svtplay.utils import get_http_data, select_quality
+from svtplay.log import log
+from svtplay.rtmp import download_rtmp
+from svtplay.http import download_http
 
 class Justin():
     def handle(self, url):

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import sys
 import base64
 import re
@@ -10,8 +11,8 @@ from datetime import timedelta
 
 import xml.etree.ElementTree as ET
 
-from lib.svtplay.output import progressbar, progress_stream
-from lib.svtplay.utils import get_http_data, select_quality
+from svtplay.output import progressbar, progress_stream
+from svtplay.utils import get_http_data, select_quality
 
 log = logging.getLogger('svtplay_dl')
 
