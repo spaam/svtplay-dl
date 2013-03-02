@@ -32,8 +32,13 @@ class Tv4play():
             if match:
                 vid = match.group(1)
             else:
-                log.error("Can't find video file")
-                sys.exit(2)
+                data = get_http_data(url)
+                match = re.search("\"vid\":\"(\d+)\",", data)
+                if match:
+                    vid = match.group(1)
+                else:
+                    log.error("Can't find video file")
+                    sys.exit(2)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = get_http_data(url)
