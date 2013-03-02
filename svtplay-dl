@@ -9,7 +9,7 @@ from optparse import OptionParser
 import logging
 
 from svtplay.log import log
-from svtplay.utils import get_http_data, select_quality
+from svtplay.utils import get_http_data
 from svtplay.service import service_handler
 
 
