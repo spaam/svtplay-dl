@@ -23,7 +23,7 @@ class Kanal9():
         try:
             from pyamf import remoting
         except ImportError:
-            log.error("You need to install pyamf to download content from kanal5 and kanal9")
+            log.error("You need to install pyamf to download content from kanal5.se and kanal9play")
             log.error("In debian the package is called python-pyamf")
             sys.exit(2)
 
