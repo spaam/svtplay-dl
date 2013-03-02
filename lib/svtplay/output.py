@@ -48,9 +48,9 @@ def progressbar(total, pos, msg=""):
     bar = str()
 
     # FIXME ugly generation of bar
-    for i in range(0, rel_pos):
+    for _ in range(0, rel_pos):
         bar += "="
-    for i in range(rel_pos, width):
+    for _ in range(rel_pos, width):
         bar += "."
 
     # Determine how many digits in total (base 10)
