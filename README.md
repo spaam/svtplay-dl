@@ -30,6 +30,7 @@ This script works for:
 * tv6play.se
 * tv8play.se
 * twitch.tv
+* ur.se
 * urplay.se
 
 If you have OS X and [Homebrew](http://mxcl.github.com/homebrew/) you can install with:
