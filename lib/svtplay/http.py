@@ -16,7 +16,10 @@ else:
 def download_http(options, url):
     """ Get the stream from HTTP """
     response = urlopen(url)
-    total_size = response.info()['Content-Length']
+    try:
+        total_size = response.info()['Content-Length']
+    except KeyError:
+        total_size = 0
     total_size = int(total_size)
     bytes_so_far = 0
     if options.output != "-":
