@@ -1296,6 +1296,13 @@ class generic(object):
                 if i.handle(url):
                     return url, i
 
+        match = re.search("src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
+        if match:
+            for i in sites:
+                if i.handle(match.group(1)):
+                    return match.group(1), i
+        return url, stream
+
 def progressbar(total, pos, msg=""):
     """
     Given a total and a progress position, output a progress bar
