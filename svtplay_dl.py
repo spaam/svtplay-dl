@@ -1253,6 +1253,37 @@ class Radioplay(object):
             log.error("Can't find any streams.")
             sys.exit(2)
 
+class Vimeo(object):
+    def handle(self, url):
+        return "vimeo.com" in url
+
+    def get(self, options, url):
+        data = get_http_data(url, referer="")
+        match = data.split(' = {config:')[1].split(',assets:')[0]
+        if match:
+            jsondata = json.loads(match)
+            sig = jsondata['request']['signature']
+            vidid = jsondata["video"]["id"]
+            timestamp = jsondata['request']['timestamp']
+            referer = jsondata["request"]["referrer"]
+            avail_quality = jsondata["video"]["files"]["h264"]
+            selected_quality = None
+            for i in avail_quality:
+                if options.quality == i:
+                    selected_quality = i
+
+            if options.quality and selected_quality is None:
+                log.error("Can't find that quality. (Try one of: %s)",
+                      ", ".join(map(str, avail_quality)))
+                sys.exit(4)
+            elif options.quality is None and selected_quality is None:
+                selected_quality = avail_quality[0]
+            url = "http://player.vimeo.com/play_redirect?clip_id=%s&sig=%s&time=%s&quality=%s&codecs=H264,VP8,VP6&type=moogaloop_local&embed_location=%s" % (vidid, sig, timestamp, selected_quality, referer)
+            download_http(options, url)
+        else:
+            log.error("Can't find any streams.")
+            sys.exit(2)
+
 class generic(object):
     ''' Videos embed in sites '''
     def get(self, sites, url):
@@ -1301,7 +1332,7 @@ def progressbar(total, pos, msg=""):
 
 def get_media(url, options):
     sites = [Aftonbladet(), Dr(), Expressen(), Hbo(), Justin(), Kanal5(), Nrk(),
-            Qbrick(), Ruv(), Radioplay(), Sr(), Svtplay(), Tv4play(), Urplay(), Viaplay()]
+            Qbrick(), Ruv(), Radioplay(), Sr(), Svtplay(), Tv4play(), Urplay(), Viaplay(), Vimeo()]
     stream = None
     for i in sites:
         if i.handle(url):
