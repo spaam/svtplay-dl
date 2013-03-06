@@ -25,7 +25,7 @@ import struct
 import binascii
 from datetime import timedelta
 
-__version__ = "0.9.2013.02.26"
+__version__ = "0.9.2013.03.06"
 
 class Options:
     """
@@ -492,6 +492,8 @@ def download_http(options, url):
         extension = re.search("(\.[a-z0-9]+)$", url)
         if extension:
             options.output = options.output + extension.group(1)
+        else:
+            options.output = "%s.mp4" % options.output
         log.info("Outfile: %s", options.output)
         file_d = open(options.output, "wb")
     else:
