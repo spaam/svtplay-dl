@@ -479,9 +479,9 @@ def download_http(options, url):
     try:
         response = urlopen(request)
     except HTTPError as e:
-        print "ERROR"
-        print e.reason
-        sys.exit()
+        log.error("Something wrong with that url")
+        log.error("Error code: %s" % e.code)
+        sys.exit(5)
     try:
         total_size = response.info()['Content-Length']
     except KeyError:
