@@ -566,12 +566,11 @@ def norm(name):
     else:
         return name
 
-def subtitle_tt(options, url):
+def subtitle_tt(options, data):
     i = 1
     data = ""
     skip = False
-    fh = get_http_data(url)
-    tree = ET.parse(fh)
+    tree = ET.parse(data)
     for node in tree.iter():
         tag = norm(node.tag)
         if tag == "p":
@@ -593,8 +592,8 @@ def subtitle_tt(options, url):
     fd.write(data)
     fd.close()
 
-def subtitle_json(options, url):
-    data = json.loads(get_http_data(url))
+def subtitle_json(options, data):
+    data = json.loads(data)
     number = 1
     subs = ""
     for i in data:
@@ -610,8 +609,7 @@ def subtitle_json(options, url):
     fd.write(subs)
     fd.close()
 
-def subtitle_sami(options, url):
-    data = get_http_data(url)
+def subtitle_sami(options, data):
     tree = ET.XML(data)
     subt = tree.find("Font")
     subs = ""
@@ -632,8 +630,7 @@ def subtitle_sami(options, url):
     fd.write(subs)
     fd.close()
 
-def subtitle_smi(options, url):
-    data = get_http_data(url)
+def subtitle_smi(options, data):
     recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
     number = 1
     subs = ""
@@ -651,8 +648,7 @@ def subtitle_smi(options, url):
     fd.write(subs)
     fd.close()
 
-def subtitle_wsrt(options, url):
-    data = get_http_data(url)
+def subtitle_wsrt(options, data):
     recomp = re.compile("(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
     srt = ""
     for i in recomp.finditer(data):
@@ -823,7 +819,8 @@ class Urplay():
             download_rtmp(options, rtmp)
         if options.subtitle:
             if options.output != "-":
-                subtitle_tt(options, subtitle)
+                data = get_http_data(subtitle)
+                subtitle_tt(options, data)
 
 class Qbrick():
     def handle(self, url):
@@ -930,7 +927,8 @@ class Kanal5():
             download_rtmp(options, steambaseurl)
         if options.subtitle:
             if options.output != "-":
-                subtitle_json(options, subtitle)
+                data = get_http_data(data)
+                subtitle_json(options, data)
 
 class Expressen():
     def handle(self, url):
@@ -1030,7 +1028,8 @@ class Viaplay():
         download_rtmp(options, filename)
         if options.subtitle and subtitle:
             if options.output != "-":
-                subtitle_sami(options, subtitle)
+                data = get_http_data(subtitle)
+                subtitle_sami(options, data)
 
 class Tv4play():
     def handle(self, url):
@@ -1100,7 +1099,8 @@ class Tv4play():
             download_hds(options, manifest, swf)
         if options.subtitle and subtitle:
             if options.output != "-":
-                subtitle_smi(options, subtitle)
+                data = get_http_data(subtitle)
+                subtitle_smi(options, data)
 
 class Svtplay():
     def handle(self, url):
@@ -1171,7 +1171,8 @@ class Svtplay():
                 sys.exit(1)
             if len(suburl) > 0:
                 if options.output != "-":
-                    subtitle_wsrt(options, suburl)
+                    data = get_http_data(suburl)
+                    subtitle_wsrt(options, data)
 
 class Nrk(object):
     def handle(self, url):
