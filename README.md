@@ -5,7 +5,6 @@ You need:
 
 * [RTMPDump](http://rtmpdump.mplayerhq.hu/) 2.4 or higher
 * [PyCrypto](https://www.dlitz.net/software/pycrypto/) to download encrypted HLS streams
-* [PyAMF](http://www.pyamf.org/) for kanal5.se / kanal9play.se
 
 This script works for:
 
