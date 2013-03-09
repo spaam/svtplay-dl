@@ -948,6 +948,9 @@ class Kanal5():
             streams = {}
 
             for i in data["streams"]:
+                if i["drmProtected"]:
+                    log.error("We cant download drm files for this site.")
+                    sys.exit(2)
                 stream = {}
                 stream["source"] = i["source"]
                 streams[int(i["bitrate"])] = stream
