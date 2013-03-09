@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 import sys
 if sys.version_info > (3, 0):
-    from urllib.request import Request, urlopen
+    from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
     from io import BytesIO as StringIO
+    from http.cookiejar import CookieJar, Cookie
 else:
-    from urllib2 import Request, urlopen, HTTPError, URLError
+    from urllib2 import Request, urlopen, HTTPError, URLError, build_opener, HTTPCookieProcessor
     from urlparse import urlparse, parse_qs
     from urllib import unquote_plus, quote_plus
     from StringIO import StringIO
+    from cookielib import CookieJar, Cookie
 
 import re
 import os
@@ -59,6 +61,8 @@ class Options:
         self.hls = False
         self.other = None
         self.subtitle = False
+        self.username = None
+        self.password = None
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -268,19 +272,21 @@ def decode_f4f(fragID, fragData):
         start  += tagLen + 11 + 4
     return start
 
-def get_http_data(url, method="GET", header="", data="", referer=None):
+def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
-    request = Request(url)
-    request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+    if not cookiejar:
+        cookiejar = CookieJar()
+    request = build_opener(HTTPCookieProcessor(cookiejar))
+    request.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
 
     if len(header) > 0:
-        request.add_header('Content-Type', header)
+        request.addheaders += [('Content-Type', header)]
     if len(data) > 0:
         request.add_data(data)
     if referer:
-        request.add_header('Referer', referer)
+        request.addheaders += [('Referer', referer)]
     try:
-        response = urlopen(request)
+        response = request.open(url)
     except HTTPError as e:
         log.error("Something wrong with that url")
         log.error("Error code: %s" % e.code)
@@ -1419,6 +1425,10 @@ def main():
     parser.add_option("-S", "--subtitle",
         action="store_true", dest="subtitle", default=False,
         help="Download subtitle from the site if available.")
+    parser.add_option("-u", "--username", default=None,
+        help="Username")
+    parser.add_option("-p", "--password", default=None,
+        help="Password")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
