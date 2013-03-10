@@ -54,9 +54,11 @@ class Justin():
                             streams[int(i.find("video_height").text)] = stream
                         except AttributeError:
                             pass
-
-                test = select_quality(options, streams)
-                options.other = "-j '%s' -W %s" % (test["token"], options.other)
-                options.resume = False
-                download_rtmp(options, test["url"])
-
+                if len(streams) > 0:
+                    test = select_quality(options, streams)
+                    options.other = "-j '%s' -W %s" % (test["token"], options.other)
+                    options.resume = False
+                    download_rtmp(options, test["url"])
+                else:
+                    log.error("Can't any streams")
+                    sys.exit(2)
