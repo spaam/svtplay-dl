@@ -11,7 +11,7 @@ from svtplay.rtmp import download_rtmp
 
 class Kanal5():
     def handle(self, url):
-        return "kanal5play.se" in url
+        return ("kanal5play.se" in url) or ('kanal9play.se' in url)
 
     def get(self, options, url):
         match = re.search(".*video/([0-9]+)", url)
