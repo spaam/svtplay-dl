@@ -25,6 +25,7 @@ class Viaplay():
         data = get_http_data(url)
         xml = ET.XML(data)
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+        subtitle = xml.find("Product").find("SamiFile").text
 
         if filename[:4] == "http":
             data = get_http_data(filename)
@@ -33,4 +34,7 @@ class Viaplay():
 
         options.other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
         download_rtmp(options, filename)
-
+        if options.subtitle and subtitle:
+            if options.output != "-":
+                data = get_http_data(subtitle)
+                subtitle_sami(options, data)
