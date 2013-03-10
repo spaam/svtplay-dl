@@ -55,6 +55,121 @@ def get_http_data(url, method="GET", header="", data=""):
     response.close()
     return data
 
+def timestr(seconds):
+    total = float(seconds) / 1000
+    hours = int(total / 3600)
+    minutes = int(total / 60)
+    sec = total % 60
+    output = "%02d:%02d:%02.02f" % (hours, minutes, sec)
+    return output.replace(".", ",")
+
+def norm(name):
+    if name[0] == "{":
+        uri, tag = name[1:].split("}")
+        return tag
+    else:
+        return name
+
+def subtitle_tt(options, data):
+    i = 1
+    data = ""
+    skip = False
+    tree = ET.parse(data)
+    for node in tree.iter():
+        tag = norm(node.tag)
+        if tag == "p":
+            if skip:
+                data = data + "\n"
+            data += '%s\n%s,%s --> %s,%s\n' % (i, node.attrib["begin"][:8], node.attrib["begin"][9:], node.attrib["end"][:8], node.attrib["end"][9:])
+            data += '%s\n' % node.text.strip(' \t\n\r')
+            skip = True
+            i += 1
+        if tag == "br":
+            if node.tail:
+                data += '%s\n\n' % node.tail.strip(' \t\n\r')
+                skip = False
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(data)
+    fd.close()
+
+def subtitle_json(options, data):
+    data = json.loads(data)
+    number = 1
+    subs = ""
+    for i in data:
+        subs += "%s\n%s --> %s\n" % (number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
+        subs += "%s\n\n" % i["text"]
+        number += 1
+
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_sami(options, data):
+    tree = ET.XML(data)
+    subt = tree.find("Font")
+    subs = ""
+    for i in subt.getiterator():
+        if i.tag == "Subtitle":
+            if i.attrib["SpotNumber"] == 1:
+                subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+            else:
+                subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+        else:
+            subs += "%s\n" % i.text
+
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_smi(options, data):
+    recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
+    number = 1
+    subs = ""
+    for i in recomp.finditer(data):
+        subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
+        text = "%s\n\n" % i.group(2)
+        subs += text.replace("<br>", "\n")
+        number += 1
+
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(subs)
+    fd.close()
+
+def subtitle_wsrt(options, data):
+    recomp = re.compile("(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
+    srt = ""
+    for i in recomp.finditer(data):
+        sub = "%s\n%s\n%s\n" % (i.group(1), i.group(2).replace(".", ","), i.group(4))
+        if len(i.group(6)) > 0:
+            sub += "%s\n" % i.group(6)
+        sub += "\n"
+        sub = re.sub('<[^>]*>', '', sub)
+        srt += sub
+    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(srt)
+    fd.close()
+
 def select_quality(options, streams):
     sort = sorted(streams.keys(), key=int)
 
