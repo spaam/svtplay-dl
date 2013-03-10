@@ -77,4 +77,12 @@ class Svtplay(Service):
             download_hds(options, manifest, swf)
         else:
             download_http(options, test["url"])
-
+        if options.subtitle:
+            try:
+                suburl = data["video"]["subtitleReferences"][0]["url"]
+            except KeyError:
+                sys.exit(1)
+            if len(suburl) > 0:
+                if options.output != "-":
+                    data = get_http_data(subtitle)
+                    subtitle_wsrt(options, data)
