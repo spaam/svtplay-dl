@@ -30,7 +30,6 @@ from svtplay.service.expressen import Expressen
 from svtplay.service.hbo import Hbo
 from svtplay.service.justin import Justin
 from svtplay.service.kanal5 import Kanal5
-from svtplay.service.kanal9 import Kanal9
 from svtplay.service.nrk import Nrk
 from svtplay.service.qbrick import Qbrick
 from svtplay.service.ruv import Ruv
@@ -50,7 +49,6 @@ def service_handler(url):
         Hbo(),
         Justin(),
         Kanal5(),
-        Kanal9(),
         Nrk(),
         Qbrick(),
         Ruv(),
