@@ -5,7 +5,7 @@ import re
 import json
 
 from svtplay.utils import get_http_data, select_quality
-from svtplay.rtmp import download_rtmp
+from svtplay.fetcher.rtmp import download_rtmp
 
 class Dr(object):
     def handle(self, url):

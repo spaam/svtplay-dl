@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay.utils import get_http_data, select_quality
 from svtplay.log import log
-from svtplay.rtmp import download_rtmp
+from svtplay.fetcher.rtmp import download_rtmp
 
 class Qbrick():
     def handle(self, url):

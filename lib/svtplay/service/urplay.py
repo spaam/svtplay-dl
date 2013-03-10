@@ -5,9 +5,9 @@ import re
 import json
 
 from svtplay.utils import get_http_data
-from svtplay.rtmp import download_rtmp
-from svtplay.hds import download_hds
-from svtplay.hls import download_hls
+from svtplay.fetcher.rtmp import download_rtmp
+from svtplay.fetcher.hds import download_hds
+from svtplay.fetcher.hls import download_hls
 
 class Urplay():
     def handle(self, url):

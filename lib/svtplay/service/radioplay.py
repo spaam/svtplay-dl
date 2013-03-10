@@ -6,9 +6,9 @@ from urlparse import urlparse
 
 from svtplay.utils import get_http_data
 
-from svtplay.rtmp import download_rtmp
-from svtplay.hls import download_hls
-from svtplay.http import download_http
+from svtplay.fetcher.rtmp import download_rtmp
+from svtplay.fetcher.hls import download_hls
+from svtplay.fetcher.http import download_http
 
 from svtplay.log import log
 

@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay.utils import get_http_data
 from svtplay.log import log
-from svtplay.rtmp import download_rtmp
+from svtplay.fetcher.rtmp import download_rtmp
 
 class Viaplay():
     def handle(self, url):

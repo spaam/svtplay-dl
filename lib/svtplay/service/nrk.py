@@ -4,8 +4,8 @@ from __future__ import absolute_import
 import re
 
 from svtplay.utils import get_http_data
-from svtplay.hds import download_hds
-from svtplay.hls import download_hls
+from svtplay.fetcher.hds import download_hds
+from svtplay.fetcher.hls import download_hls
 
 class Nrk(object):
     def handle(self, url):

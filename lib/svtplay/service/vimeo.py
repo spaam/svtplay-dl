@@ -5,7 +5,7 @@ import sys
 import json
 
 from svtplay.utils import get_http_data
-from svtplay.http import download_http
+from svtplay.fetcher.http import download_http
 from svtplay.log import log
 
 class Vimeo(object):
