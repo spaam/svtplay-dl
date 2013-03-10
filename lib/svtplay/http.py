@@ -15,7 +15,14 @@ else:
 
 def download_http(options, url):
     """ Get the stream from HTTP """
-    response = urlopen(url)
+    request = Request(url)
+    request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+    try:
+        response = urlopen(request)
+    except HTTPError as e:
+        log.error("Something wrong with that url")
+        log.error("Error code: %s" % e.code)
+        sys.exit(5)
     try:
         total_size = response.info()['Content-Length']
     except KeyError:
