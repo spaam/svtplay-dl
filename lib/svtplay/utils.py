@@ -18,7 +18,7 @@ else:
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
-def get_http_data(url, method="GET", header="", data=""):
+def get_http_data(url, method="GET", header="", data="", referer=None):
     """ Get the page to parse it for streams """
     request = Request(url)
     request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
@@ -27,6 +27,8 @@ def get_http_data(url, method="GET", header="", data=""):
         request.add_header('Content-Type', header)
     if len(data) > 0:
         request.add_data(data)
+    if referer:
+        request.add_header('Referer', referer)
     try:
         response = urlopen(request)
     except HTTPError as e:
