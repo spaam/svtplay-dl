@@ -19,6 +19,7 @@ class Urplay():
         data = re.sub("(\w+): ", r'"\1":',data.group(1))
         data = data.replace("\'", "\"").replace("\",}","\"}").replace("(m = location.hash.match(/[#&]start=(\d+)/)) ? m[1] : 0,","0")
         jsondata = json.loads(data)
+        subtitle = jsondata["subtitles"].split(",")[0]
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
         hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
@@ -30,3 +31,7 @@ class Urplay():
             download_hls(options, hls, http)
         else:
             download_rtmp(options, rtmp)
+        if options.subtitle:
+            if options.output != "-":
+                data = get_http_data(subtitle)
+                subtitle_tt(options, data)
