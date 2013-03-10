@@ -29,6 +29,9 @@ class Kanal5():
         if options.hls:
             url = data["streams"][0]["source"]
             baseurl = url[0:url.rfind("/")]
+            if data["streams"][0]["drmProtected"]:
+                log.error("We cant download drm files for this site.")
+                sys.exit(2)
             download_hls(options, url, baseurl)
         else:
             steambaseurl = data["streamBaseUrl"]
