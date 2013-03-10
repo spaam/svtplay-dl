@@ -39,6 +39,7 @@ from svtplay.service.svtplay import Svtplay
 from svtplay.service.tv4play import Tv4play
 from svtplay.service.urplay import Urplay
 from svtplay.service.viaplay import Viaplay
+from svtplay.service.vimeo import Vimeo
 
 
 def service_handler(url):
@@ -57,7 +58,8 @@ def service_handler(url):
         Svtplay(),
         Tv4play(),
         Urplay(),
-        Viaplay()]
+        Viaplay(),
+        Vimeo()]
 
     handler = None
 
