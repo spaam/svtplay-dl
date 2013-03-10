@@ -33,6 +33,8 @@ def download_http(options, url):
         extension = re.search("(\.[a-z0-9]+)$", url)
         if extension:
             options.output = options.output + extension.group(1)
+        else:
+            options.output = "%s.mp4" % options.output
         log.info("Outfile: %s", options.output)
         file_d = open(options.output, "wb")
     else:
