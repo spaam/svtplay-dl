@@ -15,6 +15,7 @@ from svtplay.service.kanal9 import Kanal9
 from svtplay.service.nrk import Nrk
 from svtplay.service.qbrick import Qbrick
 from svtplay.service.ruv import Ruv
+from svtplay.service.radioplay import Radioplay
 from svtplay.service.sr import Sr
 from svtplay.service.svtplay import Svtplay
 from svtplay.service.tv4play import Tv4play
@@ -34,6 +35,7 @@ def service_handler(url):
         Nrk(),
         Qbrick(),
         Ruv(),
+        Radioplay(),
         Sr(),
         Svtplay(),
         Tv4play(),
