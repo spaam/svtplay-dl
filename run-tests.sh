@@ -12,6 +12,9 @@ while [ "$#" -gt 0 ]; do
 		-c|--coverage)
 			OPTS="$OPTS --with-coverage"
 			;;
+		-v|--verbose)
+			OPTS="$OPTS --verbose"
+			;;
 		-*)
 			die "Unknown option: '$1'"
 			;;
