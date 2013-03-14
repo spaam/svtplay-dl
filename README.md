@@ -1,11 +1,23 @@
 svtplay-dl
 ==========
-
+Installation
+------------
 You need:
 
 * [RTMPDump](http://rtmpdump.mplayerhq.hu/) 2.4 or higher
 * [PyCrypto](https://www.dlitz.net/software/pycrypto/) to download encrypted HLS streams
 
+You can install it by running the following as root:
+
+    python setup.py install
+
+If you have OS X and [Homebrew](http://mxcl.github.com/homebrew/)
+you can install with:
+
+    brew install svtplay-dl
+
+Support
+-------
 This script works for:
 
 * aftonbladet.se
@@ -31,7 +43,3 @@ This script works for:
 * twitch.tv
 * ur.se
 * urplay.se
-
-If you have OS X and [Homebrew](http://mxcl.github.com/homebrew/) you can install with:
-
-    brew install svtplay-dl
