@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import subprocess
 import re
 import shlex
+import sys
 
 from svtplay.log import log
 
