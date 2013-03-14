@@ -5,6 +5,11 @@ import sys
 import re
 import json
 
+if sys.version_info > (3, 0):
+    from http.cookiejar import CookieJar, Cookie
+else:
+    from cookielib import CookieJar, Cookie
+
 from svtplay.utils import get_http_data, select_quality
 from svtplay.log import log
 from svtplay.fetcher.rtmp import download_rtmp
@@ -14,6 +19,7 @@ class Kanal5():
         return ("kanal5play.se" in url) or ('kanal9play.se' in url)
 
     def get(self, options, url):
+        cj = CookieJar()
         match = re.search(".*video/([0-9]+)", url)
         if not match:
             log.error("Can't find video file")
