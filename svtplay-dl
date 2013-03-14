@@ -46,6 +46,8 @@ class Options:
         self.hls = False
         self.other = None
         self.subtitle = False
+        self.username = None
+        self.password = None
 
 def get_media(url, options):
     stream = service_handler(url)
@@ -109,6 +111,10 @@ def main():
     parser.add_option("-S", "--subtitle",
         action="store_true", dest="subtitle", default=False,
         help="Download subtitle from the site if available.")
+    parser.add_option("-u", "--username", default=None,
+        help="Username")
+    parser.add_option("-p", "--password", default=None,
+        help="Password")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("incorrect number of arguments")
