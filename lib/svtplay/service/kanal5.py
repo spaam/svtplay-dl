@@ -52,7 +52,7 @@ class Kanal5():
         data = json.loads(get_http_data(url, cookiejar=cj))
         options.live = data["isLive"]
         if data["hasSubtitle"]:
-            subtitle = "http://www.kanal5play.se/api/subtitles/%s" % video_id)
+            subtitle = "http://www.kanal5play.se/api/subtitles/%s" % video_id
         if options.hls:
             url = data["streams"][0]["source"]
             baseurl = url[0:url.rfind("/")]
