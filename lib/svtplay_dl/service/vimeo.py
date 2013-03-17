@@ -4,9 +4,9 @@ from __future__ import absolute_import
 import sys
 import json
 
-from svtplay.utils import get_http_data
-from svtplay.fetcher.http import download_http
-from svtplay.log import log
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.log import log
 
 class Vimeo(object):
     def handle(self, url):

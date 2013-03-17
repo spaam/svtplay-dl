@@ -6,9 +6,9 @@ import re
 from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
-from svtplay.utils import get_http_data
-from svtplay.log import log
-from svtplay.fetcher.rtmp import download_rtmp
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.log import log
+from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Viaplay():
     def handle(self, url):

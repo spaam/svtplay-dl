@@ -10,9 +10,9 @@ if sys.version_info > (3, 0):
 else:
     from cookielib import CookieJar, Cookie
 
-from svtplay.utils import get_http_data, select_quality
-from svtplay.log import log
-from svtplay.fetcher.rtmp import download_rtmp
+from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.log import log
+from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Kanal5():
     def handle(self, url):

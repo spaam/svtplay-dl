@@ -13,8 +13,8 @@ from datetime import timedelta
 
 import xml.etree.ElementTree as ET
 
-from svtplay.output import progressbar, progress_stream
-from svtplay.utils import get_http_data, select_quality
+from svtplay_dl.output import progressbar, progress_stream
+from svtplay_dl.utils import get_http_data, select_quality
 
 log = logging.getLogger('svtplay_dl')
 

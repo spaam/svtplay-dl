@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 import re
 
-from svtplay.utils import get_http_data
-from svtplay.fetcher.hls import download_hls
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.fetcher.hls import download_hls
 
 class Ruv(object):
     def handle(self, url):

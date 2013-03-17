@@ -5,9 +5,9 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
-from svtplay.utils import get_http_data
-from svtplay.log import log
-from svtplay.fetcher.http import download_http
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.log import log
+from svtplay_dl.fetcher.http import download_http
 
 if sys.version_info > (3, 0):
     from urllib.parse import urlparse, parse_qs, unquote_plus

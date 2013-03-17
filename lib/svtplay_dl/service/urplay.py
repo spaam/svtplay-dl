@@ -4,10 +4,10 @@ from __future__ import absolute_import
 import re
 import json
 
-from svtplay.utils import get_http_data
-from svtplay.fetcher.rtmp import download_rtmp
-from svtplay.fetcher.hds import download_hds
-from svtplay.fetcher.hls import download_hls
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.hds import download_hds
+from svtplay_dl.fetcher.hls import download_hls
 
 class Urplay():
     def handle(self, url):

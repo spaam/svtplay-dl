@@ -7,7 +7,7 @@
 
 from __future__ import absolute_import
 import unittest
-import svtplay.output
+import svtplay_dl.output
 
 class mockfile(object):
     def __init__(self):
@@ -22,45 +22,45 @@ class mockfile(object):
 class progressbarTest(unittest.TestCase):
     def setUp(self):
         self.mockfile = mockfile()
-        svtplay.output.progress_stream = self.mockfile
+        svtplay_dl.output.progress_stream = self.mockfile
 
     def test_0_100(self):
-        svtplay.output.progressbar(100, 0)
+        svtplay_dl.output.progressbar(100, 0)
         self.assertEqual(
         self.mockfile.read(),
         "\r[000/100][..................................................] "
     )
 
     def test_progress_1_100(self):
-        svtplay.output.progressbar(100, 1)
+        svtplay_dl.output.progressbar(100, 1)
         self.assertEqual(
         self.mockfile.read(),
         "\r[001/100][..................................................] "
     )
 
     def test_progress_2_100(self):
-        svtplay.output.progressbar(100, 2)
+        svtplay_dl.output.progressbar(100, 2)
         self.assertEqual(
         self.mockfile.read(),
         "\r[002/100][=.................................................] "
     )
 
     def test_progress_50_100(self):
-        svtplay.output.progressbar(100, 50)
+        svtplay_dl.output.progressbar(100, 50)
         self.assertEqual(
         self.mockfile.read(),
         "\r[050/100][=========================.........................] "
     )
 
     def test_progress_100_100(self):
-        svtplay.output.progressbar(100, 100)
+        svtplay_dl.output.progressbar(100, 100)
         self.assertEqual(
         self.mockfile.read(),
         "\r[100/100][==================================================] "
     )
 
     def test_progress_20_100_msg(self):
-        svtplay.output.progressbar(100, 20, "msg")
+        svtplay_dl.output.progressbar(100, 20, "msg")
         self.assertEqual(
         self.mockfile.read(),
         "\r[020/100][==========........................................] msg"

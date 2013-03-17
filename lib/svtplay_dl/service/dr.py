@@ -4,8 +4,8 @@ from __future__ import absolute_import
 import re
 import json
 
-from svtplay.utils import get_http_data, select_quality
-from svtplay.fetcher.rtmp import download_rtmp
+from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Dr(object):
     def handle(self, url):

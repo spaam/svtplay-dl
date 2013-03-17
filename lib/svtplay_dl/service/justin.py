@@ -6,10 +6,10 @@ import re
 from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
-from svtplay.utils import get_http_data, select_quality
-from svtplay.log import log
-from svtplay.fetcher.rtmp import download_rtmp
-from svtplay.fetcher.http import download_http
+from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.log import log
+from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.http import download_http
 
 class Justin():
     def handle(self, url):

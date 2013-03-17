@@ -7,9 +7,9 @@ import re
 import time
 from datetime import timedelta
 
-from svtplay.utils import get_http_data, select_quality
-from svtplay.output import progressbar, progress_stream
-from svtplay.log import log
+from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.output import progressbar, progress_stream
+from svtplay_dl.log import log
 
 if sys.version_info > (3, 0):
     from io import BytesIO as StringIO

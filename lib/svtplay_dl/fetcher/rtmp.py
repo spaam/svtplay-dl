@@ -6,7 +6,7 @@ import re
 import shlex
 import sys
 
-from svtplay.log import log
+from svtplay_dl.log import log
 
 def download_rtmp(options, url):
     """ Get the stream from RTMP """

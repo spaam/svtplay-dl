@@ -5,8 +5,8 @@ import sys
 import time
 import re
 
-from svtplay.output import progress # FIXME use progressbar() instead
-from svtplay.log import log
+from svtplay_dl.output import progress # FIXME use progressbar() instead
+from svtplay_dl.log import log
 
 if sys.version_info > (3, 0):
     from urllib.request import urlopen

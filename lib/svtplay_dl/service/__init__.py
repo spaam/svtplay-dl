@@ -24,22 +24,22 @@ class Generic(object):
                     return match.group(1), i
         return url, stream
 
-from svtplay.service.aftonbladet import Aftonbladet
-from svtplay.service.dr import Dr
-from svtplay.service.expressen import Expressen
-from svtplay.service.hbo import Hbo
-from svtplay.service.justin import Justin
-from svtplay.service.kanal5 import Kanal5
-from svtplay.service.nrk import Nrk
-from svtplay.service.qbrick import Qbrick
-from svtplay.service.ruv import Ruv
-from svtplay.service.radioplay import Radioplay
-from svtplay.service.sr import Sr
-from svtplay.service.svtplay import Svtplay
-from svtplay.service.tv4play import Tv4play
-from svtplay.service.urplay import Urplay
-from svtplay.service.viaplay import Viaplay
-from svtplay.service.vimeo import Vimeo
+from svtplay_dl.service.aftonbladet import Aftonbladet
+from svtplay_dl.service.dr import Dr
+from svtplay_dl.service.expressen import Expressen
+from svtplay_dl.service.hbo import Hbo
+from svtplay_dl.service.justin import Justin
+from svtplay_dl.service.kanal5 import Kanal5
+from svtplay_dl.service.nrk import Nrk
+from svtplay_dl.service.qbrick import Qbrick
+from svtplay_dl.service.ruv import Ruv
+from svtplay_dl.service.radioplay import Radioplay
+from svtplay_dl.service.sr import Sr
+from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.tv4play import Tv4play
+from svtplay_dl.service.urplay import Urplay
+from svtplay_dl.service.viaplay import Viaplay
+from svtplay_dl.service.vimeo import Vimeo
 
 
 def service_handler(url):
