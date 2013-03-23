@@ -179,9 +179,9 @@ def subtitle_wsrt(options, data):
 def select_quality(options, streams):
     available = sorted(streams.keys(), key=int)
 
-    optq = int(options.quality)
+    optq = options.quality
     if optq:
-        optf = int(options.flexibleq)
+        optf = options.flexibleq
         if not optf:
             wanted = [optq]
         else:
