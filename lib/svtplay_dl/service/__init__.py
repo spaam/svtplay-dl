@@ -2,6 +2,23 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 
+from svtplay_dl.service.aftonbladet import Aftonbladet
+from svtplay_dl.service.dr import Dr
+from svtplay_dl.service.expressen import Expressen
+from svtplay_dl.service.hbo import Hbo
+from svtplay_dl.service.justin import Justin
+from svtplay_dl.service.kanal5 import Kanal5
+from svtplay_dl.service.nrk import Nrk
+from svtplay_dl.service.qbrick import Qbrick
+from svtplay_dl.service.ruv import Ruv
+from svtplay_dl.service.radioplay import Radioplay
+from svtplay_dl.service.sr import Sr
+from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.tv4play import Tv4play
+from svtplay_dl.service.urplay import Urplay
+from svtplay_dl.service.viaplay import Viaplay
+from svtplay_dl.service.vimeo import Vimeo
+
 class Service(object):
     pass
 
@@ -23,24 +40,6 @@ class Generic(object):
                 if i.handle(match.group(1)):
                     return match.group(1), i
         return url, stream
-
-from svtplay_dl.service.aftonbladet import Aftonbladet
-from svtplay_dl.service.dr import Dr
-from svtplay_dl.service.expressen import Expressen
-from svtplay_dl.service.hbo import Hbo
-from svtplay_dl.service.justin import Justin
-from svtplay_dl.service.kanal5 import Kanal5
-from svtplay_dl.service.nrk import Nrk
-from svtplay_dl.service.qbrick import Qbrick
-from svtplay_dl.service.ruv import Ruv
-from svtplay_dl.service.radioplay import Radioplay
-from svtplay_dl.service.sr import Sr
-from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.service.tv4play import Tv4play
-from svtplay_dl.service.urplay import Urplay
-from svtplay_dl.service.viaplay import Viaplay
-from svtplay_dl.service.vimeo import Vimeo
-
 
 def service_handler(url):
     sites = [
