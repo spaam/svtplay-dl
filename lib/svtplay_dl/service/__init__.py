@@ -1,6 +1,10 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+import re
+
+class Service(object):
+    pass
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.dr import Dr
@@ -18,6 +22,7 @@ from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
+from svtplay_dl.utils import get_http_data
 
 sites = [
     Aftonbladet(),
@@ -37,12 +42,10 @@ sites = [
     Viaplay(),
     Vimeo()]
 
-class Service(object):
-    pass
 
 class Generic(object):
     ''' Videos embed in sites '''
-    def get(self, sites, url):
+    def get(self, url):
         data = get_http_data(url)
         match = re.search("src=\"(http://www.svt.se/wd.*)\" frameborder", data)
         stream = None

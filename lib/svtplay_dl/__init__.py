@@ -9,7 +9,7 @@ from optparse import OptionParser
 
 from svtplay_dl.log import log
 from svtplay_dl.utils import get_http_data
-from svtplay_dl.service import service_handler
+from svtplay_dl.service import service_handler, Generic
 
 
 __version__ = "0.9.2013.03.06"
@@ -50,7 +50,9 @@ class Options:
 
 def get_media(url, options):
     stream = service_handler(url)
-
+    if not stream:
+        url, stream = Generic().get(url)
+        url = url.replace("&amp;", "&")
     if not stream:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
