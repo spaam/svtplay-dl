@@ -14,3 +14,6 @@ install: svtplay-dl
 svtplay-dl: lib/svtplay_dl/*py lib/svtplay_dl/fetcher/*py lib/svtplay_dl/service/*py
 	cd lib; $(MAKE)
 	mv lib/svtplay-dl .
+
+test:
+	sh run-tests.sh
