@@ -17,3 +17,6 @@ svtplay-dl: lib/svtplay_dl/*py lib/svtplay_dl/fetcher/*py lib/svtplay_dl/service
 
 test:
 	sh run-tests.sh
+
+pylint:
+	find lib -name '*.py' -a '!' -path '*/tests/*' | xargs pylint
