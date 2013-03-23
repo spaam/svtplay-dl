@@ -61,12 +61,25 @@ def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar
     response.close()
     return data
 
-def timestr(seconds):
-    total = float(seconds) / 1000
-    hours = int(total / 3600)
-    minutes = int(total / 60)
-    sec = total % 60
-    output = "%02d:%02d:%02.02f" % (hours, minutes, sec)
+def timestr(msec):
+    """
+    Convert a millisecond value to a string of the following
+    format:
+
+        HH:MM:SS,SS
+
+    with 10 millisecond precision. Note the , seperator in
+    the seconds.
+    """
+    sec = float(msec) / 1000
+
+    hours = int(sec / 3600)
+    sec -= hours * 3600
+
+    minutes = int(sec / 60)
+    sec -= minutes * 60
+
+    output = "%02d:%02d:%05.2f" % (hours, minutes, sec)
     return output.replace(".", ",")
 
 def norm(name):
