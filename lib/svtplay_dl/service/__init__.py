@@ -19,6 +19,24 @@ from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
 
+sites = [
+    Aftonbladet(),
+    Dr(),
+    Expressen(),
+    Hbo(),
+    Justin(),
+    Kanal5(),
+    Nrk(),
+    Qbrick(),
+    Ruv(),
+    Radioplay(),
+    Sr(),
+    Svtplay(),
+    Tv4play(),
+    Urplay(),
+    Viaplay(),
+    Vimeo()]
+
 class Service(object):
     pass
 
@@ -42,24 +60,6 @@ class Generic(object):
         return url, stream
 
 def service_handler(url):
-    sites = [
-        Aftonbladet(),
-        Dr(),
-        Expressen(),
-        Hbo(),
-        Justin(),
-        Kanal5(),
-        Nrk(),
-        Qbrick(),
-        Ruv(),
-        Radioplay(),
-        Sr(),
-        Svtplay(),
-        Tv4play(),
-        Urplay(),
-        Viaplay(),
-        Vimeo()]
-
     handler = None
 
     for i in sites:
