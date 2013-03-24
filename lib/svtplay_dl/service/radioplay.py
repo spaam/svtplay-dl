@@ -39,7 +39,7 @@ class Radioplay(object):
                     download_hls(options, m3u8_url, base_url)
                 except KeyError:
                     log.error("Can't find any streams.")
-                    sys.error(2)
+                    sys.exit(2)
             else:
                 try:
                     rtmp = streams["rtmp"]
