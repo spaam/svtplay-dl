@@ -10,7 +10,7 @@ if sys.version_info > (3, 0):
 else:
     from cookielib import CookieJar, Cookie
 
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data, select_quality, subtitle_json
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 

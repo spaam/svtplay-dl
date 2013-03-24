@@ -6,7 +6,7 @@ import re
 from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, subtitle_sami
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 

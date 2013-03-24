@@ -6,7 +6,7 @@ import re
 import json
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data, select_quality, subtitle_wsrt
 
 from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
