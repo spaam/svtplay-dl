@@ -79,7 +79,7 @@ class Svtplay(Service):
             download_http(options, test["url"])
         if options.subtitle:
             try:
-                suburl = data["video"]["subtitleReferences"][0]["url"]
+                subtitle = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 sys.exit(1)
             if len(suburl) > 0:
