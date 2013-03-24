@@ -13,6 +13,7 @@ else:
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_json
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.hls import download_hls
 
 class Kanal5():
     def handle(self, url):
