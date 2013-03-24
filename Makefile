@@ -3,7 +3,7 @@ all: svtplay-dl
 clean:
 	rm -f svtplay-dl
 
-PREFIX=/usr/local
+PREFIX?=/usr/local
 BINDIR=$(PREFIX)/bin
 PYTHON=/usr/bin/env python
 
