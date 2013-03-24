@@ -7,11 +7,11 @@
 
 from __future__ import absolute_import
 import unittest
-import svtplay.service.svtplay
+import svtplay_dl.service.svtplay
 
 class handleTest(unittest.TestCase):
     def setUp(self):
-        self.svtplay = svtplay.service.svtplay.Svtplay()
+        self.svtplay = svtplay_dl.service.svtplay.Svtplay()
 
     def handle_svtplay_se_test(self):
         self.assertTrue(self.svtplay.handle(
