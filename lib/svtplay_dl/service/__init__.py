@@ -60,6 +60,12 @@ class Generic(object):
             for i in sites:
                 if i.handle(match.group(1)):
                     return match.group(1), i
+        match = re.search("tv4video.swf\?vid=(\d+)", data)
+        if match:
+            url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
+            for i in sites:
+                if i.handle(url):
+                    return url, i
         return url, stream
 
 def service_handler(url):
