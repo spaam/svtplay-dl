@@ -82,7 +82,7 @@ class Svtplay(Service):
                 subtitle = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 sys.exit(1)
-            if len(suburl) > 0:
+            if len(subtitle) > 0:
                 if options.output != "-":
                     data = get_http_data(subtitle)
                     subtitle_wsrt(options, data)
