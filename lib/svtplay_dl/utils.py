@@ -3,6 +3,9 @@
 from __future__ import absolute_import
 import sys
 import logging
+import re
+import xml.etree.ElementTree as ET
+import json
 
 if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
