@@ -16,7 +16,7 @@ class Urplay():
     def get(self, options, url):
         data = get_http_data(url)
         data = re.search("urPlayer.init\((.*)\);", data)
-        data = re.sub("(\w+): ", r'"\1":',data.group(1))
+        data = re.sub("(\w+): ", r'"\1":', data.group(1))
         data = data.replace("\'", "\"").replace("\",}","\"}").replace("(m = location.hash.match(/[#&]start=(\d+)/)) ? m[1] : 0,","0")
         jsondata = json.loads(data)
         subtitle = jsondata["subtitles"].split(",")[0]
