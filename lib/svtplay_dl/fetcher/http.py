@@ -9,9 +9,9 @@ from svtplay_dl.output import progress # FIXME use progressbar() instead
 from svtplay_dl.log import log
 
 if sys.version_info > (3, 0):
-    from urllib.request import urlopen
+    from urllib.request import urlopen, Request
 else:
-    from urllib2 import urlopen
+    from urllib2 import urlopen, Request
 
 def download_http(options, url):
     """ Get the stream from HTTP """
