@@ -193,19 +193,28 @@ def subtitle_wsrt(options, data):
     fd.close()
 
 def select_quality(options, streams):
-    sort = sorted(streams.keys(), key=int)
+    available = sorted(streams.keys(), key=int)
 
-    if options.quality:
-        quality = options.quality
+    optq = options.quality
+    if optq:
+        optf = options.flexibleq
+        if not optf:
+            wanted = [optq]
+        else:
+            wanted = range(optq-optf, optq+optf+1)
     else:
-        quality = sort.pop()
+        wanted = [available[-1]]
 
-    try:
-        selected = streams[int(quality)]
-    except (KeyError, ValueError):
-        log.error("Can't find that quality. (Try one of: %s)",
-                      ", ".join(map(str, sort)))
+    selected = None
+    for q in available:
+        if q in wanted:
+            selected = q
+            break
+
+    if not selected:
+        log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)",
+                  ", ".join(map(str, available)))
         sys.exit(4)
 
-    return selected
+    return streams[selected]
 

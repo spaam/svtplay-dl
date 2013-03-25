@@ -42,6 +42,7 @@ class Options:
         self.live = False
         self.silent = False
         self.quality = None
+        self.flexibleq = None
         self.hls = False
         self.other = None
         self.subtitle = False
@@ -105,8 +106,10 @@ def main():
                       help="Enable for live streams")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False)
-    parser.add_option("-q", "--quality",
+    parser.add_option("-q", "--quality", type="int", default=0,
                       metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
+    parser.add_option("-Q", "--flexible-quality", type="int", default=0,
+                      metavar="amount", dest="flexibleq", help="Allow given quality (as above) to differ by an amount.")
     parser.add_option("-H", "--hls",
                       action="store_true", dest="hls", default=False)
     parser.add_option("-S", "--subtitle",
@@ -121,6 +124,10 @@ def main():
         parser.error("incorrect number of arguments")
 
     setup_log(options.silent)
+
+    if options.flexibleq and not options.quality:
+        log.error("flexible-quality requires a quality")
+        sys.exit(4)
 
     url = args[0]
     get_media(url, options)
