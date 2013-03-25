@@ -9,11 +9,9 @@ import logging
 import binascii
 import time
 
-from datetime import timedelta
-
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.output import progressbar, progress_stream
+from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.utils import get_http_data, select_quality
 
 log = logging.getLogger('svtplay_dl')
@@ -64,21 +62,15 @@ def download_hds(options, url, swf=None):
     file_d.write(base64.b64decode(test["metadata"]))
     file_d.write(binascii.a2b_hex(b"00000000"))
     total = antal[1]["total"]
-    start = time.time()
-    estimated = ""
+    eta = ETA(total)
     while i <= total:
         url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
         if options.output != "-":
-            progressbar(total, i, estimated)
+            eta.update(i)
+            progressbar(total, i, ''.join(["ETA: ", str(eta)]))
         data = get_http_data(url)
         number = decode_f4f(i, data)
         file_d.write(data[number:])
-        now = time.time()
-        dt = now - start
-        et = dt / (i + 1) * total
-        rt = et - dt
-        td = timedelta(seconds = int(rt))
-        estimated = "Estimated Remaining: " + str(td)
         i += 1
 
     if options.output != "-":
