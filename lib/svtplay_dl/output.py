@@ -3,8 +3,73 @@
 from __future__ import absolute_import
 import sys
 import os
+import time
+from datetime import timedelta
 
 progress_stream = sys.stderr
+
+class ETA(object):
+    """
+    An ETA class, used to calculate how long it takes to process
+    an arbitrary set of items. By initiating the object with the
+    number of items and continuously updating with current
+    progress, the class can calculate an estimation of how long
+    time remains.
+    """
+
+    def __init__(self, end, start=0):
+        """
+        Parameters:
+        end:   the end (or size, of start is 0)
+        start: the starting position, defaults to 0
+        """
+        self.start = start
+        self.end = end
+        self.pos = start
+
+        self.now = time.time()
+        self.start_time = self.now
+
+    def update(self, pos):
+        """
+        Set new absolute progress position.
+
+        Parameters:
+        pos: new absolute progress
+        """
+        self.pos = pos
+        self.now = time.time()
+
+    def increment(self, skip=1):
+        """
+        Like update, but set new pos relative to old pos.
+
+        Parameters:
+        skip: progress since last update (defaults to 1)
+        """
+        self.update(self.pos + skip)
+
+    @property
+    def left(self):
+        """
+        returns: How many item remains?
+        """
+        return self.end - self.pos
+
+    def __str__(self):
+        """
+        returns: a time string of the format HH:MM:SS.
+        """
+        duration = self.now - self.start_time
+
+        # Calculate how long it takes to process one item
+        try:
+            elm_time = duration / (self.end - self.left)
+        except ZeroDivisionError:
+            return "(unknown)"
+
+        return str(timedelta(seconds=int(elm_time * self.left)))
+
 
 def progress(byte, total, extra = ""):
     """ Print some info about how much we have downloaded """

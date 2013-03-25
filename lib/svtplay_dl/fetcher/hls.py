@@ -5,10 +5,9 @@ import sys
 import os
 import re
 import time
-from datetime import timedelta
 
 from svtplay_dl.utils import get_http_data, select_quality
-from svtplay_dl.output import progressbar, progress_stream
+from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
 
 if sys.version_info > (3, 0):
@@ -46,7 +45,6 @@ def download_hls(options, url, baseurl=None):
         key = get_http_data(match.group(1))
         rand = os.urandom(16)
         decryptor = AES.new(key, AES.MODE_CBC, rand)
-    n = 1
     if options.output != "-":
         extension = re.search("(\.[a-z0-9]+)$", options.output)
         if not extension:
@@ -56,12 +54,14 @@ def download_hls(options, url, baseurl=None):
     else:
         file_d = sys.stdout
 
-    start = time.time()
-    estimated = ""
+    n = 0
+    eta = ETA(len(files))
     for i in files:
         item = i[0]
         if options.output != "-":
-            progressbar(len(files), n, estimated)
+            eta.increment()
+            progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
+            n += 1
         if item[0:5] != "http:":
             item = "%s/%s" % (baseurl, item)
         data = get_http_data(item)
@@ -78,13 +78,6 @@ def download_hls(options, url, baseurl=None):
             data = plain
 
         file_d.write(data)
-        now = time.time()
-        dt = now - start
-        et = dt / (n + 1) * len(files)
-        rt = et - dt
-        td = timedelta(seconds = int(rt))
-        estimated = "Estimated Remaining: " + str(td)
-        n += 1
 
     if options.output != "-":
         file_d.close()
