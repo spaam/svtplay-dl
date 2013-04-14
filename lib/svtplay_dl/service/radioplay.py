@@ -2,7 +2,10 @@ from __future__ import absolute_import
 import sys
 import re
 import json
-from urlparse import urlparse
+if sys.version_info > (3, 0):
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 
 from svtplay_dl.utils import get_http_data
 

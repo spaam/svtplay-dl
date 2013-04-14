@@ -3,7 +3,10 @@
 from __future__ import absolute_import
 import sys
 import re
-from urlparse import urlparse
+if sys.version_info > (3, 0):
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils import get_http_data, select_quality, check_redirect

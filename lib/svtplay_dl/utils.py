@@ -11,6 +11,7 @@ if sys.version_info > (3, 0):
     from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
+    from urllib.response import addinfourl
     from io import BytesIO as StringIO
     from http.cookiejar import CookieJar, Cookie
 else:
