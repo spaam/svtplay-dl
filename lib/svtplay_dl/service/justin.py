@@ -6,7 +6,7 @@ import re
 from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data, select_quality, check_redirect
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
@@ -33,7 +33,7 @@ class Justin():
                 match = re.search("embedSWF\(\"(.*)\", \"live", data)
                 if not match:
                     log.error("Can't find swf file.")
-                options.other = match.group(1)
+                options.other = check_redirect(match.group(1))
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 options.live = True
                 data = get_http_data(url)

@@ -8,22 +8,33 @@ import xml.etree.ElementTree as ET
 import json
 
 if sys.version_info > (3, 0):
-    from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
+    from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
     from io import BytesIO as StringIO
     from http.cookiejar import CookieJar, Cookie
 else:
-    from urllib2 import Request, urlopen, HTTPError, URLError, build_opener, HTTPCookieProcessor
+    from urllib2 import Request, urlopen, HTTPError, URLError, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
     from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus, quote_plus
+    from urllib import unquote_plus, quote_plus, addinfourl
     from StringIO import StringIO
     from cookielib import CookieJar, Cookie
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
-def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar=None):
+class NoRedirectHandler(HTTPRedirectHandler):
+    def http_error_302(self, req, fp, code, msg, headers):
+        infourl = addinfourl(fp, headers, req.get_full_url())
+        infourl.status = code
+        infourl.code = code
+        return infourl
+    http_error_300 = http_error_302
+    http_error_301 = http_error_302
+    http_error_303 = http_error_302
+    http_error_307 = http_error_302
+
+def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar=None, *args, **kw):
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
@@ -63,6 +74,15 @@ def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar
             sys.exit(5)
     response.close()
     return data
+
+def check_redirect(url):
+    request = build_opener(NoRedirectHandler())
+    request.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
+    response = request.open(url)
+    if response.code in (300, 301, 302, 303, 307):
+        return response.headers["location"]
+    else:
+        return url
 
 def timestr(msec):
     """
