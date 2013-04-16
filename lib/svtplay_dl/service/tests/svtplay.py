@@ -21,6 +21,10 @@ class handleTest(unittest.TestCase):
         self.assertTrue(self.svtplay.handle(
             "http://www.svt.se/nyheter/sverige/det-ar-en-dodsfalla"))
 
+    def handle_oppetarkiv_se_test(self):
+        self.assertTrue(self.svtplay.handle(
+            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"))
+
     def handle_dn_se_test(self):
         self.assertFalse(self.svtplay.handle(
             "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla"))
