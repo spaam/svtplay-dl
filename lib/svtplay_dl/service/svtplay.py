@@ -17,7 +17,7 @@ from svtplay_dl.log import log
 
 class Svtplay(Service):
     def handle(self, url):
-        return ("svtplay.se" in url) or ("svt.se" in url)
+        return ("svtplay.se" in url) or ("svt.se" in url) or ("oppetarkiv.se" in url)
 
     def get(self, options, url):
         if re.findall("svt.se", url):
@@ -31,12 +31,15 @@ class Svtplay(Service):
                 sys.exit(2)
         url = "%s?type=embed" % url
         data = get_http_data(url)
-        match = re.search("value=\"(/(public)?(statiskt)?/swf/video/svtplayer-[0-9\.]+swf)\"", data)
+        match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
         swf = "http://www.svtplay.se%s" % match.group(1)
         options.other = "-W %s" % swf
         url = "%s&output=json&format=json" % url
         data = json.loads(get_http_data(url))
-        options.live = data["video"]["live"]
+        if "live" in data["video"]:
+            options.live = data["video"]["live"]
+        else:
+            options.live = False
         streams = {}
         streams2 = {} #hack..
         for i in data["video"]["videoReferences"]:
