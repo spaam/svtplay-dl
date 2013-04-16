@@ -31,6 +31,7 @@ This script works for:
 * kanal5play.se
 * kanal9play.se
 * nrk.no
+* oppetarkiv.se
 * ruv.is
 * svd.se
 * sverigesradio.se
