@@ -114,13 +114,7 @@ def progressbar(total, pos, msg=""):
     """
     width = 50 # TODO hardcoded progressbar width
     rel_pos = int(float(pos)/total*width)
-    bar = str()
-
-    # FIXME ugly generation of bar
-    for _ in range(0, rel_pos):
-        bar += "="
-    for _ in range(rel_pos, width):
-        bar += "."
+    bar = ''.join(["=" * rel_pos, "." * (width - rel_pos)])
 
     # Determine how many digits in total (base 10)
     digits_total = len(str(total))
