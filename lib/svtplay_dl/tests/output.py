@@ -21,6 +21,21 @@ class mockfile(object):
     def read(self):
         return self.content.pop()
 
+class progressTest(unittest.TestCase):
+    def setUp(self):
+        self.mockfile = mockfile()
+        svtplay_dl.output.progress_stream = self.mockfile
+
+    @patch('svtplay_dl.output.progressbar')
+    def test_0_0(self, pbar):
+        svtplay_dl.output.progress(0, 0)
+        self.assertFalse(pbar.called)
+
+    @patch('svtplay_dl.output.progressbar')
+    def test_0_100(self, pbar):
+        svtplay_dl.output.progress(0, 100)
+        pbar.assert_any_call(100, 0, "")
+
 class progressbarTest(unittest.TestCase):
     def setUp(self):
         self.mockfile = mockfile()
