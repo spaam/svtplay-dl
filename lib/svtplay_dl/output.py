@@ -76,24 +76,8 @@ def progress(byte, total, extra = ""):
     if total == 0:
         progresstr = "Downloaded %dkB bytes" % (byte >> 10)
         progress_stream.write(progresstr + '\r')
-    else:
-        ratio = float(byte) / total
-        percent = round(ratio*100, 2)
-        tlen = str(len(str(total)))
-        fmt = "Downloaded %"+tlen+"dkB of %dkB bytes (% 3.2f%%)"
-        progresstr = fmt % (byte >> 10, total >> 10, percent)
-
-        columns = int(os.getenv("COLUMNS", "80"))
-        if len(progresstr) < columns - 13:
-            p = int((columns - len(progresstr) - 3) * ratio)
-            q = int((columns - len(progresstr) - 3) * (1 - ratio))
-            progresstr = "[" + ("#" * p) + (" " * q) + "] " + progresstr
-        progress_stream.write(progresstr + ' ' + extra + '\r')
-
-        if byte >= total:
-            progress_stream.write('\n')
-
-    progress_stream.flush()
+        return
+    progressbar(total, byte, extra)
 
 def progressbar(total, pos, msg=""):
     """
