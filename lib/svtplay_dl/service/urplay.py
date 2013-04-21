@@ -21,7 +21,7 @@ class Urplay():
         subtitle = jsondata["subtitles"].split(",")[0]
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
-        hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
+        #hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         path = "mp%s:%s" % (jsondata["file_flash"][-1], jsondata["file_flash"])

@@ -104,7 +104,7 @@ def timestr(msec):
 
 def norm(name):
     if name[0] == "{":
-        uri, tag = name[1:].split("}")
+        _, tag = name[1:].split("}")
         return tag
     else:
         return name
