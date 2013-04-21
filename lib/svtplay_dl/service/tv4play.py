@@ -69,8 +69,9 @@ class Tv4play():
         else:
             test = select_quality(options, streams)
 
-        swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-        options.other = "-W %s -y %s" % (swf, test["path"])
+        ## This is how we construct an swf uri, if we'll ever need one
+        # swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
+        # options.other = "-W %s -y %s" % (swf, test["path"])
 
         if test["uri"][0:4] == "rtmp":
             download_rtmp(options, test["uri"])
@@ -80,7 +81,7 @@ class Tv4play():
                 log.error("This stream is encrypted. Use --hls option")
                 sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
-            download_hds(options, manifest, swf)
+            download_hds(options, manifest)
         if options.subtitle and subtitle:
             data = get_http_data(subtitle)
             subtitle_smi(options, data)

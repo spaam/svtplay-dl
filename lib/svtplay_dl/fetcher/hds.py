@@ -15,7 +15,7 @@ from svtplay_dl.utils import get_http_data, select_quality
 
 log = logging.getLogger('svtplay_dl')
 
-def download_hds(options, url, swf=None):
+def download_hds(options, url):
     data = get_http_data(url)
     streams = {}
     bootstrap = {}
