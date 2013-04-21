@@ -3,18 +3,16 @@
 from __future__ import absolute_import
 import sys
 import re
-if sys.version_info > (3, 0):
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
+from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, check_redirect
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
 
-class Justin():
+class Justin(Service):
     def handle(self, url):
         return ("twitch.tv" in url) or ("justin.tv" in url)
 

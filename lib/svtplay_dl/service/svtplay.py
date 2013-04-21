@@ -31,9 +31,12 @@ class Svtplay(Service):
                 sys.exit(2)
         url = "%s?type=embed" % url
         data = get_http_data(url)
-        match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
-        swf = "http://www.svtplay.se%s" % match.group(1)
-        options.other = "-W %s" % swf
+
+        ### This is how we construct an swf url, if we'll ever need it
+        # match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
+        # swf = "http://www.svtplay.se%s" % match.group(1)
+        # options.other = "-W %s" % swf
+
         url = "%s&output=json&format=json" % url
         data = json.loads(get_http_data(url))
         if "live" in data["video"]:
@@ -77,7 +80,7 @@ class Svtplay(Service):
                 log.error("This stream is encrypted. Use --hls option")
                 sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["url"]
-            download_hds(options, manifest, swf)
+            download_hds(options, manifest)
         else:
             download_http(options, test["url"])
         if options.subtitle:

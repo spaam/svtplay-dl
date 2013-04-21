@@ -5,17 +5,14 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-if sys.version_info > (3, 0):
-    from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
-else:
-    from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus, quote_plus
+from svtplay_dl.utils.urllib import quote_plus
 
-class Expressen():
+class Expressen(Service):
     def handle(self, url):
         return "expressen.se" in url
 

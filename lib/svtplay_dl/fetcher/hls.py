@@ -4,16 +4,11 @@ from __future__ import absolute_import
 import sys
 import os
 import re
-import time
 
 from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
-
-if sys.version_info > (3, 0):
-    from io import BytesIO as StringIO
-else:
-    from StringIO import StringIO
 
 def download_hls(options, url, baseurl=None):
     data = get_http_data(url)
@@ -32,7 +27,7 @@ def download_hls(options, url, baseurl=None):
     try:
         keydata = globaldata["KEY"]
         encrypted = True
-    except:
+    except KeyError:
         pass
 
     if encrypted:
