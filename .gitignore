@@ -3,5 +3,6 @@
 *.DS_Store
 build/
 dist/
+cover/
 *.egg-info
 svtplay-dl
