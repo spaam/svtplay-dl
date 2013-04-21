@@ -8,6 +8,7 @@ clean:
 PREFIX?=/usr/local
 BINDIR=$(PREFIX)/bin
 PYTHON=/usr/bin/env python
+export PYTHONPATH=lib
 
 install: svtplay-dl
 	install -d $(DESTDIR)$(BINDIR)
