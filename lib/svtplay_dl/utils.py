@@ -2,6 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import sys
+import socket
 import logging
 import re
 import xml.etree.ElementTree as ET
