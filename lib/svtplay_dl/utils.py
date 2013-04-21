@@ -31,7 +31,7 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar=None, *args, **kw):
+def get_http_data(url, header="", data="", referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
