@@ -1,6 +1,6 @@
 all: svtplay-dl
 
-.PHONY: test cover pylint
+.PHONY: test cover pylint svtplay-dl
 
 clean:
 	rm -f svtplay-dl
@@ -14,8 +14,8 @@ install: svtplay-dl
 	install -d $(DESTDIR)$(BINDIR)
 	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
 
-svtplay-dl: lib/svtplay_dl/*py lib/svtplay_dl/fetcher/*py lib/svtplay_dl/service/*py
-	cd lib; $(MAKE)
+svtplay-dl: $(PYFILES)
+	$(MAKE) -C lib
 	mv lib/svtplay-dl .
 
 test:
