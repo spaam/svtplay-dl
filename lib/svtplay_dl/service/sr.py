@@ -22,15 +22,16 @@ class Sr():
     def get(self, options, url):
         data = get_http_data(url)
         parse = urlparse(url)
-        try:
-            metafile = parse_qs(parse[4])["metafile"][0]
-            options.other = "%s?%s" % (parse[2], parse[4])
-        except KeyError:
+
+        if "metafile" in parse_qs(parse.query):
+            options.other = "%s?%s" % (parse.path, parse.query)
+        else:
             match = re.search("linkUrl=(.*)\;isButton=", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
             options.other = unquote_plus(match.group(1))
+
         url = "http://sverigesradio.se%s" % options.other
         data = get_http_data(url)
         xml = ET.XML(data)
