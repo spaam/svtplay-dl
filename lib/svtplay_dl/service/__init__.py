@@ -12,6 +12,7 @@ from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.justin import Justin
 from svtplay_dl.service.kanal5 import Kanal5
+from svtplay_dl.service.mtvservices import Mtvservices
 from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.qbrick import Qbrick
 from svtplay_dl.service.ruv import Ruv
@@ -31,6 +32,7 @@ sites = [
     Hbo(),
     Justin(),
     Kanal5(),
+    Mtvservices(),
     Nrk(),
     Qbrick(),
     Ruv(),
