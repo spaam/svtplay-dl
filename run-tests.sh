@@ -14,6 +14,9 @@ while [ "$#" -gt 0 ]; do
 		-c|--coverage)
 			OPTS="$OPTS $COVER_OPTS"
 			;;
+		-C|--coverage-html)
+			OPTS="$OPTS $COVER_OPTS --cover-html"
+			;;
 		-v|--verbose)
 			OPTS="$OPTS --verbose"
 			;;
