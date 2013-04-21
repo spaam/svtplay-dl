@@ -5,16 +5,12 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
+from svtplay_dl.utils.urllib import urlparse, parse_qs
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hds import download_hds
-
-if sys.version_info > (3, 0):
-    from urllib.parse import urlparse, parse_qs
-else:
-    from urlparse import urlparse, parse_qs
 
 class Tv4play(Service):
     def handle(self, url):

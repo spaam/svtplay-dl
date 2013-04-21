@@ -7,11 +7,7 @@ import re
 
 from svtplay_dl.output import progress # FIXME use progressbar() instead
 from svtplay_dl.log import log
-
-if sys.version_info > (3, 0):
-    from urllib.request import urlopen, Request, HTTPError
-else:
-    from urllib2 import urlopen, Request, HTTPError
+from svtplay_dl.utils.urllib import urlopen, Request, HTTPError
 
 def download_http(options, url):
     """ Get the stream from HTTP """

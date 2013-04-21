@@ -8,15 +8,9 @@ import re
 import xml.etree.ElementTree as ET
 import json
 
-if sys.version_info > (3, 0):
-    from urllib.request import build_opener, HTTPCookieProcessor, HTTPRedirectHandler
-    from urllib.error import HTTPError, URLError
-    from urllib.response import addinfourl
-    from http.cookiejar import CookieJar
-else:
-    from urllib2 import HTTPError, URLError, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
-    from urllib import addinfourl
-    from cookielib import CookieJar
+from svtplay_dl.utils.urllib import build_opener, HTTPCookieProcessor, \
+                                    HTTPRedirectHandler, HTTPError, URLError, \
+                                    addinfourl, CookieJar
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr

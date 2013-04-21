@@ -5,11 +5,7 @@ import sys
 import re
 import json
 
-if sys.version_info > (3, 0):
-    from http.cookiejar import CookieJar, Cookie
-else:
-    from cookielib import CookieJar, Cookie
-
+from svtplay_dl.utils.urllib import CookieJar, Cookie
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_json
 from svtplay_dl.log import log

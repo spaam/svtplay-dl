@@ -10,10 +10,7 @@ from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-if sys.version_info > (3, 0):
-    from urllib.parse import quote_plus
-else:
-    from urllib import quote_plus
+from svtplay_dl.utils.urllib import quote_plus
 
 class Expressen(Service):
     def handle(self, url):
