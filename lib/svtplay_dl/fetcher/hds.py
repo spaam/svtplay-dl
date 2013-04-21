@@ -7,7 +7,6 @@ import re
 import struct
 import logging
 import binascii
-import time
 
 import xml.etree.ElementTree as ET
 

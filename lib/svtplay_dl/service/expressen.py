@@ -10,10 +10,9 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
 if sys.version_info > (3, 0):
-    from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
+    from urllib.parse import quote_plus
 else:
-    from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus, quote_plus
+    from urllib import quote_plus
 
 class Expressen():
     def handle(self, url):

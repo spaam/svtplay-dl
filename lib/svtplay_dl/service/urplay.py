@@ -6,7 +6,6 @@ import json
 
 from svtplay_dl.utils import get_http_data, subtitle_tt
 from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
 
 class Urplay():

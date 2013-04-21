@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import sys
 import os
 import re
-import time
 
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.output import progressbar, progress_stream, ETA

@@ -8,18 +8,14 @@ import xml.etree.ElementTree as ET
 import json
 
 if sys.version_info > (3, 0):
-    from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
+    from urllib.request import build_opener, HTTPCookieProcessor, HTTPRedirectHandler
     from urllib.error import HTTPError, URLError
-    from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
     from urllib.response import addinfourl
-    from io import BytesIO as StringIO
-    from http.cookiejar import CookieJar, Cookie
+    from http.cookiejar import CookieJar
 else:
-    from urllib2 import Request, urlopen, HTTPError, URLError, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
-    from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus, quote_plus, addinfourl
-    from StringIO import StringIO
-    from cookielib import CookieJar, Cookie
+    from urllib2 import HTTPError, URLError, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
+    from urllib import addinfourl
+    from cookielib import CookieJar
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
