@@ -7,10 +7,12 @@ die() {
 	exit 1
 }
 
+COVER_OPTS="--with-coverage --cover-package=svtplay_dl"
+
 while [ "$#" -gt 0 ]; do
 	case $1 in
 		-c|--coverage)
-			OPTS="$OPTS --with-coverage"
+			OPTS="$OPTS $COVER_OPTS"
 			;;
 		-v|--verbose)
 			OPTS="$OPTS --verbose"
