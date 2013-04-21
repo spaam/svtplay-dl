@@ -5,11 +5,12 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-class Qbrick():
+class Qbrick(Service):
     def handle(self, url):
         return ("dn.se" in url) or ("di.se" in url) or ("svd.se" in url)
 

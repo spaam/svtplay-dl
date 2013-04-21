@@ -7,6 +7,7 @@ if sys.version_info > (3, 0):
 else:
     from urlparse import urlparse
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 
 from svtplay_dl.fetcher.rtmp import download_rtmp
@@ -15,7 +16,7 @@ from svtplay_dl.fetcher.http import download_http
 
 from svtplay_dl.log import log
 
-class Radioplay(object):
+class Radioplay(Service):
     def handle(self, url):
         return "radioplay.se" in url
 

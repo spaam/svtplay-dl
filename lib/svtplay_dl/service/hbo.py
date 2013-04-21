@@ -9,11 +9,12 @@ else:
     from urlparse import urlparse
 import xml.etree.ElementTree as ET
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-class Hbo():
+class Hbo(Service):
     def handle(self, url):
         return "hbo.com" in url
 

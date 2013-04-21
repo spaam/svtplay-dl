@@ -4,11 +4,12 @@ from __future__ import absolute_import
 import re
 import json
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, subtitle_tt
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
 
-class Urplay():
+class Urplay(Service):
     def handle(self, url):
         return ("urplay.se" in url) or ("ur.se" in url)
 

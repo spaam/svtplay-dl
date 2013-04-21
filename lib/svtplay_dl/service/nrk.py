@@ -3,11 +3,12 @@
 from __future__ import absolute_import
 import re
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
 
-class Nrk(object):
+class Nrk(Service):
     def handle(self, url):
         return "nrk.no" in url
 

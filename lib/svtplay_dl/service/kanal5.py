@@ -10,12 +10,13 @@ if sys.version_info > (3, 0):
 else:
     from cookielib import CookieJar, Cookie
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_json
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
 
-class Kanal5():
+class Kanal5(Service):
     def handle(self, url):
         return ("kanal5play.se" in url) or ('kanal9play.se' in url)
 
