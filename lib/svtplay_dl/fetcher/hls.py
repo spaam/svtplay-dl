@@ -31,7 +31,7 @@ def download_hls(options, url, baseurl=None):
     try:
         keydata = globaldata["KEY"]
         encrypted = True
-    except:
+    except KeyError:
         pass
 
     if encrypted:
