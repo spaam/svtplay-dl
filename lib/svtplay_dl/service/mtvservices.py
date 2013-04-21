@@ -21,20 +21,20 @@ class Mtvservices(Service):
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
-       	url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
-       	data = get_http_data(url)
-       	start = data.index("<?xml version=")
-       	data = data[start:]
-       	xml = ET.XML(data)
-       	dada = xml.find("package")
-       	ss = xml.find("video").find("item")
+        url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
+        data = get_http_data(url)
+        start = data.index("<?xml version=")
+        data = data[start:]
+        xml = ET.XML(data)
+        dada = xml.find("package")
+        ss = xml.find("video").find("item")
         if sys.version_info < (2, 7):
             sa = list(ss.getiterator("rendition"))
         else:
             sa = list(ss.iter("rendition"))
         streams = {}
         for i in sa:
-        	streams[int(i.attrib["height"])] = i.find("src").text
+            streams[int(i.attrib["height"])] = i.find("src").text
         if len(streams) == 0:
             log.error("Can't find video file")
             sys.exit(2)
@@ -42,5 +42,3 @@ class Mtvservices(Service):
         temp = stream.index("gsp.comedystor")
         url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/%s" % stream[temp:]
         download_http(options, url)
-
-
