@@ -1,5 +1,7 @@
 all: svtplay-dl
 
+.PHONY: test cover pylint
+
 clean:
 	rm -f svtplay-dl
 
@@ -17,6 +19,9 @@ svtplay-dl: lib/svtplay_dl/*py lib/svtplay_dl/fetcher/*py lib/svtplay_dl/service
 
 test:
 	sh run-tests.sh
+
+cover:
+	sh run-tests.sh -C
 
 pylint:
 	find lib -name '*.py' -a '!' -path '*/tests/*' | xargs pylint
