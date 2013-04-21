@@ -3,10 +3,11 @@
 from __future__ import absolute_import
 import re
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.hls import download_hls
 
-class Ruv(object):
+class Ruv(Service):
     def handle(self, url):
         return "ruv.is" in url
 

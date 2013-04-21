@@ -4,10 +4,11 @@ from __future__ import absolute_import
 import re
 import json
 
+from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-class Dr(object):
+class Dr(Service):
     def handle(self, url):
         return "dr.dk" in url
 

@@ -2,24 +2,15 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import sys
+import socket
 import logging
 import re
 import xml.etree.ElementTree as ET
 import json
 
-if sys.version_info > (3, 0):
-    from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
-    from urllib.error import HTTPError, URLError
-    from urllib.parse import urlparse, parse_qs, unquote_plus, quote_plus
-    from urllib.response import addinfourl
-    from io import BytesIO as StringIO
-    from http.cookiejar import CookieJar, Cookie
-else:
-    from urllib2 import Request, urlopen, HTTPError, URLError, build_opener, HTTPCookieProcessor, HTTPRedirectHandler
-    from urlparse import urlparse, parse_qs
-    from urllib import unquote_plus, quote_plus, addinfourl
-    from StringIO import StringIO
-    from cookielib import CookieJar, Cookie
+from svtplay_dl.utils.urllib import build_opener, HTTPCookieProcessor, \
+                                    HTTPRedirectHandler, HTTPError, URLError, \
+                                    addinfourl, CookieJar
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -35,7 +26,7 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def get_http_data(url, method="GET", header="", data="", referer=None, cookiejar=None, *args, **kw):
+def get_http_data(url, header="", data="", referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
@@ -108,7 +99,7 @@ def timestr(msec):
 
 def norm(name):
     if name[0] == "{":
-        uri, tag = name[1:].split("}")
+        _, tag = name[1:].split("}")
         return tag
     else:
         return name
