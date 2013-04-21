@@ -25,4 +25,4 @@ cover:
 	sh run-tests.sh -C
 
 pylint:
-	find lib -name '*.py' -a '!' -path '*/tests/*' | xargs pylint
+	find lib -name '*.py' -a '!' -path '*/tests/*' | xargs pylint -d C
