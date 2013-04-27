@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 import sys
 import re
-import json
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.fetcher.http import download_http
@@ -26,7 +24,6 @@ class Mtvservices(Service):
         start = data.index("<?xml version=")
         data = data[start:]
         xml = ET.XML(data)
-        dada = xml.find("package")
         ss = xml.find("video").find("item")
         if sys.version_info < (2, 7):
             sa = list(ss.getiterator("rendition"))
