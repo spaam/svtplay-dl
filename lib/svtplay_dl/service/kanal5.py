@@ -49,10 +49,10 @@ class Kanal5(Service):
                           comment_url=None, rest={'HttpOnly': None})
             cj.set_cookie(cc)
 
-        format = "FLASH"
+        format_ = "FLASH"
         if options.hls:
-            format = "IPHONE"
-        url = "http://www.kanal5play.se/api/getVideo?format=%s&videoId=%s" % (format, video_id)
+            format_ = "IPHONE"
+        url = "http://www.kanal5play.se/api/getVideo?format=%s&videoId=%s" % (format_, video_id)
         data = json.loads(get_http_data(url, cookiejar=cj))
         options.live = data["isLive"]
         if data["hasSubtitle"]:
