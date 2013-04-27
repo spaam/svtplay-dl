@@ -4,6 +4,7 @@
 # Pylint does not seem to handle conditional imports
 # pylint: disable=F0401
 # pylint: disable=W0611
+# pylint: disable=E0611
 
 from __future__ import absolute_import
 import sys
