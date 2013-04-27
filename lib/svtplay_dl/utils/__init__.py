@@ -8,7 +8,10 @@ import re
 import xml.etree.ElementTree as ET
 import json
 
-from svtplay_dl.utils.urllib import build_opener, HTTPCookieProcessor, \
+# Used for UA spoofing in get_http_data()
+FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+
+from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
                                     HTTPRedirectHandler, HTTPError, URLError, \
                                     addinfourl, CookieJar
 
@@ -16,6 +19,9 @@ log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
 class NoRedirectHandler(HTTPRedirectHandler):
+    def __init__(self):
+        pass
+
     def http_error_302(self, req, fp, code, msg, headers):
         infourl = addinfourl(fp, headers, req.get_full_url())
         infourl.status = code
@@ -26,21 +32,34 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def get_http_data(url, header="", data="", referer=None, cookiejar=None):
+def _build_request(url, headers, data):
+    request = Request(url)
+
+    for header, value in [head for head in headers.items() if head[1]]:
+        request.add_header(header, value)
+
+    if data:
+        request.add_data(data)
+
+    return request
+
+# FIXME change name from header to content-type?
+def get_http_data(url, header="", data="", useragent=FIREFOX_UA,
+                  referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
-    request = build_opener(HTTPCookieProcessor(cookiejar))
-    request.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
 
-    if len(header) > 0:
-        request.addheaders += [('Content-Type', header)]
-    if len(data) > 0:
-        request.add_data(data)
-    if referer:
-        request.addheaders += [('Referer', referer)]
+    request = _build_request(url, {
+        'Content-Type': header,
+        'Referer': referer,
+        'User-Agent': useragent
+    }, data)
+
+    opener = build_opener(HTTPCookieProcessor(cookiejar))
+
     try:
-        response = request.open(url)
+        response = opener.open(request)
     except HTTPError as e:
         log.error("Something wrong with that url")
         log.error("Error code: %s" % e.code)
@@ -68,9 +87,9 @@ def get_http_data(url, header="", data="", referer=None, cookiejar=None):
     return data
 
 def check_redirect(url):
-    request = build_opener(NoRedirectHandler())
-    request.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
-    response = request.open(url)
+    opener = build_opener(NoRedirectHandler())
+    opener.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
+    response = opener.open(url)
     if response.code in (300, 301, 302, 303, 307):
         return response.headers["location"]
     else:
