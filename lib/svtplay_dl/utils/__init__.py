@@ -233,7 +233,7 @@ def select_quality(options, streams):
 
     if not selected:
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)",
-                  ", ".join(map(str, available)))
+                  ", ".join([str(elm) for elm in available]))
         sys.exit(4)
 
     return streams[selected]

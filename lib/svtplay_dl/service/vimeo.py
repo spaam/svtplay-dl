@@ -30,7 +30,7 @@ class Vimeo(Service):
 
             if options.quality and selected_quality is None:
                 log.error("Can't find that quality. (Try one of: %s)",
-                      ", ".join(map(str, avail_quality)))
+                      ", ".join([str(elm) for elm in avail_quality]))
                 sys.exit(4)
             elif options.quality is None and selected_quality is None:
                 selected_quality = avail_quality[0]
