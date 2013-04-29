@@ -29,7 +29,12 @@ class Qbrick(Service):
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         elif re.findall("di.se", url):
             data = get_http_data(url)
-            match = re.search("ccid: \"(.*)\"\,", data)
+            match = re.search("src=\"(http://qstream.*)\"></iframe", data)
+            if not match:
+                log.error("Can't find video info")
+                sys.exit(2)
+            data = get_http_data(match.group(1))
+            match = re.search("data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
