@@ -19,13 +19,9 @@ class Qbrick(Service):
             data = get_http_data(url)
             match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:
-                match = re.search("mediaId = \'([0-9A-F]+)\';", data)
-                if not match:
-                    log.error("Can't find video file")
-                    sys.exit(2)
-                mcid = "%sDE1BA107" % match.group(1)
-            else:
-                mcid = match.group(1)
+                log.error("Can't find video file")
+                sys.exit(2)
+            mcid = match.group(1)
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         elif re.findall("di.se", url):
             data = get_http_data(url)
