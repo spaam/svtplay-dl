@@ -12,10 +12,10 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Qbrick(Service):
     def handle(self, url):
-        return ("dn.se" in url) or ("di.se" in url) or ("svd.se" in url)
+        return ("dn.se" in url) or ("di.se" in url) or ("svd.se" in url) or ("sydsvenskan.se" in url)
 
     def get(self, options, url):
-        if re.findall("dn.se", url):
+        if re.findall("(dn.se|sydsvenskan.se)", url):
             data = get_http_data(url)
             match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:

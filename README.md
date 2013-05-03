@@ -36,6 +36,7 @@ This script works for:
 * svd.se
 * sverigesradio.se
 * svtplay.se
+* sydsvenskan.se
 * tv4.se
 * tv3play.se
 * tv4play.se
