@@ -33,7 +33,7 @@ class Mtvservices(Service):
         for i in sa:
             streams[int(i.attrib["height"])] = i.find("src").text
         if len(streams) == 0:
-            log.error("Can't find video file")
+            log.error("Can't find video file: %s" % ss.text)
             sys.exit(2)
         stream = select_quality(options, streams)
         temp = stream.index("gsp.comedystor")
