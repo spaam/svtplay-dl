@@ -141,7 +141,7 @@ def subtitle_tt(options, data):
             if node.tail:
                 data += '%s\n\n' % node.tail.strip(' \t\n\r')
                 skip = False
-    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
@@ -158,7 +158,7 @@ def subtitle_json(options, data):
         subs += "%s\n\n" % i["text"]
         number += 1
 
-    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
@@ -179,7 +179,7 @@ def subtitle_sami(options, data):
         else:
             subs += "%s\n" % i.text
 
-    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
@@ -197,7 +197,7 @@ def subtitle_smi(options, data):
         subs += text.replace("<br>", "\n")
         number += 1
 
-    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
@@ -206,7 +206,7 @@ def subtitle_smi(options, data):
     fd.close()
 
 def subtitle_wsrt(options, data):
-    recomp = re.compile("(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
+    recomp = re.compile(r"(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
     srt = ""
     for i in recomp.finditer(data):
         sub = "%s\n%s\n%s\n" % (i.group(1), i.group(2).replace(".", ","), i.group(4))
@@ -215,7 +215,7 @@ def subtitle_wsrt(options, data):
         sub += "\n"
         sub = re.sub('<[^>]*>', '', sub)
         srt += sub
-    filename = re.search("(.*)\.[a-z0-9]{2,3}$", options.output)
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)

@@ -22,7 +22,7 @@ class Justin(Service):
 
     def get(self, options, url):
         parse = urlparse(url)
-        match = re.search("/b/(\d+)", parse.path)
+        match = re.search(r"/b/(\d+)", parse.path)
         if match:
             url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
             data = get_http_data(url)
@@ -31,19 +31,19 @@ class Justin(Service):
 
             download_http(options, url)
         else:
-            match = re.search("/(.*)", parse.path)
+            match = re.search(r"/(.*)", parse.path)
             if match:
                 user = match.group(1)
                 data = get_http_data(url)
-                match = re.search("embedSWF\(\"(.*)\", \"live", data)
+                match = re.search(r"embedSWF\(\"(.*)\", \"live", data)
                 if not match:
                     log.error("Can't find swf file.")
                 options.other = check_redirect(match.group(1))
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 options.live = True
                 data = get_http_data(url)
-                data = re.sub("<(\d+)", "<_\g<1>", data)
-                data = re.sub("</(\d+)", "</_\g<1>", data)
+                data = re.sub(r"<(\d+)", r"<_\g<1>", data)
+                data = re.sub(r"</(\d+)", r"</_\g<1>", data)
                 xml = ET.XML(data)
                 if sys.version_info < (2, 7):
                     sa = list(xml)

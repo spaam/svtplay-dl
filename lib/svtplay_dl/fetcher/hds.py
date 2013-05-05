@@ -45,7 +45,7 @@ def download_hds(options, url):
     i = 1
 
     if options.output != "-":
-        extension = re.search("(\.[a-z0-9]+)$", options.output)
+        extension = re.search(r"(\.[a-z0-9]+)$", options.output)
         if not extension:
             options.output = "%s.flv" % options.output
         log.info("Outfile: %s", options.output)

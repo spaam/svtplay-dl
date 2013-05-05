@@ -22,7 +22,7 @@ class Radioplay(Service):
 
     def get(self, options, url):
         data = get_http_data(url)
-        match = re.search("liveStationsRedundancy = ({.*});</script>", data)
+        match = re.search(r"liveStationsRedundancy = ({.*});</script>", data)
         parse = urlparse(url)
         station = parse.path[1:]
         streams = None

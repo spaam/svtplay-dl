@@ -18,7 +18,7 @@ class Kanal5(Service):
 
     def get(self, options, url):
         cj = CookieJar()
-        match = re.search(".*video/([0-9]+)", url)
+        match = re.search(r".*video/([0-9]+)", url)
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
@@ -32,7 +32,7 @@ class Kanal5(Service):
             data = get_http_data("http://www.kanal5play.se/", cookiejar=cj)
             authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % (options.username, options.password)
             data = get_http_data(authurl)
-            match = re.search("({.*})\);", data)
+            match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
             if jsondata["success"] == False:
                 log.error(jsondata["message"])
@@ -76,7 +76,7 @@ class Kanal5(Service):
             test = select_quality(options, streams)
 
             filename = test["source"]
-            match = re.search("^(.*):", filename)
+            match = re.search(r"^(.*):", filename)
             options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", filename)
             download_rtmp(options, steambaseurl)
         if options.subtitle:

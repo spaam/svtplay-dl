@@ -22,7 +22,7 @@ class Svtplay(Service):
     def get(self, options, url):
         if re.findall("svt.se", url):
             data = get_http_data(url)
-            match = re.search("data-json-href=\"(.*)\"", data)
+            match = re.search(r"data-json-href=\"(.*)\"", data)
             if match:
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
@@ -75,7 +75,7 @@ class Svtplay(Service):
         elif options.hls:
             download_hls(options, test["url"])
         elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
-            match = re.search("\/se\/secure\/", test["url"])
+            match = re.search(r"\/se\/secure\/", test["url"])
             if match:
                 log.error("This stream is encrypted. Use --hls option")
                 sys.exit(2)

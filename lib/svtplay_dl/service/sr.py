@@ -26,7 +26,7 @@ class Sr(Service):
         if "metafile" in parse_qs(parse.query):
             options.other = "%s?%s" % (parse.path, parse.query)
         else:
-            match = re.search("linkUrl=(.*)\;isButton=", data)
+            match = re.search(r"linkUrl=(.*)\;isButton=", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)

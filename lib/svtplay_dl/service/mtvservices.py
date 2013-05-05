@@ -15,7 +15,7 @@ class Mtvservices(Service):
 
     def get(self, options, url):
         data = get_http_data(url)
-        match = re.search("mgid=\"(mgid.*[0-9]+)\" data-wi", data)
+        match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
         if not match:
             log.error("Can't find video file")
             sys.exit(2)

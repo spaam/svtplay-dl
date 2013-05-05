@@ -15,33 +15,33 @@ class Qbrick(Service):
         return ("dn.se" in url) or ("di.se" in url) or ("svd.se" in url) or ("sydsvenskan.se" in url)
 
     def get(self, options, url):
-        if re.findall("(dn.se|sydsvenskan.se)", url):
+        if re.findall(r"(dn.se|sydsvenskan.se)", url):
             data = get_http_data(url)
-            match = re.search("data-qbrick-mcid=\"([0-9A-F]+)\"", data)
+            match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
             mcid = match.group(1)
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
-        elif re.findall("di.se", url):
+        elif re.findall(r"di.se", url):
             data = get_http_data(url)
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
                 log.error("Can't find video info")
                 sys.exit(2)
             data = get_http_data(match.group(1))
-            match = re.search("data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
+            match = re.search(r"data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
-        elif re.findall("svd.se", url):
-            match = re.search("_([0-9]+)\.svd", url)
+        elif re.findall(r"svd.se", url):
+            match = re.search(r"_([0-9]+)\.svd", url)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
             data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=%s" % match.group(1))
-            match = re.search("mcid=([A-F0-9]+)\&width=", data)
+            match = re.search(r"mcid=([A-F0-9]+)\&width=", data)
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)

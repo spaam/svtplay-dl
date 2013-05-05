@@ -60,20 +60,20 @@ def get_media(url, options):
 
     if not options.output or os.path.isdir(options.output):
         data = get_http_data(url)
-        match = re.search("(?i)<title.*>\s*(.*?)\s*</title>", data)
+        match = re.search(r"(?i)<title.*>\s*(.*?)\s*</title>", data)
         if match:
             if sys.version_info > (3, 0):
-                title = re.sub('[^\w\s-]', '', match.group(1)).strip().lower()
+                title = re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower()
                 if options.output:
-                    options.output = options.output + re.sub('[-\s]+', '-', title)
+                    options.output = options.output + re.sub(r'[-\s]+', '-', title)
                 else:
-                    options.output = re.sub('[-\s]+', '-', title)
+                    options.output = re.sub(r'[-\s]+', '-', title)
             else:
-                title = unicode(re.sub('[^\w\s-]', '', match.group(1)).strip().lower())
+                title = unicode(re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower())
                 if options.output:
-                    options.output = unicode(options.output + re.sub('[-\s]+', '-', title))
+                    options.output = unicode(options.output + re.sub(r'[-\s]+', '-', title))
                 else:
-                    options.output = unicode(re.sub('[-\s]+', '-', title))
+                    options.output = unicode(re.sub(r'[-\s]+', '-', title))
 
     stream.get(options, url)
 

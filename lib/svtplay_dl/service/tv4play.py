@@ -25,12 +25,12 @@ class Tv4play(Service):
                 log.error("Can't find video file")
                 sys.exit(2)
         else:
-            match = re.search("-(\d+)$", url)
+            match = re.search(r"-(\d+)$", url)
             if match:
                 vid = match.group(1)
             else:
                 data = get_http_data(url)
-                match = re.search("\"vid\":\"(\d+)\",", data)
+                match = re.search(r"\"vid\":\"(\d+)\",", data)
                 if match:
                     vid = match.group(1)
                 else:
@@ -73,7 +73,7 @@ class Tv4play(Service):
         if test["uri"][0:4] == "rtmp":
             download_rtmp(options, test["uri"])
         elif test["uri"][len(test["uri"])-3:len(test["uri"])] == "f4m":
-            match = re.search("\/se\/secure\/", test["uri"])
+            match = re.search(r"\/se\/secure\/", test["uri"])
             if match:
                 log.error("This stream is encrypted. Use --hls option")
                 sys.exit(2)

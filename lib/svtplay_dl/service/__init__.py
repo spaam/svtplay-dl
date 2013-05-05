@@ -49,7 +49,7 @@ class Generic(object):
     ''' Videos embed in sites '''
     def get(self, url):
         data = get_http_data(url)
-        match = re.search("src=\"(http://www.svt.se/wd.*)\" frameborder", data)
+        match = re.search(r"src=\"(http://www.svt.se/wd.*)\" frameborder", data)
         stream = None
         if match:
             url = match.group(1)
@@ -57,12 +57,12 @@ class Generic(object):
                 if i.handle(url):
                     return url, i
 
-        match = re.search("src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
+        match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
         if match:
             for i in sites:
                 if i.handle(match.group(1)):
                     return match.group(1), i
-        match = re.search("tv4video.swf\?vid=(\d+)", data)
+        match = re.search(r"tv4video.swf\?vid=(\d+)", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:

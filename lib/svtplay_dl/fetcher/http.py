@@ -26,7 +26,7 @@ def download_http(options, url):
     total_size = int(total_size)
     bytes_so_far = 0
     if options.output != "-":
-        extension = re.search("(\.[a-z0-9]+)$", url)
+        extension = re.search(r"(\.[a-z0-9]+)$", url)
         if extension:
             options.output = options.output + extension.group(1)
         else:

@@ -18,7 +18,7 @@ class Expressen(Service):
 
     def get(self, options, url):
         data = get_http_data(url)
-        match = re.search("xmlUrl: '(http://www.expressen.*)'", data)
+        match = re.search(r"xmlUrl: '(http://www.expressen.*)'", data)
         if not match:
             log.error("Can't find video file")
             sys.exit(2)
@@ -39,7 +39,7 @@ class Expressen(Service):
         test = select_quality(options, streams)
 
         filename = test
-        match = re.search("rtmp://([0-9a-z\.]+/[0-9]+/)(.*)", filename)
+        match = re.search(r"rtmp://([0-9a-z\.]+/[0-9]+/)(.*)", filename)
 
         filename = "rtmp://%s" % match.group(1)
         options.other = "-y %s" % match.group(2)
