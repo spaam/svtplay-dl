@@ -46,15 +46,15 @@ class Svtplay(Service):
         streams = {}
         streams2 = {} #hack..
         for i in data["video"]["videoReferences"]:
-            if options.hls and i["playerType"] == "ios":
+            if options.hls and i["url"][len(i["url"])-4:] == "m3u8":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            elif not options.hls and i["playerType"] == "flash":
+            elif not options.hls and i["url"][len(i["url"])-3:] == "f4m":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            if options.hls and i["playerType"] == "flash":
+            if options.hls and i["url"][len(i["url"])-3:] == "f4m":
                 stream = {}
                 stream["url"] = i["url"]
                 streams2[int(i["bitrate"])] = stream
