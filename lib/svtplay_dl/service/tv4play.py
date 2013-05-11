@@ -67,8 +67,8 @@ class Tv4play(Service):
             test = select_quality(options, streams)
 
         ## This is how we construct an swf uri, if we'll ever need one
-        # swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-        # options.other = "-W %s -y %s" % (swf, test["path"])
+        swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
+        options.other = "-W %s -y %s" % (swf, test["path"])
 
         if test["uri"][0:4] == "rtmp":
             download_rtmp(options, test["uri"])
