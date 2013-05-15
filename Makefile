@@ -3,6 +3,7 @@ all: svtplay-dl
 .PHONY: test cover pylint svtplay-dl
 
 clean:
+	$(MAKE) -C lib clean
 	rm -f svtplay-dl
 
 PREFIX?=/usr/local
