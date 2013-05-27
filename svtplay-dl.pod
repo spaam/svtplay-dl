@@ -1,0 +1,161 @@
+=encoding utf8
+
+=head1 NAME
+
+svtplay-dl - media downloader for "play" sites (e.g. SVT Play)
+
+=head1 SYNOPSIS
+
+ svtplay-dl [OPTIONS] <URL>
+ svtplay-dl --help
+
+=head1 DESCRIPTION
+
+svtplay-dl is able to download media from various 'video on
+demand' sites (sometimes known as 'play services') (see below
+for list of supported services). Usually, you just have to
+give it the URL as an argument, and it will figure out what
+to do itself.
+
+=head2 OPTIONS
+
+=head3 --output=filename  -o filename
+
+Outputs to the given filename.
+
+=head3 --resume  -r
+
+Resume a download.
+
+=head3 --live  -v
+
+Enable support for live streams.
+
+=head3 --silent  -s
+
+Be less verbose.
+
+=head3 --quality=quality  -q quality
+
+Choose what format to download. It will download the best format
+by default.
+
+=head3 --flexible-quality=amount  -Q amount
+
+Allow given quality (as above) to differ by an amount.
+
+=head3 --hls  -H
+
+Use HTTP Live Streaming when downloading.
+
+=head3 --subtitle  -S
+
+Download subtitle with the media if available.
+
+=head3 --username=USERNAME  -u USERNAME
+
+Username, if the service requires authentication.
+
+=head3 --password=PASSWORD  -p PASSWORD
+
+Password, if the serivce requires authentication.
+
+=head3 --version
+
+Show the program's version number and exit.
+
+=head3 --help  -h
+
+Show description of options.
+
+=head1 SUPPORTED SERVICES
+
+=head2 English
+
+=over
+
+=item * HBO: L<http://hbo.com/>
+
+=item * Twitch: L<http://twitch.tv/>
+
+=back
+
+=head2 Swedish
+
+=over
+
+=item * SVT Play: L<http://svtplay.se/>
+
+=item * UR Play : L<http://urplay.se/>
+
+=item * UR: L<http://ur.se/>
+
+=item * Sveriges Radio: L<http://sverigesradio.se/>
+
+=item * Öppet Arkiv: L<http://oppetarkiv.se/>
+
+=item * TV3 Play: L<http://tv3play.se/>
+
+=item * TV4: L<http://tv4.se/>
+
+=item * TV4 Play: L<http://tv4play.se/>
+
+=item * Kanal5: L<http://kanal5.se/>
+
+=item * Kanal5 Play: L<http://kanal5play.se/>
+
+=item * TV6 Play: L<http://tv6play.se/>
+
+=item * TV8 Play: L<http://tv8play.se/>
+
+=item * Sydsvenskan: L<http://sydsvenskan.se/>
+
+=item * Svenska Dagbladet: L<http://svd.se/>
+
+=item * Dagens Nyheter: L<http://dn.se/>
+
+=item * Dagens Industri: L<http://di.se/>
+
+=item * Aftonbladet: L<http://aftonbladet.se/>
+
+=item * Dagens Industri: L<http://di.se/>
+
+=back
+
+=head2 Danish
+
+=over
+
+=item * DR: L<http://dr.dk/>
+
+=back
+
+=head2 Norwegian
+
+=over
+
+=item * NRK: L<http://nrk.no/>
+
+=back
+
+=head2 Icelandic
+
+=over
+
+=item * RUV: L<http://ruv.is/>
+
+=back
+
+=head1 REPOTING BUGS AND CONTRIBUTING
+
+If you find an issue with svtplay-dl, you can report them at
+L<https://github.com/spaam/svtplay-dl>. Or better yet, if
+possible, open a pull request!
+
+=head1 COPYRIGHT
+
+ Copyright (C) 2011--2013, Johan Andersson et al
+
+ This software is licensed under the MIT license.
+
+=cut
