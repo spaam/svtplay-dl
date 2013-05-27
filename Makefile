@@ -4,9 +4,9 @@ all: svtplay-dl
 
 VERSION = 0.9
 
-PREFIX?=/usr/local
-BINDIR=$(PREFIX)/bin
-MANDIR=$(PREFIX)/share/man/man1
+PREFIX ?= /usr/local
+BINDIR = $(PREFIX)/bin
+MANDIR = $(PREFIX)/share/man/man1
 
 # Compress the manual if MAN_GZIP is set to y,
 ifeq ($(MAN_GZIP),y)
@@ -19,7 +19,7 @@ MANFILE = svtplay-dl.1$(MANFILE_EXT)
 POD2MAN ?= pod2man --section 1 --utf8 -c "svtplay-dl manual" \
            -r "svtplay-dl $(VERSION)"
 
-PYTHON=/usr/bin/env python
+PYTHON = /usr/bin/env python
 export PYTHONPATH=lib
 
 # Disable convention, refactor, and TODO warnings
