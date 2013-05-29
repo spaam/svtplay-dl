@@ -123,11 +123,11 @@ def norm(name):
     else:
         return name
 
-def subtitle_tt(options, data):
+def subtitle_tt(options, subtitle):
     i = 1
     data = ""
     skip = False
-    tree = ET.parse(data)
+    tree = ET.ElementTree(ET.fromstring(subtitle))
     for node in tree.iter():
         tag = norm(node.tag)
         if tag == "p":
