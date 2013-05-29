@@ -22,9 +22,9 @@ class Justin(Service):
 
     def get(self, options, url):
         parse = urlparse(url)
-        match = re.search(r"/b/(\d+)", parse.path)
+        match = re.search(r"/[-a-zA-Z0-9_]+/c/(\d+)", parse.path)
         if match:
-            url = "http://api.justin.tv/api/broadcast/by_archive/%s.xml?onsite=true" % match.group(1)
+            url = "http://api.justin.tv/api/broadcast/by_chapter/%s.xml?onsite=true" % match.group(1)
             data = get_http_data(url)
             xml = ET.XML(data)
             url = xml.find("archive").find("video_file_url").text
