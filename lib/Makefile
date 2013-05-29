@@ -10,13 +10,7 @@ export PACKAGES = svtplay_dl \
                  svtplay_dl.service
 export PYFILES = $(addsuffix /*.py,$(subst .,/,$(PACKAGES)))
 
-PREFIX=/usr/local
-BINDIR=$(PREFIX)/bin
-PYTHON=/usr/bin/env python
-
-install: svtplay-dl
-	install -d $(DESTDIR)$(BINDIR)
-	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
+PYTHON = /usr/bin/env python
 
 svtplay-dl: $(PYFILES)
 	zip --quiet svtplay-dl $(PYFILES)
