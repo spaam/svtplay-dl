@@ -146,6 +146,8 @@ def subtitle_tt(options, subtitle):
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
     fd = open(options.output, "w")
+    if sys.version_info < (3, 0):
+        data = data.encode('utf8')
     fd.write(data)
     fd.close()
 
@@ -191,7 +193,7 @@ def subtitle_smi(options, data):
     recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
     number = 1
     subs = ""
-    for i in recomp.finditer(data):
+    for i in recomp.finditer(str(data)):
         subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
         text = "%s\n\n" % i.group(2)
         subs += text.replace("<br>", "\n")
