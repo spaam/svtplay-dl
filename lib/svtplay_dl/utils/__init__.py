@@ -186,6 +186,8 @@ def subtitle_sami(options, data):
         options.output = "%s.srt" % filename.group(1)
     log.info("Subtitle: %s", options.output)
     fd = open(options.output, "w")
+    if sys.version_info < (3, 0):
+        subs = subs.encode('utf8')
     fd.write(subs)
     fd.close()
 
