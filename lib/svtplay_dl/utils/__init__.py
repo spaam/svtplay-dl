@@ -172,14 +172,17 @@ def subtitle_sami(options, data):
     tree = ET.XML(data)
     subt = tree.find("Font")
     subs = ""
+    n = 0
     for i in subt.getiterator():
         if i.tag == "Subtitle":
-            if i.attrib["SpotNumber"] == 1:
+            n = i.attrib["SpotNumber"]
+            if i.attrib["SpotNumber"] == "1":
                 subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
             else:
                 subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
         else:
-            subs += "%s\n" % i.text
+            if n > 0:
+                subs += "%s\n" % i.text
 
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     if filename:
