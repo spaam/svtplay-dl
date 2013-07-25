@@ -120,6 +120,9 @@ def main():
     parser.add_option("-p", "--password", default=None,
                       help="Password")
     (options, args) = parser.parse_args()
+    if not args:
+        parser.print_help()
+        sys.exit(0)
     if len(args) != 1:
         parser.error("incorrect number of arguments")
 
