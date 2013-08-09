@@ -65,5 +65,5 @@ class Justin(Service):
                     options.resume = False
                     download_rtmp(options, test["url"])
                 else:
-                    log.error("Can't any streams")
+                    log.error("Can't find any streams")
                     sys.exit(2)
