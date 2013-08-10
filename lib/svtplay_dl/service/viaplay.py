@@ -29,6 +29,12 @@ class Viaplay(Service):
         options.other = ""
         data = get_http_data(url)
         xml = ET.XML(data)
+        live = xml.find("Product").find("LiveInfo")
+        if live is not None:
+            live = live.find("Live").text
+            if live == "true":
+                options.live = True
+
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         subtitle = xml.find("Product").find("SamiFile").text
 
