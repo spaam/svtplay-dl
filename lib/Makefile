@@ -1,7 +1,7 @@
 all: svtplay-dl
 
 clean:
-	find -name '*.pyc' -exec rm {} \;
+	find . -name '*.pyc' -exec rm {} \;
 	rm -f svtplay-dl
 
 export PACKAGES = svtplay_dl \
