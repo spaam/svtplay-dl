@@ -43,7 +43,7 @@ class Viaplay(Service):
             xml = ET.XML(data)
             filename = xml.find("Url").text
 
-        options.other = "-W http://flvplayer.viastream.viasat.tv/play/swf/player110516.swf?rnd=1315434062"
+        options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf"
         download_rtmp(options, filename)
         if options.subtitle and subtitle:
             if options.output != "-":
