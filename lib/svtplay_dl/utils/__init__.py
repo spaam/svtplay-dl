@@ -32,29 +32,22 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def _build_request(url, headers, data):
-    request = Request(url)
-
-    for header, value in [head for head in headers.items() if head[1]]:
-        request.add_header(header, value)
-
-    if data:
-        request.add_data(data)
-
-    return request
-
 # FIXME change name from header to content-type?
-def get_http_data(url, header="", data="", useragent=FIREFOX_UA,
+def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
                   referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
 
-    request = _build_request(url, {
-        'Content-Type': header,
-        'Referer': referer,
-        'User-Agent': useragent
-    }, data)
+    request = Request(url)
+    standard_header = {'Referer': referer, 'User-Agent': useragent}
+    for key, value in [head for head in standard_header.items() if head[1]]:
+        request.add_header(key, value)
+    if header:
+        for key, value in [head for head in header.items() if head[1]]:
+            request.add_header(key, value)
+    if data:
+	    request.add_data(data)
 
     opener = build_opener(HTTPCookieProcessor(cookiejar))
 
