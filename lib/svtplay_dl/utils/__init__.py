@@ -32,7 +32,6 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-# FIXME change name from header to content-type?
 def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
                   referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
