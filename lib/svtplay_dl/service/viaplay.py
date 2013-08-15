@@ -43,7 +43,14 @@ class Viaplay(Service):
             xml = ET.XML(data)
             filename = xml.find("Url").text
 
-        options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf"
+        parse = urlparse(filename)
+        match = re.search("^(/[a-z0-9]{0,5})/(.*)", parse.path)
+        if not match:
+            log.error("Somthing wrong with rtmpparse")
+            sys.exit(2)
+        filename = "%s://%s%s" % (parse.scheme, parse.hostname, match.group(1))
+        path = "-y %s" % match.group(2)
+        options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
         download_rtmp(options, filename)
         if options.subtitle and subtitle:
             if options.output != "-":
