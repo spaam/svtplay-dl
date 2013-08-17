@@ -51,14 +51,13 @@ class Justin(Service):
                     sa = list(xml)
                 streams = {}
                 for i in sa:
-                    if i.tag[1:][:-1] != "iv":
-                        try:
-                            stream = {}
-                            stream["token"] = i.find("token").text
-                            stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
-                            streams[int(i.find("video_height").text)] = stream
-                        except AttributeError:
-                            pass
+                    try:
+                        stream = {}
+                        stream["token"] = i.find("token").text
+                        stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
+                        streams[int(i.find("video_height").text)] = stream
+                    except AttributeError:
+                        pass
                 if len(streams) > 0:
                     test = select_quality(options, streams)
                     options.other = "-j '%s' -W %s" % (test["token"], options.other)
