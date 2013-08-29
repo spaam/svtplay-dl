@@ -36,7 +36,8 @@ def download_hls(options, url, baseurl=None):
         except ImportError:
             log.error("You need to install pycrypto to download encrypted HLS streams")
             sys.exit(2)
-        match = re.search(r"URI=\"(http://.*)\"", keydata)
+
+        match = re.search(r'URI="(https?://.*?)"', keydata)
         key = get_http_data(match.group(1))
         rand = os.urandom(16)
         decryptor = AES.new(key, AES.MODE_CBC, rand)
