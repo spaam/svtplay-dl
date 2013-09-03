@@ -6,7 +6,6 @@ import os
 import re
 
 from svtplay_dl.utils import get_http_data, select_quality
-from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
 
@@ -62,17 +61,7 @@ def download_hls(options, url, baseurl=None):
             item = "%s/%s" % (baseurl, item)
         data = get_http_data(item)
         if encrypted:
-            lots = StringIO(data)
-
-            plain = b""
-            crypt = lots.read(1024)
-            decrypted = decryptor.decrypt(crypt)
-            while decrypted:
-                plain += decrypted
-                crypt = lots.read(1024)
-                decrypted = decryptor.decrypt(crypt)
-            data = plain
-
+            data = decryptor.decrypt(data)
         file_d.write(data)
 
     if options.output != "-":
