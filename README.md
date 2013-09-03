@@ -42,6 +42,7 @@ This script works for:
 * tv4play.se
 * tv6play.se
 * tv8play.se
+* tv10play.se
 * twitch.tv
 * ur.se
 * urplay.se
