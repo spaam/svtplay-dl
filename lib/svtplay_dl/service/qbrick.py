@@ -66,7 +66,9 @@ class Qbrick(Service):
         except AttributeError:
             log.error("Can't find video file")
             sys.exit(2)
-
+        live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
+        if live == "true":
+            options.live = True
         data = get_http_data(url)
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
