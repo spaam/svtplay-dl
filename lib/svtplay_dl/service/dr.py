@@ -18,14 +18,11 @@ class Dr(Service):
         resource_url = match.group(1)
         resource_data = get_http_data(resource_url)
         resource = json.loads(resource_data)
-        streams = {}
-        for stream in resource['links']:
-            streams[stream['bitrateKbps']] = stream['uri']
-        if len(streams) == 1:
-            uri = streams[list(streams.keys())[0]]
-        else:
-            uri = select_quality(options, streams)
-        # need -v ?
-        options.other = "-v -y '" + uri.replace("rtmp://vod.dr.dk/cms/", "") + "'"
+        tempresource = resource['Data'][0]['Assets']
+        # To find the VideoResource, they have Images as well
+        for resources in tempresource:
+            if resources['Kind'] == 'VideoResource':
+                uri = resources['Links'][0]['Uri']
+        options.other = ""
         download_rtmp(options, uri)
 
