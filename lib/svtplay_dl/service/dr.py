@@ -7,6 +7,7 @@ import json
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.hls import download_hls
 
 class Dr(Service):
     def handle(self, url):
@@ -27,17 +28,27 @@ class Dr(Service):
 
         streams = {}
         for i in links:
-            if i["Target"] == "Streaming":
-                stream = {}
-                stream["uri"] = i["Uri"]
-                streams[int(i["Bitrate"])] = stream
+            if options.hls:
+                if i["Target"] == "Ios":
+                    stream = {}
+                    stream["uri"] = i["Uri"]
+                    streams[int(i["Bitrate"])] = stream
+            else:
+                if i["Target"] == "Streaming":
+                    stream = {}
+                    stream["uri"] = i["Uri"]
+                    streams[int(i["Bitrate"])] = stream
 
         if len(streams) == 1:
             test = streams[list(streams.keys())[0]]
         else:
             test = select_quality(options, streams)
 
-        options.other = "-y '%s'" % test["uri"].replace("rtmp://vod.dr.dk/cms/", "")
-        rtmp = "rtmp://vod.dr.dk/cms/"
-        download_rtmp(options, rtmp)
+        if options.hls:
+            baseurl = test["uri"][0:test["uri"].rfind("/")]
+            download_hls(options, test["uri"], baseurl=baseurl)
+        else:
+            options.other = "-y '%s'" % test["uri"].replace("rtmp://vod.dr.dk/cms/", "")
+            rtmp = "rtmp://vod.dr.dk/cms/"
+            download_rtmp(options, rtmp)
 
