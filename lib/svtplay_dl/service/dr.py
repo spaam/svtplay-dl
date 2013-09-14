@@ -22,7 +22,22 @@ class Dr(Service):
         # To find the VideoResource, they have Images as well
         for resources in tempresource:
             if resources['Kind'] == 'VideoResource':
-                uri = resources['Links'][0]['Uri']
-        options.other = ""
-        download_rtmp(options, uri)
+                links = resources['Links']
+                break
+
+        streams = {}
+        for i in links:
+            if i["Target"] == "Streaming":
+                stream = {}
+                stream["uri"] = i["Uri"]
+                streams[int(i["Bitrate"])] = stream
+
+        if len(streams) == 1:
+            test = streams[list(streams.keys())[0]]
+        else:
+            test = select_quality(options, streams)
+
+        options.other = "-y '%s'" % test["uri"].replace("rtmp://vod.dr.dk/cms/", "")
+        rtmp = "rtmp://vod.dr.dk/cms/"
+        download_rtmp(options, rtmp)
 
