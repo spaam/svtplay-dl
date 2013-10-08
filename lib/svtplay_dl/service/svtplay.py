@@ -53,7 +53,7 @@ class Svtplay(Service):
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            elif not options.hls:
+            elif not options.hls and i["url"][len(i["url"])-3:] != "f4m" and i["url"][len(i["url"])-4:] != "m3u8":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
