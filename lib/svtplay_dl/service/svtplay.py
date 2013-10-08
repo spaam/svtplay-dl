@@ -32,10 +32,9 @@ class Svtplay(Service):
         url = "%s?type=embed" % url
         data = get_http_data(url)
 
-        ### This is how we construct an swf url, if we'll ever need it
-        # match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
-        # swf = "http://www.svtplay.se%s" % match.group(1)
-        # options.other = "-W %s" % swf
+        match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
+        swf = "http://www.svtplay.se%s" % match.group(1)
+        options.other = "-W %s" % swf
 
         url = "%s&output=json&format=json" % url
         data = json.loads(get_http_data(url))
@@ -54,12 +53,19 @@ class Svtplay(Service):
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
+            elif not options.hls:
+                stream = {}
+                stream["url"] = i["url"]
+                streams[int(i["bitrate"])] = stream
             if options.hls and i["url"][len(i["url"])-3:] == "f4m":
                 stream = {}
                 stream["url"] = i["url"]
                 streams2[int(i["bitrate"])] = stream
 
         if len(streams) == 0 and options.hls:
+            if len(streams) == 0:
+                log.error("Can't find any streams.")
+                sys.exit(2)
             test = streams2[0]
             test["url"] = test["url"].replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         elif len(streams) == 0:
