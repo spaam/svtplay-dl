@@ -83,7 +83,9 @@ def parsem3u(data):
         if l.startswith("#EXT-X-STREAM-INF:"):
             #not a proper parser
             info = [x.strip().split("=", 1) for x in l[18:].split(",")]
-            streaminfo.update({info[1][0]: info[1][1]})
+            for i in range(0, len(info)):
+                if info[i][0] == "BANDWIDTH":
+                    streaminfo.update({info[i][0]: info[i][1]})
         elif l.startswith("#EXT-X-ENDLIST"):
             break
         elif l.startswith("#EXT-X-"):
