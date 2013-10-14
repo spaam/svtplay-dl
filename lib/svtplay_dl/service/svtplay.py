@@ -7,7 +7,7 @@ import json
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_wsrt
-
+from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.fetcher.rtmp import download_rtmp
@@ -45,19 +45,20 @@ class Svtplay(Service):
         streams = {}
         streams2 = {} #hack..
         for i in data["video"]["videoReferences"]:
-            if options.hls and i["url"][len(i["url"])-4:] == "m3u8":
+            parse = urlparse(i["url"])
+            if options.hls and parse.path[len(parse.path)-4:] == "m3u8":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            elif not options.hls and i["url"][len(i["url"])-3:] == "f4m":
+            elif not options.hls and parse.path[len(parse.path)-3:] == "f4m":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            elif not options.hls and i["url"][len(i["url"])-3:] != "f4m" and i["url"][len(i["url"])-4:] != "m3u8":
+            elif not options.hls and parse.path[len(parse.path)-3:] != "f4m" and i["url"][len(i["url"])-4:] != "m3u8":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            if options.hls and i["url"][len(i["url"])-3:] == "f4m":
+            if options.hls and parse.path[len(parse.path)-3:] == "f4m":
                 stream = {}
                 stream["url"] = i["url"]
                 streams2[int(i["bitrate"])] = stream
