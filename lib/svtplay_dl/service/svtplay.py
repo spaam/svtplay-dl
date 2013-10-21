@@ -54,7 +54,7 @@ class Svtplay(Service):
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
-            elif not options.hls and parse.path[len(parse.path)-3:] != "f4m" and i["url"][len(i["url"])-4:] != "m3u8":
+            elif not options.hls and parse.path[len(parse.path)-3:] != "f4m" and parse.path[len(parse.path)-4:] != "m3u8":
                 stream = {}
                 stream["url"] = i["url"]
                 streams[int(i["bitrate"])] = stream
@@ -77,11 +77,12 @@ class Svtplay(Service):
         else:
             test = select_quality(options, streams)
 
-        if test["url"][0:4] == "rtmp":
+        parse = urlparse(test["url"])
+        if parse.scheme == "rtmp":
             download_rtmp(options, test["url"])
         elif options.hls:
             download_hls(options, test["url"])
-        elif test["url"][len(test["url"])-3:len(test["url"])] == "f4m":
+        elif parse.path[len(parse.path)-3:] == "f4m":
             match = re.search(r"\/se\/secure\/", test["url"])
             if match:
                 log.error("This stream is encrypted. Use --hls option")
