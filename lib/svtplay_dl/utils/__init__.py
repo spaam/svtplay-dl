@@ -126,12 +126,17 @@ def subtitle_tt(options, subtitle):
             if skip:
                 data = data + "\n"
             begin = node.attrib["begin"]
-            duration = node.attrib["dur"]
+            if not ("dur" in node.attrib):
+                duration = node.attrib["duration"]
+            else:
+                duration = node.attrib["dur"]
             if not ("end" in node.attrib):
                 begin2 = begin.split(":")
                 duration2 = duration.split(":")
                 sec = float(begin2[2]) + float(duration2[2])
                 end = "%02d:%02d:%06.3f" % (int(begin[0]), int(begin[1]), sec)
+            else:
+                end = node.attrib["end"]
             data += '%s\n%s --> %s\n' % (i, begin.replace(".",","), end.replace(".",","))
             data += '%s\n' % node.text.strip(' \t\n\r')
             skip = True
