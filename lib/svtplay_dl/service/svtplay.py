@@ -29,15 +29,13 @@ class Svtplay(Service):
             else:
                 log.error("Can't find video file")
                 sys.exit(2)
-        url = "%s?type=embed" % url
-        data = get_http_data(url)
 
-        match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
-        swf = "http://www.svtplay.se%s" % match.group(1)
-        options.other = "-W %s" % swf
-
-        url = "%s&output=json&format=json" % url
-        data = json.loads(get_http_data(url))
+        pos = url.find("?")
+        if pos < 0:
+            dataurl = "%s?&output=json&format=json" % url
+        else:
+            dataurl = "%s&output=json&format=json" % url
+        data = json.loads(get_http_data(dataurl))
         if "live" in data["video"]:
             options.live = data["video"]["live"]
         else:
