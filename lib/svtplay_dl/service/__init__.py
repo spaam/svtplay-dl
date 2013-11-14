@@ -49,7 +49,7 @@ class Generic(object):
     ''' Videos embed in sites '''
     def get(self, url):
         data = get_http_data(url)
-        match = re.search(r"src=\"(http://www.svt.se/wd.*)\" frameborder", data)
+        match = re.search(r"src=\"(http://www.svt.se/wd.*)\" height", data)
         stream = None
         if match:
             url = match.group(1)
