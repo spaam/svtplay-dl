@@ -79,6 +79,11 @@ class Svtplay(Service):
 
         parse = urlparse(test["url"])
         if parse.scheme == "rtmp":
+            embedurl = "%s?type=embed" % url
+            data = get_http_data(embedurl)
+            match = re.search("value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
+            swf = "http://www.svtplay.se%s" % match.group(1)
+            options.other = "-W %s" % swf
             download_rtmp(options, test["url"])
         elif options.hls:
             download_hls(options, test["url"])
