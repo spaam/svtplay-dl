@@ -3,12 +3,7 @@
 from __future__ import absolute_import
 import sys
 import json
-
-try:
-    import lxml.html
-except ImportError:
-    print('You need to install the lxml Python library (http://lxml.de/) to download from Vimeo.')
-    sys.exit(1)
+import re
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
@@ -20,10 +15,12 @@ class Vimeo(Service):
         return "vimeo.com" in url
 
     def get(self, options, url):
-        tree = lxml.html.parse(url)
-        root = tree.getroot()
-        player_element = root.xpath('//div[@data-config-url]')[0]
-        player_url = player_element.attrib['data-config-url']
+        data = get_http_data(url)
+        match = re.search("data-config-url=\"(.*)\" data-fallback-url", data)
+        if not match:
+            log.error("Can't find data")
+            sys.exit(4)
+        player_url = match.group(1).replace("&amp;", "&")
         player_data = get_http_data(player_url)
 
         if player_data:
