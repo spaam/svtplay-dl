@@ -4,6 +4,12 @@ from __future__ import absolute_import
 import sys
 import json
 
+try:
+    import lxml.html
+except ImportError:
+    print('You need to install the lxml Python library (http://lxml.de/) to download from Vimeo.')
+    sys.exit(1)
+
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.http import download_http
@@ -14,28 +20,38 @@ class Vimeo(Service):
         return "vimeo.com" in url
 
     def get(self, options, url):
-        data = get_http_data(url, referer="")
-        match = data.split(' = {config:')[1].split(',assets:')[0]
-        if match:
-            jsondata = json.loads(match)
-            sig = jsondata['request']['signature']
-            vidid = jsondata["video"]["id"]
-            timestamp = jsondata['request']['timestamp']
-            referer = jsondata["request"]["referrer"]
-            avail_quality = jsondata["video"]["files"]["h264"]
-            selected_quality = None
-            for i in avail_quality:
-                if options.quality == i:
-                    selected_quality = i
+        tree = lxml.html.parse(url)
+        root = tree.getroot()
+        player_element = root.xpath('//div[@data-config-url]')[0]
+        player_url = player_element.attrib['data-config-url']
+        player_data = get_http_data(player_url)
 
-            if options.quality and selected_quality is None:
-                log.error("Can't find that quality. (Try one of: %s)",
-                      ", ".join([str(elm) for elm in avail_quality]))
-                sys.exit(4)
-            elif options.quality is None and selected_quality is None:
-                selected_quality = avail_quality[0]
-            url = "http://player.vimeo.com/play_redirect?clip_id=%s&sig=%s&time=%s&quality=%s&codecs=H264,VP8,VP6&type=moogaloop_local&embed_location=%s" % (vidid, sig, timestamp, selected_quality, referer)
+        if player_data:
+            jsondata = json.loads(player_data)
+            avail_quality = jsondata["request"]["files"]["h264"]
+            if options.quality:
+                try:
+                    selected = avail_quality[options.quality]
+                except KeyError:
+                    log.error("Can't find that quality. (Try one of: %s)",
+                              ", ".join([str(elm) for elm in avail_quality]))
+                    sys.exit(4)
+            else:
+                try:
+                    selected = self.select_highest_quality(avail_quality)
+                except KeyError:
+                    log.error("Can't find any streams.")
+                    sys.exit(4)
+            url = selected['url']
             download_http(options, url)
         else:
             log.error("Can't find any streams.")
             sys.exit(2)
+
+    def select_highest_quality(self, available):
+        if 'hd' in available:
+            return available['hd']
+        elif 'sd' in available:
+            return available['sd']
+        else:
+            raise KeyError()
