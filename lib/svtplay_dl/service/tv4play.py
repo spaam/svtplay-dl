@@ -54,7 +54,7 @@ class Tv4play(Service):
         subtitle = False
 
         for i in sa:
-            if i.find("mediaFormat").text != "smi":
+            if i.find("mediaFormat").text == "mp4":
                 stream = {}
                 stream["uri"] = i.find("base").text
                 stream["path"] = i.find("url").text
