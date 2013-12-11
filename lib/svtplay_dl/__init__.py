@@ -41,7 +41,7 @@ class Options:
         self.resume = False
         self.live = False
         self.silent = False
-        self.quality = None
+        self.quality = 0
         self.flexibleq = None
         self.hls = False
         self.other = None
