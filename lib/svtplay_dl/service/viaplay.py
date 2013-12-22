@@ -21,7 +21,7 @@ class Viaplay(Service):
 
     def get(self, options, url):
         parse = urlparse(url)
-        match = re.search(r'\/play\/(.*)/?', parse.path)
+        match = re.search(r'\/play\/(\d+)/?', parse.path)
         if not match:
             log.error("Cant find video file")
             sys.exit(2)
