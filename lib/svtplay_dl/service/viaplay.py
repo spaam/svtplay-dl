@@ -44,7 +44,7 @@ class Viaplay(Service):
             filename = xml.find("Url").text
 
         parse = urlparse(filename)
-        match = re.search("^(/[a-z0-9]{0,5})/(.*)", parse.path)
+        match = re.search("^(/[a-z0-9]{0,20})/(.*)", parse.path)
         if not match:
             log.error("Somthing wrong with rtmpparse")
             sys.exit(2)
