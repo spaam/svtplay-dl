@@ -20,11 +20,7 @@ def download_rtmp(options, url):
     extension = re.search(r"(\.[a-z0-9]+)$", url)
     if options.output != "-":
         if not extension:
-            extension = re.search(r"-y (.+):[-_a-z0-9\/]", options.other)
-            if not extension:
-                options.output = "%s.flv" % options.output
-            else:
-                options.output = "%s.%s" % (options.output, extension.group(1))
+            options.output = "%s.flv" % options.output
         else:
             options.output = options.output + extension.group(1)
         log.info("Outfile: %s", options.output)
