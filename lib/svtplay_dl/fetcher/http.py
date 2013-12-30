@@ -17,7 +17,7 @@ def download_http(options, url):
         response = urlopen(request)
     except HTTPError as e:
         log.error("Something wrong with that url")
-        log.error("Error code: %s" % e.code)
+        log.error("Error code: %s", e.code)
         sys.exit(5)
     try:
         total_size = response.info()['Content-Length']
