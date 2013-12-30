@@ -4,9 +4,9 @@ from __future__ import absolute_import
 import subprocess
 import re
 import shlex
-import sys
 
 from svtplay_dl.log import log
+from svtplay_dl.utils import is_py2
 
 def download_rtmp(options, url):
     """ Get the stream from RTMP """
@@ -28,7 +28,7 @@ def download_rtmp(options, url):
     if options.silent or options.output == "-":
         args.append("-q")
     if options.other:
-        if sys.version_info < (3, 0):
+        if is_py2:
             args += shlex.split(options.other.encode("utf-8"))
         else:
             args += shlex.split(options.other)

@@ -7,9 +7,9 @@
 # pylint: disable=E0611
 
 from __future__ import absolute_import
-import sys
+from svtplay_dl.utils import is_py2
 
-if sys.version_info > (3, 0):
+if is_py2:
     from io import BytesIO as StringIO
 else:
     from StringIO import StringIO

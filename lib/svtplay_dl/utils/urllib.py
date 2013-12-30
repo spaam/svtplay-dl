@@ -6,9 +6,8 @@
 # pylint: disable=W0611
 
 from __future__ import absolute_import
-import sys
-
-if sys.version_info > (3, 0):
+from svtplay_dl.utils import is_py3
+if is_py3:
     # pylint: disable=E0611
     from urllib.parse import unquote_plus, quote_plus, urlparse, parse_qs
     from urllib.request import urlopen, Request, build_opener, \

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi
+from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hds import download_hds
@@ -41,7 +41,7 @@ class Tv4play(Service):
         data = get_http_data(url)
         xml = ET.XML(data)
         ss = xml.find("items")
-        if sys.version_info < (2, 7):
+        if is_py2_old:
             sa = list(ss.getiterator("item"))
         else:
             sa = list(ss.iter("item"))

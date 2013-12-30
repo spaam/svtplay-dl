@@ -8,7 +8,7 @@ import logging
 from optparse import OptionParser
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, is_py3, is_py2
 from svtplay_dl.service import service_handler, Generic
 
 
@@ -64,7 +64,7 @@ def get_media(url, options):
         match = re.search(r"(?i)<title.*>\s*(.*?)\s*</title>", data, re.S)
         if match:
             title_tag = re.sub(r'&[^\s]*;', '', match.group(1))
-            if sys.version_info > (3, 0):
+            if is_py3:
                 title = re.sub(r'[^\w\s-]', '', title_tag).strip().lower()
                 options.output = re.sub(r'[-\s]+', '-', title)
             else:

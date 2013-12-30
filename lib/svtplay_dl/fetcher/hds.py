@@ -11,7 +11,7 @@ import binascii
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
 
 log = logging.getLogger('svtplay_dl')
 
@@ -21,7 +21,7 @@ def download_hds(options, url):
     bootstrap = {}
     xml = ET.XML(data)
 
-    if sys.version_info < (2, 7):
+    if is_py2_old:
         bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
         mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
     else:

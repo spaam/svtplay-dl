@@ -4,7 +4,7 @@ import re
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
 from svtplay_dl.fetcher.http import download_http
 
 from svtplay_dl.log import log
@@ -25,7 +25,7 @@ class Mtvservices(Service):
         data = data[start:]
         xml = ET.XML(data)
         ss = xml.find("video").find("item")
-        if sys.version_info < (2, 7):
+        if is_py2_old:
             sa = list(ss.getiterator("rendition"))
         else:
             sa = list(ss.iter("rendition"))
