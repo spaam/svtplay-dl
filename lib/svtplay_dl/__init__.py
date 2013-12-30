@@ -65,16 +65,10 @@ def get_media(url, options):
         if match:
             if sys.version_info > (3, 0):
                 title = re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower()
-                if options.output:
-                    options.output = options.output + re.sub(r'[-\s]+', '-', title)
-                else:
-                    options.output = re.sub(r'[-\s]+', '-', title)
+                options.output = re.sub(r'[-\s]+', '-', title)
             else:
                 title = unicode(re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower())
-                if options.output:
-                    options.output = unicode(options.output + re.sub(r'[-\s]+', '-', title))
-                else:
-                    options.output = unicode(re.sub(r'[-\s]+', '-', title))
+                options.output = unicode(re.sub(r'[-\s]+', '-', title))
 
     stream.get(options, url)
 
