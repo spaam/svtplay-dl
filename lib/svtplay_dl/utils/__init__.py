@@ -50,7 +50,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
         for key, value in [head for head in header.items() if head[1]]:
             request.add_header(key, value)
     if data:
-	    request.add_data(data)
+        request.add_data(data)
 
     opener = build_opener(HTTPCookieProcessor(cookiejar))
 
