@@ -63,11 +63,12 @@ def get_media(url, options):
         data = get_http_data(url)
         match = re.search(r"(?i)<title.*>\s*(.*?)\s*</title>", data, re.S)
         if match:
+            title_tag = re.sub(r'&[^\s]*;', '', match.group(1))
             if sys.version_info > (3, 0):
-                title = re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower()
+                title = re.sub(r'[^\w\s-]', '', title_tag).strip().lower()
                 options.output = re.sub(r'[-\s]+', '-', title)
             else:
-                title = unicode(re.sub(r'[^\w\s-]', '', match.group(1)).strip().lower())
+                title = unicode(re.sub(r'[^\w\s-]', '', title_tag).strip().lower())
                 options.output = unicode(re.sub(r'[-\s]+', '-', title))
 
     stream.get(options, url)
