@@ -17,8 +17,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
 
 class Justin(Service):
-    def handle(self, url):
-        return ("twitch.tv" in url) or ("justin.tv" in url)
+    supported_domains = ['twitch.tv', 'justin.tv']
 
     def get(self, options, url):
         parse = urlparse(url)

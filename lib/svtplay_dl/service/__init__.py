@@ -2,9 +2,22 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+from urlparse import urlparse
 
 class Service(object):
-    pass
+    supported_domains = []
+
+    def handle(self, url):
+        urlp = urlparse(url)
+
+        if urlp.netloc in self.supported_domains:
+            return True
+
+        # For every listed domain, try with www. subdomain as well.
+        if urlp.netloc in ['www.'+x for x in self.supported_domains]:
+            return True
+
+        return False
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.dr import Dr

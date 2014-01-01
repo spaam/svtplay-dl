@@ -16,8 +16,8 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Viaplay(Service):
-    def handle(self, url):
-        return ("tv3play.se" in url) or ("tv6play.se" in url) or ("tv8play.se" in url) or ("tv10play.se" in url)
+    supported_domains = [
+        'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se']
 
     def get(self, options, url):
         parse = urlparse(url)

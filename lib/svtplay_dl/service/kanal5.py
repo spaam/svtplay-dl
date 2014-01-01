@@ -13,8 +13,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
 
 class Kanal5(Service):
-    def handle(self, url):
-        return ("kanal5play.se" in url) or ('kanal9play.se' in url)
+    supported_domains = ['kanal5play.se', 'kanal9play.se']
 
     def get(self, options, url):
         cj = CookieJar()

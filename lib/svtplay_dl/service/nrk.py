@@ -10,8 +10,7 @@ from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
 
 class Nrk(Service):
-    def handle(self, url):
-        return "nrk.no" in url
+    supported_domains = ['nrk.no']
 
     def get(self, options, url):
         data = get_http_data(url)

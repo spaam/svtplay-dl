@@ -16,8 +16,7 @@ from svtplay_dl.fetcher.http import download_http
 from svtplay_dl.log import log
 
 class Svtplay(Service):
-    def handle(self, url):
-        return ("svtplay.se" in url) or ("svt.se" in url) or ("oppetarkiv.se" in url)
+    supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se']
 
     def get(self, options, url):
         if re.findall("svt.se", url):

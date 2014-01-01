@@ -13,8 +13,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
 
 class Aftonbladet(Service):
-    def handle(self, url):
-        return "aftonbladet.se" in url
+    supported_domains = ['aftonbladet.se']
 
     def get(self, options, url):
         parse = urlparse(url)

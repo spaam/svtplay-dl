@@ -10,8 +10,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
 
 class Urplay(Service):
-    def handle(self, url):
-        return ("urplay.se" in url) or ("ur.se" in url)
+    supported_domains = ['urplay.se', 'ur.se']
 
     def get(self, options, url):
         data = get_http_data(url)

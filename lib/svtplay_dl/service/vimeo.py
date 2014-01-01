@@ -11,8 +11,7 @@ from svtplay_dl.fetcher.http import download_http
 from svtplay_dl.log import log
 
 class Vimeo(Service):
-    def handle(self, url):
-        return "vimeo.com" in url
+    supported_domains = ['vimeo.com']
 
     def get(self, options, url):
         data = get_http_data(url)

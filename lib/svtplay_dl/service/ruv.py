@@ -8,8 +8,7 @@ from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.hls import download_hls
 
 class Ruv(Service):
-    def handle(self, url):
-        return "ruv.is" in url
+    supported_domains = ['ruv.is']
 
     def get(self, options, url):
         data = get_http_data(url)

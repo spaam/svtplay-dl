@@ -16,8 +16,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import download_http
 
 class Sr(Service):
-    def handle(self, url):
-        return "sverigesradio.se" in url
+    supported_domains = ['sverigesradio.se']
 
     def get(self, options, url):
         data = get_http_data(url)
