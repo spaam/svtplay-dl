@@ -38,6 +38,7 @@ class Justin(Service):
                 match = re.search(r"embedSWF\(\"(.*)\", \"live", data)
                 if not match:
                     log.error("Can't find swf file.")
+                    sys.exit(2)
                 options.other = check_redirect(match.group(1))
                 url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
                 options.live = True
