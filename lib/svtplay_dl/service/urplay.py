@@ -17,7 +17,7 @@ class Urplay(Service):
         data = get_http_data(url)
         data = re.search(r"urPlayer.init\((.*)\);", data)
         data = re.sub(r"(\w+): ", r'"\1":', data.group(1))
-        data = data.replace("\'", "\"").replace("\",}","\"}").replace("(m = location.hash.match(/[#&]start=(\d+)/)) ? m[1] : 0,","0")
+        data = data.replace("\'", "\"").replace("\",}","\"}").replace(r"(m = location.hash.match(/[#&]start=(\d+)/)) ? m[1] : 0,","0")
         jsondata = json.loads(data)
         subtitle = jsondata["subtitles"].split(",")[0]
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
