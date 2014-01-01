@@ -6,9 +6,17 @@ from urlparse import urlparse
 
 class Service(object):
     supported_domains = []
+    supported_domains_re = []
 
     def handles(self, url):
         urlp = urlparse(url)
+
+        # Apply supported_domains_re regexp to the netloc. This
+        # is meant for 'dynamic' domains, e.g. containing country
+        # information etc.
+        for domain_re in [re.compile(x) for x in self.supported_domains_re]:
+            if domain_re.match(urlp.netloc):
+                return True
 
         if urlp.netloc in self.supported_domains:
             return True
