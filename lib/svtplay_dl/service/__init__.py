@@ -7,7 +7,7 @@ from urlparse import urlparse
 class Service(object):
     supported_domains = []
 
-    def handle(self, url):
+    def handles(self, url):
         urlp = urlparse(url)
 
         if urlp.netloc in self.supported_domains:
@@ -67,19 +67,19 @@ class Generic(object):
         if match:
             url = match.group(1)
             for i in sites:
-                if i.handle(url):
+                if i.handles(url):
                     return url, i
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
         if match:
             for i in sites:
-                if i.handle(match.group(1)):
+                if i.handles(match.group(1)):
                     return match.group(1), i
         match = re.search(r"tv4video.swf\?vid=(\d+)", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
-                if i.handle(url):
+                if i.handles(url):
                     return url, i
         return url, stream
 
@@ -87,7 +87,7 @@ def service_handler(url):
     handler = None
 
     for i in sites:
-        if i.handle(url):
+        if i.handles(url):
             handler = i
             break
 
