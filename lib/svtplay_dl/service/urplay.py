@@ -14,7 +14,6 @@ class Urplay(Service):
 
     def get(self, options, url):
         data = get_http_data(url)
-        data = re.search(r"urPlayer.init\((.*)\);", data)
         match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
             log.error("Can't find json info")
