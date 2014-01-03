@@ -12,7 +12,7 @@ from svtplay_dl.utils import get_http_data, is_py3, is_py2
 from svtplay_dl.service import service_handler, Generic
 
 
-__version__ = "0.9.2014.01.03"
+__version__ = "0.9.2014.01.03.5"
 
 class Options:
     """
