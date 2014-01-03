@@ -61,7 +61,7 @@ def get_media(url, options):
 
     if not options.output or os.path.isdir(options.output):
         data = get_http_data(url)
-        match = re.search(r"(?i)<title.*>\s*(.*?)\s*</title>", data, re.S)
+        match = re.search(r"(?i)<title.*>\s*(.*?)\s*</title>", data)
         if match:
             title_tag = re.sub(r'&[^\s]*;', '', match.group(1))
             if is_py3:
