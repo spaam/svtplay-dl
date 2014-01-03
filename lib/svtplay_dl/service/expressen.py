@@ -13,8 +13,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.utils.urllib import quote_plus
 
 class Expressen(Service):
-    def handle(self, url):
-        return "expressen.se" in url
+    supported_domains = ['expressen.se']
 
     def get(self, options, url):
         data = get_http_data(url)

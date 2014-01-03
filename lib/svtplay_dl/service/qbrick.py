@@ -11,8 +11,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Qbrick(Service):
-    def handle(self, url):
-        return ("dn.se" in url) or ("di.se" in url) or ("svd.se" in url) or ("sydsvenskan.se" in url)
+    supported_domains = ['dn.se', 'di.se', 'svd.se', 'sydsvenskan.se']
 
     def get(self, options, url):
         if re.findall(r"sydsvenskan.se", url):

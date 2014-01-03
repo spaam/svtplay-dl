@@ -12,8 +12,7 @@ from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.log import log
 
 class Dr(Service):
-    def handle(self, url):
-        return "dr.dk" in url
+    supported_domains = ['dr.dk']
 
     def get(self, options, url):
         data = get_http_data(url)

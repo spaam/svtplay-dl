@@ -10,8 +10,7 @@ from svtplay_dl.fetcher.http import download_http
 from svtplay_dl.log import log
 
 class Mtvservices(Service):
-    def handle(self, url):
-        return ("colbertnation.com" in url) or ("www.thedailyshow.com" in url)
+    supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
     def get(self, options, url):
         data = get_http_data(url)

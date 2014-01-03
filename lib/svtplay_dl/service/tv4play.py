@@ -13,8 +13,7 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hds import download_hds
 
 class Tv4play(Service):
-    def handle(self, url):
-        return ("tv4play.se" in url) or ("tv4.se" in url)
+    supported_domains = ['tv4play.se', 'tv4.se']
 
     def get(self, options, url):
         parse = urlparse(url)

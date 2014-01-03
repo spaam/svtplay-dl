@@ -2,9 +2,30 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+from urlparse import urlparse
 
 class Service(object):
-    pass
+    supported_domains = []
+    supported_domains_re = []
+
+    def handles(self, url):
+        urlp = urlparse(url)
+
+        # Apply supported_domains_re regexp to the netloc. This
+        # is meant for 'dynamic' domains, e.g. containing country
+        # information etc.
+        for domain_re in [re.compile(x) for x in self.supported_domains_re]:
+            if domain_re.match(urlp.netloc):
+                return True
+
+        if urlp.netloc in self.supported_domains:
+            return True
+
+        # For every listed domain, try with www. subdomain as well.
+        if urlp.netloc in ['www.'+x for x in self.supported_domains]:
+            return True
+
+        return False
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.dr import Dr
@@ -54,19 +75,19 @@ class Generic(object):
         if match:
             url = match.group(1)
             for i in sites:
-                if i.handle(url):
+                if i.handles(url):
                     return url, i
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
         if match:
             for i in sites:
-                if i.handle(match.group(1)):
+                if i.handles(match.group(1)):
                     return match.group(1), i
         match = re.search(r"tv4video.swf\?vid=(\d+)", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
-                if i.handle(url):
+                if i.handles(url):
                     return url, i
         return url, stream
 
@@ -74,7 +95,7 @@ def service_handler(url):
     handler = None
 
     for i in sites:
-        if i.handle(url):
+        if i.handles(url):
             handler = i
             break
 

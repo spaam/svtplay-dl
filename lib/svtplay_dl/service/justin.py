@@ -17,8 +17,12 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
 
 class Justin(Service):
-    def handle(self, url):
-        return ("twitch.tv" in url) or ("justin.tv" in url)
+    # Justin and Twitch uses language subdomains, e.g. en.www.twitch.tv. They
+    # are usually two characters, but may have a country suffix as well (e.g.
+    # zh-tw, zh-cn and pt-br.
+    supported_domains_re = [
+        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?twitch\.tv$',
+        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?justin\.tv$']
 
     def get(self, options, url):
         parse = urlparse(url)

@@ -12,8 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Hbo(Service):
-    def handle(self, url):
-        return "hbo.com" in url
+    supported_domains = ['hbo.com']
 
     def get(self, options, url):
         parse = urlparse(url)
