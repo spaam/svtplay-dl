@@ -77,15 +77,19 @@ def get_media(url, options):
 
     stream.get(options, url)
 
-def setup_log(silent):
+def setup_log(silent, verbose=False):
+    fmt = logging.Formatter('%(levelname)s %(message)s')
     if silent:
         stream = sys.stderr
         level = logging.WARNING
+    elif verbose:
+        stream = sys.stderr
+        level = logging.DEBUG
+        fmt = logging.Formatter('[%(created).3f] %(pathname)s/%(funcName)s: %(levelname)s %(message)s')
     else:
         stream = sys.stdout
         level = logging.INFO
 
-    fmt = logging.Formatter('%(levelname)s %(message)s')
     hdlr = logging.StreamHandler(stream)
     hdlr.setFormatter(fmt)
 
@@ -106,6 +110,8 @@ def main():
                       help="Enable for live streams")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False)
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose", default=False)
     parser.add_option("-q", "--quality", default=0,
                       metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
@@ -126,7 +132,7 @@ def main():
     if len(args) != 1:
         parser.error("incorrect number of arguments")
 
-    setup_log(options.silent)
+    setup_log(options.silent, options.verbose)
 
     if options.flexibleq and not options.quality:
         log.error("flexible-quality requires a quality")
