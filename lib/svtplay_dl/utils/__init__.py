@@ -8,6 +8,10 @@ import re
 import xml.etree.ElementTree as ET
 import json
 import time
+try:
+    import HTMLParser
+except ImportError:
+    import html.parser as HTMLParser
 
 is_py2 = (sys.version_info[0] == 2)
 is_py3 = (sys.version_info[0] == 3)
@@ -283,3 +287,22 @@ def select_quality(options, streams):
 
     return streams[selected]
 
+def ensure_unicode(s):
+    """
+    Ensure string is a unicode string. If it isn't it assumed it is
+    utf-8 and decodes it to a unicode string.
+    """
+    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)):
+        s = s.decode('utf-8', 'replace')
+    return s
+
+def decode_html_entities(s):
+    """
+    Replaces html entities with the character they represent.
+
+    e.g: "R&auml;ksm&ouml;rg&aring;s" -> u'R\xe4ksm\xf6rg\xe5s'
+    """
+    parser = HTMLParser.HTMLParser()
+    def unesc(m):
+        return parser.unescape(m.group())
+    return re.sub(r'(&[^;]+;)', unesc, ensure_unicode(s))
