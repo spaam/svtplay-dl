@@ -8,7 +8,7 @@ import logging
 from optparse import OptionParser
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data, is_py3, is_py2, decode_html_entities
+from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify
 from svtplay_dl.service import service_handler, Generic
 
 
@@ -64,16 +64,11 @@ def get_media(url, options):
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
         if match:
             title_tag = decode_html_entities(match.group(1))
-            if is_py3:
-                title = re.sub(r'[^\w\s-]', '', title_tag).strip().lower()
-                tmp = re.sub(r'[-\s]+', '-', title)
+            if not options.output:
+                options.output = filenamify(title_tag)
             else:
-                title = unicode(re.sub(r'[^\w\s-]', '', title_tag).strip().lower())
-                tmp = unicode(re.sub(r'[-\s]+', '-', title))
-            if options.output and os.path.isdir(options.output):
-                options.output += "/%s" % tmp
-            else:
-                options.output = tmp
+                # output is a directory
+                os.path.join(options.output, filenamify(title_tag))
 
     stream.get(options, url)
 

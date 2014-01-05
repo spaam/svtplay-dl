@@ -8,6 +8,7 @@ import re
 import xml.etree.ElementTree as ET
 import json
 import time
+import unicodedata
 try:
     import HTMLParser
 except ImportError:
@@ -306,3 +307,24 @@ def decode_html_entities(s):
     def unesc(m):
         return parser.unescape(m.group())
     return re.sub(r'(&[^;]+;)', unesc, ensure_unicode(s))
+
+def filenamify(title):
+    """
+    Convert a string to something suitable as a file name.
+    """
+    # ensure it is unicode
+    title = ensure_unicode(title)
+
+    # NFD decomposes chars into base char and diacritical mark, which means that we will get base char when we strip out non-ascii.
+    title = unicodedata.normalize('NFD', title)
+
+    # Drop any non ascii letters/digits
+    title = re.sub(r'[^a-zA-Z0-9 -]', '', title)
+    # Drop any leading/trailing whitespace that may have appeared
+    title = title.strip()
+    # Lowercase
+    title = title.lower()
+    # Replace whitespace with dash
+    title = re.sub(r'[-\s]+', '-', title)
+
+    return title
