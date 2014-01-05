@@ -2,7 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-from urlparse import urlparse
+from svtplay_dl.utils.urllib import urlparse
 
 class Service(object):
     supported_domains = []
