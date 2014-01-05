@@ -9,8 +9,13 @@ die() {
 
 COVER_OPTS="--with-coverage --cover-package=svtplay_dl"
 
+NOSETESTS=nosetests
+
 while [ "$#" -gt 0 ]; do
 	case $1 in
+		-3)
+			NOSETESTS=nosetests3
+			;;
 		-c|--coverage)
 			OPTS="$OPTS $COVER_OPTS"
 			;;
@@ -30,4 +35,4 @@ while [ "$#" -gt 0 ]; do
 	shift
 done
 
-PYTHONPATH=lib nosetests $OPTS
+PYTHONPATH=lib $NOSETESTS $OPTS
