@@ -7,6 +7,7 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 import json
+import time
 
 is_py2 = (sys.version_info[0] == 2)
 is_py3 = (sys.version_info[0] == 3)
@@ -41,6 +42,9 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
+
+    log.debug("HTTP getting %r", url)
+    starttime = time.time()
 
     request = Request(url)
     standard_header = {'Referer': referer, 'User-Agent': useragent}
@@ -80,6 +84,13 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
             log.error("Lost the connection to the server")
             sys.exit(5)
     response.close()
+
+    spent_time = time.time() - starttime
+    bps = 8 * len(data) / max(spent_time, 0.001)
+
+    log.debug("HTTP got %d bytes from %r in %.2fs (= %dbps)",
+              len(data), url, spent_time, bps)
+
     return data
 
 def check_redirect(url):
