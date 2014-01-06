@@ -8,6 +8,9 @@ class Service(object):
     supported_domains = []
     supported_domains_re = []
 
+    def __init__(self, url):
+        self.url = url
+
     @classmethod
     def handles(cls, url):
         urlp = urlparse(url)
@@ -77,19 +80,19 @@ class Generic(object):
             url = match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i()
+                    return url, i(url)
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
         if match:
             for i in sites:
                 if i.handles(match.group(1)):
-                    return match.group(1), i()
+                    return match.group(1), i(url)
         match = re.search(r"tv4video.swf\?vid=(\d+)", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i()
+                    return url, i(url)
         return url, stream
 
 def service_handler(url):
@@ -97,7 +100,7 @@ def service_handler(url):
 
     for i in sites:
         if i.handles(url):
-            handler = i()
+            handler = i(url)
             break
 
     return handler

@@ -12,8 +12,8 @@ from svtplay_dl.log import log
 class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
         if not match:
             log.error("Can't find video file")

@@ -24,8 +24,8 @@ class Justin(Service):
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?twitch\.tv$',
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?justin\.tv$']
 
-    def get(self, options, url):
-        parse = urlparse(url)
+    def get(self, options):
+        parse = urlparse(self.url)
         match = re.search(r"/[-a-zA-Z0-9_]+/c/(\d+)", parse.path)
         if match:
             url = "http://api.justin.tv/api/broadcast/by_chapter/%s.xml?onsite=true" % match.group(1)

@@ -12,8 +12,8 @@ from svtplay_dl.fetcher.hls import download_hls
 class Nrk(Service):
     supported_domains = ['nrk.no']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r'data-media="(.*manifest.f4m)"', data)
         manifest_url = match.group(1)
         if options.hls:
@@ -25,7 +25,7 @@ class Nrk(Service):
         if options.subtitle:
             match = re.search("data-subtitlesurl = \"(/.*)\"", data)
             if match:
-                parse = urlparse(url)
+                parse = urlparse(self.url)
                 subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
                 data = get_http_data(subtitle)
                 subtitle_tt(options, data)

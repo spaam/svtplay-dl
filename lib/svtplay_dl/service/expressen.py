@@ -15,8 +15,8 @@ from svtplay_dl.utils.urllib import quote_plus
 class Expressen(Service):
     supported_domains = ['expressen.se']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r"xmlUrl: '(http://www.expressen.*)'", data)
         if not match:
             log.error("Can't find video file")

@@ -13,8 +13,8 @@ from svtplay_dl.log import log
 class Vimeo(Service):
     supported_domains = ['vimeo.com']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search("data-config-url=\"(.*)\" data-fallback-url", data)
         if not match:
             log.error("Can't find data")

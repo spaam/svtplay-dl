@@ -18,9 +18,9 @@ from svtplay_dl.fetcher.http import download_http
 class Sr(Service):
     supported_domains = ['sverigesradio.se']
 
-    def get(self, options, url):
-        data = get_http_data(url)
-        parse = urlparse(url)
+    def get(self, options):
+        data = get_http_data(self.url)
+        parse = urlparse(self.url)
 
         if "metafile" in parse_qs(parse.query):
             options.other = "%s?%s" % (parse.path, parse.query)

@@ -70,7 +70,7 @@ def get_media(url, options):
                 # output is a directory
                 os.path.join(options.output, filenamify(title_tag))
 
-    stream.get(options, url)
+    stream.get(options)
 
 def setup_log(silent, verbose=False):
     fmt = logging.Formatter('%(levelname)s %(message)s')

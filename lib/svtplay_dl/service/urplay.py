@@ -14,8 +14,8 @@ from svtplay_dl.log import log
 class Urplay(Service):
     supported_domains = ['urplay.se', 'ur.se']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
             log.error("Can't find json info")

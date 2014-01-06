@@ -14,8 +14,8 @@ from svtplay_dl.log import log
 class Dr(Service):
     supported_domains = ['dr.dk']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)

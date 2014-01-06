@@ -15,9 +15,9 @@ from svtplay_dl.fetcher.hls import download_hls
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se']
 
-    def get(self, options, url):
+    def get(self, options):
         cj = CookieJar()
-        match = re.search(r".*video/([0-9]+)", url)
+        match = re.search(r".*video/([0-9]+)", self.url)
         if not match:
             log.error("Can't find video file")
             sys.exit(2)

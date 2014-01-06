@@ -15,9 +15,9 @@ from svtplay_dl.fetcher.http import download_http
 class Aftonbladet(Service):
     supported_domains = ['aftonbladet.se']
 
-    def get(self, options, url):
-        parse = urlparse(url)
-        data = get_http_data(url)
+    def get(self, options):
+        parse = urlparse(self.url)
+        data = get_http_data(self.url)
         match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
         if not match:
             log.error("Can't find video file")

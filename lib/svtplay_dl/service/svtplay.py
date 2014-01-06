@@ -18,9 +18,9 @@ from svtplay_dl.log import log
 class Svtplay(Service):
     supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se', 'beta.svtplay.se']
 
-    def get(self, options, url):
-        if re.findall("svt.se", url):
-            data = get_http_data(url)
+    def get(self, options):
+        if re.findall("svt.se", self.url):
+            data = get_http_data(self.url)
             match = re.search(r"data-json-href=\"(.*)\"", data)
             if match:
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
@@ -28,6 +28,8 @@ class Svtplay(Service):
             else:
                 log.error("Can't find video file")
                 sys.exit(2)
+        else:
+            url = self.url
 
         pos = url.find("?")
         if pos < 0:

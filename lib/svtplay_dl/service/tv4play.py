@@ -15,20 +15,20 @@ from svtplay_dl.fetcher.hds import download_hds
 class Tv4play(Service):
     supported_domains = ['tv4play.se', 'tv4.se']
 
-    def get(self, options, url):
-        parse = urlparse(url)
-        if "tv4play.se" in url:
+    def get(self, options):
+        parse = urlparse(self.url)
+        if "tv4play.se" in self.url:
             try:
                 vid = parse_qs(parse[4])["video_id"][0]
             except KeyError:
                 log.error("Can't find video file")
                 sys.exit(2)
         else:
-            match = re.search(r"-(\d+)$", url)
+            match = re.search(r"-(\d+)$", self.url)
             if match:
                 vid = match.group(1)
             else:
-                data = get_http_data(url)
+                data = get_http_data(self.url)
                 match = re.search(r"\"vid\":\"(\d+)\",", data)
                 if match:
                     vid = match.group(1)

@@ -21,8 +21,8 @@ class Viaplay(Service):
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt']
 
-    def get(self, options, url):
-        parse = urlparse(url)
+    def get(self, options):
+        parse = urlparse(self.url)
         match = re.search(r'\/play\/(\d+)/?', parse.path)
         if not match:
             log.error("Cant find video file")

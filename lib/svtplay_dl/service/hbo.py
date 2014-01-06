@@ -14,8 +14,8 @@ from svtplay_dl.fetcher.rtmp import download_rtmp
 class Hbo(Service):
     supported_domains = ['hbo.com']
 
-    def get(self, options, url):
-        parse = urlparse(url)
+    def get(self, options):
+        parse = urlparse(self.url)
         try:
             other = parse[5]
         except KeyError:

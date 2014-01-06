@@ -19,10 +19,10 @@ from svtplay_dl.log import log
 class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r"liveStationsRedundancy = ({.*});</script>", data)
-        parse = urlparse(url)
+        parse = urlparse(self.url)
         station = parse.path[1:]
         streams = None
         if match:

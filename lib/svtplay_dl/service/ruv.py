@@ -10,8 +10,8 @@ from svtplay_dl.fetcher.hls import download_hls
 class Ruv(Service):
     supported_domains = ['ruv.is']
 
-    def get(self, options, url):
-        data = get_http_data(url)
+    def get(self, options):
+        data = get_http_data(self.url)
         match = re.search(r'(http://load.cache.is/vodruv.*)"', data)
         js_url = match.group(1)
         js = get_http_data(js_url)
