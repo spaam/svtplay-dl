@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OPTS='--all-modules '
+OPTS='--all-modules --with-doctest '
 
 die() {
 	echo Error: "$@"

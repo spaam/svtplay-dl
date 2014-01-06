@@ -301,7 +301,8 @@ def decode_html_entities(s):
     """
     Replaces html entities with the character they represent.
 
-    e.g: "R&auml;ksm&ouml;rg&aring;s" -> u'R\xe4ksm\xf6rg\xe5s'
+        >>> print(decode_html_entities("&lt;3 &amp;"))
+        <3 &
     """
     parser = HTMLParser.HTMLParser()
     def unesc(m):
@@ -311,6 +312,10 @@ def decode_html_entities(s):
 def filenamify(title):
     """
     Convert a string to something suitable as a file name.
+
+        >>> print(filenamify(u'Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play'))
+        matlagning-del-1-av-10-raksmorgas-svt-play
+
     """
     # ensure it is unicode
     title = ensure_unicode(title)
