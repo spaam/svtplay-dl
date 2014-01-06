@@ -7,36 +7,34 @@
 
 from __future__ import absolute_import
 import unittest
-import svtplay_dl.service.justin
+from svtplay_dl.service.justin import Justin
 
 class handlesTest(unittest.TestCase):
-    def setUp(self):
-        self.justin = svtplay_dl.service.justin.Justin()
 
     def handles_true_test(self):
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://twitch.tv/foo/c/123456"))
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://www.twitch.tv/foo/c/123456"))
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://en.www.twitch.tv/foo/c/123456"))
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://en.twitch.tv/foo/c/123456"))
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://pt-br.twitch.tv/foo/c/123456"))
-        self.assertTrue(self.justin.handles(
+        self.assertTrue(Justin.handles(
             "http://pt-br.www.twitch.tv/foo/c/123456"))
 
     def handles_false_test(self):
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla"))
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://pxt-br.www.twitch.tv/foo/c/123456"))
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://pxt-bxr.www.twitch.tv/foo/c/123456"))
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://p-r.www.twitch.tv/foo/c/123456"))
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://pxx.www.twitch.tv/foo/c/123456"))
-        self.assertFalse(self.justin.handles(
+        self.assertFalse(Justin.handles(
             "http://en.wwww.twitch.tv/foo/c/123456"))

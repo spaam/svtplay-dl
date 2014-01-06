@@ -15,8 +15,7 @@ class MockService(Service):
 
 class ServiceTest(unittest.TestCase):
     def test_supports(self):
-        service = MockService()
-        self.assertTrue(service.handles('http://example.com/video.swf?id=1'))
-        self.assertTrue(service.handles('http://example.net/video.swf?id=1'))
-        self.assertTrue(service.handles('http://www.example.com/video.swf?id=1'))
-        self.assertTrue(service.handles('http://www.example.net/video.swf?id=1'))
+        self.assertTrue(MockService.handles('http://example.com/video.swf?id=1'))
+        self.assertTrue(MockService.handles('http://example.net/video.swf?id=1'))
+        self.assertTrue(MockService.handles('http://www.example.com/video.swf?id=1'))
+        self.assertTrue(MockService.handles('http://www.example.net/video.swf?id=1'))
