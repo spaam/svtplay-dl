@@ -11,9 +11,22 @@ import binascii
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
-from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
+from svtplay_dl.utils import get_http_data, select_quality, is_py2_old, is_py2, is_py3
 
 log = logging.getLogger('svtplay_dl')
+
+if is_py2:
+    def bytes(string=None, encoding="ascii"):
+        if string is None:
+            return ""
+        return string
+
+    def _chr(temp):
+        return temp
+
+if is_py3:
+    def _chr(temp):
+        return chr(temp)
 
 def download_hds(options, url):
     data = get_http_data(url)
@@ -38,7 +51,8 @@ def download_hds(options, url):
 
     bootstrap = base64.b64decode(bootstrap[test["bootstrapInfoId"]])
     box = readboxtype(bootstrap, 0)
-    if box[2] == "abst":
+    antal = None
+    if box[2] == b"abst":
         antal = readbox(bootstrap, box[0])
 
     baseurl = url[0:url.rfind("/")]
@@ -76,7 +90,7 @@ def download_hds(options, url):
         progress_stream.write('\n')
 
 def readbyte(data, pos):
-    return struct.unpack("B", data[pos])[0]
+    return struct.unpack("B", bytes(_chr(data[pos]), "ascii"))[0]
 
 def read16(data, pos):
     endpos = pos + 2
@@ -96,7 +110,7 @@ def read64(data, pos):
 
 def readstring(data, pos):
     length = 0
-    while (data[pos + length] != "\x00"):
+    while bytes(_chr(data[pos + length]), "ascii") != b"\x00":
         length += 1
     endpos = pos + length
     string = data[pos:endpos]
@@ -168,7 +182,7 @@ def readbox(data, pos):
         boxtype = tmp[2]
         boxsize = tmp[1]
         pos = tmp[0]
-        if boxtype == "asrt":
+        if boxtype == b"asrt":
             antal = readasrtbox(data, pos)
             pos += boxsize
     fragRunTableCount = readbyte(data, pos)
@@ -179,7 +193,7 @@ def readbox(data, pos):
         boxtype = tmp[2]
         boxsize = tmp[1]
         pos = tmp[0]
-        if boxtype == "afrt":
+        if boxtype == b"afrt":
             readafrtbox(data, pos)
             pos += boxsize
         i += 1
@@ -247,7 +261,7 @@ def readasrtbox(data, pos):
     return ret
 
 def decode_f4f(fragID, fragData):
-    start = fragData.find("mdat") + 4
+    start = fragData.find(b"mdat") + 4
     if (fragID > 1):
         tagLen, = struct.unpack_from(">L", fragData, start)
         tagLen &= 0x00ffffff
