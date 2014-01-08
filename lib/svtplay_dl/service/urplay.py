@@ -25,16 +25,48 @@ class Urplay(Service):
         subtitle = jsondata["subtitles"].split(",")[0]
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
+        hd = None
+        if len(jsondata["file_html5_hd"]) > 0:
+            http_hd = "http://%s/%s" % (basedomain, jsondata["file_html5_hd"])
+            hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
+            path_hd = "mp%s:%s" % (jsondata["file_hd"][-1], jsondata["file_hd"])
+            hd = True
         #hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         path = "mp%s:%s" % (jsondata["file_flash"][-1], jsondata["file_flash"])
-        options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
-        if options.hls:
-            download_hls(options, hls, http)
+        available = {"sd":{"hls":{"http":http, "playlist":hls}, "rtmp":{"server":rtmp, "path":path}}}
+        if hd:
+            available.update({"hd":{"hls":{"http":http_hd, "playlist":hls_hd}, "rtmp":{"server":rtmp, "path":path_hd}}})
+
+        if options.quality:
+            try:
+                selected = available[options.quality]
+            except KeyError:
+                log.error("Can't find that quality. (Try one of: %s)",
+                          ", ".join([str(elm) for elm in available]))
+                sys.exit(4)
         else:
-            download_rtmp(options, rtmp)
+            try:
+                selected = self.select_highest_quality(available)
+            except KeyError:
+                log.error("Can't find any streams.")
+                sys.exit(4)
+
+        options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], selected["rtmp"]["path"])
+        if options.hls:
+            download_hls(options, selected["hls"]["playlist"], selected["hls"]["http"])
+        else:
+            download_rtmp(options, selected["rtmp"]["server"])
         if options.subtitle:
             if options.output != "-":
                 data = get_http_data(subtitle)
                 subtitle_tt(options, data)
+
+    def select_highest_quality(self, available):
+        if 'hd' in available:
+            return available["hd"]
+        elif 'sd' in available:
+            return available["sd"]
+        else:
+            raise KeyError()
