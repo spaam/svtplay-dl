@@ -3,11 +3,13 @@
 from __future__ import absolute_import
 import re
 import json
+import sys
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, subtitle_tt
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
+from svtplay_dl.log import log
 
 class Urplay(Service):
     supported_domains = ['urplay.se', 'ur.se']
