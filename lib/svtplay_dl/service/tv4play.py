@@ -15,6 +15,10 @@ from svtplay_dl.fetcher.hds import download_hds
 class Tv4play(Service):
     supported_domains = ['tv4play.se', 'tv4.se']
 
+    def __init__(self, url):
+        Service.__init__(self, url)
+        self.subtitle = None
+
     def get(self, options):
         parse = urlparse(self.url)
         if "tv4play.se" in self.url:
@@ -50,7 +54,6 @@ class Tv4play(Service):
                 options.live = True
 
         streams = {}
-        subtitle = False
 
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
@@ -59,7 +62,8 @@ class Tv4play(Service):
                 stream["path"] = i.find("url").text
                 streams[int(i.find("bitrate").text)] = stream
             elif i.find("mediaFormat").text == "smi":
-                subtitle = i.find("url").text
+                self.subtitle = i.find("url").text
+
         if len(streams) == 0:
             log.error("Can't find any streams")
             sys.exit(2)
@@ -81,7 +85,9 @@ class Tv4play(Service):
                 sys.exit(2)
             manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
             download_hds(options, manifest)
-        if options.subtitle and subtitle:
-            data = get_http_data(subtitle)
-            subtitle_smi(options, data)
 
+
+    def get_subtitle(self, options):
+        if self.subtitle:
+            data = get_http_data(self.subtitle)
+            subtitle_smi(options, data)

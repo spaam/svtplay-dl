@@ -18,6 +18,10 @@ from svtplay_dl.log import log
 class Svtplay(Service):
     supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se', 'beta.svtplay.se']
 
+    def __init__(self, url):
+        Service.__init__(self, url)
+        self.subtitle = None
+
     def get(self, options):
         if re.findall("svt.se", self.url):
             data = get_http_data(self.url)
@@ -41,6 +45,13 @@ class Svtplay(Service):
             options.live = data["video"]["live"]
         else:
             options.live = False
+
+        try:
+            self.subtitle = data["video"]["subtitleReferences"][0]["url"]
+        except KeyError:
+            pass
+
+
         streams = {}
         streams2 = {} #hack..
         for i in data["video"]["videoReferences"]:
@@ -95,12 +106,10 @@ class Svtplay(Service):
             download_hds(options, manifest)
         else:
             download_http(options, test["url"])
-        if options.subtitle:
-            try:
-                subtitle = data["video"]["subtitleReferences"][0]["url"]
-            except KeyError:
-                sys.exit(1)
-            if len(subtitle) > 0:
-                if options.output != "-":
-                    data = get_http_data(subtitle)
-                    subtitle_wsrt(options, data)
+
+
+    def get_subtitle(self, options):
+        if self.subtitle:
+            if options.output != "-":
+                data = get_http_data(self.subtitle)
+                subtitle_wsrt(options, data)

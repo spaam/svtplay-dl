@@ -21,6 +21,10 @@ class Viaplay(Service):
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt']
 
+    def __init__(self, url):
+        Service.__init__(self, url)
+        self.subtitle = None
+
     def get(self, options):
         parse = urlparse(self.url)
         match = re.search(r'\/play\/(\d+)/?', parse.path)
@@ -38,7 +42,7 @@ class Viaplay(Service):
                 options.live = True
 
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
-        subtitle = xml.find("Product").find("SamiFile").text
+        self.subtitle = xml.find("Product").find("SamiFile").text
 
         if filename[:4] == "http":
             data = get_http_data(filename)
@@ -54,7 +58,8 @@ class Viaplay(Service):
         path = "-y %s" % match.group(2)
         options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
         download_rtmp(options, filename)
-        if options.subtitle and subtitle:
-            if options.output != "-":
-                data = get_http_data(subtitle)
-                subtitle_sami(options, data)
+
+    def get_subtitle(self, options):
+        if self.subtitle:
+            data = get_http_data(self.subtitle)
+            subtitle_sami(options, data)

@@ -22,11 +22,14 @@ class Nrk(Service):
         else:
             manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
             download_hds(options, manifest_url)
-        if options.subtitle:
-            match = re.search("data-subtitlesurl = \"(/.*)\"", data)
-            if match:
-                parse = urlparse(self.url)
-                subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
-                data = get_http_data(subtitle)
-                subtitle_tt(options, data)
+
+
+    def get_subtitle(self, options):
+        data = get_http_data(self.url)
+        match = re.search("data-subtitlesurl = \"(/.*)\"", data)
+        if match:
+            parse = urlparse(self.url)
+            subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
+            data = get_http_data(subtitle)
+            subtitle_tt(options, data)
 

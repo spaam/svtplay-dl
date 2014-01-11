@@ -71,6 +71,10 @@ def get_media(url, options):
                 os.path.join(options.output, filenamify(title_tag))
 
     stream.get(options)
+    if options.subtitle:
+        if options.output != "-":
+            stream.get_subtitle(options)
+
 
 def setup_log(silent, verbose=False):
     fmt = logging.Formatter('%(levelname)s %(message)s')

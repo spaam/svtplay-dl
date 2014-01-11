@@ -31,6 +31,9 @@ class Service(object):
 
         return False
 
+    def get_subtitle(self, options):
+        pass
+
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.expressen import Expressen
