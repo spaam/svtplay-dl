@@ -60,7 +60,10 @@ class Tv4play(Service):
                 streams[int(i.find("bitrate").text)] = stream
             elif i.find("mediaFormat").text == "smi":
                 subtitle = i.find("url").text
-        if len(streams) == 1:
+        if len(streams) == 0:
+            log.error("Can't find any streams")
+            sys.exit(2)
+        elif len(streams) == 1:
             test = streams[list(streams.keys())[0]]
         else:
             test = select_quality(options, streams)
