@@ -69,7 +69,7 @@ def get_media(url, options):
                 tmp = re.sub(r'[-\s]+', '-', title)
             else:
                 title = unicode(re.sub(r'[^\w\s-]', '', title_tag).strip().lower())
-                tmp = "%s%s" % (options.output, unicode(re.sub(r'[-\s]+', '-', title)))
+                tmp = unicode(re.sub(r'[-\s]+', '-', title))
             if options.output and os.path.isdir(options.output):
                 options.output += "/%s" % tmp
             else:
