@@ -11,7 +11,7 @@ You can install it by running the following as root:
 
     python setup.py install
 
-If you have OS X and [Homebrew](http://mxcl.github.com/homebrew/)
+If you have OS X and [Homebrew](http://brew.sh/)
 you can install with:
 
     brew install svtplay-dl
