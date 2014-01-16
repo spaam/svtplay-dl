@@ -66,10 +66,14 @@ def get_media(url, options):
             title_tag = re.sub(r'&[^\s]*;', '', match.group(1))
             if is_py3:
                 title = re.sub(r'[^\w\s-]', '', title_tag).strip().lower()
-                options.output = re.sub(r'[-\s]+', '-', title)
+                tmp = re.sub(r'[-\s]+', '-', title)
             else:
                 title = unicode(re.sub(r'[^\w\s-]', '', title_tag).strip().lower())
-                options.output = unicode(re.sub(r'[-\s]+', '-', title))
+                tmp = "%s%s" % (options.output, unicode(re.sub(r'[-\s]+', '-', title)))
+            if options.output and os.path.isdir(options.output):
+                options.output += "/%s" % tmp
+            else:
+                options.output = tmp
 
     stream.get(options, url)
 
