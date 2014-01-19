@@ -5,7 +5,7 @@ import sys
 import re
 import json
 
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_wsrt
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import download_hds
@@ -15,7 +15,7 @@ from svtplay_dl.fetcher.http import download_http
 
 from svtplay_dl.log import log
 
-class Svtplay(Service):
+class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se', 'beta.svtplay.se']
 
     def __init__(self, url):

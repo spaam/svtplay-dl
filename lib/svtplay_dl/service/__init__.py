@@ -3,6 +3,10 @@
 from __future__ import absolute_import
 import re
 from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.utils import download_thumbnail
+import logging
+
+log = logging.getLogger('svtplay_dl')
 
 class Service(object):
     supported_domains = []
@@ -33,6 +37,21 @@ class Service(object):
 
     def get_subtitle(self, options):
         pass
+
+
+class OpenGraphThumbMixin(object):
+    """
+    Mix this into the service class to grab thumbnail from OpenGraph properties.
+    """
+    def get_thumbnail(self, options):
+        data = get_http_data(self.url)
+        match = re.search(r'<meta property="og:image" content="([^"]*)"', data)
+        if match is None:
+            match = re.search(r'<meta content="([^"]*)" property="og:image"', data)
+            if match is None:
+                return
+        download_thumbnail(options, match.group(1))
+
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.dr import Dr

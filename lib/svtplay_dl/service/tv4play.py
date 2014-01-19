@@ -6,13 +6,13 @@ import re
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hds import download_hds
 
-class Tv4play(Service):
+class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
 
     def __init__(self, url):

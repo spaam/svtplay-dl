@@ -48,8 +48,10 @@ class Options:
         self.subtitle = False
         self.username = None
         self.password = None
+        self.thumbnail = False
 
 def get_media(url, options):
+
     url, stream = Generic().get(url)
     if stream:
         url = url.replace("&amp;", "&")
@@ -74,6 +76,14 @@ def get_media(url, options):
     if options.subtitle:
         if options.output != "-":
             stream.get_subtitle(options)
+    if options.thumbnail:
+        if hasattr(stream, "get_thumbnail"):
+            log.info("thumb requested")
+            if options.output != "-":
+                log.info("getting thumbnail")
+                stream.get_thumbnail(options)
+    else:
+        log.info("no thumb requested")
 
 
 def setup_log(silent, verbose=False):
@@ -124,6 +134,9 @@ def main():
                       help="Username")
     parser.add_option("-p", "--password", default=None,
                       help="Password")
+    parser.add_option("-t", "--thumbnail",
+                      action="store_true", dest="thumbnail", default=False,
+                      help="Download thumbnail from the site if available.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()

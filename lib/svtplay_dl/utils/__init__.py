@@ -333,3 +333,14 @@ def filenamify(title):
     title = re.sub(r'[-\s]+', '-', title)
 
     return title
+
+def download_thumbnail(options, url):
+    data = get_http_data(url)
+
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
+    tbn = "%s.tbn" % filename.group(1)
+    log.info("Thumbnail: %s", tbn)
+
+    fd = open(tbn, "wb")
+    fd.write(data)
+    fd.close()
