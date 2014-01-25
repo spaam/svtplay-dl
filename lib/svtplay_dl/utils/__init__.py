@@ -100,7 +100,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
 
 def check_redirect(url):
     opener = build_opener(NoRedirectHandler())
-    opener.addheaders += [('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')]
+    opener.addheaders += [('User-Agent', FIREFOX_UA)]
     response = opener.open(url)
     if response.code in (300, 301, 302, 303, 307):
         return response.headers["location"]
