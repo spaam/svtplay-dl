@@ -10,12 +10,12 @@ import re
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_sami
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-class Viaplay(Service):
+class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
