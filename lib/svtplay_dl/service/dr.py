@@ -5,13 +5,13 @@ import re
 import json
 import sys
 
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.log import log
 
-class Dr(Service):
+class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
     def get(self, options):
