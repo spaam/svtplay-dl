@@ -5,12 +5,12 @@ import sys
 import json
 import re
 
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.http import download_http
 from svtplay_dl.log import log
 
-class Vimeo(Service):
+class Vimeo(Service, OpenGraphThumbMixin):
     supported_domains = ['vimeo.com']
 
     def get(self, options):
