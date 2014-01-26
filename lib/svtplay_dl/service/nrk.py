@@ -5,14 +5,14 @@ import re
 import sys
 import json
 
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_tt
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import download_hds
 from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.log import log
 
-class Nrk(Service):
+class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no']
 
     def get(self, options):
