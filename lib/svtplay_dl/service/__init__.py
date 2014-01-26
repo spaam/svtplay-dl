@@ -49,7 +49,9 @@ class OpenGraphThumbMixin(object):
         if match is None:
             match = re.search(r'<meta content="([^"]*)" property="og:image"', data)
             if match is None:
-                return
+                match = re.search(r'<meta name="og:image" property="og:image" content="([^"]*)" />', data)
+                if match is None:
+                    return
         download_thumbnail(options, match.group(1))
 
 
