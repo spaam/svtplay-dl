@@ -5,12 +5,12 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
-class Qbrick(Service):
+class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'di.se', 'svd.se', 'sydsvenskan.se']
 
     def get(self, options):
