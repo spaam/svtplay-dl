@@ -33,7 +33,9 @@ class Urplay(Service, OpenGraphThumbMixin):
         if len(jsondata["file_html5_hd"]) > 0:
             http_hd = "http://%s/%s" % (basedomain, jsondata["file_html5_hd"])
             hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-            path_hd = "mp%s:%s" % (jsondata["file_hd"][-1], jsondata["file_hd"])
+            tmp = jsondata["file_html5_hd"]
+            match = re.search(".*(mp[34]:.*$)", tmp)
+            path_hd = match.group(1)
             hd = True
         #hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
