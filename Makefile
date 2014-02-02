@@ -19,7 +19,7 @@ MANFILE = svtplay-dl.1$(MANFILE_EXT)
 POD2MAN ?= pod2man --section 1 --utf8 -c "svtplay-dl manual" \
            -r "svtplay-dl $(VERSION)"
 
-PYTHON = /usr/bin/env python
+PYTHON ?= /usr/bin/env python
 export PYTHONPATH=lib
 
 # Disable convention, refactor, and TODO warnings

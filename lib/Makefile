@@ -10,7 +10,7 @@ export PACKAGES = svtplay_dl \
                  svtplay_dl.service
 export PYFILES = $(addsuffix /*.py,$(subst .,/,$(PACKAGES)))
 
-PYTHON = /usr/bin/env python
+PYTHON ?= /usr/bin/env python
 
 svtplay-dl: $(PYFILES)
 	zip --quiet svtplay-dl $(PYFILES)
