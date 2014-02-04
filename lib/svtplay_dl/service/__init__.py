@@ -111,7 +111,7 @@ class Generic(object):
             for i in sites:
                 if i.handles(match.group(1)):
                     return match.group(1), i(url)
-        match = re.search(r"tv4video.swf\?vid=(\d+)", data)
+        match = re.search(r"tv4play.se/iframe/video/(\d+)?", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
