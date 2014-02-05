@@ -3,50 +3,38 @@
 from __future__ import absolute_import
 import sys
 import re
-import xml.etree.ElementTree as ET
+import json
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.fetcher.hls import download_hls
 
 class Aftonbladet(Service):
-    supported_domains = ['aftonbladet.se']
+    supported_domains = ['tv.aftonbladet.se']
 
     def get(self, options):
-        parse = urlparse(self.url)
         data = get_http_data(self.url)
-        match = re.search("abTvArticlePlayer-player-(.*)-[0-9]+-[0-9]+-clickOverlay", data)
+        match = re.search("data-aptomaId=\"([-0-9a-z]+)\"", data)
         if not match:
-            log.error("Can't find video file")
+            log.error("Can't find video info")
             sys.exit(2)
-        try:
-            start = parse_qs(parse[4])["start"][0]
-        except KeyError:
-            start = 0
-        url = "http://www.aftonbladet.se/resource/webbtv/article/%s/player" % match.group(1)
-        data = get_http_data(url)
-        xml = ET.XML(data)
-        url = xml.find("articleElement").find("mediaElement").find("baseUrl").text
-        path = xml.find("articleElement").find("mediaElement").find("media").attrib["url"]
-        live = xml.find("articleElement").find("mediaElement").find("isLive").text
-        options.other = "-y %s" % path
-
-        if start > 0:
-            options.other = "%s -A %s" % (options.other, str(start))
-
-        if live == "true":
+        videoId = match.group(1)
+        match = re.search("data-isLive=\"(\w+)\"", data)
+        if not match:
+            log.error("Can't find live info")
+            sys.exit(2)
+        if match.group(1) == "true":
             options.live = True
+        if not options.live:
+            dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
+            data = get_http_data(dataurl)
+            data = json.loads(data)
+            videoId = data["videoId"]
 
-        if url == None:
-            log.error("Can't find any video on that page")
-            sys.exit(3)
-
-        if url[0:4] == "rtmp":
-            download_rtmp(options, url)
-        else:
-            filename = url + path
-            download_http(options, filename)
-
+        streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
+        streams = json.loads(get_http_data(streamsurl))
+        hls = streams["formats"]["hls"]["level3"]["m3u8"][0]
+        playlist = "http://%s/%s/%s" % (hls["address"], hls["path"], hls["filename"])
+        baseurl = "http://%s/%s/" % (hls["address"], hls["path"])
+        download_hls(options, playlist, baseurl)
