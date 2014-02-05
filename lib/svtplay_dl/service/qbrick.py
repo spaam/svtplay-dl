@@ -82,6 +82,6 @@ class Qbrick(Service, OpenGraphThumbMixin):
 
         path = select_quality(options, streams)
 
-        options.other = "-y %s" % path
+        options.other = "-y '%s'" % path
         download_rtmp(options, server)
 
