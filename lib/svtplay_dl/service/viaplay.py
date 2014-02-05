@@ -27,7 +27,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         parse = urlparse(self.url)
-        match = re.search(r'\/play\/(\d+)/?', parse.path)
+        match = re.search(r'\/(\d+)/?', parse.path)
         if not match:
             log.error("Cant find video file")
             sys.exit(2)
