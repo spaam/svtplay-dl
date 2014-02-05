@@ -19,7 +19,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
-        'tv3play.ee', 'tv3play.lv', 'tv3play.lt']
+        'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv']
 
     def __init__(self, url):
         Service.__init__(self, url)
