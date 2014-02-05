@@ -72,10 +72,12 @@ from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
+from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.utils import get_http_data
 
 sites = [
     Aftonbladet,
+    Bambuser,
     Dr,
     Expressen,
     Hbo,
