@@ -6,34 +6,32 @@
 
 from __future__ import absolute_import
 import sys
+import json
 import re
-import xml.etree.ElementTree as ET
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs, unquote_plus
-from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
+from svtplay_dl.service import Service, OpenGraphThumbMixin
+from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import download_http
 
-class Sr(Service):
+class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
 
     def get(self, options):
         data = get_http_data(self.url)
-        parse = urlparse(self.url)
+        match = re.search("href=\"(/sida/[\.\/=a-z0-9&;\?]+\d+)\" aria-label", data)
+        if not match:
+            log.error("Can't find audio info")
+            sys.exit(2)
+        path = quote_plus(match.group(1))
+        dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path
+        data = get_http_data(dataurl)
+        playerinfo = json.loads(data)["playerInfo"]
+        streams = {}
+        for i in playerinfo["AudioSources"]:
+            streams[int(i["Quality"])] = "http:%s" % i["Url"]
 
-        if "metafile" in parse_qs(parse.query):
-            options.other = "%s?%s" % (parse.path, parse.query)
-        else:
-            match = re.search(r"linkUrl=(.*)\;isButton=", data)
-            if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
-            options.other = unquote_plus(match.group(1))
-
-        url = "http://sverigesradio.se%s" % options.other
-        data = get_http_data(url)
-        xml = ET.XML(data)
-        url = xml.find("entry").find("ref").attrib["href"]
-        download_http(options, url)
+        test = select_quality(options, streams)
+        download_http(options, test)
 
