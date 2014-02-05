@@ -48,6 +48,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
             data = get_http_data(filename)
             xml = ET.XML(data)
             filename = xml.find("Url").text
+            if xml.find("Msg").text:
+                log.error("Can't download file:")
+                log.error(xml.find("Msg").text)
+                sys.exit(2)
 
         parse = urlparse(filename)
         match = re.search("^(/[a-z0-9]{0,20})/(.*)", parse.path)
