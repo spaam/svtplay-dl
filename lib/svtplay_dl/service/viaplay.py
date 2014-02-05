@@ -40,7 +40,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
             live = live.find("Live").text
             if live == "true":
                 options.live = True
-
+        if xml.find("Product").find("Syndicate").text == "true":
+            options.live = True
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         self.subtitle = xml.find("Product").find("SamiFile").text
 
