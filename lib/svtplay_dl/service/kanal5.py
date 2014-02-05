@@ -68,13 +68,17 @@ class Kanal5(Service):
                 sys.exit(2)
             download_hls(options, url, baseurl)
         else:
-            steambaseurl = data["streamBaseUrl"]
             streams = {}
 
             for i in data["streams"]:
                 stream = {}
+                if i["drmProtected"]:
+                    log.error("We cant download drm files for this site.")
+                    sys.exit(2)
                 stream["source"] = i["source"]
                 streams[int(i["bitrate"])] = stream
+
+            steambaseurl = data["streamBaseUrl"]
 
             test = select_quality(options, streams)
 
