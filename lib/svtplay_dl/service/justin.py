@@ -16,6 +16,18 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.http import download_http
 
+class JustinUrlException(Exception):
+    """
+    Used to indicate an invalid URL for a given media_type. E.g.:
+
+      JustinUrlException('video', 'http://twitch.tv/example')
+    """
+    def __init__(self, media_type, url):
+        super(JustinUrlException, self).__init__(
+            "'%s' is not recognized as a %s URL" % (url, media_type)
+        )
+
+
 class Justin(Service):
     # Justin and Twitch uses language subdomains, e.g. en.www.twitch.tv. They
     # are usually two characters, but may have a country suffix as well (e.g.
@@ -25,49 +37,70 @@ class Justin(Service):
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?justin\.tv$']
 
     def get(self, options):
-        parse = urlparse(self.url)
-        match = re.search(r"/[-a-zA-Z0-9_]+/c/(\d+)", parse.path)
-        if match:
-            url = "http://api.justin.tv/api/broadcast/by_chapter/%s.xml?onsite=true" % match.group(1)
-            data = get_http_data(url)
-            xml = ET.XML(data)
-            url = xml.find("archive").find("video_file_url").text
+        urlp = urlparse(self.url)
 
-            download_http(options, url)
+        try:
+            self._get_video(urlp, options)
+        except JustinUrlException as e:
+            log.debug(e.message)
+
+            try:
+                self._get_channel(urlp, options)
+            except JustinUrlException as e:
+                log.debug(e.message)
+                log.error("Can't find media for URL")
+                sys.exit(2)
+
+
+    def _get_video(self, urlp, options):
+        match = re.match(r'/\w+/c/(\d+)', urlp.path)
+        if not match:
+            raise JustinUrlException('video', urlp.geturl())
+
+        url = "http://api.justin.tv/api/broadcast/by_chapter/%s.xml?onsite=true" % match.group(1)
+        data = get_http_data(url)
+        xml = ET.XML(data)
+        url = xml.find("archive").find("video_file_url").text
+
+        download_http(options, url)
+
+
+    def _get_channel(self, urlp, options):
+        match = re.match(r'/(\w+)', urlp.path)
+        if not match:
+            raise JustinUrlException('channel', urlp.geturl())
+
+        user = match.group(1)
+        data = get_http_data(url)
+        match = re.search(r"embedSWF\(\"(.*)\", \"live", data)
+        if not match:
+            log.error("Can't find swf file.")
+            sys.exit(2)
+        options.other = check_redirect(match.group(1))
+        url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
+        options.live = True
+        data = get_http_data(url)
+        data = re.sub(r"<(\d+)", r"<_\g<1>", data)
+        data = re.sub(r"</(\d+)", r"</_\g<1>", data)
+        xml = ET.XML(data)
+        if is_py2_old:
+            sa = list(xml)
         else:
-            match = re.search(r"/(.*)", parse.path)
-            if match:
-                user = match.group(1)
-                data = get_http_data(url)
-                match = re.search(r"embedSWF\(\"(.*)\", \"live", data)
-                if not match:
-                    log.error("Can't find swf file.")
-                    sys.exit(2)
-                options.other = check_redirect(match.group(1))
-                url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
-                options.live = True
-                data = get_http_data(url)
-                data = re.sub(r"<(\d+)", r"<_\g<1>", data)
-                data = re.sub(r"</(\d+)", r"</_\g<1>", data)
-                xml = ET.XML(data)
-                if is_py2_old:
-                    sa = list(xml)
-                else:
-                    sa = list(xml)
-                streams = {}
-                for i in sa:
-                    try:
-                        stream = {}
-                        stream["token"] = i.find("token").text
-                        stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
-                        streams[int(i.find("video_height").text)] = stream
-                    except AttributeError:
-                        pass
-                if len(streams) > 0:
-                    test = select_quality(options, streams)
-                    options.other = "-j '%s' -W %s" % (test["token"], options.other)
-                    options.resume = False
-                    download_rtmp(options, test["url"])
-                else:
-                    log.error("Can't find any streams")
-                    sys.exit(2)
+            sa = list(xml)
+        streams = {}
+        for i in sa:
+            try:
+                stream = {}
+                stream["token"] = i.find("token").text
+                stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
+                streams[int(i.find("video_height").text)] = stream
+            except AttributeError:
+                pass
+        if len(streams) > 0:
+            test = select_quality(options, streams)
+            options.other = "-j '%s' -W %s" % (test["token"], options.other)
+            options.resume = False
+            download_rtmp(options, test["url"])
+        else:
+            log.error("Can't find any streams")
+            sys.exit(2)
