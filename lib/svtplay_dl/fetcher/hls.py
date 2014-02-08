@@ -8,8 +8,26 @@ import re
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
+from svtplay_dl.utils.urllib import urlparse
 
-def download_hls(options, url, baseurl=None):
+def _get_full_url(url, srcurl):
+    if url[:4] == 'http':
+        return url
+
+    urlp = urlparse(srcurl)
+
+    # remove everything after last / in the path of the URL
+    baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
+    returl = "%s/%s" % (baseurl, url)
+
+    # Append optional query parameters
+    if urlp.query:
+        returl += "?%s" % urlp.query
+
+    return returl
+
+
+def download_hls(options, url):
     data = get_http_data(url)
     globaldata, files = parsem3u(data)
     streams = {}
@@ -17,8 +35,8 @@ def download_hls(options, url, baseurl=None):
         streams[int(i[1]["BANDWIDTH"])] = i[0]
 
     test = select_quality(options, streams)
-    if baseurl and test[:4] != 'http':
-        test = "%s/%s" % (baseurl, test)
+    test = _get_full_url(test, url)
+
     m3u8 = get_http_data(test)
     globaldata, files = parsem3u(m3u8)
     encrypted = False
@@ -52,13 +70,13 @@ def download_hls(options, url, baseurl=None):
     n = 0
     eta = ETA(len(files))
     for i in files:
-        item = i[0]
+        item = _get_full_url(i[0], test)
+
         if options.output != "-":
             eta.increment()
             progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
             n += 1
-        if item[0:5] != "http:":
-            item = "%s/%s" % (baseurl, item)
+
         data = get_http_data(item)
         if encrypted:
             data = decryptor.decrypt(data)

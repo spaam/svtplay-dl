@@ -47,8 +47,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 test = select_quality(options, streams)
 
             if options.hls:
-                baseurl = test["uri"][0:test["uri"].rfind("/")]
-                download_hls(options, test["uri"], baseurl=baseurl)
+                download_hls(options, test["uri"])
             else:
                 options.other = "-y '%s'" % test["uri"].replace("rtmp://vod.dr.dk/cms/", "")
                 rtmp = "rtmp://vod.dr.dk/cms/"
