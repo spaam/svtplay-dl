@@ -23,7 +23,7 @@ PYTHON ?= /usr/bin/env python
 export PYTHONPATH=lib
 
 # Disable convention, refactor, and TODO warnings
-PYLINT_OPTS = -d C -d R -d W0511
+PYLINT_OPTS = -d I -d C -d R -d W0511
 
 install: svtplay-dl $(MANFILE)
 	install -d $(DESTDIR)$(BINDIR)
