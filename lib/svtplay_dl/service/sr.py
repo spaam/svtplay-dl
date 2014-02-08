@@ -20,7 +20,7 @@ class Sr(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         data = get_http_data(self.url)
-        match = re.search("href=\"(/sida/[\.\/=a-z0-9&;\?]+\d+)\" aria-label", data)
+        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', data)
         if not match:
             log.error("Can't find audio info")
             sys.exit(2)

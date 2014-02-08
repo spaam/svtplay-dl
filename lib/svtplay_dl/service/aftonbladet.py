@@ -15,12 +15,12 @@ class Aftonbladet(Service):
 
     def get(self, options):
         data = get_http_data(self.url)
-        match = re.search("data-aptomaId=\"([-0-9a-z]+)\"", data)
+        match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
             log.error("Can't find video info")
             sys.exit(2)
         videoId = match.group(1)
-        match = re.search("data-isLive=\"(\w+)\"", data)
+        match = re.search(r'data-isLive="(\w+)"', data)
         if not match:
             log.error("Can't find live info")
             sys.exit(2)
