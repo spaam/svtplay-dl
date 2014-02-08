@@ -7,16 +7,20 @@
 from __future__ import absolute_import
 import sys
 import re
+import json
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.utils.urllib import urlparse, quote
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, check_redirect, is_py2_old
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.fetcher.http import download_http
 
-class JustinUrlException(Exception):
+class JustinException(Exception):
+    pass
+
+class JustinUrlException(JustinException):
     """
     Used to indicate an invalid URL for a given media_type. E.g.:
 
@@ -35,6 +39,10 @@ class Justin(Service):
     supported_domains_re = [
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?twitch\.tv$',
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?justin\.tv$']
+
+    # TODO: verify that this will support Justin as well
+    api_base_url = 'https://api.twitch.tv'
+    hls_base_url = 'http://usher.justin.tv/api/channel/hls'
 
     def get(self, options):
         urlp = urlparse(self.url)
@@ -65,42 +73,60 @@ class Justin(Service):
         download_http(options, url)
 
 
+    def _get_access_token(self, channel):
+        """
+        Get a Twitch access token. It's a three element dict:
+
+         * mobile_restricted
+         * sig
+         * token
+
+        `sig` is a hexadecimal string, and `token` is a JSON blob, with
+        information about access expiration. `mobile_restricted` is not
+        important, but is a boolean.
+
+        Both `sig` and `token` should be added to the HLS URI, and the
+        token should, of course, be URI encoded.
+        """
+        return self._ajax_get('/api/channels/%s/access_token' % channel)
+
+
+    def _ajax_get(self, method):
+        url = "%s/%s" % (self.api_base_url, method)
+
+        # Logic found in Twitch's global.js. Prepend /kraken/ to url
+        # path unless the API method already is absolute.
+        if method[0] != '/':
+            method = '/kraken/%s' % method
+
+        # There are references to a api_token in global.js; it's used
+        # with the "Twitch-Api-Token" HTTP header. But it doesn't seem
+        # to be necessary.
+        payload = get_http_data(url, header={
+            'Accept': 'application/vnd.twitchtv.v2+json'
+        })
+        return json.loads(payload)
+
+
+    def _get_hls_url(self, channel):
+        access = self._get_access_token(channel)
+
+        query = "token=%s&sig=%s" % (quote(access['token']), access['sig'])
+        return "%s/%s.m3u8?%s" % (self.hls_base_url, channel, query)
+
+
     def _get_channel(self, urlp, options):
         match = re.match(r'/(\w+)', urlp.path)
+
         if not match:
             raise JustinUrlException('channel', urlp.geturl())
 
-        user = match.group(1)
-        data = get_http_data(url)
-        match = re.search(r"embedSWF\(\"(.*)\", \"live", data)
-        if not match:
-            log.error("Can't find swf file.")
-            sys.exit(2)
-        options.other = check_redirect(match.group(1))
-        url = "http://usher.justin.tv/find/%s.xml?type=any&p=2321" % user
+        channel = match.group(1)
+        hls_url = self._get_hls_url(channel)
+        urlp = urlparse(hls_url)
+
         options.live = True
-        data = get_http_data(url)
-        data = re.sub(r"<(\d+)", r"<_\g<1>", data)
-        data = re.sub(r"</(\d+)", r"</_\g<1>", data)
-        xml = ET.XML(data)
-        if is_py2_old:
-            sa = list(xml)
-        else:
-            sa = list(xml)
-        streams = {}
-        for i in sa:
-            try:
-                stream = {}
-                stream["token"] = i.find("token").text
-                stream["url"] = "%s/%s" % (i.find("connect").text, i.find("play").text)
-                streams[int(i.find("video_height").text)] = stream
-            except AttributeError:
-                pass
-        if len(streams) > 0:
-            test = select_quality(options, streams)
-            options.other = "-j '%s' -W %s" % (test["token"], options.other)
-            options.resume = False
-            download_rtmp(options, test["url"])
-        else:
-            log.error("Can't find any streams")
-            sys.exit(2)
+        if not options.output:
+            options.output = channel
+
+        download_hls(options, hls_url)
