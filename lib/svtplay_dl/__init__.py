@@ -87,7 +87,7 @@ def get_media(url, options):
 
 
 def setup_log(silent, verbose=False):
-    fmt = logging.Formatter('%(levelname)s %(message)s')
+    fmt = logging.Formatter('%(levelname)s: %(message)s')
     if silent:
         stream = sys.stderr
         level = logging.WARNING
