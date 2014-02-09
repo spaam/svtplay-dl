@@ -9,6 +9,19 @@ from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.error import UIException
+
+class HLSException(UIException):
+    def __init__(self, url, message):
+        self.url = url
+        super(HLSException, self).__init__(message)
+
+
+class LiveHLSException(HLSException):
+    def __init__(self, url):
+        super(LiveHLSException, self).__init__(
+            url, "This is a live HLS stream, and they are not supported.")
+
 
 def _get_full_url(url, srcurl):
     if url[:4] == 'http':
@@ -31,6 +44,10 @@ def download_hls(options, url):
     data = get_http_data(url)
     globaldata, files = parsem3u(data)
     streams = {}
+
+    if options.live and not options.force:
+        raise LiveHLSException(url)
+
     for i in files:
         streams[int(i[1]["BANDWIDTH"])] = i[0]
 
