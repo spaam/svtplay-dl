@@ -18,6 +18,5 @@ class Ruv(Service):
         tengipunktur = js.split('"')[1]
         match = re.search(r"http.*tengipunktur [+] '([:]1935.*)'", data)
         m3u8_url = "http://" + tengipunktur + match.group(1)
-        base_url = m3u8_url.rsplit("/", 1)[0]
-        download_hls(options, m3u8_url, base_url)
+        download_hls(options, m3u8_url)
 

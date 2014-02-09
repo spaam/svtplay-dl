@@ -36,5 +36,4 @@ class Aftonbladet(Service):
         streams = json.loads(get_http_data(streamsurl))
         hls = streams["formats"]["hls"]["level3"]["m3u8"][0]
         playlist = "http://%s/%s/%s" % (hls["address"], hls["path"], hls["filename"])
-        baseurl = "http://%s/%s/" % (hls["address"], hls["path"])
-        download_hls(options, playlist, baseurl)
+        download_hls(options, playlist)

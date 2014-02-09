@@ -38,8 +38,7 @@ class Radioplay(Service):
             if options.hls:
                 try:
                     m3u8_url = streams["hls"]
-                    base_url = m3u8_url.rsplit("/", 1)[0]
-                    download_hls(options, m3u8_url, base_url)
+                    download_hls(options, m3u8_url)
                 except KeyError:
                     log.error("Can't find any streams.")
                     sys.exit(2)

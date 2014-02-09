@@ -61,7 +61,7 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], selected["rtmp"]["path"])
         if options.hls:
-            download_hls(options, selected["hls"]["playlist"], selected["hls"]["http"])
+            download_hls(options, selected["hls"]["playlist"])
         else:
             download_rtmp(options, selected["rtmp"]["server"])
 
