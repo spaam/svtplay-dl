@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.utils import get_http_data, select_quality, is_py2_old, is_py2, is_py3
+from svtplay_dl.error import UIException
 
 log = logging.getLogger('svtplay_dl')
 
@@ -28,11 +29,26 @@ if is_py3:
     def _chr(temp):
         return chr(temp)
 
+class HDSException(UIException):
+    def __init__(self, url, message):
+        self.url = url
+        super(HDSException, self).__init__(message)
+
+
+class LiveHDSException(HDSException):
+    def __init__(self, url):
+        super(LiveHDSException, self).__init__(
+            url, "This is a live HDS stream, and they are not supported.")
+
+
 def download_hds(options, url):
     data = get_http_data(url)
     streams = {}
     bootstrap = {}
     xml = ET.XML(data)
+
+    if options.live and not options.force:
+        raise LiveHDSException(url)
 
     if is_py2_old:
         bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
