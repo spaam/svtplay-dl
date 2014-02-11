@@ -77,6 +77,8 @@ def get_media(url, options):
     try:
         stream.get(options)
     except UIException as e:
+        if options.verbose:
+            raise e
         log.error(e.message)
         sys.exit(2)
 
