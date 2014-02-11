@@ -46,10 +46,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             options.live = False
 
-        try:
-            self.subtitle = data["video"]["subtitleReferences"][0]["url"]
-        except KeyError:
-            pass
+        if data["video"]["subtitleReferences"]:
+            try:
+                self.subtitle = data["video"]["subtitleReferences"][0]["url"]
+            except (KeyError, NoneType):
+                pass
 
 
         streams = {}
