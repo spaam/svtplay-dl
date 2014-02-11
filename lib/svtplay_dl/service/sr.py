@@ -30,7 +30,10 @@ class Sr(Service, OpenGraphThumbMixin):
         playerinfo = json.loads(data)["playerInfo"]
         streams = {}
         for i in playerinfo["AudioSources"]:
-            streams[int(i["Quality"])] = "http:%s" % i["Url"]
+            url = i["Url"]
+            if not url.startswith('http'):
+                i = 'http:%s' % url
+            streams[int(i["Quality"])] = url
 
         test = select_quality(options, streams)
         download_http(options, test)
