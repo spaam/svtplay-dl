@@ -7,6 +7,7 @@ import os
 import logging
 from optparse import OptionParser
 
+from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify
 from svtplay_dl.service import service_handler, Generic
@@ -41,6 +42,7 @@ class Options:
         self.resume = False
         self.live = False
         self.silent = False
+        self.force = False
         self.quality = 0
         self.flexibleq = None
         self.hls = False
@@ -72,7 +74,14 @@ def get_media(url, options):
                 # output is a directory
                 os.path.join(options.output, filenamify(title_tag))
 
-    stream.get(options)
+    try:
+        stream.get(options)
+    except UIException as e:
+        if options.verbose:
+            raise e
+        log.error(e.message)
+        sys.exit(2)
+
     if options.subtitle:
         if options.output != "-":
             stream.get_subtitle(options)
@@ -87,7 +96,7 @@ def get_media(url, options):
 
 
 def setup_log(silent, verbose=False):
-    fmt = logging.Formatter('%(levelname)s %(message)s')
+    fmt = logging.Formatter('%(levelname)s: %(message)s')
     if silent:
         stream = sys.stderr
         level = logging.WARNING
@@ -121,6 +130,8 @@ def main():
                       action="store_true", dest="silent", default=False)
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False)
+    parser.add_option("-f", "--force",
+                      action="store_true", dest="force", default=False)
     parser.add_option("-q", "--quality", default=0,
                       metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
