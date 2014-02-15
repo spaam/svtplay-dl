@@ -13,7 +13,7 @@ from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify
 from svtplay_dl.service import service_handler, Generic
 
 
-__version__ = "0.9.2014.01.18"
+__version__ = "0.9.2014.02.15"
 
 class Options:
     """
