@@ -118,8 +118,6 @@ Show description of options.
 
 =item * Aftonbladet: L<http://aftonbladet.se/>
 
-=item * Dagens Industri: L<http://di.se/>
-
 =back
 
 =head2 Danish
