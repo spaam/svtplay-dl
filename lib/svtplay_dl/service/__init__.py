@@ -39,20 +39,35 @@ class Service(object):
         pass
 
 
+def opengraph_get(html, prop):
+    """
+    Extract specified OpenGraph property from html.
+
+        >>> opengraph_get('<html><head><meta property="og:image" content="http://example.com/img.jpg"><meta ...', "image")
+        'http://example.com/img.jpg'
+        >>> opengraph_get('<html><head><meta content="http://example.com/img2.jpg" property="og:image"><meta ...', "image")
+        'http://example.com/img2.jpg'
+        >>> opengraph_get('<html><head><meta name="og:image" property="og:image" content="http://example.com/img3.jpg"><meta ...', "image")
+        'http://example.com/img3.jpg'
+    """
+    match = re.search('<meta [^>]*property="og:' + prop + '" content="([^"]*)"', html)
+    if match is None:
+        match = re.search('<meta [^>]*content="([^"]*)" property="og:' + prop + '"', html)
+        if match is None:
+            return None
+    return match.group(1)
+
+
 class OpenGraphThumbMixin(object):
     """
     Mix this into the service class to grab thumbnail from OpenGraph properties.
     """
     def get_thumbnail(self, options):
         data = get_http_data(self.url)
-        match = re.search(r'<meta property="og:image" content="([^"]*)"', data)
-        if match is None:
-            match = re.search(r'<meta content="([^"]*)" property="og:image"', data)
-            if match is None:
-                match = re.search(r'<meta name="og:image" property="og:image" content="([^"]*)" />', data)
-                if match is None:
-                    return
-        download_thumbnail(options, match.group(1))
+        url = opengraph_get(data, "image")
+        if url is None:
+            return
+        download_thumbnail(options, url)
 
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
