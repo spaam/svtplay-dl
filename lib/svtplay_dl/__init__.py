@@ -5,6 +5,7 @@ import sys
 import re
 import os
 import logging
+import copy
 from optparse import OptionParser
 
 from svtplay_dl.error import UIException
@@ -51,6 +52,7 @@ class Options:
         self.username = None
         self.password = None
         self.thumbnail = False
+        self.all_episodes = False
 
 def get_media(url, options):
 
@@ -63,6 +65,27 @@ def get_media(url, options):
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
 
+    if options.all_episodes:
+        if options.output and not os.path.isdir(options.output):
+            log.error("Output must be a directory if used with --all-episodes")
+            sys.exit(2)
+
+        episodes = stream.find_all_episodes(options)
+
+        for idx, o in enumerate(episodes):
+            if o == url:
+                substream = stream
+            else:
+                substream = service_handler(o)
+
+            log.info("Episode %d of %d" % (idx + 1, len(episodes)))
+
+            # get_one_media overwrites options.output...
+            get_one_media(substream, copy.copy(options))
+    else:
+        get_one_media(stream, options)
+
+def get_one_media(stream, options):
     if not options.output or os.path.isdir(options.output):
         data = stream.get_urldata()
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
@@ -148,6 +171,9 @@ def main():
     parser.add_option("-t", "--thumbnail",
                       action="store_true", dest="thumbnail", default=False,
                       help="Download thumbnail from the site if available.")
+    parser.add_option("-A", "--all-episodes",
+                      action="store_true", dest="all_episodes", default=False,
+                      help="Try to download all episodes.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()

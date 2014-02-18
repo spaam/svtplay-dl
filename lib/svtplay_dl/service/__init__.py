@@ -48,6 +48,9 @@ class Service(object):
     def get_subtitle(self, options):
         pass
 
+    def find_all_episodes(self, options):
+        log.warning("--all-episodes not implemented for this service")
+        return [self.url]
 
 def opengraph_get(html, prop):
     """
