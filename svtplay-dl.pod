@@ -74,9 +74,15 @@ Show description of options.
 
 =over
 
+=item * Bambuser: L<http://bambuser.com/>
+
 =item * HBO: L<http://hbo.com/>
 
+=item * Justin.tv: L<http://justin.tv/>
+
 =item * Twitch: L<http://twitch.tv/>
+
+=item * Vimeo: L<http://vimeo.com/>
 
 =back
 
@@ -84,15 +90,33 @@ Show description of options.
 
 =over
 
-=item * SVT Play: L<http://svtplay.se/>
+=item * Aftonbladet: L<http://www.aftonbladet.se/>
 
-=item * UR Play : L<http://urplay.se/>
+=item * Dagens Industri: L<http://di.se/>
 
-=item * UR: L<http://ur.se/>
+=item * Dagens Nyheter: L<http://dn.se/>
+
+=item * DR: L<http://dr.dk/>
+
+=item * Expressen: L<http://expressen.se/>
+
+=item * Kanal5: L<http://kanal5.se/>
+
+=item * Kanal5 Play: L<http://kanal5play.se/>
+
+=item * Kanal9 Play: L<http://kanal9play.se/>
+
+=item * Öppet Arkiv: L<http://oppetarkiv.se/>
+
+=item * Svenska Dagbladet: L<http://svd.se/>
 
 =item * Sveriges Radio: L<http://sverigesradio.se/>
 
-=item * Öppet Arkiv: L<http://oppetarkiv.se/>
+=item * SVT Play: L<http://svtplay.se/>
+
+=item * Sydsvenskan: L<http://sydsvenskan.se/>
+
+=item * TV10 Play: L<http://tv10play.se/>
 
 =item * TV3 Play: L<http://tv3play.se/>
 
@@ -100,23 +124,13 @@ Show description of options.
 
 =item * TV4 Play: L<http://tv4play.se/>
 
-=item * Kanal5: L<http://kanal5.se/>
-
-=item * Kanal5 Play: L<http://kanal5play.se/>
-
 =item * TV6 Play: L<http://tv6play.se/>
 
 =item * TV8 Play: L<http://tv8play.se/>
 
-=item * Sydsvenskan: L<http://sydsvenskan.se/>
+=item * UR: L<http://ur.se/>
 
-=item * Svenska Dagbladet: L<http://svd.se/>
-
-=item * Dagens Nyheter: L<http://dn.se/>
-
-=item * Dagens Industri: L<http://di.se/>
-
-=item * Aftonbladet: L<http://aftonbladet.se/>
+=item * UR Play: L<http://urplay.se/>
 
 =back
 
@@ -126,6 +140,8 @@ Show description of options.
 
 =item * DR: L<http://dr.dk/>
 
+=item * TV3 Play: L<http://tv3play.dk/>
+
 =back
 
 =head2 Norwegian
@@ -134,6 +150,10 @@ Show description of options.
 
 =item * NRK: L<http://nrk.no/>
 
+=item * TV3 Play: L<http://tv3play.no/>
+
+=item * Viasat 4 play: L<http://viasat4play.no>
+
 =back
 
 =head2 Icelandic
@@ -141,6 +161,30 @@ Show description of options.
 =over
 
 =item * RUV: L<http://ruv.is/>
+
+=back
+
+=head2 Estonian
+
+=over
+
+=item * TV3 Play: L<http://tv3play.ee/>
+
+=back
+
+=head2 Latvian
+
+=over
+
+=item * TV3 Play: L<http://tv3play.lt/>
+
+=back
+
+=head2 Lithuanian
+
+=over
+
+=item * TV3 Play: L<http://tv3play.lv/>
 
 =back
 
