@@ -21,6 +21,7 @@ Support
 This script works for:
 
 * aftonbladet.se
+* bambuser.com
 * di.se
 * dn.se
 * dr.dk
