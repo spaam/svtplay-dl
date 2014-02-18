@@ -72,7 +72,7 @@ def get_media(url, options):
                 options.output = filenamify(title_tag)
             else:
                 # output is a directory
-                os.path.join(options.output, filenamify(title_tag))
+                options.output = os.path.join(options.output, filenamify(title_tag))
 
     try:
         stream.get(options)
