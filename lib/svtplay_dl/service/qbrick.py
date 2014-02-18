@@ -15,7 +15,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         if re.findall(r"sydsvenskan.se", self.url):
-            data = get_http_data(self.url)
+            data = self.get_urldata()
             match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:
                 log.error("Can't find video file")
@@ -23,7 +23,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             mcid = match.group(1)
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         elif re.findall(r"di.se", self.url):
-            data = get_http_data(self.url)
+            data = self.get_urldata()
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
                 log.error("Can't find video info")
@@ -35,7 +35,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
                 sys.exit(2)
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
         elif re.findall(r"dn.se", self.url):
-            data = get_http_data(self.url)
+            data = self.get_urldata()
             match = re.search(r"'([0-9A-F]{8})',", data)
             if not match:
                 match = re.search(r"mediaId = '([0-9A-F]{8})';", data)

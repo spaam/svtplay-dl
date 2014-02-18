@@ -11,7 +11,7 @@ class Ruv(Service):
     supported_domains = ['ruv.is']
 
     def get(self, options):
-        data = get_http_data(self.url)
+        data = self.get_urldata()
         match = re.search(r'(http://load.cache.is/vodruv.*)"', data)
         js_url = match.group(1)
         js = get_http_data(js_url)

@@ -24,8 +24,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         if re.findall("svt.se", self.url):
-            data = get_http_data(self.url)
-            match = re.search(r"data-json-href=\"(.*)\"", data)
+            match = re.search(r"data-json-href=\"(.*)\"", self.get_urldata())
             if match:
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
@@ -51,7 +50,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 self.subtitle = data["video"]["subtitleReferences"][0]["url"]
             except (KeyError, NoneType):
                 pass
-
 
         streams = {}
         streams2 = {} #hack..

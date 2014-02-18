@@ -64,7 +64,7 @@ def get_media(url, options):
         sys.exit(2)
 
     if not options.output or os.path.isdir(options.output):
-        data = get_http_data(url)
+        data = stream.get_urldata()
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
         if match:
             title_tag = decode_html_entities(match.group(1))

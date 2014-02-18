@@ -19,8 +19,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         self.subtitle = None
 
     def get(self, options):
-        data = get_http_data(self.url)
-        match = re.search(r"urPlayer.init\((.*)\);", data)
+        match = re.search(r"urPlayer.init\((.*)\);", self.get_urldata())
         if not match:
             log.error("Can't find json info")
             sys.exit(2)

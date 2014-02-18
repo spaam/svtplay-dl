@@ -14,7 +14,7 @@ class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
 
     def get(self, options):
-        data = get_http_data(self.url)
+        data = self.get_urldata()
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
             log.error("Can't find video info")

@@ -15,7 +15,7 @@ class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
     def get(self, options):
-        data = get_http_data(self.url)
+        data = self.get_urldata()
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)

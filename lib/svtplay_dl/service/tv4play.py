@@ -32,8 +32,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if match:
                 vid = match.group(1)
             else:
-                data = get_http_data(self.url)
-                match = re.search(r"\"vid\":\"(\d+)\",", data)
+                match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
                 if match:
                     vid = match.group(1)
                 else:

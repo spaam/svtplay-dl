@@ -16,7 +16,7 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no']
 
     def get(self, options):
-        data = get_http_data(self.url)
+        data = self.get_urldata()
         match = re.search(r'data-media="(.*manifest.f4m)"', data)
         if match:
             manifest_url = match.group(1)
@@ -43,8 +43,7 @@ class Nrk(Service, OpenGraphThumbMixin):
 
 
     def get_subtitle(self, options):
-        data = get_http_data(self.url)
-        match = re.search("data-subtitlesurl = \"(/.*)\"", data)
+        match = re.search("data-subtitlesurl = \"(/.*)\"", self.get_urldata())
         if match:
             parse = urlparse(self.url)
             subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))

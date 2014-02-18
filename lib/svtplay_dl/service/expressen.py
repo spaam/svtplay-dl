@@ -16,8 +16,7 @@ class Expressen(Service):
     supported_domains = ['expressen.se']
 
     def get(self, options):
-        data = get_http_data(self.url)
-        match = re.search(r"xmlUrl: '(http://www.expressen.*)'", data)
+        match = re.search(r"xmlUrl: '(http://www.expressen.*)'", self.get_urldata())
         if not match:
             log.error("Can't find video file")
             sys.exit(2)

@@ -8,7 +8,6 @@ import json
 
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
 
 from svtplay_dl.fetcher.rtmp import download_rtmp
 from svtplay_dl.fetcher.hls import download_hls
@@ -20,8 +19,7 @@ class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
     def get(self, options):
-        data = get_http_data(self.url)
-        match = re.search(r"liveStationsRedundancy = ({.*});</script>", data)
+        match = re.search(r"liveStationsRedundancy = ({.*});</script>", self.get_urldata())
         parse = urlparse(self.url)
         station = parse.path[1:]
         streams = None

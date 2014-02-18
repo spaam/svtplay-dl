@@ -19,8 +19,7 @@ class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
 
     def get(self, options):
-        data = get_http_data(self.url)
-        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', data)
+        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', self.get_urldata())
         if not match:
             log.error("Can't find audio info")
             sys.exit(2)
