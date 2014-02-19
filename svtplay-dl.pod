@@ -152,7 +152,7 @@ Show description of options.
 
 =item * TV3 Play: L<http://tv3play.no/>
 
-=item * Viasat 4 play: L<http://viasat4play.no>
+=item * Viasat 4 play: L<http://viasat4play.no/>
 
 =back
 
@@ -176,7 +176,7 @@ Show description of options.
 
 =over
 
-=item * TV3 Play: L<http://tv3play.lt/>
+=item * TV3 Play: L<http://tv3play.lv/>
 
 =back
 
@@ -184,7 +184,7 @@ Show description of options.
 
 =over
 
-=item * TV3 Play: L<http://tv3play.lv/>
+=item * TV3 Play: L<http://tv3play.lt/>
 
 =back
 
