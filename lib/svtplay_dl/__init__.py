@@ -56,11 +56,9 @@ class Options:
 
 def get_media(url, options):
 
-    url, stream = Generic().get(url)
-    if stream:
-        url = url.replace("&amp;", "&")
+    stream = service_handler(url)
     if not stream:
-        stream = service_handler(url)
+        url, stream = Generic().get(url)
     if not stream:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
