@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
+from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
@@ -44,11 +45,12 @@ class Qbrick(Service, OpenGraphThumbMixin):
                     sys.exit(2)
             host = "http://vms.api.qbrick.com/rest/v3//getsingleplayer/%sDE1BA107?statusCode=xml" %  match.group(1)
         elif re.findall(r"svd.se", self.url):
-            match = re.search(r"_([0-9]+)\.svd", self.url)
+            match = re.search(r'video url-([^"]*)\"', self.get_urldata())
             if not match:
                 log.error("Can't find video file")
                 sys.exit(2)
-            data = get_http_data("http://www.svd.se/?service=ajax&type=webTvClip&articleId=%s" % match.group(1))
+            path = unquote_plus(match.group(1))
+            data = get_http_data("http://www.svd.se%s" % path)
             match = re.search(r"mcid=([A-F0-9]+)\&width=", data)
             if not match:
                 log.error("Can't find video file")
