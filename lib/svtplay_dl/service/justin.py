@@ -59,7 +59,7 @@ class Justin(Service):
 
         if not success:
             log.debug(str(e))
-            log.error("Can't find media for URL")
+            log.error("This twitch/justin video type is unsupported")
             sys.exit(2)
 
 
