@@ -37,6 +37,7 @@ def download_rtmp(options, url):
         args.append("-V")
 
     command = ["rtmpdump", "-r", url] + args
+    log.debug("Running: %s", " ".join(command))
     try:
         subprocess.call(command)
     except OSError as e:
