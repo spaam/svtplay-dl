@@ -25,13 +25,34 @@ class Viaplay(Service, OpenGraphThumbMixin):
         Service.__init__(self, url)
         self.subtitle = None
 
-    def get(self, options):
+
+    def _get_video_id(self):
+        """
+        Extract video id. It will try to avoid making an HTTP request
+        if it can find the ID in the URL, but otherwise it will try
+        to scrape it from the HTML document. Returns None in case it's
+        unable to extract the ID at all.
+        """
         parse = urlparse(self.url)
         match = re.search(r'\/(\d+)/?', parse.path)
-        if not match:
+        if match:
+            return match.group(1)
+
+        html_data = self.get_urldata()
+        match = re.search(r'data-link="[^"]+/([0-9]+)"', html_data)
+        if match:
+            return match.group(1)
+
+        return None
+
+
+    def get(self, options):
+        vid = self._get_video_id()
+        if vid is None:
             log.error("Cant find video file")
             sys.exit(2)
-        url = "http://viastream.viasat.tv/PlayProduct/%s" % match.group(1)
+
+        url = "http://viastream.viasat.tv/PlayProduct/%s" % vid
         options.other = ""
         data = get_http_data(url)
         xml = ET.XML(data)
