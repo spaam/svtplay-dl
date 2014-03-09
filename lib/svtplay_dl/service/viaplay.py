@@ -59,7 +59,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if not match:
             log.error("Somthing wrong with rtmpparse")
             sys.exit(2)
-        filename = "%s://%s%s" % (parse.scheme, parse.hostname, match.group(1))
+        filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
         path = "-y %s" % match.group(2)
         options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
         download_rtmp(options, filename)
