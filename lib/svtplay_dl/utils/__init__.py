@@ -205,7 +205,7 @@ def subtitle_sami(options, data):
             else:
                 subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
         else:
-            if n > 0:
+            if int(n) > 0:
                 subs += "%s\n" % i.text
 
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
