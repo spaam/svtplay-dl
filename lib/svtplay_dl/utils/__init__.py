@@ -181,7 +181,7 @@ def subtitle_json(options, data):
     subs = ""
     for i in data:
         subs += "%s\n%s --> %s\n" % (number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
-        subs += "%s\n\n" % i["text"]
+        subs += "%s\n\n" % i["text"].encode("utf-8")
         number += 1
 
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
