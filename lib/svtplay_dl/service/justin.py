@@ -50,12 +50,12 @@ class Justin(Service):
         try:
             self._get_video(urlp, options)
         except JustinUrlException as e:
-            log.debug(e.message)
+            log.debug(str(e))
 
             try:
                 self._get_channel(urlp, options)
             except JustinUrlException as e:
-                log.debug(e.message)
+                log.debug(str(e))
                 log.error("Can't find media for URL")
                 sys.exit(2)
 
