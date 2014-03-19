@@ -10,6 +10,6 @@ try:
     import svtplay_dl
 
     if __name__ == '__main__':
-	svtplay_dl.main()
+        svtplay_dl.main()
 except KeyboardInterrupt:
     pass
