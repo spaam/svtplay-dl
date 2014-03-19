@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse, quote
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality, check_redirect, is_py2_old
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.fetcher.http import download_http
