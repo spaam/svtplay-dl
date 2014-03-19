@@ -25,6 +25,10 @@ export PYTHONPATH=lib
 # Disable convention, refactor, and TODO warnings
 PYLINT_OPTS = -d I -d C -d R -d W0511
 
+# If you don't have a python3 environment (e.g. mock for py3 and
+# nosetests3), you can remove the -3 flag.
+TEST_OPTS = -2 -3
+
 install: svtplay-dl $(MANFILE)
 	install -d $(DESTDIR)$(BINDIR)
 	install -d $(DESTDIR)$(MANDIR)
@@ -44,7 +48,7 @@ svtplay-dl.1.gz: svtplay-dl.1
 	gzip -9 svtplay-dl.1
 
 test:
-	sh run-tests.sh
+	sh run-tests.sh $(TEST_OPTS)
 
 cover:
 	sh run-tests.sh -C

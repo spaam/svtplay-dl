@@ -9,12 +9,15 @@ die() {
 
 COVER_OPTS="--with-coverage --cover-package=svtplay_dl"
 
-NOSETESTS=nosetests
+NOSETESTS=
 
 while [ "$#" -gt 0 ]; do
 	case $1 in
+		-2)
+			NOSETESTS="$NOSETESTS nosetests"
+			;;
 		-3)
-			NOSETESTS=nosetests3
+			NOSETESTS="$NOSETESTS nosetests3"
 			;;
 		-c|--coverage)
 			OPTS="$OPTS $COVER_OPTS"
@@ -35,4 +38,13 @@ while [ "$#" -gt 0 ]; do
 	shift
 done
 
-PYTHONPATH=lib $NOSETESTS $OPTS
+# Default to only run for python2
+NOSETESTS=${NOSETESTS:-nosetests}
+
+tests_ok=y
+for nose in $NOSETESTS; do
+	PYTHONPATH=lib $nose $OPTS
+	[ $? -eq 0 ] || tests_ok=
+done
+
+[ "$tests_ok" = y ]
