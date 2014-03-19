@@ -76,7 +76,7 @@ def get_media(url, options):
             else:
                 substream = service_handler(o)
 
-            log.info("Episode %d of %d" % (idx + 1, len(episodes)))
+            log.info("Episode %d of %d", idx + 1, len(episodes))
 
             # get_one_media overwrites options.output...
             get_one_media(substream, copy.copy(options))
