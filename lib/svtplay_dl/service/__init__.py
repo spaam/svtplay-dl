@@ -48,7 +48,10 @@ class Service(object):
     def get_subtitle(self, options):
         pass
 
-    def find_all_episodes(self, options):
+    # the options parameter is unused, but is part of the
+    # interface, so we don't want to remove it. Thus, the
+    # pylint ignore.
+    def find_all_episodes(self, options): # pylint: disable-msg=unused-argument
         log.warning("--all-episodes not implemented for this service")
         return [self.url]
 
