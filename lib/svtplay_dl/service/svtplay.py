@@ -87,6 +87,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             test = select_quality(options, streams)
 
+        if options.subtitle and options.force_subtitle:
+            return
+
         parse = urlparse(test["url"])
         if parse.scheme == "rtmp":
             embedurl = "%s?type=embed" % url

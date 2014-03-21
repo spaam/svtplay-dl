@@ -59,6 +59,10 @@ class Urplay(Service, OpenGraphThumbMixin):
                 sys.exit(4)
 
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], selected["rtmp"]["path"])
+
+        if options.subtitle and options.force_subtitle:
+            return
+
         if options.hls:
             download_hls(options, selected["hls"]["playlist"])
         else:

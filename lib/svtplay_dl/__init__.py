@@ -53,6 +53,7 @@ class Options:
         self.password = None
         self.thumbnail = False
         self.all_episodes = False
+        self.force_subtitle = False
 
 def get_media(url, options):
 
@@ -162,6 +163,8 @@ def main():
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
                       help="Download subtitle from the site if available.")
+    parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
+                      action="store_true", help="Download only subtitle if its used with -S")
     parser.add_option("-u", "--username", default=None,
                       help="Username")
     parser.add_option("-p", "--password", default=None,

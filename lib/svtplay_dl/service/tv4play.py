@@ -75,6 +75,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
         swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
         options.other = "-W %s -y %s" % (swf, test["path"])
 
+        if options.subtitle and options.force_subtitle:
+            return
+
         if test["uri"][0:4] == "rtmp":
             download_rtmp(options, test["uri"])
         elif test["uri"][len(test["uri"])-3:len(test["uri"])] == "f4m":

@@ -60,6 +60,10 @@ class Kanal5(Service):
         options.live = data["isLive"]
         if data["hasSubtitle"]:
             self.subtitle = "http://www.kanal5play.se/api/subtitles/%s" % video_id
+
+        if options.subtitle and options.force_subtitle:
+            return
+
         if options.hls:
             url = data["streams"][0]["source"]
             if data["streams"][0]["drmProtected"]:

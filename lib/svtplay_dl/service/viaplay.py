@@ -83,6 +83,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
         path = "-y %s" % match.group(2)
         options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
+        if options.subtitle and options.force_subtitle:
+            return
+
         download_rtmp(options, filename)
 
     def get_subtitle(self, options):
