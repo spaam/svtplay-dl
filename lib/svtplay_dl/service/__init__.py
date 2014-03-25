@@ -94,6 +94,7 @@ from svtplay_dl.service.kanal5 import Kanal5
 from svtplay_dl.service.mtvservices import Mtvservices
 from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.qbrick import Qbrick
+from svtplay_dl.service.picsearch import Picsearch
 from svtplay_dl.service.ruv import Ruv
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.sr import Sr
@@ -116,6 +117,7 @@ sites = [
     Mtvservices,
     Nrk,
     Qbrick,
+    Picsearch,
     Ruv,
     Radioplay,
     Sr,
