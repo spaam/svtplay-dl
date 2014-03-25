@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import sys
 import re
 import xml.etree.ElementTree as ET
+import json
 
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -92,3 +93,14 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if self.subtitle:
             data = get_http_data(self.subtitle)
             subtitle_sami(options, data)
+
+    def find_all_episodes(self, options):
+        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
+        if not format_id:
+            log.error("Can't find video info")
+            sys.exit(2)
+        data = get_http_data("http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1))
+        jsondata = json.loads(data)
+        videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
+
+        return sorted(x["sharing"]["url"] for x in videos)
