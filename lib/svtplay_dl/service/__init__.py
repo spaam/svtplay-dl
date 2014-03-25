@@ -138,6 +138,7 @@ class Generic(object):
             url = match.group(1)
             for i in sites:
                 if i.handles(url):
+                    url = url.replace("&amp;", "&")
                     return url, i(url)
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
