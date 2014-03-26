@@ -57,7 +57,8 @@ class Kanal5(Service):
             format_ = "IPHONE"
         url = "http://www.kanal5play.se/api/getVideo?format=%s&videoId=%s" % (format_, video_id)
         data = json.loads(get_http_data(url, cookiejar=self.cj))
-        options.live = data["isLive"]
+        if not options.live:
+            options.live = data["isLive"]
         if data["hasSubtitle"]:
             self.subtitle = "http://www.kanal5play.se/api/subtitles/%s" % video_id
 
