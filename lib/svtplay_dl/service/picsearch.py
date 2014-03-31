@@ -8,7 +8,6 @@ import sys
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
@@ -26,7 +25,6 @@ class Picsearch(Service, OpenGraphThumbMixin):
             sys.exit(2)
         jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
         jsondata = json.loads(jsondata)
-        #print jsondata
         files = jsondata["media"]["playerconfig"]["playlist"][1]["bitrates"]
         server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
 
