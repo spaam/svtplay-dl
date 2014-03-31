@@ -18,11 +18,11 @@ class Picsearch(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
         if not ajax_auth:
-            print "hej"
+            log.error("Cant find token for video")
             sys.exit(2)
         mediaid = re.search(r"mediaId = '(\w+)';", data)
         if not mediaid:
-            print "didi"
+            log.error("Cant find media id")
             sys.exit(2)
         jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
         jsondata = json.loads(jsondata)
