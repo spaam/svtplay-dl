@@ -35,15 +35,6 @@ class Qbrick(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file")
                 sys.exit(2)
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
-        elif re.findall(r"dn.se", self.url):
-            data = self.get_urldata()
-            match = re.search(r"'([0-9A-F]{8})',", data)
-            if not match:
-                match = re.search(r"mediaId = '([0-9A-F]{8})';", data)
-                if not match:
-                    log.error("Can't find video file")
-                    sys.exit(2)
-            host = "http://vms.api.qbrick.com/rest/v3//getsingleplayer/%sDE1BA107?statusCode=xml" %  match.group(1)
         elif re.findall(r"svd.se", self.url):
             match = re.search(r'video url-([^"]*)\"', self.get_urldata())
             if not match:
