@@ -195,4 +195,8 @@ def main():
         sys.exit(4)
 
     url = args[0]
-    get_media(url, options)
+
+    try:
+        get_media(url, options)
+    except KeyboardInterrupt:
+        pass
