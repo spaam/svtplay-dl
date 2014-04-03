@@ -4,8 +4,9 @@ from __future__ import absolute_import
 import sys
 import re
 import xml.etree.ElementTree as ET
+import json
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs
+from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi, is_py2_old
 from svtplay_dl.log import log
@@ -93,3 +94,20 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if self.subtitle:
             data = get_http_data(self.subtitle)
             subtitle_smi(options, data)
+
+    def find_all_episodes(self, options):
+        parse =  urlparse(self.url)
+        show = quote_plus(parse.path[parse.path.find("/", 1)+1:])
+        data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
+        jsondata = json.loads(data)
+        episodes = []
+        for i in jsondata["results"]:
+            try:
+                days = int(i["availability"]["availability_group_free"])
+            except ValueError:
+                days = 999
+            if  days > 0:
+                id = i["id"]
+                url = "http://www.tv4play.se/program/%s?video_id=%s" % (show, id)
+                episodes.append(url)
+        return sorted(episodes)
