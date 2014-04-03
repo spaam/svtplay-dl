@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import re
 import json
 import sys
+import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_tt
@@ -81,3 +82,14 @@ class Urplay(Service, OpenGraphThumbMixin):
         if self.subtitle:
             data = get_http_data(self.subtitle)
             subtitle_tt(options, data)
+
+    def find_all_episodes(self, options):
+        match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
+                  self.get_urldata())
+        if match is None:
+            log.error("Couldn't retrieve episode list")
+            sys.exit(2)
+        url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
+        xml = ET.XML(get_http_data(url))
+
+        return sorted(x.text for x in xml.findall(".//item/link"))
