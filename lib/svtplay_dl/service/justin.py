@@ -14,8 +14,8 @@ from svtplay_dl.utils.urllib import urlparse, quote
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import download_hls
-from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.http import HTTP
 
 class JustinException(Exception):
     pass
@@ -73,7 +73,7 @@ class Justin(Service):
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
 
-        download_http(options, url)
+        yield HTTP(options, url)
 
 
     def _get_archive(self, urlp, options):
@@ -148,4 +148,4 @@ class Justin(Service):
         if not options.output:
             options.output = channel
 
-        download_hls(options, hls_url)
+        yield HLS(options, hls_url, 0)
