@@ -72,13 +72,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
             else:
                 yield HTTP(options, i["url"], "0")
 
-    def get_subtitle(self, options):
-        if self.subtitle:
-            if options.output != "-":
-                data = get_http_data(self.subtitle)
-                subtitle_wsrt(options, data)
-
-
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
                           self.get_urldata())

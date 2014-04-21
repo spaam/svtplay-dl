@@ -69,8 +69,3 @@ class Kanal5(Service):
                 sys.exit(2)
             options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
             yield RTMP(options, steambaseurl, i["bitrate"])
-
-    def get_subtitle(self, options):
-        if self.subtitle:
-            data = get_http_data(self.subtitle, cookiejar=self.cj)
-            subtitle_json(options, data)
