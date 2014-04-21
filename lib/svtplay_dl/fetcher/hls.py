@@ -42,7 +42,19 @@ def _get_full_url(url, srcurl):
     return returl
 
 class HLS(VideoRetriever):
+    def parse(self):
+        data = get_http_data(self.url)
+        globaldata, files = parsem3u(data)
+        streams = {}
+
+        for i in files:
+            streams[i[1]["RESOLUTION"].split("x")[1]] = i[0]
+        return streams
+
     def download(self):
+        if self.options.live and not self.options.force:
+            raise LiveHLSException(self.url)
+
         data = get_http_data(self.url)
         globaldata, files = parsem3u(data)
         streams = {}
@@ -122,6 +134,8 @@ def parsem3u(data):
             info = [x.strip().split("=", 1) for x in l[18:].split(",")]
             for i in range(0, len(info)):
                 if info[i][0] == "BANDWIDTH":
+                    streaminfo.update({info[i][0]: info[i][1]})
+                if info[i][0] == "RESOLUTION":
                     streaminfo.update({info[i][0]: info[i][1]})
         elif l.startswith("#EXT-X-ENDLIST"):
             break
