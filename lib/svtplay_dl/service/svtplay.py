@@ -57,12 +57,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
             if parse.path.find("m3u8") > 0:
                 yield HLS(options, i["url"], i["bitrate"])
-            if parse.path.find("f4m") > 0:
+            elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i["url"]
                     yield HDS(options, manifest, i["bitrate"])
-            if parse.scheme == "rtmp":
+            elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
                 data = get_http_data(embedurl)
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
