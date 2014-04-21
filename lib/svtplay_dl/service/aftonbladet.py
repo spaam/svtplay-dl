@@ -8,7 +8,7 @@ import json
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import download_hls
+from svtplay_dl.fetcher.hls import HLS
 
 class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
@@ -36,4 +36,4 @@ class Aftonbladet(Service):
         streams = json.loads(get_http_data(streamsurl))
         hls = streams["formats"]["hls"]["level3"]["m3u8"][0]
         playlist = "http://%s/%s/%s" % (hls["address"], hls["path"], hls["filename"])
-        download_hls(options, playlist)
+        yield HLS(options, playlist, "0")
