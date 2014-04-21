@@ -7,9 +7,10 @@ import json
 
 from svtplay_dl.utils.urllib import CookieJar, Cookie
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, subtitle_json
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.subtitle import subtitle_json
 
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se']
@@ -56,7 +57,7 @@ class Kanal5(Service):
         if not options.live:
             options.live = data["isLive"]
         if data["hasSubtitle"]:
-            self.subtitle = "http://www.kanal5play.se/api/subtitles/%s" % video_id
+            yield subtitle_json("http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
         if options.subtitle and options.force_subtitle:
             return
