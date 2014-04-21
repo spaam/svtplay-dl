@@ -8,8 +8,8 @@ import json
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_tt
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hds import download_hds
-from svtplay_dl.fetcher.hls import download_hls
+from svtplay_dl.fetcher.hds import HDS
+from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.log import log
 
 class Nrk(Service, OpenGraphThumbMixin):
@@ -36,10 +36,10 @@ class Nrk(Service, OpenGraphThumbMixin):
             options.live = data["isLive"]
         if options.hls:
             manifest_url = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-            download_hls(options, manifest_url)
+            yield HLS(options, manifest_url, "0")
         else:
             manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
-            download_hds(options, manifest_url)
+            yield HDS(options, manifest_url, "0")
 
 
     def get_subtitle(self, options):
