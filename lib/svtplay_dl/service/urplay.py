@@ -8,8 +8,8 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_tt
-from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hls import download_hls
+from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.log import log
 
 class Urplay(Service, OpenGraphThumbMixin):
@@ -37,46 +37,16 @@ class Urplay(Service, OpenGraphThumbMixin):
             match = re.search(".*(mp[34]:.*$)", tmp)
             path_hd = match.group(1)
             hd = True
-        #hds = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hds_file"])
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         path = "mp%s:%s" % (jsondata["file_flash"][-1], jsondata["file_flash"])
-        available = {"sd":{"hls":{"http":http, "playlist":hls}, "rtmp":{"server":rtmp, "path":path}}}
+        yield HLS(options, hls, "480")
+        options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
+        yield RTMP(options, rtmp, "480")
         if hd:
-            available.update({"hd":{"hls":{"http":http_hd, "playlist":hls_hd}, "rtmp":{"server":rtmp, "path":path_hd}}})
-
-        if options.quality:
-            try:
-                selected = available[options.quality]
-            except KeyError:
-                log.error("Can't find that quality. (Try one of: %s)",
-                          ", ".join([str(elm) for elm in available]))
-                sys.exit(4)
-        else:
-            try:
-                selected = self.select_highest_quality(available)
-            except KeyError:
-                log.error("Can't find any streams.")
-                sys.exit(4)
-
-        options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], selected["rtmp"]["path"])
-
-        if options.subtitle and options.force_subtitle:
-            return
-
-        if options.hls:
-            download_hls(options, selected["hls"]["playlist"])
-        else:
-            download_rtmp(options, selected["rtmp"]["server"])
-
-    def select_highest_quality(self, available):
-        if 'hd' in available:
-            return available["hd"]
-        elif 'sd' in available:
-            return available["sd"]
-        else:
-            raise KeyError()
-
+            yield HLS(options, hls_hd, "720")
+            options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
+            yield RTMP(options, rtmp, "720")
 
     def get_subtitle(self, options):
         if self.subtitle:
