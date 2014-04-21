@@ -14,7 +14,7 @@ from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_sami
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.rtmp import RTMP
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -65,6 +65,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if xml.find("Product").find("Syndicate").text == "true":
             options.live = True
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+        bitrate = xml.find("Product").find("Videos").find("Video").find("BitRate").text
         self.subtitle = xml.find("Product").find("SamiFile").text
 
         if filename[:4] == "http":
@@ -87,7 +88,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if options.subtitle and options.force_subtitle:
             return
 
-        download_rtmp(options, filename)
+        yield RTMP(options, filename, bitrate)
 
     def get_subtitle(self, options):
         if self.subtitle:
