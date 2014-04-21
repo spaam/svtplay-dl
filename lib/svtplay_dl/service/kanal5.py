@@ -7,10 +7,9 @@ import json
 
 from svtplay_dl.utils.urllib import CookieJar, Cookie
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality, subtitle_json
+from svtplay_dl.utils import get_http_data, subtitle_json
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hls import download_hls
+from svtplay_dl.fetcher.rtmp import RTMP
 
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se']
@@ -52,10 +51,7 @@ class Kanal5(Service):
                           comment_url=None, rest={'HttpOnly': None})
             self.cj.set_cookie(cc)
 
-        format_ = "FLASH"
-        if options.hls:
-            format_ = "IPHONE"
-        url = "http://www.kanal5play.se/api/getVideo?format=%s&videoId=%s" % (format_, video_id)
+        url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
         data = json.loads(get_http_data(url, cookiejar=self.cj))
         if not options.live:
             options.live = data["isLive"]
@@ -65,31 +61,13 @@ class Kanal5(Service):
         if options.subtitle and options.force_subtitle:
             return
 
-        if options.hls:
-            url = data["streams"][0]["source"]
-            if data["streams"][0]["drmProtected"]:
+        steambaseurl = data["streamBaseUrl"]
+        for i in data["streams"]:
+            if i["drmProtected"]:
                 log.error("We cant download drm files for this site.")
                 sys.exit(2)
-            download_hls(options, url)
-        else:
-            streams = {}
-
-            for i in data["streams"]:
-                stream = {}
-                if i["drmProtected"]:
-                    log.error("We cant download drm files for this site.")
-                    sys.exit(2)
-                stream["source"] = i["source"]
-                streams[int(i["bitrate"])] = stream
-
-            steambaseurl = data["streamBaseUrl"]
-
-            test = select_quality(options, streams)
-
-            filename = test["source"]
-            match = re.search(r"^(.*):", filename)
-            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", filename)
-            download_rtmp(options, steambaseurl)
+            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
+            yield RTMP(options, steambaseurl, i["bitrate"])
 
     def get_subtitle(self, options):
         if self.subtitle:
