@@ -43,9 +43,9 @@ class subtitle_tt(subtitle):
                     skip = False
         filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
         if filename:
-           options.output = "%s.srt" % filename.group(1)
+            options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" % options.output
+            options.output = "%s.srt" % options.output
 
         log.info("Subtitle: %s", options.output)
         fd = open(options.output, "w")
@@ -67,9 +67,9 @@ class subtitle_json(subtitle):
 
         filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
         if filename:
-           options.output = "%s.srt" % filename.group(1)
+            options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" % options.output
+            options.output = "%s.srt" % options.output
 
         log.info("Subtitle: %s", options.output)
         fd = open(options.output, "w")
@@ -96,9 +96,9 @@ class subtitle_sami(subtitle):
 
         filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
         if filename:
-           options.output = "%s.srt" % filename.group(1)
+            options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" % options.output
+            options.output = "%s.srt" % options.output
 
         log.info("Subtitle: %s", options.output)
         fd = open(options.output, "w")
@@ -121,9 +121,9 @@ class subtitle_smi(subtitle):
 
         filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
         if filename:
-           options.output = "%s.srt" % filename.group(1)
+            options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" % options.output
+            options.output = "%s.srt" % options.output
 
         log.info("Subtitle: %s", options.output)
         fd = open(options.output, "w")
@@ -146,7 +146,7 @@ class subtitle_wsrt(subtitle):
         if filename:
             options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" % options.output
+            options.output = "%s.srt" % options.output
 
         log.info("Subtitle: %s", options.output)
         fd = open(options.output, "w")
