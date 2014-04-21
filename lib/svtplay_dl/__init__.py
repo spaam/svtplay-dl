@@ -13,7 +13,8 @@ from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify
 from svtplay_dl.service import service_handler, Generic
-
+from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.subtitle import subtitle, subtitle_json, subtitle_sami, subtitle_smi, subtitle_tt, subtitle_wsrt
 
 __version__ = "0.9.2014.04.27"
 
@@ -102,17 +103,31 @@ def get_one_media(stream, options):
         if options.output.find("\\") > 0:
             options.output = options.output.replace("\\", "/")
 
+    videos = []
+    subs = []
+    streams = stream.get(options)
+    for i in streams:
+        if isinstance(i, VideoRetriever):
+            videos.append(i)
+        if isinstance(i, subtitle):
+            subs.append(i)
+
+    if options.subtitle and options.output != "-":
+        if subs:
+            subs[0].download(options)
+
+    bitrate = sorted(x.bitrate for x in videos)
+    for i in videos:
+        if i.bitrate == bitrate[0]:
+            stream = i
     try:
-        stream.get(options)
+        stream.download()
     except UIException as e:
         if options.verbose:
             raise e
         log.error(e.message)
         sys.exit(2)
 
-    if options.subtitle:
-        if options.output != "-":
-            stream.get_subtitle(options)
     if options.thumbnail:
         if hasattr(stream, "get_thumbnail"):
             log.info("thumb requested")
