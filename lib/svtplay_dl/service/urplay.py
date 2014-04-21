@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.subtitle import subtitle_tt
 
@@ -41,11 +41,15 @@ class Urplay(Service, OpenGraphThumbMixin):
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         path = "mp%s:%s" % (jsondata["file_flash"][-1], jsondata["file_flash"])
-        yield HLS(options, hls, "480")
+        streams = hlsparse(hls)
+        for n in list(streams.keys()):
+            yield HLS(options, streams[n], n)
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         yield RTMP(options, rtmp, "480")
         if hd:
-            yield HLS(options, hls_hd, "720")
+            streams = hlsparse(hls_hd)
+            for n in list(streams.keys()):
+                yield HLS(options, streams[n], n)
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
             yield RTMP(options, rtmp, "720")
 

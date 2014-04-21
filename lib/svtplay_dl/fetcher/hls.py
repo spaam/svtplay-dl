@@ -41,16 +41,16 @@ def _get_full_url(url, srcurl):
 
     return returl
 
+def hlsparse(url):
+    data = get_http_data(url)
+    globaldata, files = parsem3u(data)
+    streams = {}
+
+    for i in files:
+        streams[i[1]["RESOLUTION"].split("x")[1]] = i[0]
+    return streams
+
 class HLS(VideoRetriever):
-    def parse(self):
-        data = get_http_data(self.url)
-        globaldata, files = parsem3u(data)
-        streams = {}
-
-        for i in files:
-            streams[i[1]["RESOLUTION"].split("x")[1]] = i[0]
-        return streams
-
     def download(self):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
