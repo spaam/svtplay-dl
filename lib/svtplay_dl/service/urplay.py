@@ -7,10 +7,11 @@ import sys
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, subtitle_tt
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.log import log
+from svtplay_dl.subtitle import subtitle_tt
 
 class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ['urplay.se', 'ur.se']
@@ -26,7 +27,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             sys.exit(2)
         data = match.group(1)
         jsondata = json.loads(data)
-        self.subtitle = jsondata["subtitles"].split(",")[0]
+        yield subtitle_tt(jsondata["subtitles"].split(",")[0])
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
         hd = None
@@ -47,11 +48,6 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield HLS(options, hls_hd, "720")
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
             yield RTMP(options, rtmp, "720")
-
-    def get_subtitle(self, options):
-        if self.subtitle:
-            data = get_http_data(self.subtitle)
-            subtitle_tt(options, data)
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
