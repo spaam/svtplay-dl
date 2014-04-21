@@ -12,10 +12,11 @@ import json
 
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, subtitle_sami
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.subtitle import subtitle_sami
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -67,7 +68,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             options.live = True
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         bitrate = xml.find("Product").find("Videos").find("Video").find("BitRate").text
-        self.subtitle = xml.find("Product").find("SamiFile").text
+        yield subtitle_sami(xml.find("Product").find("SamiFile").text)
 
         if options.subtitle and options.force_subtitle:
             return
@@ -99,11 +100,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
             path = "-y %s" % match.group(2)
             options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
             yield RTMP(options, filename, bitrate)
-
-    def get_subtitle(self, options):
-        if self.subtitle:
-            data = get_http_data(self.subtitle)
-            subtitle_sami(options, data)
 
     def find_all_episodes(self, options):
         format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
