@@ -59,7 +59,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 base = i.find("base").text
                 if base[0:4] == "rtmp":
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-                    options.other = "-W %s -y %s" % (swf, test["path"])
+                    options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(options, i.find("base").text, i.find("bitrate").text)
                 elif base[len(base)-3:len(base)] == "f4m":
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
