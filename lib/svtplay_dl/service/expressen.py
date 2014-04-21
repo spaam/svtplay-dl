@@ -6,8 +6,8 @@ import re
 from svtplay_dl.service import Service
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import download_hls
-from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.http import HTTP
 
 class ExpressenException(UIException):
     pass
@@ -37,11 +37,13 @@ class Expressen(Service):
         try:
             try:
                 url = self._get_hls()
-                download_hls(options, url)
+                streams = hlsparse(url)
+                for n in list(streams.keys()):
+                    yield HLS(options, streams[n], n)
             except ExpressenException as exc:
                 # Lower res, but static mp4 file.
                 log.debug(exc)
                 url = self._get_mp4()
-                download_http(options, url)
+                yield HTTP(options, url)
         except ExpressenException:
             log.error("Could not find any videos in '%s'", self.url)
