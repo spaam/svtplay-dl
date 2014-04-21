@@ -10,7 +10,7 @@ class subtitle():
         self.subtitle = None
 
 class subtitle_tt(subtitle):
-    def download(self):
+    def download(self, options):
         self.subtitle = get_http_data(self.url)
         i = 1
         data = ""
@@ -41,14 +41,14 @@ class subtitle_tt(subtitle):
                 if node.tail:
                     data += '%s\n\n' % node.tail.strip(' \t\n\r')
                     skip = False
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$",options.output)
+        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
         if filename:
            options.output = "%s.srt" % filename.group(1)
         else:
-           options.output = "%s.srt" %options.output
+           options.output = "%s.srt" % options.output
 
-        log.info("Subtitle: %s",options.output)
-        fd = open(self.options.output, "w")
+        log.info("Subtitle: %s", options.output)
+        fd = open(options.output, "w")
         if is_py2:
             data = data.encode('utf8')
         fd.write(data)
