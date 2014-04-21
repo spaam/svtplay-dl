@@ -8,10 +8,11 @@ import json
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import HDS
+from svtplay_dl.subtitle import subtitle_smi
 
 class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
@@ -64,15 +65,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
                     yield HDS(options, manifest, "0")
             elif i.find("mediaFormat").text == "smi":
-                self.subtitle = i.find("url").text
-
-        if options.subtitle and options.force_subtitle:
-            return
-
-    def get_subtitle(self, options):
-        if self.subtitle:
-            data = get_http_data(self.subtitle)
-            subtitle_smi(options, data)
+                yield subtitle_smi(i.find("url").text)
 
     def find_all_episodes(self, options):
         parse =  urlparse(self.url)
