@@ -8,11 +8,7 @@ import sys
 import re
 import json
 
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service
-
-from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.fetcher.http import HTTP
 
 from svtplay_dl.log import log

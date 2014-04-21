@@ -11,7 +11,7 @@ import re
 
 from svtplay_dl.utils.urllib import quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import HTTP
 
