@@ -14,8 +14,8 @@ from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_sami
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hds import download_hds
+from svtplay_dl.fetcher.hds import hdsparse
+from svtplay_dl.fetcher.rtmp import RTMP
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -66,6 +66,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if xml.find("Product").find("Syndicate").text == "true":
             options.live = True
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+        bitrate = xml.find("Product").find("Videos").find("Video").find("BitRate").text
         self.subtitle = xml.find("Product").find("SamiFile").text
 
         if options.subtitle and options.force_subtitle:
@@ -76,7 +77,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if xml.find("Product").find("Syndicate").text == "true":
                 options.live = False
             manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
-            download_hds(options, manifest)
+            streams = hdsparse(options, manifest)
+            for n in list(streams.keys()):
+                yield streams[n]
         else:
             if filename[:4] == "http":
                 data = get_http_data(filename)
@@ -95,8 +98,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
             path = "-y %s" % match.group(2)
             options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
-
-            download_rtmp(options, filename)
+            yield RTMP(options, filename, bitrate)
 
     def get_subtitle(self, options):
         if self.subtitle:
