@@ -10,8 +10,8 @@ from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality, subtitle_smi, is_py2_old
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
-from svtplay_dl.fetcher.hds import download_hds
+from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.fetcher.hds import HDS
 
 class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
@@ -53,42 +53,21 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if xml.find("live").text != "false":
                 options.live = True
 
-        streams = {}
-
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
-                stream = {}
-                stream["uri"] = i.find("base").text
-                stream["path"] = i.find("url").text
-                streams[int(i.find("bitrate").text)] = stream
+                base = i.find("base").text
+                if base[0:4] == "rtmp":
+                    swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
+                    options.other = "-W %s -y %s" % (swf, test["path"])
+                    yield RTMP(options, i.find("base").text, i.find("bitrate").text)
+                elif base[len(base)-3:len(base)] == "f4m":
+                    manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
+                    yield HDS(options, manifest, "0")
             elif i.find("mediaFormat").text == "smi":
                 self.subtitle = i.find("url").text
 
-        if len(streams) == 0:
-            log.error("Can't find any streams")
-            sys.exit(2)
-        elif len(streams) == 1:
-            test = streams[list(streams.keys())[0]]
-        else:
-            test = select_quality(options, streams)
-
-        ## This is how we construct an swf uri, if we'll ever need one
-        swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-        options.other = "-W %s -y %s" % (swf, test["path"])
-
         if options.subtitle and options.force_subtitle:
             return
-
-        if test["uri"][0:4] == "rtmp":
-            download_rtmp(options, test["uri"])
-        elif test["uri"][len(test["uri"])-3:len(test["uri"])] == "f4m":
-            match = re.search(r"\/se\/secure\/", test["uri"])
-            if match:
-                log.error("This stream is encrypted. Use --hls option")
-                sys.exit(2)
-            manifest = "%s?hdcore=2.8.0&g=hejsan" % test["path"]
-            download_hds(options, manifest)
-
 
     def get_subtitle(self, options):
         if self.subtitle:
