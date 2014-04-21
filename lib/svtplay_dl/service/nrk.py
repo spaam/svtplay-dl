@@ -6,10 +6,11 @@ import sys
 import json
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, subtitle_tt
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import HDS
 from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.subtitle import subtitle_tt
 from svtplay_dl.log import log
 
 class Nrk(Service, OpenGraphThumbMixin):
@@ -17,6 +18,11 @@ class Nrk(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         data = self.get_urldata()
+        match = re.search("data-subtitlesurl = \"(/.*)\"", data)
+        if match:
+            parse = urlparse(self.url)
+            subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
+            yield subtitle_tt(subtitle)
         match = re.search(r'data-media="(.*manifest.f4m)"', data)
         if match:
             manifest_url = match.group(1)
@@ -40,13 +46,3 @@ class Nrk(Service, OpenGraphThumbMixin):
         else:
             manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
             yield HDS(options, manifest_url, "0")
-
-
-    def get_subtitle(self, options):
-        match = re.search("data-subtitlesurl = \"(/.*)\"", self.get_urldata())
-        if match:
-            parse = urlparse(self.url)
-            subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
-            data = get_http_data(subtitle)
-            subtitle_tt(options, data)
-
