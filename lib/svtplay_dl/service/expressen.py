@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.rtmp import RTMP
 
 from svtplay_dl.utils.urllib import quote_plus
 
@@ -29,18 +29,10 @@ class Expressen(Service):
             sa = list(ss.getiterator("vurl"))
         else:
             sa = list(ss.iter("vurl"))
-        streams = {}
 
         for i in sa:
-            streams[int(i.attrib["bitrate"])] = i.text
-
-        test = select_quality(options, streams)
-
-        filename = test
-        match = re.search(r"rtmp://([0-9a-z\.]+/[0-9]+/)(.*)", filename)
-
-        filename = "rtmp://%s" % match.group(1)
-        options.other = "-y %s" % match.group(2)
-
-        download_rtmp(options, filename)
+            match = re.search(r"rtmp://([0-9a-z\.]+/[0-9]+/)(.*)", i.text)
+            filename = "rtmp://%s" % match.group(1)
+            options.other = "-y %s" % match.group(2)
+            yield RTMP(options, filename, i.attrib["bitrate"])
 
