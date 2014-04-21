@@ -6,7 +6,7 @@ import re
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, select_quality, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.fetcher.http import HTTP
 
 from svtplay_dl.log import log
