@@ -7,13 +7,13 @@ import json
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, select_quality, subtitle_wsrt
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import HDS
 from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
-
+from svtplay_dl.subtitle import subtitle_wsrt
 from svtplay_dl.log import log
 
 class Svtplay(Service, OpenGraphThumbMixin):
@@ -48,7 +48,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if data["video"]["subtitleReferences"]:
             try:
-                self.subtitle = data["video"]["subtitleReferences"][0]["url"]
+                yield subtitle_wsrt(data["video"]["subtitleReferences"][0]["url"])
             except KeyError:
                 pass
 
