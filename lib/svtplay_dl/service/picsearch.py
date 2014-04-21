@@ -7,7 +7,7 @@ import sys
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality
-from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
@@ -30,11 +30,6 @@ class Picsearch(Service, OpenGraphThumbMixin):
         files = jsondata["media"]["playerconfig"]["playlist"][1]["bitrates"]
         server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
 
-        streams = {}
         for i in files:
-            streams[int(i["height"])] = i["url"]
-
-        path = select_quality(options, streams)
-
-        options.other = "-y '%s'" % path
-        download_rtmp(options, server)
+            options.other = "-y '%s'" % i["url"]
+            yield RTMP(options, server, i["height"])
