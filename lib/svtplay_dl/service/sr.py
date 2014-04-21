@@ -13,7 +13,7 @@ from svtplay_dl.utils.urllib import quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.fetcher.http import HTTP
 
 class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
@@ -27,13 +27,10 @@ class Sr(Service, OpenGraphThumbMixin):
         dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path
         data = get_http_data(dataurl)
         playerinfo = json.loads(data)["playerInfo"]
-        streams = {}
         for i in playerinfo["AudioSources"]:
             url = i["Url"]
             if not url.startswith('http'):
-                i = 'http:%s' % url
-            streams[int(i["Quality"])] = url
+                url = 'http:%s' % url
+            yield HTTP(options, url, i["Quality"])
 
-        test = select_quality(options, streams)
-        download_http(options, test)
 
