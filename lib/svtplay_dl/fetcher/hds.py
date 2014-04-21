@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.utils import get_http_data, select_quality, is_py2_old, is_py2, is_py3
 from svtplay_dl.error import UIException
+from svtplay_dl.fetcher import VideoRetriever
 
 log = logging.getLogger('svtplay_dl')
 
@@ -40,70 +41,70 @@ class LiveHDSException(HDSException):
         super(LiveHDSException, self).__init__(
             url, "This is a live HDS stream, and they are not supported.")
 
+class HDS(VideoRetriever):
+    def download(self):
+        data = get_http_data(self.url)
+        streams = {}
+        bootstrap = {}
+        xml = ET.XML(data)
 
-def download_hds(options, url):
-    data = get_http_data(url)
-    streams = {}
-    bootstrap = {}
-    xml = ET.XML(data)
+        if self.options.live and not self.options.force:
+            raise LiveHDSException(self.url)
 
-    if options.live and not options.force:
-        raise LiveHDSException(url)
+        if is_py2_old:
+            bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+            mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
+        else:
+            bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+            mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
 
-    if is_py2_old:
-        bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
-    else:
-        bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
+        for i in bootstrapIter:
+            bootstrap[i.attrib["id"]] = i.text
 
-    for i in bootstrapIter:
-        bootstrap[i.attrib["id"]] = i.text
+        for i in mediaIter:
+            streams[int(i.attrib["bitrate"])] = {"url": i.attrib["url"], "bootstrapInfoId": i.attrib["bootstrapInfoId"], "metadata": i.find("{http://ns.adobe.com/f4m/1.0}metadata").text}
 
-    for i in mediaIter:
-        streams[int(i.attrib["bitrate"])] = {"url": i.attrib["url"], "bootstrapInfoId": i.attrib["bootstrapInfoId"], "metadata": i.find("{http://ns.adobe.com/f4m/1.0}metadata").text}
+        test = select_quality(self.options, streams)
 
-    test = select_quality(options, streams)
+        bootstrap = base64.b64decode(bootstrap[test["bootstrapInfoId"]])
+        box = readboxtype(bootstrap, 0)
+        antal = None
+        if box[2] == b"abst":
+            antal = readbox(bootstrap, box[0])
 
-    bootstrap = base64.b64decode(bootstrap[test["bootstrapInfoId"]])
-    box = readboxtype(bootstrap, 0)
-    antal = None
-    if box[2] == b"abst":
-        antal = readbox(bootstrap, box[0])
+        baseurl = self.url[0:self.url.rfind("/")]
+        i = 1
 
-    baseurl = url[0:url.rfind("/")]
-    i = 1
+        if self.options.output != "-":
+            extension = re.search(r"(\.[a-z0-9]+)$", self.options.output)
+            if not extension:
+                self.options.output = "%s.flv" % self.options.output
+            log.info("Outfile: %s", self.options.output)
+            file_d = open(self.options.output, "wb")
+        else:
+            file_d = sys.stdout
 
-    if options.output != "-":
-        extension = re.search(r"(\.[a-z0-9]+)$", options.output)
-        if not extension:
-            options.output = "%s.flv" % options.output
-        log.info("Outfile: %s", options.output)
-        file_d = open(options.output, "wb")
-    else:
-        file_d = sys.stdout
+        metasize = struct.pack(">L", len(base64.b64decode(test["metadata"])))[1:]
+        file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))
+        file_d.write(metasize)
+        file_d.write(binascii.a2b_hex(b"00000000000000"))
+        file_d.write(base64.b64decode(test["metadata"]))
+        file_d.write(binascii.a2b_hex(b"00000000"))
+        total = antal[1]["total"]
+        eta = ETA(total)
+        while i <= total:
+            url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
+            if self.options.output != "-":
+                eta.update(i)
+                progressbar(total, i, ''.join(["ETA: ", str(eta)]))
+            data = get_http_data(url)
+            number = decode_f4f(i, data)
+            file_d.write(data[number:])
+            i += 1
 
-    metasize = struct.pack(">L", len(base64.b64decode(test["metadata"])))[1:]
-    file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))
-    file_d.write(metasize)
-    file_d.write(binascii.a2b_hex(b"00000000000000"))
-    file_d.write(base64.b64decode(test["metadata"]))
-    file_d.write(binascii.a2b_hex(b"00000000"))
-    total = antal[1]["total"]
-    eta = ETA(total)
-    while i <= total:
-        url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
-        if options.output != "-":
-            eta.update(i)
-            progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-        data = get_http_data(url)
-        number = decode_f4f(i, data)
-        file_d.write(data[number:])
-        i += 1
-
-    if options.output != "-":
-        file_d.close()
-        progress_stream.write('\n')
+        if self.options.output != "-":
+            file_d.close()
+            progress_stream.write('\n')
 
 def readbyte(data, pos):
     return struct.unpack("B", bytes(_chr(data[pos]), "ascii"))[0]
