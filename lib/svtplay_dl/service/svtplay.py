@@ -10,7 +10,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import HDS
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle_wsrt
@@ -56,7 +56,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
 
             if parse.path.find("m3u8") > 0:
-                yield HLS(options, i["url"], i["bitrate"])
+                streams = hlsparse(i["url"])
+                for n in list(streams.keys()):
+                    yield HLS(options, streams[n], n)
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:

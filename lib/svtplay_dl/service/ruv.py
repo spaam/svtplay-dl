@@ -5,7 +5,7 @@ import re
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 
 class Ruv(Service):
     supported_domains = ['ruv.is']
@@ -18,5 +18,7 @@ class Ruv(Service):
         tengipunktur = js.split('"')[1]
         match = re.search(r"http.*tengipunktur [+] '([:]1935.*)'", data)
         m3u8_url = "http://" + tengipunktur + match.group(1)
-        yield HLS(options, m3u8_url)
+        streams = hlsparse(m3u8_url)
+        for n in list(streams.keys()):
+            yield HLS(options, streams[n], n)
 

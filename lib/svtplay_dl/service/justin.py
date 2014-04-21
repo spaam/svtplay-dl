@@ -14,7 +14,7 @@ from svtplay_dl.utils.urllib import urlparse, quote
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
 
 class JustinException(Exception):
@@ -148,4 +148,6 @@ class Justin(Service):
         if not options.output:
             options.output = channel
 
-        yield HLS(options, hls_url, 0)
+        streams = hlsparse(hls_url)
+        for n in list(streams.keys()):
+            yield HLS(options, streams[n], n)

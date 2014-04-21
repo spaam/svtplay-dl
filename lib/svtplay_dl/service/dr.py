@@ -8,7 +8,7 @@ import sys
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -30,7 +30,9 @@ class Dr(Service, OpenGraphThumbMixin):
 
             for i in links:
                 if i["Target"] == "Ios":
-                    yield HLS(options, i["Uri"], i["Bitrate"])
+                    streams = hlsparse(i["Uri"])
+                    for n in list(streams.keys()):
+                        yield HLS(options, streams[n], n)
                 else:
                     if i["Target"] == "Streaming":
                         options.other = "-y '%s'" % i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")
