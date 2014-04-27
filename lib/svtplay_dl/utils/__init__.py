@@ -106,7 +106,7 @@ def check_redirect(url):
         return url
 
 def select_quality(options, streams):
-    available = sorted(x.bitrate for x in streams)
+    available = sorted(int(x.bitrate) for x in streams)
 
     try:
         optq = int(options.quality)
@@ -136,9 +136,8 @@ def select_quality(options, streams):
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)",
                   ", ".join([str(elm) for elm in available]))
         sys.exit(4)
-
     for i in streams:
-        if i.bitrate == selected:
+        if int(i.bitrate) == selected:
             stream = i
     return stream
 
