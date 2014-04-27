@@ -5,7 +5,7 @@ import sys
 import os
 import re
 
-from svtplay_dl.utils import get_http_data, select_quality
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
