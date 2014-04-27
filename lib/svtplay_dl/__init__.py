@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify
+from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify, select_quality
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle, subtitle_json, subtitle_sami, subtitle_smi, subtitle_tt, subtitle_wsrt
@@ -116,10 +116,8 @@ def get_one_media(stream, options):
         if subs:
             subs[0].download(options)
 
-    bitrate = sorted(x.bitrate for x in videos)
-    for i in videos:
-        if i.bitrate == bitrate[0]:
-            stream = i
+
+    stream = select_quality(options, videos)
     try:
         stream.download()
     except UIException as e:

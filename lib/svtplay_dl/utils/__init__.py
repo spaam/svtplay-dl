@@ -106,7 +106,7 @@ def check_redirect(url):
         return url
 
 def select_quality(options, streams):
-    available = sorted(streams.keys(), key=int)
+    available = sorted(x.bitrate for x in streams)
 
     try:
         optq = int(options.quality)
@@ -137,7 +137,10 @@ def select_quality(options, streams):
                   ", ".join([str(elm) for elm in available]))
         sys.exit(4)
 
-    return streams[selected]
+    for i in streams:
+        if i.bitrate == selected:
+            stream = i
+    return stream
 
 def ensure_unicode(s):
     """
