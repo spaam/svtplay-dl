@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hds import HDS, hdsparse
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
