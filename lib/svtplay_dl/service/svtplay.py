@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hds import HDS
+from svtplay_dl.fetcher.hds import HDS, hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
@@ -63,7 +63,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i["url"]
-                    yield HDS(options, manifest, i["bitrate"])
+                    streams = hdsparse(options, manifest)
+                    for n in list(streams.keys()):
+                        yield streams[n]
             elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
                 data = get_http_data(embedurl)
