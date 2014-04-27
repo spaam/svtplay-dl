@@ -7,7 +7,7 @@ import re
 import struct
 import logging
 import binascii
-
+import os
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
@@ -79,6 +79,9 @@ class HDS(VideoRetriever):
             if not extension:
                 self.options.output = "%s.flv" % self.options.output
             log.info("Outfile: %s", self.options.output)
+            if os.path.isfile(self.options.output) and not self.options.force:
+                log.info("File already exists. use --force to overwrite")
+                return
             file_d = open(self.options.output, "wb")
         else:
             file_d = sys.stdout
