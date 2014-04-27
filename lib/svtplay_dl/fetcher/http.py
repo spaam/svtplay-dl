@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import time
 import re
+import os
 
 from svtplay_dl.output import progress # FIXME use progressbar() instead
 from svtplay_dl.log import log
@@ -34,6 +35,9 @@ class HTTP(VideoRetriever):
             else:
                 self.options.output = "%s.mp4" % self.options.output
             log.info("Outfile: %s", self.options.output)
+            if os.path.isfile(self.options.output) and not self.options.force:
+                log.info("File already exists. use --force to overwrite")
+                return
             file_d = open(self.options.output, "wb")
         else:
             file_d = sys.stdout
