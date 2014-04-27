@@ -41,38 +41,37 @@ class LiveHDSException(HDSException):
         super(LiveHDSException, self).__init__(
             url, "This is a live HDS stream, and they are not supported.")
 
+def hdsparse(options, manifest):
+    data = get_http_data(manifest)
+    streams = {}
+    bootstrap = {}
+    xml = ET.XML(data)
+
+    if is_py2_old:
+        bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+        mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
+    else:
+        bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+        mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
+
+    for i in bootstrapIter:
+        bootstrap[i.attrib["id"]] = i.text
+    for i in mediaIter:
+        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]], metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text)
+    return streams
+
 class HDS(VideoRetriever):
     def download(self):
-        data = get_http_data(self.url)
-        streams = {}
-        bootstrap = {}
-        xml = ET.XML(data)
-
         if self.options.live and not self.options.force:
             raise LiveHDSException(self.url)
 
-        if is_py2_old:
-            bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-            mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
-        else:
-            bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-            mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
-
-        for i in bootstrapIter:
-            bootstrap[i.attrib["id"]] = i.text
-
-        for i in mediaIter:
-            streams[int(i.attrib["bitrate"])] = {"url": i.attrib["url"], "bootstrapInfoId": i.attrib["bootstrapInfoId"], "metadata": i.find("{http://ns.adobe.com/f4m/1.0}metadata").text}
-
-        test = select_quality(self.options, streams)
-
-        bootstrap = base64.b64decode(bootstrap[test["bootstrapInfoId"]])
+        bootstrap = base64.b64decode(self.kwargs["bootstrap"])
         box = readboxtype(bootstrap, 0)
         antal = None
         if box[2] == b"abst":
             antal = readbox(bootstrap, box[0])
 
-        baseurl = self.url[0:self.url.rfind("/")]
+        baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
         i = 1
 
         if self.options.output != "-":
@@ -84,16 +83,16 @@ class HDS(VideoRetriever):
         else:
             file_d = sys.stdout
 
-        metasize = struct.pack(">L", len(base64.b64decode(test["metadata"])))[1:]
+        metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
         file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))
         file_d.write(metasize)
         file_d.write(binascii.a2b_hex(b"00000000000000"))
-        file_d.write(base64.b64decode(test["metadata"]))
+        file_d.write(base64.b64decode(self.kwargs["metadata"]))
         file_d.write(binascii.a2b_hex(b"00000000"))
         total = antal[1]["total"]
-        eta = ETA(total)
+        eta = ETA(total)q
         while i <= total:
-            url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
+            url = "%s/%sSeg1-Frag%s" % (baseurl, self.url, i)
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
