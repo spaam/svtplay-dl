@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import subprocess
 import re
 import shlex
+import os
 
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2
@@ -26,6 +27,9 @@ class RTMP(VideoRetriever):
             else:
                 self.options.output = self.options.output + extension.group(1)
             log.info("Outfile: %s", self.options.output)
+            if os.path.isfile(self.options.output) and not self.options.force:
+                log.info("File already exists. use --force to overwrite")
+                return
             args += ["-o", self.options.output]
         if self.options.silent or self.options.output == "-":
             args.append("-q")
