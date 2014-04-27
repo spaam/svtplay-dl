@@ -48,9 +48,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if data["video"]["subtitleReferences"]:
             try:
-                yield subtitle_wsrt(data["video"]["subtitleReferences"][0]["url"])
+                subtitle = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 pass
+            if len(subtitle) > 0:
+                yield subtitle_wsrt(subtitle)
 
         for i in data["video"]["videoReferences"]:
             parse = urlparse(i["url"])
