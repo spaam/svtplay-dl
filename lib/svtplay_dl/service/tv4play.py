@@ -11,7 +11,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hds import HDS
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle_smi
 
 class Tv4play(Service, OpenGraphThumbMixin):
@@ -63,7 +63,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     yield RTMP(options, i.find("base").text, i.find("bitrate").text)
                 elif base[len(base)-3:len(base)] == "f4m":
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
-                    yield HDS(options, manifest, "0")
+                    streams = hdsparse(options, manifest)
+                    for n in list(streams.keys()):
+                        yield streams[n]
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle_smi(i.find("url").text)
 
