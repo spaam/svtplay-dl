@@ -90,7 +90,7 @@ class HDS(VideoRetriever):
         file_d.write(base64.b64decode(self.kwargs["metadata"]))
         file_d.write(binascii.a2b_hex(b"00000000"))
         total = antal[1]["total"]
-        eta = ETA(total)q
+        eta = ETA(total)
         while i <= total:
             url = "%s/%sSeg1-Frag%s" % (baseurl, self.url, i)
             if self.options.output != "-":
