@@ -17,7 +17,7 @@ from svtplay_dl.fetcher.http import download_http
 from svtplay_dl.log import log
 
 class Svtplay(Service, OpenGraphThumbMixin):
-    supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se', 'beta.svtplay.se']
+    supported_domains = ['svtplay.se', 'svt.se', 'oppetarkiv.se', 'beta.svtplay.se', 'svtflow.se']
 
     def __init__(self, url):
         Service.__init__(self, url)
