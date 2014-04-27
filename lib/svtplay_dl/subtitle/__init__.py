@@ -41,18 +41,10 @@ class subtitle_tt(subtitle):
                 if node.tail:
                     data += '%s\n\n' % node.tail.strip(' \t\n\r')
                     skip = False
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-        if filename:
-            options.output = "%s.srt" % filename.group(1)
-        else:
-            options.output = "%s.srt" % options.output
 
-        log.info("Subtitle: %s", options.output)
-        fd = open(options.output, "w")
         if is_py2:
             data = data.encode('utf8')
-        fd.write(data)
-        fd.close()
+        save(options, data)
 
 class subtitle_json(subtitle):
     def download(self, options):
@@ -65,16 +57,7 @@ class subtitle_json(subtitle):
             subs += "%s\n\n" % i["text"].encode("utf-8")
             number += 1
 
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-        if filename:
-            options.output = "%s.srt" % filename.group(1)
-        else:
-            options.output = "%s.srt" % options.output
-
-        log.info("Subtitle: %s", options.output)
-        fd = open(options.output, "w")
-        fd.write(subs)
-        fd.close()
+        save(options, subs)
 
 class subtitle_sami(subtitle):
     def download(self, options):
@@ -94,18 +77,9 @@ class subtitle_sami(subtitle):
                 if int(n) > 0:
                     subs += "%s\n" % i.text
 
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-        if filename:
-            options.output = "%s.srt" % filename.group(1)
-        else:
-            options.output = "%s.srt" % options.output
-
-        log.info("Subtitle: %s", options.output)
-        fd = open(options.output, "w")
         if is_py2:
             subs = subs.encode('utf8')
-        fd.write(subs)
-        fd.close()
+        save(options, subs)
 
 class subtitle_smi(subtitle):
     def download(self, options):
@@ -119,16 +93,7 @@ class subtitle_smi(subtitle):
             subs += text.replace("<br>", "\n")
             number += 1
 
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-        if filename:
-            options.output = "%s.srt" % filename.group(1)
-        else:
-            options.output = "%s.srt" % options.output
-
-        log.info("Subtitle: %s", options.output)
-        fd = open(options.output, "w")
-        fd.write(subs)
-        fd.close()
+        save(options, subs)
 
 class subtitle_wsrt(subtitle):
     def download(self, options):
@@ -142,16 +107,20 @@ class subtitle_wsrt(subtitle):
             sub += "\n"
             sub = re.sub('<[^>]*>', '', sub)
             srt += sub
-        filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-        if filename:
-            options.output = "%s.srt" % filename.group(1)
-        else:
-            options.output = "%s.srt" % options.output
 
-        log.info("Subtitle: %s", options.output)
-        fd = open(options.output, "w")
-        fd.write(srt)
-        fd.close()
+        save(options, srt)
+
+def save(options, data):
+    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
+    if filename:
+        options.output = "%s.srt" % filename.group(1)
+    else:
+        options.output = "%s.srt" % options.output
+
+    log.info("Subtitle: %s", options.output)
+    fd = open(options.output, "w")
+    fd.write(data)
+    fd.close()
 
 def timestr(msec):
     """
