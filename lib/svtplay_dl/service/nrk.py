@@ -8,7 +8,7 @@ import json
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hds import HDS
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle_tt
 from svtplay_dl.log import log
@@ -47,4 +47,6 @@ class Nrk(Service, OpenGraphThumbMixin):
                 yield HLS(options, streams[n], n)
         else:
             manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
-            yield HDS(options, manifest_url, "0")
+            streams = hdsparse(options, manifest_url)
+            for n in list(streams.keys()):
+                yield streams[n]
