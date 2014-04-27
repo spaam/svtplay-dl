@@ -82,6 +82,9 @@ class HLS(VideoRetriever):
             if not extension:
                 self.options.output = "%s.ts" % self.options.output
             log.info("Outfile: %s", self.options.output)
+            if os.path.isfile(self.options.output) and not self.options.force:
+                log.info("File already exists. use --force to overwrite")
+                return
             file_d = open(self.options.output, "wb")
         else:
             file_d = sys.stdout
