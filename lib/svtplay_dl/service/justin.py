@@ -46,31 +46,50 @@ class Justin(Service):
 
     def get(self, options):
         urlp = urlparse(self.url)
+        success = False
 
-        try:
-            self._get_video(urlp, options)
-        except JustinUrlException as e:
-            log.debug(str(e))
-
+        for jtv_video_type in [self._get_chapter, self._get_archive,
+                               self._get_channel]:
             try:
-                self._get_channel(urlp, options)
+                jtv_video_type(urlp, options)
+                success = True
+                break
             except JustinUrlException as e:
                 log.debug(str(e))
-                log.error("Can't find media for URL")
-                sys.exit(2)
+
+        if not success:
+            log.debug(str(e))
+            log.error("This twitch/justin video type is unsupported")
+            sys.exit(2)
 
 
-    def _get_video(self, urlp, options):
-        match = re.match(r'/\w+/c/(\d+)', urlp.path)
-        if not match:
-            raise JustinUrlException('video', urlp.geturl())
-
-        url = "http://api.justin.tv/api/broadcast/by_chapter/%s.xml?onsite=true" % match.group(1)
+    def _get_static_video(self, vid, options, vidtype):
+        url = "http://api.justin.tv/api/broadcast/by_%s/%s.xml?onsite=true" % (
+            vidtype, vid)
         data = get_http_data(url)
+        if not data:
+            return False
+
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
 
         download_http(options, url)
+
+
+    def _get_archive(self, urlp, options):
+        match = re.match(r'/\w+/b/(\d+)', urlp.path)
+        if not match:
+            raise JustinUrlException('video', urlp.geturl())
+
+        self._get_static_video(match.group(1), options, 'archive')
+
+
+    def _get_chapter(self, urlp, options):
+        match = re.match(r'/\w+/c/(\d+)', urlp.path)
+        if not match:
+            raise JustinUrlException('video', urlp.geturl())
+
+        self._get_static_video(match.group(1), options, 'chapter')
 
 
     def _get_access_token(self, channel):
