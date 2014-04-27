@@ -56,20 +56,7 @@ class HLS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
 
-        data = get_http_data(self.url)
-        globaldata, files = parsem3u(data)
-        streams = {}
-
-        if self.options.live and not self.options.force:
-            raise LiveHLSException(self.url)
-
-        for i in files:
-            streams[int(i[1]["BANDWIDTH"])] = i[0]
-
-        test = select_quality(self.options, streams)
-        test = _get_full_url(test, self.url)
-
-        m3u8 = get_http_data(test)
+        m3u8 = get_http_data(self.url)
         globaldata, files = parsem3u(m3u8)
         encrypted = False
         key = None
@@ -102,7 +89,7 @@ class HLS(VideoRetriever):
         n = 0
         eta = ETA(len(files))
         for i in files:
-            item = _get_full_url(i[0], test)
+            item = _get_full_url(i[0], self.url)
 
             if self.options.output != "-":
                 eta.increment()
