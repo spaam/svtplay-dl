@@ -11,7 +11,7 @@ import binascii
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
-from svtplay_dl.utils import get_http_data, select_quality, is_py2_old, is_py2, is_py3
+from svtplay_dl.utils import get_http_data, is_py2_old, is_py2, is_py3
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 
