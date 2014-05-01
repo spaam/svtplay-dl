@@ -15,6 +15,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle_sami
 
 class Viaplay(Service, OpenGraphThumbMixin):
@@ -65,10 +66,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 options.live = True
         if xml.find("Product").find("Syndicate").text == "true":
             options.live = True
+
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         bitrate = xml.find("Product").find("Videos").find("Video").find("BitRate").text
         yield subtitle_sami(xml.find("Product").find("SamiFile").text)
 
+        if filename[len(filename)-3:] == "f4m":
+            if xml.find("Product").find("Syndicate").text == "true":
+                options.live = False
+            manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
+            streams = hdsparse(options, manifest)
+            for n in list(streams.keys()):
+                yield streams[n]
         if filename[:4] == "http":
             data = get_http_data(filename)
             xml = ET.XML(data)
