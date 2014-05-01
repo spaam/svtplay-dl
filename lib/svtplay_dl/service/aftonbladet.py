@@ -6,7 +6,7 @@ import re
 import json
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, select_quality
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import download_hls
 
@@ -34,6 +34,14 @@ class Aftonbladet(Service):
 
         streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
         streams = json.loads(get_http_data(streamsurl))
-        hls = streams["formats"]["hls"]["level3"]["m3u8"][0]
-        playlist = "http://%s/%s/%s" % (hls["address"], hls["path"], hls["filename"])
-        download_hls(options, playlist)
+        hls = streams["formats"]["hls"]["level3"]["csmil"][0]
+        address = hls["address"]
+        path = hls["path"]
+
+        streams = {}
+        for i in hls["files"]:
+            streams[int(i["bitrate"])] = i["filename"]
+
+        filename = select_quality(options, streams)
+        playlist = "http://%s/%s/%s/master.m3u8" % (address, path, filename)
+        download_hls(options, playlist, False)
