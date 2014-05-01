@@ -99,6 +99,7 @@ from svtplay_dl.service.ruv import Ruv
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.sr import Sr
 from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.viaplay import Viaplay
@@ -122,6 +123,7 @@ sites = [
     Radioplay,
     Sr,
     Svtplay,
+    OppetArkiv,
     Tv4play,
     Urplay,
     Viaplay,
