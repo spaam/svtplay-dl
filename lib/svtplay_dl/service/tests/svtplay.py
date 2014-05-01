@@ -7,22 +7,18 @@
 
 from __future__ import absolute_import
 import unittest
+from svtplay_dl.service.tests import HandlesURLsTestMixin
 from svtplay_dl.service.svtplay import Svtplay
 
-class handlesTest(unittest.TestCase):
-
-    def handles_svtplay_se_test(self):
-        self.assertTrue(Svtplay.handles(
-            "http://www.svtplay.se/video/1090393/del-9"))
-
-    def handles_svt_se_test(self):
-        self.assertTrue(Svtplay.handles(
-            "http://www.svt.se/nyheter/sverige/det-ar-en-dodsfalla"))
-
-    def handles_oppetarkiv_se_test(self):
-        self.assertFalse(Svtplay.handles(
-            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"))
-
-    def handles_dn_se_test(self):
-        self.assertFalse(Svtplay.handles(
-            "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla"))
+class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
+    service = Svtplay
+    urls = {
+        'ok': [
+            "http://www.svtplay.se/video/1090393/del-9",
+            "http://www.svt.se/nyheter/sverige/det-ar-en-dodsfalla"
+        ],
+        'bad': [
+            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1",
+            "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla"
+        ]
+    }

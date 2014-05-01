@@ -7,14 +7,17 @@
 
 from __future__ import absolute_import
 import unittest
+from svtplay_dl.service.tests import HandlesURLsTestMixin
 from svtplay_dl.service.oppetarkiv import OppetArkiv
 
-class handlesTest(unittest.TestCase):
-    def handles_oppetarkiv_se_test(self):
-        self.assertTrue(OppetArkiv.handles(
-            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"))
-
-    def handles_svtplay_se_test(self):
-        self.assertFalse(OppetArkiv.handles(
-            "http://www.svtplay.se/video/1090393/del-9"))
+class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
+    service = OppetArkiv
+    urls = {
+        'ok': [
+            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"
+        ],
+        'bad': [
+            "http://www.svtplay.se/video/1090393/del-9"
+        ]
+    }
 
