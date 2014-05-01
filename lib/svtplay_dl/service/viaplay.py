@@ -49,7 +49,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         return None
 
-
     def get(self, options):
         vid = self._get_video_id()
         if vid is None:
@@ -71,9 +70,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         bitrate = xml.find("Product").find("Videos").find("Video").find("BitRate").text
         yield subtitle_sami(xml.find("Product").find("SamiFile").text)
-
-        if options.subtitle and options.force_subtitle:
-            return
 
         if filename[len(filename)-3:] == "f4m":
             #fulhack. RTMP need live to be set
