@@ -77,25 +77,26 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 options.live = False
             manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
             download_hds(options, manifest)
-        if filename[:4] == "http":
-            data = get_http_data(filename)
-            xml = ET.XML(data)
-            filename = xml.find("Url").text
-            if xml.find("Msg").text:
-                log.error("Can't download file:")
-                log.error(xml.find("Msg").text)
+        else:
+            if filename[:4] == "http":
+                data = get_http_data(filename)
+                xml = ET.XML(data)
+                filename = xml.find("Url").text
+                if xml.find("Msg").text:
+                    log.error("Can't download file:")
+                    log.error(xml.find("Msg").text)
+                    sys.exit(2)
+
+            parse = urlparse(filename)
+            match = re.search("^(/[a-z0-9]{0,20})/(.*)", parse.path)
+            if not match:
+                log.error("Somthing wrong with rtmpparse")
                 sys.exit(2)
+            filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
+            path = "-y %s" % match.group(2)
+            options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
 
-        parse = urlparse(filename)
-        match = re.search("^(/[a-z0-9]{0,20})/(.*)", parse.path)
-        if not match:
-            log.error("Somthing wrong with rtmpparse")
-            sys.exit(2)
-        filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
-        path = "-y %s" % match.group(2)
-        options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
-
-        download_rtmp(options, filename)
+            download_rtmp(options, filename)
 
     def get_subtitle(self, options):
         if self.subtitle:
