@@ -12,7 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
 
 class Qbrick(Service, OpenGraphThumbMixin):
-    supported_domains = ['di.se', 'svd.se', 'sydsvenskan.se']
+    supported_domains = ['di.se', 'sydsvenskan.se']
 
     def get(self, options):
         if re.findall(r"sydsvenskan.se", self.url):

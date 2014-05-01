@@ -105,6 +105,7 @@ from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.bambuser import Bambuser
+from svtplay_dl.service.lemonwhale import Lemonwhale
 from svtplay_dl.utils import get_http_data
 
 sites = [
@@ -114,6 +115,7 @@ sites = [
     Expressen,
     Hbo,
     Justin,
+    Lemonwhale,
     Kanal5,
     Mtvservices,
     Nrk,
