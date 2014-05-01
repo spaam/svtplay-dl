@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import re
 
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.log import log
 
@@ -23,7 +24,7 @@ class OppetArkiv(Svtplay):
         episodes = []
         while more:
             url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=tid_stigande&embed=true" % (program, page)
-            data = self.get_http_data(url)
+            data = get_http_data(url)
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False
