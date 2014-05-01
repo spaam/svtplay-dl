@@ -68,6 +68,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         self.subtitle = xml.find("Product").find("SamiFile").text
 
+        if options.subtitle and options.force_subtitle:
+            return
+
         if filename[len(filename)-3:] == "f4m":
             #fulhack. RTMP need live to be set
             if xml.find("Product").find("Syndicate").text == "true":
@@ -91,8 +94,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
         path = "-y %s" % match.group(2)
         options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
-        if options.subtitle and options.force_subtitle:
-            return
 
         download_rtmp(options, filename)
 
