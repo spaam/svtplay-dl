@@ -9,8 +9,6 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import download_hls
 from svtplay_dl.fetcher.http import download_http
 
-from svtplay_dl.utils.urllib import quote_plus
-
 class ExpressenException(UIException):
     pass
 
@@ -46,4 +44,4 @@ class Expressen(Service):
                 url = self._get_mp4()
                 download_http(options, url)
         except ExpressenException:
-            log.error("Could not find any videos in '%s'" % self.url)
+            log.error("Could not find any videos in '%s'", self.url)
