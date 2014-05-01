@@ -12,6 +12,9 @@ from svtplay_dl.utils.urllib import urlopen, Request, HTTPError
 from svtplay_dl.fetcher import VideoRetriever
 
 class HTTP(VideoRetriever):
+    def name(self):
+        return "http"
+
     def download(self):
         """ Get the stream from HTTP """
         request = Request(self.url)

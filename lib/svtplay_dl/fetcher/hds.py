@@ -61,6 +61,9 @@ def hdsparse(options, manifest):
     return streams
 
 class HDS(VideoRetriever):
+    def name(self):
+        return "hds"
+
     def download(self):
         if self.options.live and not self.options.force:
             raise LiveHDSException(self.url)

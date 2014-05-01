@@ -52,6 +52,9 @@ def hlsparse(url):
     return streams
 
 class HLS(VideoRetriever):
+    def name(self):
+        return "hls"
+
     def download(self):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)

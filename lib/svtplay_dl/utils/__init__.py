@@ -106,8 +106,13 @@ def check_redirect(url):
         return url
 
 def select_quality(options, streams):
-    available = sorted(int(x.bitrate) for x in streams)
-
+    if options.preferred:
+        available = []
+        data = sorted(streams, key=lambda x:(x.name()!= options.preferred, x.name()), reverse=True)
+        for i in data:
+            available.append(i.bitrate)
+    else:
+        available = sorted(int(x.bitrate) for x in streams)
     try:
         optq = int(options.quality)
     except ValueError:
