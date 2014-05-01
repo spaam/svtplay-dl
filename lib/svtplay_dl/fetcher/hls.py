@@ -41,13 +41,13 @@ def _get_full_url(url, srcurl):
 
 # needparse is a fulhack++ it will be removed.
 def download_hls(options, url, needparse=True):
+    if options.live and not options.force:
+        raise LiveHLSException(url)
+
     if needparse:
         data = get_http_data(url)
         globaldata, files = parsem3u(data)
         streams = {}
-
-        if options.live and not options.force:
-            raise LiveHLSException(url)
 
         for i in files:
             streams[int(i[1]["BANDWIDTH"])] = i[0]
