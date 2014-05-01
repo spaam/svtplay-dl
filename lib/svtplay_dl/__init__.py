@@ -56,6 +56,7 @@ class Options:
         self.thumbnail = False
         self.all_episodes = False
         self.force_subtitle = False
+        self.preferred = None
 
 def get_media(url, options):
 
@@ -196,6 +197,8 @@ def main():
     parser.add_option("-A", "--all-episodes",
                       action="store_true", dest="all_episodes", default=False,
                       help="Try to download all episodes.")
+    parser.add_option("-P", "--preferred", default=None,
+                      metavar="preferred", help="preferred download method")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()

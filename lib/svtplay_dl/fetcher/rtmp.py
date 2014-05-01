@@ -11,6 +11,9 @@ from svtplay_dl.utils import is_py2
 from svtplay_dl.fetcher import VideoRetriever
 
 class RTMP(VideoRetriever):
+    def name(self):
+        return "hds"
+
     def download(self):
         """ Get the stream from RTMP """
         args = []
