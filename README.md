@@ -44,6 +44,12 @@ To install it, run
 
 Support
 -------
+If you encounter any bugs or problems, don't hesitate to open an
+issue [on github](https://github.com/spaam/svtplay-dl/issues). Or
+why not join the `#svtplay-dl` IRC channel on Freenode?
+
+Supported services
+------------------
 This script works for:
 
 * aftonbladet.se
