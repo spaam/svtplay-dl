@@ -39,22 +39,23 @@ def _get_full_url(url, srcurl):
 
     return returl
 
+# needparse is a fulhack++ it will be removed.
+def download_hls(options, url, needparse=True):
+    if needparse:
+        data = get_http_data(url)
+        globaldata, files = parsem3u(data)
+        streams = {}
 
-def download_hls(options, url):
-    data = get_http_data(url)
-    globaldata, files = parsem3u(data)
-    streams = {}
+        if options.live and not options.force:
+            raise LiveHLSException(url)
 
-    if options.live and not options.force:
-        raise LiveHLSException(url)
+        for i in files:
+            streams[int(i[1]["BANDWIDTH"])] = i[0]
 
-    for i in files:
-        streams[int(i[1]["BANDWIDTH"])] = i[0]
+        test = select_quality(options, streams)
+        url = _get_full_url(test, url)
 
-    test = select_quality(options, streams)
-    test = _get_full_url(test, url)
-
-    m3u8 = get_http_data(test)
+    m3u8 = get_http_data(url)
     globaldata, files = parsem3u(m3u8)
     encrypted = False
     key = None
@@ -87,7 +88,7 @@ def download_hls(options, url):
     n = 0
     eta = ETA(len(files))
     for i in files:
-        item = _get_full_url(i[0], test)
+        item = _get_full_url(i[0], url)
 
         if options.output != "-":
             eta.increment()
