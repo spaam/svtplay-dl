@@ -15,6 +15,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, subtitle_sami
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import download_rtmp
+from svtplay_dl.fetcher.hds import download_hds
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -67,6 +68,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         self.subtitle = xml.find("Product").find("SamiFile").text
 
+        if filename[len(filename)-3:] == "f4m":
+            #fulhack. RTMP need live to be set
+            if xml.find("Product").find("Syndicate").text == "true":
+                options.live = False
+            manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
+            download_hds(options, manifest)
         if filename[:4] == "http":
             data = get_http_data(filename)
             xml = ET.XML(data)
