@@ -199,4 +199,5 @@ def main():
     try:
         get_media(url, options)
     except KeyboardInterrupt:
+        print("")
         pass
