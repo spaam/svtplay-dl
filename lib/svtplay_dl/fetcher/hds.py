@@ -93,7 +93,7 @@ def download_hds(options, url):
     eta = ETA(total)
     while i <= total:
         url = "%s/%sSeg1-Frag%s" % (baseurl, test["url"], i)
-        if options.output != "-":
+        if not options.silent and options.output != "-":
             eta.update(i)
             progressbar(total, i, ''.join(["ETA: ", str(eta)]))
         data = get_http_data(url)
