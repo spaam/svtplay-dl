@@ -90,7 +90,7 @@ def download_hls(options, url, needparse=True):
     for i in files:
         item = _get_full_url(i[0], url)
 
-        if options.output != "-":
+        if not options.silent and options.output != "-":
             eta.increment()
             progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
             n += 1
