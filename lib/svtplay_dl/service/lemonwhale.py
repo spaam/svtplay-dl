@@ -9,7 +9,7 @@ from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.http import download_http
+from svtplay_dl.fetcher.http import HTTP
 
 class Lemonwhale(Service):
     supported_domains = ['svd.se']
@@ -40,7 +40,6 @@ class Lemonwhale(Service):
         mediafiles = videofile.find("{http://www.lemonwhale.com/xml11}MediaFiles")
         high = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURLHigh")
         if high.text:
-            download_http(options, high.text)
-        else:
-            file = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURL").text
-            download_http(options, file)
+            yield HTTP(options, high.text, 720)
+        file = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURL").text
+        yield HTTP(options, file, 480)
