@@ -9,6 +9,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.log import log
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -44,11 +45,21 @@ class Dr(Service, OpenGraphThumbMixin):
             if not match:
                 log.error("Cant find resource info for this video")
                 sys.exit(2)
-            resource_url = "http://www.dr.dk%s" % match.group(1)
+            resource_url = "%s" % match.group(1)
             resource_data = get_http_data(resource_url)
             resource = json.loads(resource_data)
 
-            for stream in resource['links']:
-                options.other = "-v -y '%s'" % stream['uri'].replace("rtmp://vod.dr.dk/cms/", "")
-                rtmp = "rtmp://vod.dr.dk/cms/"
-                yield RTMP(options, rtmp, stream['bitrateKbps'])
+            for stream in resource['Links']:
+                if stream["Target"] == "HDS":
+                    manifest = "%s?hdcore=2.8.0&g=hejsan" % stream["Uri"]
+                    streams = hdsparse(options, manifest)
+                    for n in list(streams.keys()):
+                        yield streams[n]
+                if stream["Target"] == "HLS":
+                    streams = hlsparse(stream["Uri"])
+                    for n in list(streams.keys()):
+                        yield HLS(options, streams[n], n)
+                if stream["Target"] == "Streaming":
+                    options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
+                    rtmp = "rtmp://vod.dr.dk/cms/"
+                    yield RTMP(options, rtmp, stream['Bitrate'])
