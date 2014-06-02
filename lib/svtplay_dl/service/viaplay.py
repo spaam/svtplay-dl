@@ -36,13 +36,13 @@ class Viaplay(Service, OpenGraphThumbMixin):
         to scrape it from the HTML document. Returns None in case it's
         unable to extract the ID at all.
         """
-        parse = urlparse(self.url)
-        match = re.search(r'\/(\d+)/?', parse.path)
+        html_data = self.get_urldata()
+        match = re.search(r'data-emediate-video_id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
 
-        html_data = self.get_urldata()
-        match = re.search(r'data-emediate-video_id="([0-9]+)"', html_data)
+        parse = urlparse(self.url)
+        match = re.search(r'\/(\d+)/\?', parse.path)
         if match:
             return match.group(1)
 
