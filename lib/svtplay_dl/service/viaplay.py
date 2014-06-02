@@ -42,7 +42,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return match.group(1)
 
         html_data = self.get_urldata()
-        match = re.search(r'data-link="[^"]+/([0-9]+)"', html_data)
+        match = re.search(r'data-emediate-video_id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
 
