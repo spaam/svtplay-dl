@@ -53,7 +53,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if xml.find("live").text:
             if xml.find("live").text != "false":
                 options.live = True
-
+        if xml.find("drmProtected").text == "true":
+            log.error("DRM protected content.")
+            sys.exit(2)
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
                 base = i.find("base").text
