@@ -112,7 +112,7 @@ class subtitle_wsrt(subtitle):
             if subtract:
                 hour1 -= 10
                 hour2 -= 10
-            time = "%s:%s:%s -> %s:%s:%s" % (hour1, match.group(2), match.group(3).replace(".", ","), hour2, match.group(5), match.group(6).replace(".", ","))
+            time = "%s:%s:%s --> %s:%s:%s" % (hour1, match.group(2), match.group(3).replace(".", ","), hour2, match.group(5), match.group(6).replace(".", ","))
             sub = "%s\n%s\n%s\n" % (i.group(1), time, i.group(4))
             if len(i.group(6)) > 0:
                 sub += "%s\n" % i.group(6)
