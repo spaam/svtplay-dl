@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 import sys
 import re
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
@@ -33,4 +34,4 @@ class Mtvservices(Service):
         for i in sa:
             temp = i.find("src").text.index("gsp.comedystor")
             url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/%s" % i.find("src").text[temp:]
-            yield HTTP(options, url, i.attrib["height"])
+            yield HTTP(copy.copy(options), url, i.attrib["height"])

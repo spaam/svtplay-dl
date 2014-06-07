@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import re
 import json
+import copy
 
 from svtplay_dl.utils.urllib import CookieJar, Cookie
 from svtplay_dl.service import Service
@@ -68,4 +69,4 @@ class Kanal5(Service):
                 log.error("We cant download drm files for this site.")
                 sys.exit(2)
             options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
-            yield RTMP(options, steambaseurl, i["bitrate"])
+            yield RTMP(copy.copy(options), steambaseurl, i["bitrate"])

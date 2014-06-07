@@ -2,6 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
@@ -20,5 +21,5 @@ class Ruv(Service):
         m3u8_url = "http://" + tengipunktur + match.group(1)
         streams = hlsparse(m3u8_url)
         for n in list(streams.keys()):
-            yield HLS(options, streams[n], n)
+            yield HLS(copy.copy(options), streams[n], n)
 

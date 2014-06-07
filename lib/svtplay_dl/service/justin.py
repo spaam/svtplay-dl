@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import sys
 import re
 import json
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse, quote
@@ -71,8 +72,7 @@ class Justin(Service):
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text
 
-        yield HTTP(options, url)
-
+        yield HTTP(copy.copy(options), url)
 
     def _get_archive(self, urlp, options):
         match = re.match(r'/\w+/b/(\d+)', urlp.path)
@@ -148,4 +148,4 @@ class Justin(Service):
 
         streams = hlsparse(hls_url)
         for n in list(streams.keys()):
-            yield HLS(options, streams[n], n)
+            yield HLS(copy.copy(options), streams[n], n)

@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import re
 import json
 import sys
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -49,9 +50,9 @@ class Urplay(Service, OpenGraphThumbMixin):
         if hd:
             streams = hlsparse(hls_hd)
             for n in list(streams.keys()):
-                yield HLS(options, streams[n], n)
+                yield HLS(copy.copy(options), streams[n], n)
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
-            yield RTMP(options, rtmp, "720")
+            yield RTMP(copy.copy(options), rtmp, "720")
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',

@@ -2,6 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.error import UIException
@@ -39,11 +40,11 @@ class Expressen(Service):
                 url = self._get_hls()
                 streams = hlsparse(url)
                 for n in list(streams.keys()):
-                    yield HLS(options, streams[n], n)
+                    yield HLS(copy.copy(options), streams[n], n)
             except ExpressenException as exc:
                 # Lower res, but static mp4 file.
                 log.debug(exc)
                 url = self._get_mp4()
-                yield HTTP(options, url)
+                yield HTTP(copy.copy(options), url)
         except ExpressenException:
             log.error("Could not find any videos in '%s'", self.url)

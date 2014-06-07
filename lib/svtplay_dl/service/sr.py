@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import sys
 import json
 import re
+import copy
 
 from svtplay_dl.utils.urllib import quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -31,6 +32,6 @@ class Sr(Service, OpenGraphThumbMixin):
             url = i["Url"]
             if not url.startswith('http'):
                 url = 'http:%s' % url
-            yield HTTP(options, url, i["Quality"])
+            yield HTTP(copy.copy(options), url, i["Quality"])
 
 

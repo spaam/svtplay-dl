@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import re
 import json
+import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
@@ -40,4 +41,4 @@ class Aftonbladet(Service):
 
         for i in hls["files"]:
             playlist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
-            yield HLS(options, playlist, i["bitrate"])
+            yield HLS(copy.copy(options), playlist, i["bitrate"])

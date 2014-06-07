@@ -5,6 +5,7 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 import json
+import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -62,10 +63,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 if base[0:4] == "rtmp":
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
-                    yield RTMP(options, i.find("base").text, i.find("bitrate").text)
+                    yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
                 elif base[len(base)-3:len(base)] == "f4m":
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
-                    streams = hdsparse(options, manifest)
+                    streams = hdsparse(copy.copy(options), manifest)
                     for n in list(streams.keys()):
                         yield streams[n]
             elif i.find("mediaFormat").text == "smi":

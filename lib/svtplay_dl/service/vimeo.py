@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import json
 import re
+import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
@@ -25,7 +26,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
             jsondata = json.loads(player_data)
             avail_quality = jsondata["request"]["files"]["h264"]
             for i in avail_quality.keys():
-                yield HTTP(options, avail_quality[i]["url"], avail_quality[i]["bitrate"])
+                yield HTTP(copy.copy(options), avail_quality[i]["url"], avail_quality[i]["bitrate"])
         else:
             log.error("Can't find any streams.")
             sys.exit(2)

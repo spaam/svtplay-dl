@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import sys
 import re
 import json
+import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.http import HTTP
@@ -21,7 +22,7 @@ class Radioplay(Service):
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):
-                yield HTTP(options, data["station"]["streams"][i], i)
+                yield HTTP(copy.copy(options), data["station"]["streams"][i], i)
         else:
             log.error("Can't find stream info")
             sys.exit(2)

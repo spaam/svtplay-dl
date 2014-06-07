@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 import sys
 import re
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import urlparse
@@ -39,4 +40,4 @@ class Hbo(Service):
             sa = list(ss.iter("size"))
 
         for i in sa:
-            yield RTMP(options, i.find("tv14").find("path").text, i.attrib["width"])
+            yield RTMP(copy.copy(options), i.find("tv14").find("path").text, i.attrib["width"])

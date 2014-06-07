@@ -5,7 +5,7 @@ import sys
 import re
 import json
 import xml.etree.ElementTree as ET
-
+import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
@@ -60,12 +60,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
             if parse.path.find("m3u8") > 0:
                 streams = hlsparse(i["url"])
                 for n in list(streams.keys()):
-                    yield HLS(options, streams[n], n)
+                    yield HLS(copy.copy(options), streams[n], n)
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % i["url"]
-                    streams = hdsparse(options, manifest)
+                    streams = hdsparse(copy.copy(options), manifest)
                     for n in list(streams.keys()):
                         yield streams[n]
             elif parse.scheme == "rtmp":
@@ -74,9 +74,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
                 swf = "http://www.svtplay.se%s" % match.group(1)
                 options.other = "-W %s" % swf
-                yield RTMP(options, i["url"], i["bitrate"])
+                yield RTMP(copy.copy(options), i["url"], i["bitrate"])
             else:
-                yield HTTP(options, i["url"], "0")
+                yield HTTP(copy.copy(options), i["url"], "0")
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',

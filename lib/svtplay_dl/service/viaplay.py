@@ -9,6 +9,7 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 import json
+import copy
 
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin

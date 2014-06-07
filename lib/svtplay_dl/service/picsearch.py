@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import re
 import json
 import sys
+import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
@@ -32,4 +33,4 @@ class Picsearch(Service, OpenGraphThumbMixin):
 
         for i in files:
             options.other = "-y '%s'" % i["url"]
-            yield RTMP(options, server, i["height"])
+            yield RTMP(copy.copy(options), server, i["height"])

@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 import sys
 import re
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import unquote_plus
@@ -40,6 +41,6 @@ class Lemonwhale(Service):
         mediafiles = videofile.find("{http://www.lemonwhale.com/xml11}MediaFiles")
         high = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURLHigh")
         if high.text:
-            yield HTTP(options, high.text, 720)
+            yield HTTP(copy.copy(options), high.text, 720)
         file = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURL").text
-        yield HTTP(options, file, 480)
+        yield HTTP(copy.copy(options), file, 480)

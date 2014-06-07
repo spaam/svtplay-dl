@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import re
 import json
 import sys
+import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
@@ -33,12 +34,12 @@ class Dr(Service, OpenGraphThumbMixin):
                 if i["Target"] == "Ios":
                     streams = hlsparse(i["Uri"])
                     for n in list(streams.keys()):
-                        yield HLS(options, streams[n], n)
+                        yield HLS(copy.copy(options), streams[n], n)
                 else:
                     if i["Target"] == "Streaming":
                         options.other = "-y '%s'" % i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")
                         rtmp = "rtmp://vod.dr.dk/cms/"
-                        yield RTMP(options, rtmp, i["Bitrate"])
+                        yield RTMP(copy.copy(options), rtmp, i["Bitrate"])
 
         else:
             match = re.search(r'resource="([^"]*)"', data)
@@ -52,14 +53,14 @@ class Dr(Service, OpenGraphThumbMixin):
             for stream in resource['Links']:
                 if stream["Target"] == "HDS":
                     manifest = "%s?hdcore=2.8.0&g=hejsan" % stream["Uri"]
-                    streams = hdsparse(options, manifest)
+                    streams = hdsparse(copy.copy(options), manifest)
                     for n in list(streams.keys()):
                         yield streams[n]
                 if stream["Target"] == "HLS":
                     streams = hlsparse(stream["Uri"])
                     for n in list(streams.keys()):
-                        yield HLS(options, streams[n], n)
+                        yield HLS(copy.copy(options), streams[n], n)
                 if stream["Target"] == "Streaming":
                     options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
                     rtmp = "rtmp://vod.dr.dk/cms/"
-                    yield RTMP(options, rtmp, stream['Bitrate'])
+                    yield RTMP(copy.copy(options), rtmp, stream['Bitrate'])
