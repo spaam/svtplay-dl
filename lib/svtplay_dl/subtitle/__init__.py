@@ -108,7 +108,7 @@ class subtitle_wsrt(subtitle):
             hour2 = int(match.group(4))
             if number == 1:
                 if hour1 > 9:
-                    substract = True
+                    subtract = True
             if subtract:
                 hour1 -= 10
                 hour2 -= 10
