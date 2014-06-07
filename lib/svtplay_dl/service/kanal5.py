@@ -60,9 +60,6 @@ class Kanal5(Service):
         if data["hasSubtitle"]:
             yield subtitle_json("http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
-        if options.subtitle and options.force_subtitle:
-            return
-
         steambaseurl = data["streamBaseUrl"]
         for i in data["streams"]:
             if i["drmProtected"]:
