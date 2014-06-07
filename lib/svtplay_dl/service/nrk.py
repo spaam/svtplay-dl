@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import re
 import sys
 import json
+import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
@@ -40,13 +41,13 @@ class Nrk(Service, OpenGraphThumbMixin):
             data = json.loads(get_http_data(dataurl))
             manifest_url = data["mediaUrl"]
             options.live = data["isLive"]
-        if options.hls:
-            manifest_url = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-            streams = hlsparse(manifest_url)
-            for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
-        else:
-            manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
-            streams = hdsparse(copy.copy(options), manifest_url)
-            for n in list(streams.keys()):
-                yield streams[n]
+
+        hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
+        streams = hlsparse(hlsurl)
+        for n in list(streams.keys()):
+            yield HLS(copy.copy(options), streams[n], n)
+
+        manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
+        streams = hdsparse(copy.copy(options), manifest_url)
+        for n in list(streams.keys()):
+            yield streams[n]
