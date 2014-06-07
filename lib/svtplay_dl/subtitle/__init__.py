@@ -100,8 +100,20 @@ class subtitle_wsrt(subtitle):
         self.subtitle = get_http_data(self.url)
         recomp = re.compile(r"(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
         srt = ""
+        subtract = False
         for i in recomp.finditer(self.subtitle):
-            sub = "%s\n%s\n%s\n" % (i.group(1), i.group(2).replace(".", ","), i.group(4))
+            number = int(i.group(1))
+            match = re.search(r'(\d+):(\d+):([\d\.]+) --> (\d+):(\d+):([\d\.]+)', i.group(2))
+            hour1 = int(match.group(1))
+            hour2 = int(match.group(4))
+            if number == 1:
+                if hour1 > 9:
+                    substract = True
+            if subtract:
+                hour1 -= 10
+                hour2 -= 10
+            time = "%s:%s:%s -> %s:%s:%s" % (hour1, match.group(2), match.group(3).replace(".", ","), hour2, match.group(5), match.group(6).replace(".", ","))
+            sub = "%s\n%s\n%s\n" % (i.group(1), time, i.group(4))
             if len(i.group(6)) > 0:
                 sub += "%s\n" % i.group(6)
             sub += "\n"
