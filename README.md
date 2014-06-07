@@ -11,7 +11,7 @@ If you have OS X and [Homebrew](http://brew.sh/) you can install with:
 ### Debian and Ubuntu
 
 svtplay-dl is available in Debian in Jessie and later and Ubuntu
-in 14.10 and later, which means you can install it using apt:
+in 14.04 and later, which means you can install it using apt:
 
     apt-get install svtplay-dl
 
