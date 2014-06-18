@@ -107,36 +107,39 @@ def get_one_media(stream, options):
     videos = []
     subs = []
     streams = stream.get(options)
-    for i in streams:
-        if isinstance(i, VideoRetriever):
-            videos.append(i)
-        if isinstance(i, subtitle):
-            subs.append(i)
+    if streams:
+        for i in streams:
+            if isinstance(i, VideoRetriever):
+                videos.append(i)
+            if isinstance(i, subtitle):
+                subs.append(i)
 
-    if options.subtitle and options.output != "-":
-        if subs:
-            subs[0].download(copy.copy(options))
-        if options.force_subtitle:
-            return
+        if options.subtitle and options.output != "-":
+            if subs:
+                subs[0].download(copy.copy(options))
+            if options.force_subtitle:
+                return
 
 
-    stream = select_quality(options, videos)
-    try:
-        stream.download()
-    except UIException as e:
-        if options.verbose:
-            raise e
-        log.error(e.message)
-        sys.exit(2)
+        stream = select_quality(options, videos)
+        try:
+            stream.download()
+        except UIException as e:
+            if options.verbose:
+                raise e
+            log.error(e.message)
+            sys.exit(2)
 
-    if options.thumbnail:
-        if hasattr(stream, "get_thumbnail"):
-            log.info("thumb requested")
-            if options.output != "-":
-                log.info("getting thumbnail")
-                stream.get_thumbnail(options)
+        if options.thumbnail:
+            if hasattr(stream, "get_thumbnail"):
+                log.info("thumb requested")
+                if options.output != "-":
+                    log.info("getting thumbnail")
+                    stream.get_thumbnail(options)
+        else:
+            log.info("no thumb requested")
     else:
-        log.info("no thumb requested")
+        log.error("Can't find any streams for that url")
 
 
 def setup_log(silent, verbose=False):
