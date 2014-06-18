@@ -48,7 +48,7 @@ def hlsparse(url):
 
     for i in files:
         bitrate = float(i[1]["BANDWIDTH"])/1024
-        streams[int(bitrate)] = i[0]
+        streams[int(bitrate)] = _get_full_url(i[0], url)
     return streams
 
 class HLS(VideoRetriever):
