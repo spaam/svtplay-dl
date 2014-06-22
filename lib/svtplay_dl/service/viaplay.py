@@ -38,7 +38,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         unable to extract the ID at all.
         """
         html_data = self.get_urldata()
-        match = re.search(r'data-emediate-video_id="([0-9]+)"', html_data)
+        match = re.search(r'data-video-id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
 
