@@ -59,13 +59,17 @@ class Tv4play(Service, OpenGraphThumbMixin):
             sys.exit(2)
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
-                base = i.find("base").text
-                if base[0:4] == "rtmp":
+                base = urlparse(i.find("base").text)
+                parse = urlparse(i.find("url").text)
+                if base.scheme == "rtmp":
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
-                elif base[len(base)-3:len(base)] == "f4m":
-                    manifest = "%s?hdcore=2.8.0&g=hejsan" % i.find("url").text
+                elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
+                    query = ""
+                    if i.find("url").text[-1] != "?":
+                        query = "?"
+                    manifest = "%s%shdcore=2.8.0&g=hejsan" % (i.find("url").text, query)
                     streams = hdsparse(copy.copy(options), manifest)
                     for n in list(streams.keys()):
                         yield streams[n]
