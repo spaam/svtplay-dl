@@ -120,24 +120,26 @@ def get_one_media(stream, options):
             if options.force_subtitle:
                 return
 
+        if len(videos) > 0:
+            stream = select_quality(options, videos)
+            try:
+                stream.download()
+            except UIException as e:
+                if options.verbose:
+                    raise e
+                log.error(e.message)
+                sys.exit(2)
 
-        stream = select_quality(options, videos)
-        try:
-            stream.download()
-        except UIException as e:
-            if options.verbose:
-                raise e
-            log.error(e.message)
-            sys.exit(2)
-
-        if options.thumbnail:
-            if hasattr(stream, "get_thumbnail"):
-                log.info("thumb requested")
-                if options.output != "-":
-                    log.info("getting thumbnail")
-                    stream.get_thumbnail(options)
+            if options.thumbnail:
+                if hasattr(stream, "get_thumbnail"):
+                    log.info("thumb requested")
+                    if options.output != "-":
+                        log.info("getting thumbnail")
+                        stream.get_thumbnail(options)
+            else:
+                log.info("no thumb requested")
         else:
-            log.info("no thumb requested")
+            log.error("Can't find any streams for that url")
     else:
         log.error("Can't find any streams for that url")
 
