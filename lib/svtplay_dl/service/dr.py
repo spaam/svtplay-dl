@@ -57,12 +57,13 @@ class Dr(Service):
             if not match:
                 log.error("Cant find resource info for this video")
                 sys.exit(2)
-            resource_url = "http://www.dr.dk%s" % match.group(1)
+            resource_url = "%s" % match.group(1)
             resource_data = get_http_data(resource_url)
             resource = json.loads(resource_data)
             streams = {}
-            for stream in resource['links']:
-                streams[stream['bitrateKbps']] = stream['uri']
+            for stream in resource['Links']:
+                if stream.get('Bitrate'):
+                    streams[stream['Bitrate']] = stream['Uri']
             if len(streams) == 1:
                 uri = streams[list(streams.keys())[0]]
             else:
