@@ -174,7 +174,7 @@ def main():
                       help="Resume a download")
     parser.add_option("-l", "--live",
                       action="store_true", dest="live", default=False,
-                      help="Enable for live streams")
+                      help="Enable for live streams (RTMP based ones)")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False)
     parser.add_option("-v", "--verbose",
