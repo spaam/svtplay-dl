@@ -3,48 +3,54 @@
 from __future__ import absolute_import
 import re
 import copy
+import sys
+import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils.urllib import unquote_plus
 
 class ExpressenException(UIException):
     pass
 
 class Expressen(Service):
     supported_domains = ['expressen.se']
-    expressen_div_id = 'ctl00_WebTvArticleContent_BaseVideoHolder_VideoPlaceHolder_Satellite_Satellite'
-
-    def _get_video_source(self, vtype):
-        match = re.search(
-            '<source src="([^"]+)" type="%s" />' % vtype, self.get_urldata()
-        )
-
-        if not match:
-            raise ExpressenException(
-                "Could not find any videos of type %s" % vtype)
-
-        return match.group(1)
-
-    def _get_hls(self):
-        return self._get_video_source("application/x-mpegURL")
-
-    def _get_mp4(self):
-        return self._get_video_source('video/mp4')
 
     def get(self, options):
-        try:
-            try:
-                url = self._get_hls()
-                streams = hlsparse(url)
-                for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
-            except ExpressenException as exc:
-                # Lower res, but static mp4 file.
-                log.debug(exc)
-                url = self._get_mp4()
-                yield HTTP(copy.copy(options), url)
-        except ExpressenException:
-            log.error("Could not find any videos in '%s'", self.url)
+        match = re.search("xmlUrl=([^ ]+)\" ", self.get_urldata())
+        if match:
+            xmlurl = unquote_plus(match.group(1))
+        else:
+            match = re.search("moviesList: \[\{\"VideoId\":\"(\d+)\"", self.get_urldata())
+            if not match:
+                log.error("Can't find video id")
+                sys.exit(2)
+            vid = match.group(1)
+            xmlurl = "http://www.expressen.se/Handlers/WebTvHandler.ashx?id=%s" % vid
+        data = get_http_data(xmlurl)
+
+        xml = ET.XML(data)
+        live = xml.find("live").text
+        if live != "0":
+            options.live = True
+        ss = xml.find("vurls")
+        if is_py2_old:
+            sa = list(ss.getiterator("vurl"))
+        else:
+            sa = list(ss.iter("vurl"))
+
+        for i in sa:
+            options2 = copy.copy(options)
+            match = re.search(r"rtmp://([-0-9a-z\.]+/[-a-z0-9]+/)(.*)", i.text)
+            filename = "rtmp://%s" % match.group(1)
+            options2.other = "-y %s" % match.group(2)
+            yield RTMP(options2, filename, int(i.attrib["bitrate"]))
+
+        ipadurl = xml.find("mobileurls").find("ipadurl").text
+        streams = hlsparse(ipadurl)
+        for n in list(streams.keys()):
+            yield HLS(copy.copy(options), streams[n], n)
