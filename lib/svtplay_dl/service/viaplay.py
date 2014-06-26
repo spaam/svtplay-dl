@@ -87,9 +87,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if filename[len(filename)-3:] == "f4m":
-                #fulhack. RTMP need live to be set
-                if xml.find("Product").find("Syndicate").text == "true":
-                    options.live = False
                 manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
                 streams = hdsparse(copy.copy(options), manifest)
                 for n in list(streams.keys()):
