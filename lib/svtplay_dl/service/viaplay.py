@@ -42,6 +42,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r'data-video-id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
+        match = re.search(r'data-videoid="([0-9]+)', html_data)
+        if match:
+            return match.group(1)
 
         parse = urlparse(self.url)
         match = re.search(r'\/(\d+)/\?', parse.path)
@@ -70,18 +73,21 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         #Fulhack.. expose error code from get_http_data.
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
+        if filename[len(filename)-3:] == "f4m":
+            filename = "%s?hdcore=2.8.0&g=hejsan" % filename
         filedata = get_http_data(filename)
         geoxml = ET.XML(filedata)
-        success = geoxml.find("Success").text
-        if success == "false":
+        if geoxml.find("Success") and geoxml.find("Success").text == "false":
             log.error("Can't download file:")
             log.error(xml.find("Msg").text)
             sys.exit(2)
         streams = get_http_data("http://playapi.mtgx.tv/v1/videos/stream/%s" % vid)
         streamj = json.loads(streams)
 
+        print streamj
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
+            print filename
             if filename[len(filename)-3:] == "f4m":
                 #fulhack. RTMP need live to be set
                 if xml.find("Product").find("Syndicate").text == "true":
