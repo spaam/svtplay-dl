@@ -5,6 +5,8 @@ import sys
 import time
 from datetime import timedelta
 
+from svtplay_dl.utils.terminal import get_terminal_size
+
 progress_stream = sys.stderr
 
 class ETA(object):
@@ -95,7 +97,7 @@ def progressbar(total, pos, msg=""):
     Of course, the ETA part should be supplied be the calling
     function.
     """
-    width = 50 # TODO hardcoded progressbar width
+    width = get_terminal_size()[0] - 25
     rel_pos = int(float(pos)/total*width)
     bar = ''.join(["=" * rel_pos, "." * (width - rel_pos)])
 
