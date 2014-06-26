@@ -84,10 +84,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
         streams = get_http_data("http://playapi.mtgx.tv/v1/videos/stream/%s" % vid)
         streamj = json.loads(streams)
 
-        print streamj
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
-            print filename
             if filename[len(filename)-3:] == "f4m":
                 #fulhack. RTMP need live to be set
                 if xml.find("Product").find("Syndicate").text == "true":
