@@ -29,7 +29,7 @@ Resume a download.
 
 =head3 --live  -v
 
-Enable support for live streams.
+Enable support for live streams. (rtmp based ones)
 
 =head3 --silent  -s
 
@@ -52,6 +52,10 @@ Use HTTP Live Streaming when downloading.
 
 Download subtitle with the media if available.
 
+=head3 --force-subtitle
+
+Download only subtitle if its used with -S
+
 =head3 --username=USERNAME  -u USERNAME
 
 Username, if the service requires authentication.
@@ -59,6 +63,18 @@ Username, if the service requires authentication.
 =head3 --password=PASSWORD  -p PASSWORD
 
 Password, if the serivce requires authentication.
+
+=head3 -t, --thumbnail
+
+Download thumbnail from the site if available.
+
+=head3 -A, --all-episodes
+
+Try to download all episodes.
+
+=head3 -P preferred, --preferred=preferred
+
+Preferred download method
 
 =head3 --version
 
@@ -83,6 +99,8 @@ Show description of options.
 =item * Twitch: L<http://twitch.tv/>
 
 =item * Vimeo: L<http://vimeo.com/>
+
+=item * Viagame: L<http://www.viagame.com/>
 
 =back
 
@@ -196,7 +214,7 @@ possible, open a pull request!
 
 =head1 COPYRIGHT
 
- Copyright (C) 2011--2013, Johan Andersson et al
+ Copyright (C) 2011--2014, Johan Andersson et al
 
  This software is licensed under the MIT license.
 

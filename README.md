@@ -84,4 +84,5 @@ This script works for:
 * twitch.tv
 * ur.se
 * urplay.se
+* viagame.com
 * viasat4play.no
