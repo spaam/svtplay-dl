@@ -73,14 +73,15 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         #Fulhack.. expose error code from get_http_data.
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
-        if filename[len(filename)-3:] == "f4m":
-            filename = "%s?hdcore=2.8.0&g=hejsan" % filename
-        filedata = get_http_data(filename)
-        geoxml = ET.XML(filedata)
-        if geoxml.find("Success") and geoxml.find("Success").text == "false":
-            log.error("Can't download file:")
-            log.error(xml.find("Msg").text)
-            sys.exit(2)
+        if filename[:4] != "rtmp":
+            if filename[len(filename)-3:] == "f4m":
+                filename = "%s?hdcore=2.8.0&g=hejsan" % filename
+            filedata = get_http_data(filename)
+            geoxml = ET.XML(filedata)
+            if geoxml.find("Success") and geoxml.find("Success").text == "false":
+                log.error("Can't download file:")
+                log.error(xml.find("Msg").text)
+                sys.exit(2)
         streams = get_http_data("http://playapi.mtgx.tv/v1/videos/stream/%s" % vid)
         streamj = json.loads(streams)
 
