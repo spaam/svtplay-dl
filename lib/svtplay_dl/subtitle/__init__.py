@@ -14,13 +14,12 @@ class subtitle_tt(subtitle):
         self.subtitle = get_http_data(self.url)
         i = 1
         data = ""
-        skip = False
-        tree = ET.ElementTree(ET.fromstring(subtitle))
-        for node in tree.iter():
+        tree = ET.ElementTree(ET.fromstring(self.subtitle))
+        xml = tree.find("{http://www.w3.org/2006/10/ttaf1}body").find("{http://www.w3.org/2006/10/ttaf1}div")
+        plist = list(xml.findall("{http://www.w3.org/2006/10/ttaf1}p"))
+        for node in plist:
             tag = norm(node.tag)
-            if tag == "p":
-                if skip:
-                    data = data + "\n"
+            if tag == "p" or tag == "span":
                 begin = node.attrib["begin"]
                 if not ("dur" in node.attrib):
                     duration = node.attrib["duration"]
@@ -34,13 +33,9 @@ class subtitle_tt(subtitle):
                 else:
                     end = node.attrib["end"]
                 data += '%s\n%s --> %s\n' % (i, begin.replace(".",","), end.replace(".",","))
-                data += '%s\n' % node.text.strip(' \t\n\r')
-                skip = True
+                data = tt_text(node, data)
+                data += "\n"
                 i += 1
-            if tag == "br":
-                if node.tail:
-                    data += '%s\n\n' % node.tail.strip(' \t\n\r')
-                    skip = False
 
         if is_py2:
             data = data.encode('utf8')
@@ -161,3 +156,15 @@ def norm(name):
         return tag
     else:
         return name
+
+def tt_text(node, data):
+    if node.text:
+        data += "%s\n" % node.text.strip(' \t\n\r')
+    for i in node:
+        if i.text:
+            data += "%s\n" % i.text.strip(' \t\n\r')
+        if i.tail:
+            text = i.tail.strip(' \t\n\r')
+            if text:
+                data += "%s\n" % text
+    return data
