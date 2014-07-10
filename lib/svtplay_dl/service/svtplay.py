@@ -65,7 +65,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     parse = urlparse(i["url"])
-                    manifest = "%s://%s%s?%s&hdcore=2.8.0&g=hejsan" % (parse.scheme, parse.netloc, parse.path, parse.query)
+                    manifest = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)
                     streams = hdsparse(copy.copy(options), manifest)
                     for n in list(streams.keys()):
                         yield streams[n]
