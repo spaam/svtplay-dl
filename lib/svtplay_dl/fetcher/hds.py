@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.utils import get_http_data, is_py2_old, is_py2, is_py3
+from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 
@@ -56,8 +57,10 @@ def hdsparse(options, manifest):
 
     for i in bootstrapIter:
         bootstrap[i.attrib["id"]] = i.text
+    parse = urlparse(manifest)
+    querystring = parse.query
     for i in mediaIter:
-        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]], metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text)
+        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]], metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
     return streams
 
 class HDS(VideoRetriever):
@@ -68,14 +71,13 @@ class HDS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHDSException(self.url)
 
+        querystring = self.kwargs["querystring"]
         bootstrap = base64.b64decode(self.kwargs["bootstrap"])
         box = readboxtype(bootstrap, 0)
         antal = None
         if box[2] == b"abst":
             antal = readbox(bootstrap, box[0])
-
         baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
-        i = 1
 
         if self.options.output != "-":
             extension = re.search(r"(\.[a-z0-9]+)$", self.options.output)
@@ -95,10 +97,12 @@ class HDS(VideoRetriever):
         file_d.write(binascii.a2b_hex(b"00000000000000"))
         file_d.write(base64.b64decode(self.kwargs["metadata"]))
         file_d.write(binascii.a2b_hex(b"00000000"))
+        i = 1
+        start = antal[1]["first"]
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "%s/%sSeg1-Frag%s" % (baseurl, self.url, i)
+            url = "%s/%sSeg1-Frag%s?%s" % (baseurl, self.url, start, querystring)
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
@@ -106,6 +110,7 @@ class HDS(VideoRetriever):
             number = decode_f4f(i, data)
             file_d.write(data[number:])
             i += 1
+            start += 1
 
         if self.options.output != "-":
             file_d.close()
@@ -125,6 +130,10 @@ def read24(data, pos):
 def read32(data, pos):
     end = pos + 4
     return struct.unpack(">i", data[pos:end])[0]
+
+def readu32(data, pos):
+    end = pos + 4
+    return struct.unpack(">I", data[pos:end])[0]
 
 def read64(data, pos):
     end = pos + 8
@@ -210,15 +219,17 @@ def readbox(data, pos):
     fragRunTableCount = readbyte(data, pos)
     pos += 1
     i = 0
+    first = 1
     while i < fragRunTableCount:
         tmp = readboxtype(data, pos)
         boxtype = tmp[2]
         boxsize = tmp[1]
         pos = tmp[0]
         if boxtype == b"afrt":
-            readafrtbox(data, pos)
+            first = readafrtbox(data, pos)
             pos += boxsize
         i += 1
+    antal[1]["first"] = first
     return antal
 
 # Note! A lot of variable assignments are commented out. These are
@@ -241,14 +252,20 @@ def readafrtbox(data, pos):
     fragrunentrycount = read32(data, pos)
     pos += 4
     i = 0
+    first = 1
+    skip = False
     while i < fragrunentrycount:
-        #firstfragment = read32(data, pos)
+        firstfragment = readu32(data, pos)
+        if not skip:
+            first = firstfragment
+            skip = True
         pos += 4
         #timestamp = read64(data, pos)
         pos += 8
         #duration = read32(data, pos)
         pos += 4
         i += 1
+    return first
 
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
