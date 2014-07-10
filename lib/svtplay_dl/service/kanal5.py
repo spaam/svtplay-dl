@@ -61,11 +61,11 @@ class Kanal5(Service):
         if data["hasSubtitle"]:
             yield subtitle_json("http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
-        steambaseurl = data["streamBaseUrl"]
         for i in data["streams"]:
             if i["drmProtected"]:
                 log.error("We cant download drm files for this site.")
                 sys.exit(2)
+            steambaseurl = data["streamBaseUrl"]
             options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
             yield RTMP(copy.copy(options), steambaseurl, i["bitrate"])
 
