@@ -110,7 +110,11 @@ def get_one_media(stream, options):
     if streams:
         for i in streams:
             if isinstance(i, VideoRetriever):
-                videos.append(i)
+                if options.preferred:
+                    if options.preferred == i.name():
+                        videos.append(i)
+                else:
+                    videos.append(i)
             if isinstance(i, subtitle):
                 subs.append(i)
 
