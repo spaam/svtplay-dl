@@ -190,7 +190,7 @@ def main():
     parser.add_option("-Q", "--flexible-quality", default=0,
                       metavar="amount", dest="flexibleq", help="Allow given quality (as above) to differ by an amount.")
     parser.add_option("-H", "--hls",
-                      action="store_true", dest="hls", default=False)
+                      action="store_true", dest="hls", default=False, help="obsolete use -P")
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
                       help="Download subtitle from the site if available.")
@@ -207,7 +207,7 @@ def main():
                       action="store_true", dest="all_episodes", default=False,
                       help="Try to download all episodes.")
     parser.add_option("-P", "--preferred", default=None,
-                      metavar="preferred", help="preferred download method")
+                      metavar="preferred", help="preferred download method (rtmp, hls or hds)")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
