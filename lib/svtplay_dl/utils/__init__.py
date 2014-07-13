@@ -138,8 +138,13 @@ def select_quality(options, streams):
             break
 
     if not selected:
-        log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)",
-                  ", ".join([str(elm) for elm in available]))
+        data = sorted(streams, key=lambda x:(x.bitrate, x.name()), reverse=True)
+        datas = []
+        for i in data:
+            datas.append([i.bitrate, i.name()])
+        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in datas)
+        log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
+
         sys.exit(4)
     for i in streams:
         if int(i.bitrate) == selected:
