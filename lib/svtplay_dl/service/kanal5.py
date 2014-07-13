@@ -69,8 +69,10 @@ class Kanal5(Service):
             bitrate = i["bitrate"]
             if bitrate > 1000:
                 bitrate = bitrate / 1000
-            options.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
-            yield RTMP(copy.copy(options), steambaseurl, bitrate)
+            options2 = copy.copy(options)
+            options2.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
+            options2.live = True
+            yield RTMP(options2, steambaseurl, bitrate)
 
         url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
         data = json.loads(get_http_data(url, cookiejar=self.cj))
