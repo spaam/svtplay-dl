@@ -11,6 +11,7 @@ from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.log import log
+from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle_smi
@@ -75,6 +76,19 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         yield streams[n]
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle_smi(i.find("url").text)
+
+        url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
+        data = get_http_data(url)
+        xml = ET.XML(data)
+        ss = xml.find("items")
+        if is_py2_old:
+            sa = list(ss.getiterator("item"))
+        else:
+            sa = list(ss.iter("item"))
+        for i in sa:
+            streams = hlsparse(i.find("url").text)
+            for n in list(streams.keys()):
+                yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
         parse =  urlparse(self.url)
