@@ -35,10 +35,17 @@ class Aftonbladet(Service):
 
         streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
         streams = json.loads(get_http_data(streamsurl))
-        hls = streams["formats"]["hls"]["level3"]["csmil"][0]
+        hlsstreams = streams["formats"]["hls"]
+        if "level3" in hlsstreams.keys():
+            hls = hlsstreams["level3"]["csmil"][0]
+        else:
+            hls = hlsstreams["akamai"]["m3u8"][0]
         address = hls["address"]
         path = hls["path"]
 
         for i in hls["files"]:
-            playlist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
+            if "filename" in i.keys():
+                playlist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
+            else:
+                playlist = "http://%s/%s/%s/master.m3u8" % (address, path, hls["filename"])
             yield HLS(copy.copy(options), playlist, i["bitrate"])
