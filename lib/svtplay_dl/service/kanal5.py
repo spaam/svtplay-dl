@@ -76,7 +76,8 @@ class Kanal5(Service):
 
         url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
         data = json.loads(get_http_data(url, cookiejar=self.cj))
-        for i in data["streams"]:
-                streams = hlsparse(i["source"])
-                for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+        if "streams" in data.keys():
+            for i in data["streams"]:
+                    streams = hlsparse(i["source"])
+                    for n in list(streams.keys()):
+                        yield HLS(copy.copy(options), streams[n], n)
