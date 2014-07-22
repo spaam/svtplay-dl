@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 import sys
 import re
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin

@@ -42,5 +42,6 @@ class Lemonwhale(Service):
         high = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURLHigh")
         if high.text:
             yield HTTP(copy.copy(options), high.text, 720)
-        file = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURL").text
-        yield HTTP(copy.copy(options), file, 480)
+        videourl = mediafiles.find(
+            "{http://www.lemonwhale.com/xml11}VideoURL").text
+        yield HTTP(copy.copy(options), videourl, 480)

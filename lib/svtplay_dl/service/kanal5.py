@@ -78,6 +78,6 @@ class Kanal5(Service):
         data = json.loads(get_http_data(url, cookiejar=self.cj))
         if "streams" in data.keys():
             for i in data["streams"]:
-                    streams = hlsparse(i["source"])
-                    for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
+                streams = hlsparse(i["source"])
+                for n in list(streams.keys()):
+                    yield HLS(copy.copy(options), streams[n], n)

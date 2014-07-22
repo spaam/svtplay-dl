@@ -23,7 +23,7 @@ PYTHON ?= /usr/bin/env python
 export PYTHONPATH=lib
 
 # Disable convention, refactor, and TODO warnings
-PYLINT_OPTS = -d I -d C -d R -d W0511
+PYLINT_OPTS = --report=no -d I -d C -d R -d W0511
 
 # If you don't have a python3 environment (e.g. mock for py3 and
 # nosetests3), you can remove the -3 flag.

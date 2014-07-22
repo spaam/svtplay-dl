@@ -25,7 +25,9 @@ class Expressen(Service):
         if match:
             xmlurl = unquote_plus(match.group(1))
         else:
-            match = re.search("moviesList: \[\{\"VideoId\":\"(\d+)\"", self.get_urldata())
+            match = re.search(
+                r"moviesList: \[\{\"VideoId\":\"(\d+)\"",
+                self.get_urldata())
             if not match:
                 log.error("Can't find video id")
                 sys.exit(2)

@@ -7,9 +7,11 @@ import logging
 import re
 import time
 import unicodedata
+
 try:
     import HTMLParser
 except ImportError:
+    # pylint: disable-msg=import-error
     import html.parser as HTMLParser
 
 is_py2 = (sys.version_info[0] == 2)

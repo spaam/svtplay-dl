@@ -227,4 +227,3 @@ def main():
         get_media(url, options)
     except KeyboardInterrupt:
         print("")
-        pass
