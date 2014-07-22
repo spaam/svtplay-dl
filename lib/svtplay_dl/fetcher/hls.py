@@ -43,7 +43,7 @@ def _get_full_url(url, srcurl):
 
 def hlsparse(url):
     data = get_http_data(url)
-    globaldata, files = parsem3u(data)
+    files = (parsem3u(data))[1]
     streams = {}
 
     for i in files:
