@@ -102,7 +102,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
             except ValueError:
                 days = 999
             if  days > 0:
-                id = i["id"]
-                url = "http://www.tv4play.se/program/%s?video_id=%s" % (show, id)
+                video_id = i["id"]
+                url = "http://www.tv4play.se/program/%s?video_id=%s" % (
+                    show, video_id)
                 episodes.append(url)
         return sorted(episodes)
