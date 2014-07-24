@@ -83,6 +83,14 @@ class progressbarTest(unittest.TestCase):
             self.mockfile.read(), "\r[020/100][=====....................] msg"
         )
 
+    def test_progress_20_100_termwidth(self):
+        svtplay_dl.output.get_terminal_size = lambda: (75, 25)
+        svtplay_dl.output.progressbar(100, 20)
+        self.assertEqual(
+            self.mockfile.read(),
+            "\r[020/100][==========........................................] "
+        )
+
 class EtaTest(unittest.TestCase):
     @patch('time.time')
     def test_eta_0_100(self, mock_time):
