@@ -88,7 +88,7 @@ def progressbar(total, pos, msg=""):
     return (\\r).
 
     Can also take an optioal message to add after the
-    progressbar. It must not contain newliens.
+    progressbar. It must not contain newlines.
 
     The progress bar will look something like this:
 
