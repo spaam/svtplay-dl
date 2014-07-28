@@ -4,7 +4,7 @@ import re
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, get_http_data
 
-class subtitle():
+class subtitle(object):
     def __init__(self, url):
         self.url = url
         self.subtitle = None
