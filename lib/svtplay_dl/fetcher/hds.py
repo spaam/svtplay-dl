@@ -161,25 +161,25 @@ def readboxtype(data, pos):
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
 def readbox(data, pos):
-    #version = readbyte(data, pos)
+    # version = readbyte(data, pos)
     pos += 1
-    #flags = read24(data, pos)
+    # flags = read24(data, pos)
     pos += 3
-    #bootstrapversion = read32(data, pos)
+    # bootstrapversion = read32(data, pos)
     pos += 4
-    #byte = readbyte(data, pos)
+    # byte = readbyte(data, pos)
     pos += 1
-    #profile = (byte & 0xC0) >> 6
-    #live = (byte & 0x20) >> 5
-    #update = (byte & 0x10) >> 4
-    #timescale = read32(data, pos)
+    # profile = (byte & 0xC0) >> 6
+    # live = (byte & 0x20) >> 5
+    # update = (byte & 0x10) >> 4
+    # timescale = read32(data, pos)
     pos += 4
-    #currentmediatime = read64(data, pos)
+    # currentmediatime = read64(data, pos)
     pos += 8
-    #smptetimecodeoffset = read64(data, pos)
+    # smptetimecodeoffset = read64(data, pos)
     pos += 8
     temp = readstring(data, pos)
-    #movieidentifier = temp[1]
+    # movieidentifier = temp[1]
     pos = temp[0]
     serverentrycount = readbyte(data, pos)
     pos += 1
@@ -201,10 +201,10 @@ def readbox(data, pos):
         i += 1
 
     tmp = readstring(data, pos)
-    #drm = tmp[1]
+    # drm = tmp[1]
     pos = tmp[0]
     tmp = readstring(data, pos)
-    #metadata = tmp[1]
+    # metadata = tmp[1]
     pos = tmp[0]
     segmentruntable = readbyte(data, pos)
     pos += 1
@@ -235,11 +235,11 @@ def readbox(data, pos):
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
 def readafrtbox(data, pos):
-    #version = readbyte(data, pos)
+    # version = readbyte(data, pos)
     pos += 1
-    #flags = read24(data, pos)
+    # flags = read24(data, pos)
     pos += 3
-    #timescale = read32(data, pos)
+    # timescale = read32(data, pos)
     pos += 4
     qualityentry = readbyte(data, pos)
     pos += 1
@@ -260,9 +260,9 @@ def readafrtbox(data, pos):
             first = firstfragment
             skip = True
         pos += 4
-        #timestamp = read64(data, pos)
+        # timestamp = read64(data, pos)
         pos += 8
-        #duration = read32(data, pos)
+        # duration = read32(data, pos)
         pos += 4
         i += 1
     return first
@@ -270,9 +270,9 @@ def readafrtbox(data, pos):
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
 def readasrtbox(data, pos):
-    #version = readbyte(data, pos)
+    # version = readbyte(data, pos)
     pos += 1
-    #flags = read24(data, pos)
+    # flags = read24(data, pos)
     pos += 3
     qualityentrycount = readbyte(data, pos)
     pos += 1

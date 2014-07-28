@@ -124,7 +124,7 @@ def parsem3u(data):
         if not l:
             continue
         if l.startswith("#EXT-X-STREAM-INF:"):
-            #not a proper parser
+            # not a proper parser
             info = [x.strip().split("=", 1) for x in l[18:].split(",")]
             for i in range(0, len(info)):
                 if info[i][0] == "BANDWIDTH":

@@ -71,7 +71,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         yield subtitle_sami(xml.find("Product").find("SamiFile").text)
 
-        #Fulhack.. expose error code from get_http_data.
+        # Fulhack.. expose error code from get_http_data.
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
         if filename[:4] != "rtmp":
             if filename[len(filename)-3:] == "f4m":

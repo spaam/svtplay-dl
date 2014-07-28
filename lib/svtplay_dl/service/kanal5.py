@@ -30,10 +30,10 @@ class Kanal5(Service):
 
         video_id = match.group(1)
         if options.username and options.password:
-            #bogus
+            # bogus
             cc = Cookie(None, 'asdf', None, '80', '80', 'www.kanal5play.se', None, None, '/', None, False, False, 'TestCookie', None, None, None)
             self.cj.set_cookie(cc)
-            #get session cookie
+            # get session cookie
             data = get_http_data("http://www.kanal5play.se/", cookiejar=self.cj)
             authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % (options.username, options.password)
             data = get_http_data(authurl)
