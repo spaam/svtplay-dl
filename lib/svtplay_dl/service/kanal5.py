@@ -44,14 +44,14 @@ class Kanal5(Service):
                 sys.exit(2)
             authToken = jsondata["userData"]["auth"]
             cc = Cookie(version=0, name='authToken',
-                          value=authToken,
-                          port=None, port_specified=False,
-                          domain='www.kanal5play.se',
-                          domain_specified=True,
-                          domain_initial_dot=True, path='/',
-                          path_specified=True, secure=False,
-                          expires=None, discard=True, comment=None,
-                          comment_url=None, rest={'HttpOnly': None})
+                        value=authToken,
+                        port=None, port_specified=False,
+                        domain='www.kanal5play.se',
+                        domain_specified=True,
+                        domain_initial_dot=True, path='/',
+                        path_specified=True, secure=False,
+                        expires=None, discard=True, comment=None,
+                        comment_url=None, rest={'HttpOnly': None})
             self.cj.set_cookie(cc)
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
