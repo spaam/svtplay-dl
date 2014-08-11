@@ -41,3 +41,18 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
         for i in sa:
             yield RTMP(options, i.find("src").text, i.attrib["bitrate"])
+
+    def find_all_episodes(self, options):
+        match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
+        if match is None:
+            log.error("Couldn't program id")
+            sys.exit(2)
+        programid = match.group(1)
+        match = re.findall(r"data-item-id='([^']+)'", self.get_urldata())
+        if not match:
+            log.error("Couldn't retrieve episode list")
+            sys.exit(2)
+        episodes = []
+        for i in sorted(match):
+            episodes.append("http://www.nickelodeon.se/serier/%s-something/videos/%s-something" % (programid, i))
+        return episodes
