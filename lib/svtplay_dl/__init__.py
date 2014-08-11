@@ -57,6 +57,7 @@ class Options:
         self.all_episodes = False
         self.force_subtitle = False
         self.preferred = None
+        self.verbose = False
 
 def get_media(url, options):
 
@@ -214,7 +215,7 @@ def main():
         sys.exit(0)
     if len(args) != 1:
         parser.error("incorrect number of arguments")
-
+    options = mergeParserOption(Options, options)
     setup_log(options.silent, options.verbose)
 
     if options.flexibleq and not options.quality:
@@ -227,3 +228,22 @@ def main():
         get_media(url, options)
     except KeyboardInterrupt:
         print("")
+
+def mergeParserOption(options, parser):
+    options.output = parser.output
+    options.resume = parser.resume
+    options.live = parser.live
+    options.silent = parser.silent
+    options.force = parser.force
+    options.quality = parser.quality
+    options.flexibleq = parser.flexibleq
+    options.hls = parser.hls
+    options.subtitle = parser.subtitle
+    options.username = parser.username
+    options.password = parser.password
+    options.thumbnail = parser.thumbnail
+    options.all_episodes = parser.all_episodes
+    options.force_subtitle = parser.force_subtitle
+    options.preferred = parser.preferred
+    options.verbose = parser.verbose
+    return options
