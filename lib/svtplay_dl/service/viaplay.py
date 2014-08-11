@@ -78,10 +78,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 filename = "%s?hdcore=2.8.0&g=hejsan" % filename
             filedata = get_http_data(filename)
             geoxml = ET.XML(filedata)
-            if geoxml.find("Success") and geoxml.find("Success").text == "false":
-                log.error("Can't download file:")
-                log.error(xml.find("Msg").text)
-                sys.exit(2)
+            if geoxml.find("Success") is not None:
+                if geoxml.find("Success").text == "false":
+                    log.error("Can't download file:")
+                    log.error(xml.find("Msg").text)
+                    sys.exit(2)
+
         streams = get_http_data("http://playapi.mtgx.tv/v1/videos/stream/%s" % vid)
         streamj = json.loads(streams)
 
