@@ -217,7 +217,7 @@ def main():
         sys.exit(0)
     if len(args) != 1:
         parser.error("incorrect number of arguments")
-    options = mergeParserOption(Options, options)
+    options = mergeParserOption(Options(), options)
     setup_log(options.silent, options.verbose)
 
     if options.flexibleq and not options.quality:
