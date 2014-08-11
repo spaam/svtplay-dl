@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import sys
 import re
+import os
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -22,6 +23,13 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         data = get_http_data(match.group(1))
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
+        title = xml.find("channel").find("item").find("title").text
+        if options.output_auto:
+            directory = os.path.dirname(options.output)
+            if len(directory):
+                options.output = "%s/%s" % (directory, title)
+            else:
+                options.output = title
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         content = get_http_data(contenturl)
         xml = ET.XML(content)
