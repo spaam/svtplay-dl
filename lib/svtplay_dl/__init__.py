@@ -58,6 +58,7 @@ class Options:
         self.force_subtitle = False
         self.preferred = None
         self.verbose = False
+        self.output_auto = False
 
 def get_media(url, options):
 
@@ -93,6 +94,7 @@ def get_one_media(stream, options):
         data = stream.get_urldata()
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
         if match:
+            options.output_auto = True
             title_tag = decode_html_entities(match.group(1))
             if not options.output:
                 options.output = filenamify(title_tag)
