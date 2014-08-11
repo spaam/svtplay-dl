@@ -246,7 +246,7 @@ def readafrtbox(data, pos):
     i = 0
     while i < qualityentry:
         temp = readstring(data, pos)
-        #qualitysegmulti = temp[1]
+        # qualitysegmulti = temp[1]
         pos = temp[0]
         i += 1
     fragrunentrycount = read32(data, pos)

@@ -39,7 +39,7 @@ class Kanal5(Service):
             data = get_http_data(authurl)
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
-            if jsondata["success"] == False:
+            if jsondata["success"] is False:
                 log.error(jsondata["message"])
                 sys.exit(2)
             authToken = jsondata["userData"]["auth"]

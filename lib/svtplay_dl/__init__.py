@@ -11,14 +11,14 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data, decode_html_entities, filenamify, select_quality
+from svtplay_dl.utils import decode_html_entities, filenamify, select_quality
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle, subtitle_json, subtitle_sami, subtitle_smi, subtitle_tt, subtitle_wsrt
 
 __version__ = "0.9.2014.04.27"
 
-class Options:
+class Options(object):
     """
     Options used when invoking the script from another Python script.
 
