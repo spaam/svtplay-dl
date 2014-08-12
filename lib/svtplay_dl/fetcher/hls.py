@@ -5,7 +5,7 @@ import sys
 import os
 import re
 
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, is_py3
 from svtplay_dl.output import progressbar, progress_stream, ETA
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
@@ -90,7 +90,10 @@ class HLS(VideoRetriever):
                 return
             file_d = open(self.options.output, "wb")
         else:
-            file_d = sys.stdout
+            if is_py3:
+                file_d = sys.stdout.buffer
+            else:
+                file_d = sys.stdout
 
         n = 0
         eta = ETA(len(files))

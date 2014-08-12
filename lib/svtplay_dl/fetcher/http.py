@@ -10,6 +10,7 @@ from svtplay_dl.output import progress # FIXME use progressbar() instead
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlopen, Request, HTTPError
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils import is_py3
 
 class HTTP(VideoRetriever):
     def name(self):
@@ -43,7 +44,10 @@ class HTTP(VideoRetriever):
                 return
             file_d = open(self.options.output, "wb")
         else:
-            file_d = sys.stdout
+            if is_py3:
+                file_d = sys.stdout.buffer
+            else:
+                file_d = sys.stdout
 
         lastprogress = 0
         while 1:

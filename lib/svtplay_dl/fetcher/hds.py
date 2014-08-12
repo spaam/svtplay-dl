@@ -89,7 +89,10 @@ class HDS(VideoRetriever):
                 return
             file_d = open(self.options.output, "wb")
         else:
-            file_d = sys.stdout
+            if is_py3:
+                file_d = sys.stdout.buffer
+            else:
+                file_d = sys.stdout
 
         metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
         file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))
