@@ -172,6 +172,13 @@ class Generic(object):
             for i in sites:
                 if i.handles(url):
                     return url, i(url)
+        match = re.search(r'a href="(http://tv.aftonbladet[^"]*)" class="abVi', data)
+        if match:
+            url = match.group(1)
+            for i in sites:
+                if i.handles(url):
+                    return url, i(url)
+
         match = re.search(r"iframe src='(http://www.svtplay[^']*)'", data)
         if match:
             url = match.group(1)
