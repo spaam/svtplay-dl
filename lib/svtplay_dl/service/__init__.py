@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 import re
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.utils import download_thumbnail
+from svtplay_dl.utils import download_thumbnail, get_http_data
+
 import logging
 
 log = logging.getLogger('svtplay_dl')
@@ -86,30 +87,29 @@ class OpenGraphThumbMixin(object):
 
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
+from svtplay_dl.service.bambuser import Bambuser
+from svtplay_dl.service.dbtv import Dbtv
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.justin import Justin
 from svtplay_dl.service.kanal5 import Kanal5
-from svtplay_dl.service.mtvservices import Mtvservices
-from svtplay_dl.service.nrk import Nrk
-from svtplay_dl.service.qbrick import Qbrick
-from svtplay_dl.service.picsearch import Picsearch
-from svtplay_dl.service.ruv import Ruv
-from svtplay_dl.service.radioplay import Radioplay
-from svtplay_dl.service.sr import Sr
-from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.service.oppetarkiv import OppetArkiv
-from svtplay_dl.service.tv4play import Tv4play
-from svtplay_dl.service.urplay import Urplay
-from svtplay_dl.service.viaplay import Viaplay
-from svtplay_dl.service.vimeo import Vimeo
-from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.lemonwhale import Lemonwhale
 from svtplay_dl.service.mtvnn import Mtvnn
-from svtplay_dl.service.dbtv import Dbtv
+from svtplay_dl.service.mtvservices import Mtvservices
+from svtplay_dl.service.nrk import Nrk
+from svtplay_dl.service.oppetarkiv import OppetArkiv
+from svtplay_dl.service.picsearch import Picsearch
+from svtplay_dl.service.qbrick import Qbrick
+from svtplay_dl.service.radioplay import Radioplay
+from svtplay_dl.service.ruv import Ruv
+from svtplay_dl.service.sr import Sr
+from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.tv4play import Tv4play
+from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.vg import Vg
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.service.viaplay import Viaplay
+from svtplay_dl.service.vimeo import Vimeo
 
 sites = [
     Aftonbladet,
