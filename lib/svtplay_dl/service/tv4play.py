@@ -86,9 +86,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
         else:
             sa = list(ss.iter("item"))
         for i in sa:
-            streams = hlsparse(i.find("url").text)
-            for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+            if i.find("mediaFormat").text == "mp4":
+                parse = urlparse(i.find("url").text)
+                if parse.path.endswith("m3u8"):
+                    streams = hlsparse(i.find("url").text)
+                    for n in list(streams.keys()):
+                        yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
         parse =  urlparse(self.url)
