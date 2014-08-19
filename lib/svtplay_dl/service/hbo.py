@@ -18,7 +18,7 @@ class Hbo(Service):
     def get(self, options):
         parse = urlparse(self.url)
         try:
-            other = parse[5]
+            other = parse.fragment
         except KeyError:
             log.error("Something wrong with that url")
             sys.exit(2)
@@ -40,4 +40,7 @@ class Hbo(Service):
             sa = list(ss.iter("size"))
 
         for i in sa:
-            yield RTMP(copy.copy(options), i.find("tv14").find("path").text, i.attrib["width"])
+            videourl = i.find("tv14").find("path").text
+            match = re.search("/([a-z0-9]+:[a-z0-9]+)/", videourl)
+            options.other = "-y %s" % videourl[videourl.index(match.group(1)):]
+            yield RTMP(copy.copy(options), videourl[:videourl.index(match.group(1))], i.attrib["width"])
