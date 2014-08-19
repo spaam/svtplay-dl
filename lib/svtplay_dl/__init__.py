@@ -14,7 +14,7 @@ from svtplay_dl.log import log
 from svtplay_dl.utils import decode_html_entities, filenamify, select_quality
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.subtitle import subtitle, subtitle_json, subtitle_sami, subtitle_smi, subtitle_tt, subtitle_wsrt
+from svtplay_dl.subtitle import subtitle
 
 __version__ = "0.9.2014.04.27"
 
