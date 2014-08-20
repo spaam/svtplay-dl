@@ -1,16 +1,13 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import sys
 import base64
-import re
 import struct
 import logging
 import binascii
-import os
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.output import progressbar, progress_stream, ETA
+from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.utils import get_http_data, is_py2_old, is_py2, is_py3
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
@@ -79,20 +76,9 @@ class HDS(VideoRetriever):
             antal = readbox(bootstrap, box[0])
         baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
 
-        if self.options.output != "-":
-            extension = re.search(r"(\.[a-z0-9]+)$", self.options.output)
-            if not extension:
-                self.options.output = "%s.flv" % self.options.output
-            log.info("Outfile: %s", self.options.output)
-            if os.path.isfile(self.options.output) and not self.options.force:
-                log.info("File already exists. use --force to overwrite")
-                return
-            file_d = open(self.options.output, "wb")
-        else:
-            if is_py3:
-                file_d = sys.stdout.buffer
-            else:
-                file_d = sys.stdout
+        file_d = output(self.options, self.options.output, "flv")
+        if file_d is None:
+            return
 
         metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
         file_d.write(binascii.a2b_hex(b"464c560105000000090000000012"))

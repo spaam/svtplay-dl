@@ -9,6 +9,7 @@ import os
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.output import output
 
 class RTMP(VideoRetriever):
     def name(self):
@@ -23,17 +24,10 @@ class RTMP(VideoRetriever):
         if self.options.resume:
             args.append("-e")
 
-        extension = re.search(r"(\.[a-z0-9]+)$", self.url)
-        if self.options.output != "-":
-            if not extension:
-                self.options.output = "%s.flv" % self.options.output
-            else:
-                self.options.output = self.options.output + extension.group(1)
-            log.info("Outfile: %s", self.options.output)
-            if os.path.isfile(self.options.output) and not self.options.force:
-                log.info("File already exists. use --force to overwrite")
-                return
-            args += ["-o", self.options.output]
+        fild_d = output(self.options, self.options.output, "flv", False)
+        if fild_d is None:
+            return
+        args += ["-o", self.options.output]
         if self.options.silent or self.options.output == "-":
             args.append("-q")
         if self.options.other:

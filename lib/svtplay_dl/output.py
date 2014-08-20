@@ -3,9 +3,13 @@
 from __future__ import absolute_import
 import sys
 import time
+import re
+import os
 from datetime import timedelta
 
+from svtplay_dl.utils import is_py3
 from svtplay_dl.utils.terminal import get_terminal_size
+from svtplay_dl.log import log
 
 progress_stream = sys.stderr
 
@@ -108,3 +112,23 @@ def progressbar(total, pos, msg=""):
 
     progress_stream.write(fmt % (pos, total, bar, msg))
 
+def output(options, filename, extention="mp4", openfd=True):
+    file_d = -1
+    if options.output != "-":
+        ext = re.search(r"(\.[a-z0-9]+)$", filename)
+        if not ext:
+            options.output = "%s.%s" % (options.output, extention)
+        log.info("Outfile: %s", options.output)
+        if os.path.isfile(options.output) and not options.force:
+            log.info("File already exists. use --force to overwrite")
+            return None
+        if openfd:
+            file_d = open(options.output, "wb")
+    else:
+        if openfd:
+            if is_py3:
+                file_d = sys.stdout.buffer
+            else:
+                file_d = sys.stdout
+
+    return file_d

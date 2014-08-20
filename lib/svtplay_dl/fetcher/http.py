@@ -3,14 +3,11 @@
 from __future__ import absolute_import
 import sys
 import time
-import re
-import os
 
-from svtplay_dl.output import progress # FIXME use progressbar() instead
+from svtplay_dl.output import progress, output # FIXME use progressbar() instead
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlopen, Request, HTTPError
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils import is_py3
 
 class HTTP(VideoRetriever):
     def name(self):
@@ -32,22 +29,10 @@ class HTTP(VideoRetriever):
             total_size = 0
         total_size = int(total_size)
         bytes_so_far = 0
-        if self.options.output != "-":
-            extension = re.search(r"(\.[a-z0-9]+)$", self.url)
-            if extension:
-                self.options.output = self.options.output + extension.group(1)
-            else:
-                self.options.output = "%s.mp4" % self.options.output
-            log.info("Outfile: %s", self.options.output)
-            if os.path.isfile(self.options.output) and not self.options.force:
-                log.info("File already exists. use --force to overwrite")
-                return
-            file_d = open(self.options.output, "wb")
-        else:
-            if is_py3:
-                file_d = sys.stdout.buffer
-            else:
-                file_d = sys.stdout
+
+        file_d = output(self.options, self.url, "mp4")
+        if file_d is None:
+            return
 
         lastprogress = 0
         while 1:

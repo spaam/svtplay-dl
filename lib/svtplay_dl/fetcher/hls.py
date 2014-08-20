@@ -5,8 +5,8 @@ import sys
 import os
 import re
 
-from svtplay_dl.utils import get_http_data, is_py3
-from svtplay_dl.output import progressbar, progress_stream, ETA
+from svtplay_dl.utils import get_http_data
+from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
@@ -80,20 +80,10 @@ class HLS(VideoRetriever):
             key = get_http_data(match.group(1))
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
-        if self.options.output != "-":
-            extension = re.search(r"(\.[a-z0-9]+)$", self.options.output)
-            if not extension:
-                self.options.output = "%s.ts" % self.options.output
-            log.info("Outfile: %s", self.options.output)
-            if os.path.isfile(self.options.output) and not self.options.force:
-                log.info("File already exists. use --force to overwrite")
-                return
-            file_d = open(self.options.output, "wb")
-        else:
-            if is_py3:
-                file_d = sys.stdout.buffer
-            else:
-                file_d = sys.stdout
+
+        file_d = output(self.options, self.options.output, "ts")
+        if file_d is None:
+            return
 
         n = 0
         eta = ETA(len(files))
