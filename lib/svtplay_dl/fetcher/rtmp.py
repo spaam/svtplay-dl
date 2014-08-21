@@ -2,9 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import subprocess
-import re
 import shlex
-import os
 
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2
