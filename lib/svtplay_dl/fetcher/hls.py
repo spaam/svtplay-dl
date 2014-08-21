@@ -82,7 +82,7 @@ class HLS(VideoRetriever):
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
         file_d = output(self.options, self.options.output, "ts")
-        if file_d is None:
+        if hasattr(file_d, "read") is False:
             return
 
         n = 0

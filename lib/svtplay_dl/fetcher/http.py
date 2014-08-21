@@ -31,7 +31,7 @@ class HTTP(VideoRetriever):
         bytes_so_far = 0
 
         file_d = output(self.options, self.url, "mp4")
-        if file_d is None:
+        if hasattr(file_d, "read") is False:
             return
 
         lastprogress = 0

@@ -113,7 +113,7 @@ def progressbar(total, pos, msg=""):
     progress_stream.write(fmt % (pos, total, bar, msg))
 
 def output(options, filename, extention="mp4", openfd=True):
-    file_d = -1
+    file_d = file
     if options.output != "-":
         ext = re.search(r"(\.[a-z0-9]+)$", filename)
         if not ext:

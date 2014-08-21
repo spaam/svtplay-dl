@@ -77,7 +77,7 @@ class HDS(VideoRetriever):
         baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
 
         file_d = output(self.options, self.options.output, "flv")
-        if file_d is None:
+        if hasattr(file_d, "read") is False:
             return
 
         metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
