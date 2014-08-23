@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import json
 import re
+import os
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, get_http_data
 
@@ -125,6 +126,9 @@ def save(options, data):
         options.output = "%s.srt" % options.output
 
     log.info("Subtitle: %s", options.output)
+    if os.path.isfile(options.output) and not options.force:
+        log.info("File already exists. use --force to overwrite")
+        return
     fd = open(options.output, "w")
     fd.write(data)
     fd.close()
