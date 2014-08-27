@@ -57,17 +57,18 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if options.output_auto:
             directory = os.path.dirname(options.output)
+            options.service = "svtplay"
+
             name = data["statistics"]["folderStructure"]
             if name.find(".") > 0:
-                title = "%s-%s-%s-%s" % (name[:name.find(".")], data["statistics"]["title"], data["videoId"], "svtplay")
+                title = "%s-%s-%s-%s" % (name[:name.find(".")], data["statistics"]["title"], data["videoId"], options.service)
             else:
-                title = "%s-%s-%s-%s" % (name, data["statistics"]["title"], data["videoId"], "svtplay")
+                title = "%s-%s-%s-%s" % (name, data["statistics"]["title"], data["videoId"], options.service)
             title = filenamify(title)
             if len(directory):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
-            options.service = "svtplay"
 
         for i in data["video"]["videoReferences"]:
             parse = urlparse(i["url"])
