@@ -3,13 +3,14 @@
 from __future__ import absolute_import
 import sys
 import re
+import os
 import xml.etree.ElementTree as ET
 import json
 import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -58,6 +59,17 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if xml.find("drmProtected").text == "true":
             log.error("DRM protected content.")
             sys.exit(2)
+
+        if options.output_auto:
+            directory = os.path.dirname(options.output)
+            options.service = "tv4play"
+            title = "%s-%s-%s" % (options.output, vid, options.service)
+            title = filenamify(title)
+            if len(directory):
+                options.output = "%s/%s" % (directory, title)
+            else:
+                options.output = title
+
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
                 base = urlparse(i.find("base").text)
