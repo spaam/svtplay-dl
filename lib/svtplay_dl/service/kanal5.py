@@ -64,13 +64,14 @@ class Kanal5(Service):
 
         if options.output_auto:
             directory = os.path.dirname(options.output)
-            title = "%s-s%s-%s-%s-%s" % (data["program"]["name"], data["seasonNumber"], data["episodeText"], data["id"], "kanal5")
+            options.service = "kanal5"
+
+            title = "%s-s%s-%s-%s-%s" % (data["program"]["name"], data["seasonNumber"], data["episodeText"], data["id"], options.service)
             title = filenamify(title)
             if len(directory):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
-            options.service = "kanal5"
 
         for i in data["streams"]:
             if i["drmProtected"]:
