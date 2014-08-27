@@ -96,7 +96,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     yield streams[n]
             else:
                 parse = urlparse(filename)
-                match = re.search("^(/[a-z0-9]{0,20})/(.*)", parse.path)
+                match = re.search("^(/[^/]+)/(.*)", parse.path)
                 if not match:
                     log.error("Somthing wrong with rtmpparse")
                     sys.exit(2)
