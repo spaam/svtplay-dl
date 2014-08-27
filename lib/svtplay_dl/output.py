@@ -5,6 +5,7 @@ import sys
 import time
 import re
 import os
+import io
 from datetime import timedelta
 
 from svtplay_dl.utils import is_py3
@@ -113,13 +114,19 @@ def progressbar(total, pos, msg=""):
     progress_stream.write(fmt % (pos, total, bar, msg))
 
 def output(options, filename, extention="mp4", openfd=True):
-    file_d = file
+    if is_py3:
+        file_d = io.IOBase
+    else:
+        file_d = file
+
     if options.output != "-":
         ext = re.search(r"(\.[a-z0-9]+)$", filename)
         if not ext:
             options.output = "%s.%s" % (options.output, extention)
         log.info("Outfile: %s", options.output)
-        if os.path.isfile(options.output) and not options.force:
+        if (os.path.isfile(options.output) or \
+            findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))) and \
+            not options.force:
             log.info("File already exists. use --force to overwrite")
             return None
         if openfd:
@@ -132,3 +139,18 @@ def output(options, filename, extention="mp4", openfd=True):
                 file_d = sys.stdout
 
     return file_d
+
+def findexpisode(directory, service, name):
+    match = re.search("-(\w+)-\w+.(?!srt)\w{2,3}$", name)
+    if not match:
+        return False
+    videoid = match.group(1)
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    for i in files:
+        match = re.search("-(\w+)-\w+.(?!srt)\w{2,3}$", i)
+        if match:
+            if service:
+                if name.find(service) and match.group(1) == videoid:
+                    return True
+
+    return False

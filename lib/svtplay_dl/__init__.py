@@ -59,6 +59,7 @@ class Options(object):
         self.preferred = None
         self.verbose = False
         self.output_auto = False
+        self.service = None
 
 def get_media(url, options):
 
