@@ -4,10 +4,11 @@ from __future__ import absolute_import
 import sys
 import re
 import json
+import os
 import xml.etree.ElementTree as ET
 import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -53,6 +54,20 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 pass
             if len(subtitle) > 0:
                 yield subtitle_wsrt(subtitle)
+
+        if options.output_auto:
+            directory = os.path.dirname(options.output)
+            name = data["statistics"]["folderStructure"]
+            if name.find(".") > 0:
+                title = "%s-%s-%s-%s" % (name[:name.find(".")], data["statistics"]["title"], data["videoId"], "svtplay")
+            else:
+                title = "%s-%s-%s-%s" % (name, data["statistics"]["title"], data["videoId"], "svtplay")
+            title = filenamify(title)
+            if len(directory):
+                options.output = "%s/%s" % (directory, title)
+            else:
+                options.output = title
+            options.service = "svtplay"
 
         for i in data["video"]["videoReferences"]:
             parse = urlparse(i["url"])
