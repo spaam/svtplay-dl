@@ -36,7 +36,8 @@ class Kanal5(Service):
             self.cj.set_cookie(cc)
             # get session cookie
             data = get_http_data("http://www.kanal5play.se/", cookiejar=self.cj)
-            authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % (options.username, options.password)
+            authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % \
+                      (options.username, options.password)
             data = get_http_data(authurl)
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))

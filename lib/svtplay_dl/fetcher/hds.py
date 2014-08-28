@@ -57,7 +57,8 @@ def hdsparse(options, manifest):
     parse = urlparse(manifest)
     querystring = parse.query
     for i in mediaIter:
-        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]], metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
+        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]],
+                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
     return streams
 
 class HDS(VideoRetriever):
