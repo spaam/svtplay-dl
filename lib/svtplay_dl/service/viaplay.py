@@ -69,7 +69,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if live == "true":
                 options.live = True
 
-        yield subtitle_sami(xml.find("Product").find("SamiFile").text)
+        if xml.find("Product").find("SamiFile").text:
+            yield subtitle_sami(xml.find("Product").find("SamiFile").text)
 
         # Fulhack.. expose error code from get_http_data.
         filename = xml.find("Product").find("Videos").find("Video").find("Url").text
