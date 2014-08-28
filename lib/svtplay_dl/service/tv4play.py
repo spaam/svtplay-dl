@@ -28,7 +28,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         if "tv4play.se" in self.url:
             try:
-                vid = parse_qs(parse[4])["video_id"][0]
+                vid = parse_qs(parse.query)["video_id"][0]
             except KeyError:
                 log.error("Can't find video file")
                 sys.exit(2)
