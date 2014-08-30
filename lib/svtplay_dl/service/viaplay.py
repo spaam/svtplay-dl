@@ -17,7 +17,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.subtitle import subtitle_sami
+from svtplay_dl.subtitle import subtitle
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -70,7 +70,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             options.live = True
 
         if dataj["sami_path"]:
-            yield subtitle_sami(dataj["sami_path"])
+            yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
 
         streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         streamj = json.loads(streams)

@@ -12,7 +12,7 @@ from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
-from svtplay_dl.subtitle import subtitle_tt
+from svtplay_dl.subtitle import subtitle
 
 class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ['urplay.se', 'ur.se']
@@ -28,7 +28,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             sys.exit(2)
         data = match.group(1)
         jsondata = json.loads(data)
-        yield subtitle_tt(jsondata["subtitles"].split(",")[0])
+        yield subtitle(copy.copy(options), "tt", jsondata["subtitles"].split(",")[0])
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
         hd = None

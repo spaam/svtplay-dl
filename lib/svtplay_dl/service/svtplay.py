@@ -14,7 +14,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.subtitle import subtitle_wsrt
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.log import log
 
 class Svtplay(Service, OpenGraphThumbMixin):
@@ -50,11 +50,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if data["video"]["subtitleReferences"]:
             subtitle = None
             try:
-                subtitle = data["video"]["subtitleReferences"][0]["url"]
+                suburl = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 pass
             if subtitle and len(subtitle) > 0:
-                yield subtitle_wsrt(subtitle)
+                yield subtitle(copy.copy(options), "wrst", suburl)
 
         if options.output_auto:
             directory = os.path.dirname(options.output)

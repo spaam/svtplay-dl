@@ -12,7 +12,7 @@ from svtplay_dl.utils import get_http_data, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.subtitle import subtitle_json
+from svtplay_dl.subtitle import subtitle
 
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se', 'kanal11play.se']
@@ -58,7 +58,7 @@ class Kanal5(Service):
         if not options.live:
             options.live = data["isLive"]
         if data["hasSubtitle"]:
-            yield subtitle_json("http://www.kanal5play.se/api/subtitles/%s" % video_id)
+            yield subtitle(copy.copy(options), "json", "http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
         if options.output_auto:
             directory = os.path.dirname(options.output)

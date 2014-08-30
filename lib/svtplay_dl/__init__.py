@@ -129,7 +129,7 @@ def get_one_media(stream, options):
 
     if options.subtitle and options.output != "-":
         if subs:
-            subs[0].download(copy.copy(options))
+            subs[0].download()
         if options.force_subtitle:
             return
 

@@ -15,7 +15,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.subtitle import subtitle_smi
+from svtplay_dl.subtitle import subtitle
 
 class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
@@ -88,7 +88,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         for n in list(streams.keys()):
                             yield streams[n]
             elif i.find("mediaFormat").text == "smi":
-                yield subtitle_smi(i.find("url").text)
+                yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
         data = get_http_data(url)

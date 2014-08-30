@@ -11,7 +11,7 @@ from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.subtitle import subtitle_tt
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.log import log
 
 class Nrk(Service, OpenGraphThumbMixin):
@@ -22,8 +22,8 @@ class Nrk(Service, OpenGraphThumbMixin):
         match = re.search("data-subtitlesurl = \"(/.*)\"", data)
         if match:
             parse = urlparse(self.url)
-            subtitle = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
-            yield subtitle_tt(subtitle)
+            suburl = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
+            yield subtitle(copy.copy(options), "tt", suburl)
 
         if options.force_subtitle:
             return

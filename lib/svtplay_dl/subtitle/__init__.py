@@ -6,9 +6,11 @@ from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, is_py3, get_http_data, HTTPError
 
 class subtitle(object):
-    def __init__(self, url):
+    def __init__(self, options, subtype, url):
         self.url = url
         self.subtitle = None
+        self.options = options
+        self.subtype = subtype
 
     def get_subdata(self):
         if self.subtitle is None:
@@ -18,12 +20,27 @@ class subtitle(object):
                 return None
         return self.subtitle
 
-class subtitle_tt(subtitle):
-    def download(self, options):
+    def download(self):
         subdata = self.get_subdata()
         if subdata is None:
             log.error("Can't download subtitle.")
             return
+
+        data = None
+        if self.subtype == "tt":
+            data = self.tt(subdata)
+        if self.subtype == "json":
+            data = self.json(subdata)
+        if self.subtype == "sami":
+            data = self.sami(subdata)
+        if self.subtype == "smi":
+            data = self.smi(subdata)
+        if self.subtype == "wrst":
+            data = self.wrst(subdata)
+
+        save(self.options, data)
+
+    def tt(self, subdata):
         i = 1
         data = ""
         tree = ET.ElementTree(ET.fromstring(subdata))
@@ -51,14 +68,9 @@ class subtitle_tt(subtitle):
 
         if is_py2:
             data = data.encode('utf8')
-        save(options, data)
+        return data
 
-class subtitle_json(subtitle):
-    def download(self, options):
-        subdata = self.get_subdata()
-        if subdata is None:
-            log.error("Can't download subtitle.")
-            return
+    def json(self, subdata):
         data = json.loads(subdata)
         number = 1
         subs = ""
@@ -70,14 +82,9 @@ class subtitle_json(subtitle):
                 subs += "%s\n\n" % i["text"]
             number += 1
 
-        save(options, subs)
+        return subs
 
-class subtitle_sami(subtitle):
-    def download(self, options):
-        subdata = self.get_subdata()
-        if subdata is None:
-            log.error("Can't download subtitle.")
-            return
+    def sami(self, subdata):
         tree = ET.XML(subdata)
         subt = tree.find("Font")
         subs = ""
@@ -95,22 +102,17 @@ class subtitle_sami(subtitle):
 
         if is_py2:
             subs = subs.encode('utf8')
-        save(options, subs)
+        return subs
 
-class subtitle_smi(subtitle):
-    def download(self, options):
-        subdata = self.get_subdata()
-        if subdata is None:
-            log.error("Can't download subtitle.")
-            return
+    def smi(self, subdata):
         if is_py3:
-            self.subtitle = self.subtitle.decode("latin1")
+            subdata = subdata.decode("latin1")
         recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
         number = 1
         subs = ""
         TAG_RE = re.compile(r'<[^>]+>')
         bad_char = re.compile(r'\x96')
-        for i in recomp.finditer(self.subtitle):
+        for i in recomp.finditer(subdata):
             subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(6)))
             text = "%s\n\n" % TAG_RE.sub('', i.group(3).replace("<br>", "\n"))
             if text[0] == "\x0a":
@@ -119,14 +121,9 @@ class subtitle_smi(subtitle):
             number += 1
         recomp = re.compile(r'\r')
         text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
-        save(options, text)
+        return text
 
-class subtitle_wsrt(subtitle):
-    def download(self, options):
-        subdata = self.get_subdata()
-        if subdata is None:
-            log.error("Can't download subtitle.")
-            return
+    def wrst(self, subdata):
         recomp = re.compile(r"(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
         srt = ""
         subtract = False
@@ -149,7 +146,7 @@ class subtitle_wsrt(subtitle):
             sub = re.sub('<[^>]*>', '', sub)
             srt += sub
 
-        save(options, srt)
+        return srt
 
 def save(options, data):
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
