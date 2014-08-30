@@ -63,19 +63,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
 
     opener = build_opener(HTTPCookieProcessor(cookiejar))
 
-    try:
-        response = opener.open(request)
-    except HTTPError as e:
-        log.error("Something wrong with that url")
-        log.error("Error code: %s", e.code)
-        sys.exit(5)
-    except URLError as e:
-        log.error("Something wrong with that url")
-        log.error("Error code: %s", e.reason)
-        sys.exit(5)
-    except ValueError as e:
-        log.error("Try adding http:// before the url")
-        sys.exit(5)
+    response = opener.open(request)
     if is_py3:
         data = response.read()
         try:
