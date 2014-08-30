@@ -33,15 +33,15 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file")
                 sys.exit(2)
         else:
-            match = re.search(r"-(\d+)$", self.url)
+            match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
             if match:
                 vid = match.group(1)
             else:
-                match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
+                match = re.search(r"-(\d+)$", self.url)
                 if match:
                     vid = match.group(1)
                 else:
-                    log.error("Can't find video file")
+                    log.error("Can't find video id")
                     sys.exit(2)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
