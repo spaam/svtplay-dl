@@ -3,19 +3,30 @@ import json
 import re
 import os
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, is_py3, get_http_data
+from svtplay_dl.utils import is_py2, is_py3, get_http_data, HTTPError
 
 class subtitle(object):
     def __init__(self, url):
         self.url = url
         self.subtitle = None
 
+    def get_subdata(self):
+        if self.subtitle is None:
+            try:
+                self.subtitle = get_http_data(self.url)
+            except HTTPError:
+                return None
+        return self.subtitle
+
 class subtitle_tt(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url)
+        subdata = self.get_subdata()
+        if subdata is None:
+            log.error("Can't download subtitle.")
+            return
         i = 1
         data = ""
-        tree = ET.ElementTree(ET.fromstring(self.subtitle))
+        tree = ET.ElementTree(ET.fromstring(subdata))
         xml = tree.find("{http://www.w3.org/2006/10/ttaf1}body").find("{http://www.w3.org/2006/10/ttaf1}div")
         plist = list(xml.findall("{http://www.w3.org/2006/10/ttaf1}p"))
         for node in plist:
@@ -44,8 +55,11 @@ class subtitle_tt(subtitle):
 
 class subtitle_json(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url, cookiejar=options.cookiejar)
-        data = json.loads(self.subtitle)
+        subdata = self.get_subdata()
+        if subdata is None:
+            log.error("Can't download subtitle.")
+            return
+        data = json.loads(subdata)
         number = 1
         subs = ""
         for i in data:
@@ -60,8 +74,11 @@ class subtitle_json(subtitle):
 
 class subtitle_sami(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url)
-        tree = ET.XML(self.subtitle)
+        subdata = self.get_subdata()
+        if subdata is None:
+            log.error("Can't download subtitle.")
+            return
+        tree = ET.XML(subdata)
         subt = tree.find("Font")
         subs = ""
         n = 0
@@ -82,10 +99,13 @@ class subtitle_sami(subtitle):
 
 class subtitle_smi(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url)
+        subdata = self.get_subdata()
+        if subdata is None:
+            log.error("Can't download subtitle.")
+            return
         if is_py3:
             self.subtitle = self.subtitle.decode("latin1")
-        recomp = re.compile(r'<SYNC Start=(\d+)>(\r\n)?\s+<P Class=\w+>(.*)(<br>)?(\r\n)?\s+<SYNC Start=(\d+)>', re.U|re.M|re.I)
+        recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
         number = 1
         subs = ""
         TAG_RE = re.compile(r'<[^>]+>')
@@ -103,11 +123,14 @@ class subtitle_smi(subtitle):
 
 class subtitle_wsrt(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url)
+        subdata = self.get_subdata()
+        if subdata is None:
+            log.error("Can't download subtitle.")
+            return
         recomp = re.compile(r"(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
         srt = ""
         subtract = False
-        for i in recomp.finditer(self.subtitle):
+        for i in recomp.finditer(subdata):
             number = int(i.group(1))
             match = re.search(r'(\d+):(\d+):([\d\.]+) --> (\d+):(\d+):([\d\.]+)', i.group(2))
             hour1 = int(match.group(1))
