@@ -85,7 +85,7 @@ class HLS(VideoRetriever):
         if hasattr(file_d, "read") is False:
             return
 
-        n = 0
+        n = 1
         eta = ETA(len(files))
         for i in files:
             item = _get_full_url(i[0], self.url)
