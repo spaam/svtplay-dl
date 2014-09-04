@@ -12,7 +12,7 @@ from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
-    supported_domains = ['dn.se']
+    supported_domains = ['dn.se', 'mobil.dn.se']
 
     def get(self, options):
         data = self.get_urldata()
