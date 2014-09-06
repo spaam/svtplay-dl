@@ -54,6 +54,7 @@ This script works for:
 
 * aftonbladet.se
 * bambuser.com
+* dbtv.no
 * di.se
 * dn.se
 * dr.dk
@@ -63,6 +64,9 @@ This script works for:
 * kanal5.se
 * kanal5play.se
 * kanal9play.se
+* nickelodeon.nl
+* nickelodeon.no
+* nickelodeon.se
 * nrk.no
 * oppetarkiv.se
 * ruv.is
@@ -84,5 +88,6 @@ This script works for:
 * twitch.tv
 * ur.se
 * urplay.se
+* vg.no
 * viagame.com
 * viasat4play.no
