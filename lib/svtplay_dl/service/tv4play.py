@@ -107,7 +107,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         parse =  urlparse(self.url)
-        show = quote_plus(parse.path[parse.path.find("/", 1)+1:])
+        show = parse.path[parse.path.find("/", 1)+1:]
+        if not re.search("%", show):
+            show = quote_plus(show)
         data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
         jsondata = json.loads(data)
         episodes = []
