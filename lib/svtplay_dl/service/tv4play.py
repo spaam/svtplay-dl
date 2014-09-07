@@ -10,7 +10,7 @@ import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, filenamify
+from svtplay_dl.utils import get_http_data, is_py2_old, filenamify, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -45,7 +45,18 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     sys.exit(2)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        data = get_http_data(url)
+        try:
+            data = get_http_data(url)
+        except HTTPError as e:
+            xml = ET.XML(e.read())
+            code = xml.find("code").text
+            if code == "SESSION_NOT_AUTHENTICATED":
+                log.error("Can't access premium content")
+            if code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
+                log.error("Can't downoad this video because of geoblocked.")
+            else:
+                log.error("Can't any info for that video")
+            return
         xml = ET.XML(data)
         ss = xml.find("items")
         if is_py2_old:
@@ -91,7 +102,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
-        data = get_http_data(url)
+        try:
+            data = get_http_data(url)
+        except HTTPError as e:
+            log.warning("Can't get HLS video.")
+            return
         xml = ET.XML(data)
         ss = xml.find("items")
         if is_py2_old:
