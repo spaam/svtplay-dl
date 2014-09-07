@@ -27,7 +27,7 @@ PYLINT_OPTS = --report=no -d I -d C -d R -d W0511
 
 # If you don't have a python3 environment (e.g. mock for py3 and
 # nosetests3), you can remove the -3 flag.
-TEST_OPTS = -2 -3
+TEST_OPTS ?= -2 -3
 
 install: svtplay-dl $(MANFILE)
 	install -d $(DESTDIR)$(BINDIR)
