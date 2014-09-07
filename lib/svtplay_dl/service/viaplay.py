@@ -81,7 +81,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
-            if filename[len(filename)-3:] == "f4m":
+            if filename.endswith("f4m"):
                 manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
                 streams = hdsparse(copy.copy(options), manifest)
                 if streams:
