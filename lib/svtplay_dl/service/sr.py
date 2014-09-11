@@ -12,7 +12,7 @@ import copy
 
 from svtplay_dl.utils.urllib import quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import HTTP
 
@@ -20,7 +20,11 @@ class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
 
     def get(self, options):
-        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', self.get_urldata())
+        try:
+            match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', self.get_urldata())
+        except HTTPError as e:
+            log.error("Can't find webpage")
+            return
         if not match:
             log.error("Can't find audio info")
             sys.exit(2)

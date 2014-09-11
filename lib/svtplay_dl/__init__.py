@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import decode_html_entities, filenamify, select_quality
+from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, URLError
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -65,7 +65,11 @@ def get_media(url, options):
 
     stream = service_handler(url)
     if not stream:
-        url, stream = Generic().get(url)
+        try:
+            url, stream = Generic().get(url)
+        except URLError as e:
+            log.error("Cant find that page: %s", e.reason)
+            return
     if not stream:
         log.error("That site is not supported. Make a ticket or send a message")
         sys.exit(2)
@@ -98,7 +102,13 @@ def get_media(url, options):
 
 def get_one_media(stream, options):
     if not options.output or os.path.isdir(options.output):
-        data = stream.get_urldata()
+        try:
+            data = stream.get_urldata()
+        except URLError as e:
+            log.error("Cant find that page: %s", e.reason)
+            return
+        if data is None:
+            return
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
         if match:
             options.output_auto = True
