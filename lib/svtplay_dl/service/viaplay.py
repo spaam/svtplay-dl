@@ -63,6 +63,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
         options.other = ""
         data = get_http_data(url)
         xml = ET.XML(data)
+        error = xml.find("Error")
+        if error is not None:
+            log.error("%s" % error.text)
+            return
         live = xml.find("Product").find("LiveInfo")
         if live is not None:
             live = live.find("Live").text
