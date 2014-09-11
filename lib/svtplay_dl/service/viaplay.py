@@ -47,7 +47,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return match.group(1)
 
         parse = urlparse(self.url)
-        match = re.search(r'\/(\d+)/\?', parse.path)
+        match = re.search(r'/\w+/(\d+)', parse.path)
         if match:
             return match.group(1)
 
