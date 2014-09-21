@@ -71,9 +71,15 @@ def get_media(url, options):
         sys.exit(2)
 
     if options.all_episodes:
-        if options.output and not os.path.isdir(options.output):
+        if options.output and os.path.isfile(options.output):
             log.error("Output must be a directory if used with --all-episodes")
             sys.exit(2)
+        elif options.output and not os.path.exists(options.output):
+            try:
+                os.makedirs(options.output)
+            except OSError as e:
+                log.error("%s: %s" % (e.strerror,  e.filename))
+                return
 
         episodes = stream.find_all_episodes(options)
 
