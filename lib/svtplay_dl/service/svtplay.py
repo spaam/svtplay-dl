@@ -48,11 +48,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
             options.live = False
 
         if data["video"]["subtitleReferences"]:
+            subtitle = None
             try:
                 subtitle = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 pass
-            if len(subtitle) > 0:
+            if subtitle and len(subtitle) > 0:
                 yield subtitle_wsrt(subtitle)
 
         if options.output_auto:
