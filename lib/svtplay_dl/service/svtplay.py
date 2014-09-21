@@ -71,6 +71,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             else:
                 options.output = title
 
+        if options.force_subtitle:
+            return
+
         for i in data["video"]["videoReferences"]:
             parse = urlparse(i["url"])
 

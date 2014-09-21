@@ -74,6 +74,9 @@ class Kanal5(Service):
             else:
                 options.output = title
 
+        if options.force_subtitle:
+            return
+
         for i in data["streams"]:
             if i["drmProtected"]:
                 log.error("We cant download drm files for this site.")
