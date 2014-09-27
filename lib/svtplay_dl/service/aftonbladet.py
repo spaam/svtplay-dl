@@ -9,7 +9,7 @@ import copy
 from svtplay_dl.service import Service
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import HLS
+from svtplay_dl.fetcher.hls import HLS, hlsparse
 
 class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
@@ -36,16 +36,28 @@ class Aftonbladet(Service):
         streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
         streams = json.loads(get_http_data(streamsurl))
         hlsstreams = streams["formats"]["hls"]
+        playlist = False
         if "level3" in hlsstreams.keys():
-            hls = hlsstreams["level3"]["csmil"][0]
+            hls = hlsstreams["level3"]
         else:
-            hls = hlsstreams["akamai"]["m3u8"][0]
+            hls = hlsstreams["akamai"]
+        if "csmil" in hls.keys():
+            hls = hls["csmil"][0]
+        else:
+            hls = hls["m3u8"][0]
+            playlist = True
         address = hls["address"]
         path = hls["path"]
 
         for i in hls["files"]:
             if "filename" in i.keys():
-                playlist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
+                plist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
             else:
-                playlist = "http://%s/%s/%s/master.m3u8" % (address, path, hls["filename"])
-            yield HLS(copy.copy(options), playlist, i["bitrate"])
+                plist = "http://%s/%s/%s" % (address, path, hls["filename"])
+            if playlist:
+                streams = hlsparse(plist)
+                print streams
+                for n in list(streams.keys()):
+                    yield HLS(copy.copy(options), streams[n], n)
+            else:
+                yield HLS(copy.copy(options), plist, i["bitrate"])
