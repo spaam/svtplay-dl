@@ -132,8 +132,7 @@ def select_quality(options, streams):
         if q in wanted:
             selected = q
             break
-
-    if not selected:
+    if not selected and selected != 0:
         data = sorted(streams, key=lambda x:(x.bitrate, x.name()), reverse=True)
         datas = []
         for i in data:
