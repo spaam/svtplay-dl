@@ -52,10 +52,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             code = xml.find("code").text
             if code == "SESSION_NOT_AUTHENTICATED":
                 log.error("Can't access premium content")
-            if code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
+            elif code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
                 log.error("Can't downoad this video because of geoblocked.")
             else:
-                log.error("Can't any info for that video")
+                log.error("Can't find any info for that video")
             return
         xml = ET.XML(data)
         ss = xml.find("items")
