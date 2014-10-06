@@ -28,8 +28,8 @@ class Ruv(Service):
         else:
             match = re.search(r'<source [^ ]*[ ]*src="([^"]+)" ', self.get_urldata())
             if not match:
-                log.error("Can't find video info")
-                sys.exit(2)
+                log.error("Can't find video info for: %s", self.url)
+                return
             m3u8_url = match.group(1)
             options.live = checklive(m3u8_url)
             yield HLS(copy.copy(options), m3u8_url, 800)

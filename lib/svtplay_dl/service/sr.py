@@ -27,7 +27,7 @@ class Sr(Service, OpenGraphThumbMixin):
             return
         if not match:
             log.error("Can't find audio info")
-            sys.exit(2)
+            return
         path = quote_plus(match.group(1))
         dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path
         data = get_http_data(dataurl)

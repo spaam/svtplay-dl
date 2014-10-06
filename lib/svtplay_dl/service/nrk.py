@@ -35,12 +35,12 @@ class Nrk(Service, OpenGraphThumbMixin):
             match = re.search(r'data-video-id="(\d+)"', data)
             if match is None:
                 log.error("Can't find video id.")
-                sys.exit(2)
+                return
             vid = match.group(1)
             match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", data)
             if match is None:
                 log.error("Can't find server address with media info")
-                sys.exit(2)
+                return
             dataurl = "%smediaelement/%s" % (match.group(1), vid)
             data = json.loads(get_http_data(dataurl))
             manifest_url = data["mediaUrl"]

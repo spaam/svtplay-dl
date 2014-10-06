@@ -25,4 +25,4 @@ class Radioplay(Service):
                 yield HTTP(copy.copy(options), data["station"]["streams"][i], i)
         else:
             log.error("Can't find stream info")
-            sys.exit(2)
+            return

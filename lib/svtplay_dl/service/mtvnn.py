@@ -17,7 +17,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         match = re.search(r'mrss\s+:\s+"([^"]+)"', self.get_urldata())
         if not match:
             log.error("Can't find id for the video")
-            sys.exit(2)
+            return
         swfurl = re.search(r'embedSWF\( "([^"]+)"', self.get_urldata())
         options.other = "-W %s" % swfurl.group(1)
         data = get_http_data(match.group(1))
@@ -46,12 +46,12 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
         if match is None:
             log.error("Couldn't program id")
-            sys.exit(2)
+            return
         programid = match.group(1)
         match = re.findall(r"<li class='(divider playlist-item|playlist-item)'( data-item-id='([^']+)')?", self.get_urldata())
         if not match:
             log.error("Couldn't retrieve episode list")
-            sys.exit(2)
+            return
         episodNr = []
         for i in match:
             if i[0] == "playlist-item":

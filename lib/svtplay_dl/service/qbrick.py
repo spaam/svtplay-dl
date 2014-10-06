@@ -20,37 +20,37 @@ class Qbrick(Service, OpenGraphThumbMixin):
             data = self.get_urldata()
             match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
             mcid = match.group(1)
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         elif re.findall(r"di.se", self.url):
             data = self.get_urldata()
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
-                log.error("Can't find video info")
-                sys.exit(2)
+                log.error("Can't find video info for: %s", self.url)
+                return
             data = get_http_data(match.group(1))
             match = re.search(r"data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
         elif re.findall(r"svd.se", self.url):
             match = re.search(r'video url-([^"]*)\"', self.get_urldata())
             if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
             path = unquote_plus(match.group(1))
             data = get_http_data("http://www.svd.se%s" % path)
             match = re.search(r"mcid=([A-F0-9]+)\&width=", data)
             if not match:
-                log.error("Can't find video file")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % match.group(1)
         else:
-            log.error("Can't find site")
-            sys.exit(2)
+            log.error("Can't find any info for %s", self.url)
+            return
 
         data = get_http_data(host)
         xml = ET.XML(data)
@@ -58,7 +58,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
         except AttributeError:
             log.error("Can't find video file")
-            sys.exit(2)
+            return
         live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
         if live == "true":
             options.live = True

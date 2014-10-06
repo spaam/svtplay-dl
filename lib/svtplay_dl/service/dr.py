@@ -30,7 +30,7 @@ class Dr(Service, OpenGraphThumbMixin):
             match = re.search(r'resource="([^"]*)"', data)
             if not match:
                 log.error("Cant find resource info for this video")
-                sys.exit(2)
+                return
             resource_url = "%s" % match.group(1)
             resource_data = get_http_data(resource_url)
             resource = json.loads(resource_data)

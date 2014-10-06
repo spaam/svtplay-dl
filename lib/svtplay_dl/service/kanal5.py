@@ -74,7 +74,7 @@ class Kanal5(Service):
         if options.force_subtitle:
             return
 
-        if "streams" in data:
+        if "streams" in data.keys():
             for i in data["streams"]:
                 if i["drmProtected"]:
                     log.error("We cant download drm files for this site.")

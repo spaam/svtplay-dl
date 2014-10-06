@@ -20,7 +20,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
         match = re.search(r'JSONdata = ({.*});', data)
         if not match:
             log.error("Cant find json data")
-            sys.exit(2)
+            return
         janson = json.loads(match.group(1))
         playlist = janson["playlist"]
         for i in playlist:

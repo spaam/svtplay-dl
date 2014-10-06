@@ -30,7 +30,7 @@ class Expressen(Service):
                 self.get_urldata())
             if not match:
                 log.error("Can't find video id")
-                sys.exit(2)
+                return
             vid = match.group(1)
             xmlurl = "http://www.expressen.se/Handlers/WebTvHandler.ashx?id=%s" % vid
         data = get_http_data(xmlurl)

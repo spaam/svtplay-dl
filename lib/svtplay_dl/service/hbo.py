@@ -21,11 +21,11 @@ class Hbo(Service):
             other = parse.fragment
         except KeyError:
             log.error("Something wrong with that url")
-            sys.exit(2)
+            return
         match = re.search("^/(.*).html", other)
         if not match:
             log.error("Cant find video file")
-            sys.exit(2)
+            return
         url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
         data = get_http_data(url)
         xml = ET.XML(data)

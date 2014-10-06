@@ -61,7 +61,7 @@ class Justin(Service):
         if not success:
             log.debug(str(e))
             log.error("This twitch/justin video type is unsupported")
-            sys.exit(2)
+            return
 
 
     def _get_static_video(self, vid, options, vidtype):

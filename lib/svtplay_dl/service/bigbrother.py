@@ -25,19 +25,19 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         match = re.search(r'playerID" value="([^"]+)"', self.get_urldata())
         if not match:
             log.error("Can't find playerID")
-            sys.exit(2)
+            return
         playerid = match.group(1)
 
         match = re.search(r'playerKey" value="([^"]+)"', self.get_urldata())
         if not match:
             log.error("Can't find playerKey")
-            sys.exit(2)
+            return
         playerkey = match.group(1)
 
         match = re.search(r'videoPlayer" value="([^"]+)"', self.get_urldata())
         if not match:
             log.error("Can't find videoPlayer info")
-            sys.exit(2)
+            return
         videoplayer = match.group(1)
 
         dataurl = "http://c.brightcove.com/services/viewer/htmlFederated?flashID=%s&playerID=%s&playerKey=%s&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer=%s" % (flashid, playerid, playerkey, videoplayer)
@@ -45,7 +45,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         match = re.search(r'experienceJSON = ({.*});', data)
         if not match:
             log.error("Can't find json data")
-            sys.exit(2)
+            return
         jsondata = json.loads(match.group(1))
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
         for i in renditions:

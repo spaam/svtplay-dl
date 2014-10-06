@@ -19,7 +19,7 @@ class Bambuser(Service, OpenGraphThumbMixin):
         match = re.search(r"v/(\d+)", self.url)
         if not match:
             log.error("Can't find video id in url")
-            sys.exit(2)
+            return
         json_url = "http://player-c.api.bambuser.com/getVideo.json?api_key=005f64509e19a868399060af746a00aa&vid=%s" % match.group(1)
         data = get_http_data(json_url)
         info = json.loads(data)["result"]

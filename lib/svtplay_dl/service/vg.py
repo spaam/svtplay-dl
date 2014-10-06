@@ -22,8 +22,8 @@ class Vg(Service, OpenGraphThumbMixin):
             parse = urlparse(self.url)
             match = re.search(r'video/(\d+)/', parse.fragment)
             if not match:
-                log.error("Can't find video id")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
         videoid = match.group(1)
         data = get_http_data("http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid)
         jsondata = json.loads(data)

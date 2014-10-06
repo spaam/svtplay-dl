@@ -55,8 +55,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def get(self, options):
         vid = self._get_video_id()
         if vid is None:
-            log.error("Cant find video file")
-            sys.exit(2)
+            log.error("Can't find video file for: %s", self.url)
+            return
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""

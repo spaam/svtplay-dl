@@ -18,7 +18,7 @@ class OppetArkiv(Svtplay):
             match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', self.url)
             if match is None:
                 log.error("Couldn't find title")
-                sys.exit(2)
+                return
         program = match.group(1)
         more = True
         episodes = []

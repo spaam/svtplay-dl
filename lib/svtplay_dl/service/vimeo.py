@@ -15,10 +15,10 @@ class Vimeo(Service, OpenGraphThumbMixin):
     supported_domains = ['vimeo.com']
 
     def get(self, options):
-        match = re.search("data-config-url=\"(.*)\" data-fallback-url", self.get_urldata())
+        match = re.search('data-config-url="([^"]+)" data-fallback-url', self.get_urldata())
         if not match:
-            log.error("Can't find data")
-            sys.exit(4)
+            log.error("Can't find video file for: %s", self.url)
+            return
         player_url = match.group(1).replace("&amp;", "&")
         player_data = get_http_data(player_url)
 

@@ -19,12 +19,12 @@ class Aftonbladet(Service):
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
             log.error("Can't find video info")
-            sys.exit(2)
+            return
         videoId = match.group(1)
         match = re.search(r'data-isLive="(\w+)"', data)
         if not match:
             log.error("Can't find live info")
-            sys.exit(2)
+            return
         if match.group(1) == "true":
             options.live = True
         if not options.live:

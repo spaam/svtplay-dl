@@ -23,15 +23,15 @@ class Lemonwhale(Service):
             match = re.search(r'embed.jsp\?id=([^&]+)&', data)
             if not match:
                 log.error("Cant find video id")
-                sys.exit(2)
+                return
             vid = match.group(1)
         if not vid:
             path = unquote_plus(match.group(1))
             data = get_http_data("http://www.svd.se%s" % path)
             match = re.search(r'embed.jsp\?id=([^&]+)&', data)
             if not match:
-                log.error("Cant find video id2")
-                sys.exit(2)
+                log.error("Cant find second video id")
+                return
             vid = match.group(1)
 
         url = "http://amz.lwcdn.com/api/cache/VideoCache.jsp?id=%s" % vid

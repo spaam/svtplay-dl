@@ -19,7 +19,7 @@ class Mtvservices(Service):
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", self.get_urldata())
         if not match:
             log.error("Can't find video file")
-            sys.exit(2)
+            return
         url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
         data = get_http_data(url)
         start = data.index("<?xml version=")
