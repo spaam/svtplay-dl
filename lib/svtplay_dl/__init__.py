@@ -185,7 +185,7 @@ def main():
                       metavar="OUTPUT", help="Outputs to the given filename.")
     parser.add_option("-r", "--resume",
                       action="store_true", dest="resume", default=False,
-                      help="Resume a download")
+                      help="Resume a download (RTMP based ones)")
     parser.add_option("-l", "--live",
                       action="store_true", dest="live", default=False,
                       help="Enable for live streams (RTMP based ones)")
