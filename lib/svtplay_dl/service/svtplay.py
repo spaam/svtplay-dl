@@ -31,8 +31,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
             else:
-                log.error("Can't find video file")
-                sys.exit(2)
+                log.error("Can't find video file for: %s", self.url)
+                return
         else:
             url = self.url
 
