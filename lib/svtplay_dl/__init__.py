@@ -147,14 +147,12 @@ def get_one_media(stream, options):
         log.error(e.message)
         sys.exit(2)
 
-    if options.thumbnail:
-        if hasattr(stream, "get_thumbnail"):
-            log.info("thumb requested")
-            if options.output != "-":
-                log.info("getting thumbnail")
-                stream.get_thumbnail(options)
-    else:
-        log.debug("no thumb requested")
+    if options.thumbnail and hasattr(stream, "get_thumbnail"):
+        if options.output != "-":
+            log.info("Getting thumbnail")
+            stream.get_thumbnail(options)
+        else:
+            log.warning("Can not get thumbnail when fetching to stdout")
 
 
 def setup_log(silent, verbose=False):
