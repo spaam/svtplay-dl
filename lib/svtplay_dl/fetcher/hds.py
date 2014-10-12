@@ -52,6 +52,9 @@ def hdsparse(options, manifest):
         bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
         mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
 
+    if xml.find("{http://ns.adobe.com/f4m/1.0}drmAdditionalHeader") is not None:
+        log.error("HDS DRM protected content.")
+        return
     for i in bootstrapIter:
         if "id" in i.attrib:
             bootstrap[i.attrib["id"]] = i.text

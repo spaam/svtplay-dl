@@ -87,8 +87,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     parse = urlparse(i["url"])
                     manifest = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)
                     streams = hdsparse(copy.copy(options), manifest)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
             elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
                 data = get_http_data(embedurl)

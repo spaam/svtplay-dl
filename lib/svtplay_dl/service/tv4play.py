@@ -84,8 +84,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         query = "?"
                     manifest = "%s%shdcore=2.8.0&g=hejsan" % (i.find("url").text, query)
                     streams = hdsparse(copy.copy(options), manifest)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle_smi(i.find("url").text)
 

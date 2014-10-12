@@ -40,8 +40,9 @@ class Vg(Service, OpenGraphThumbMixin):
             parse = urlparse(jsondata["streamUrls"]["hds"])
             manifest = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)
             streams = hdsparse(copy.copy(options), manifest)
-            for n in list(streams.keys()):
-                yield streams[n]
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
         if "hls" in jsondata["streamUrls"]:
             streams = hlsparse(jsondata["streamUrls"]["hls"])
             for n in list(streams.keys()):

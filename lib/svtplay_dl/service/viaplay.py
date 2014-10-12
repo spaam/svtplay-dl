@@ -97,8 +97,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if filename[len(filename)-3:] == "f4m":
                 manifest = "%s?hdcore=2.8.0&g=hejsan" % filename
                 streams = hdsparse(copy.copy(options), manifest)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                if streams:
+                    for n in list(streams.keys()):
+                        yield streams[n]
             else:
                 parse = urlparse(filename)
                 match = re.search("^(/[^/]+)/(.*)", parse.path)
