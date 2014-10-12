@@ -136,6 +136,8 @@ def get_one_media(stream, options):
 
         if len(videos) > 0:
             stream = select_quality(options, videos)
+            log.info("Selected to download %s, bitrate: %s",
+                stream.name(), stream.bitrate)
             try:
                 stream.download()
             except UIException as e:
