@@ -163,7 +163,7 @@ def setup_log(silent, verbose=False):
     elif verbose:
         stream = sys.stderr
         level = logging.DEBUG
-        fmt = logging.Formatter('%(levelname)s [%(created)] %(pathname)s/%(funcName)s: %(message)s')
+        fmt = logging.Formatter('%(levelname)s [%(created)s] %(pathname)s/%(funcName)s: %(message)s')
     else:
         stream = sys.stdout
         level = logging.INFO
