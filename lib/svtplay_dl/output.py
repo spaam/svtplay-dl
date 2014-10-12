@@ -127,7 +127,7 @@ def output(options, filename, extention="mp4", openfd=True):
         if (os.path.isfile(options.output) or \
             findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))) and \
             not options.force:
-            log.info("File already exists. use --force to overwrite")
+            log.error("File already exists. Use --force to overwrite")
             return None
         if openfd:
             file_d = open(options.output, "wb")
