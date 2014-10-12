@@ -22,7 +22,9 @@ class RTMP(VideoRetriever):
         if self.options.resume:
             args.append("-e")
 
-        output(self.options, self.options.output, "flv", False)
+        file_d = output(self.options, self.options.output, "flv", False)
+        if file_d is None:
+            return
         args += ["-o", self.options.output]
         if self.options.silent or self.options.output == "-":
             args.append("-q")
