@@ -53,11 +53,18 @@ def hdsparse(options, manifest):
         mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
 
     for i in bootstrapIter:
-        bootstrap[i.attrib["id"]] = i.text
+        if "id" in i.attrib:
+            bootstrap[i.attrib["id"]] = i.text
+        else:
+            bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
     for i in mediaIter:
-        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrap[i.attrib["bootstrapInfoId"]],
+        if len(bootstrap) == 1:
+            bootstrapid = bootstrap["0"]
+        else:
+            bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
+        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
                                                 metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
     return streams
 
