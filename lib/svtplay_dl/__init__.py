@@ -135,24 +135,24 @@ def get_one_media(stream, options):
 
     if len(videos) == 0:
         log.error("Can't find any streams for that url")
+    else:
+        stream = select_quality(options, videos)
+        log.info("Selected to download %s, bitrate: %s",
+            stream.name(), stream.bitrate)
+        try:
+            stream.download()
+        except UIException as e:
+            if options.verbose:
+                raise e
+            log.error(e.message)
+            sys.exit(2)
 
-    stream = select_quality(options, videos)
-    log.info("Selected to download %s, bitrate: %s",
-        stream.name(), stream.bitrate)
-    try:
-        stream.download()
-    except UIException as e:
-        if options.verbose:
-            raise e
-        log.error(e.message)
-        sys.exit(2)
-
-    if options.thumbnail and hasattr(stream, "get_thumbnail"):
-        if options.output != "-":
-            log.info("Getting thumbnail")
-            stream.get_thumbnail(options)
-        else:
-            log.warning("Can not get thumbnail when fetching to stdout")
+        if options.thumbnail and hasattr(stream, "get_thumbnail"):
+            if options.output != "-":
+                log.info("Getting thumbnail")
+                stream.get_thumbnail(options)
+            else:
+                log.warning("Can not get thumbnail when fetching to stdout")
 
 
 def setup_log(silent, verbose=False):
