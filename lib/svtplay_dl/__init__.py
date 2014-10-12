@@ -117,47 +117,44 @@ def get_one_media(stream, options):
     videos = []
     subs = []
     streams = stream.get(options)
-    if streams:
-        for i in streams:
-            if isinstance(i, VideoRetriever):
-                if options.preferred:
-                    if options.preferred == i.name():
-                        videos.append(i)
-                else:
+    for i in streams:
+        if isinstance(i, VideoRetriever):
+            if options.preferred:
+                if options.preferred == i.name():
                     videos.append(i)
-            if isinstance(i, subtitle):
-                subs.append(i)
-
-        if options.subtitle and options.output != "-":
-            if subs:
-                subs[0].download(copy.copy(options))
-            if options.force_subtitle:
-                return
-
-        if len(videos) > 0:
-            stream = select_quality(options, videos)
-            log.info("Selected to download %s, bitrate: %s",
-                stream.name(), stream.bitrate)
-            try:
-                stream.download()
-            except UIException as e:
-                if options.verbose:
-                    raise e
-                log.error(e.message)
-                sys.exit(2)
-
-            if options.thumbnail:
-                if hasattr(stream, "get_thumbnail"):
-                    log.info("thumb requested")
-                    if options.output != "-":
-                        log.info("getting thumbnail")
-                        stream.get_thumbnail(options)
             else:
-                log.info("no thumb requested")
-        else:
-            log.error("Can't find any streams for that url")
-    else:
+                videos.append(i)
+        if isinstance(i, subtitle):
+            subs.append(i)
+
+    if options.subtitle and options.output != "-":
+        if subs:
+            subs[0].download(copy.copy(options))
+        if options.force_subtitle:
+            return
+
+    if len(videos) == 0:
         log.error("Can't find any streams for that url")
+
+    stream = select_quality(options, videos)
+    log.info("Selected to download %s, bitrate: %s",
+        stream.name(), stream.bitrate)
+    try:
+        stream.download()
+    except UIException as e:
+        if options.verbose:
+            raise e
+        log.error(e.message)
+        sys.exit(2)
+
+    if options.thumbnail:
+        if hasattr(stream, "get_thumbnail"):
+            log.info("thumb requested")
+            if options.output != "-":
+                log.info("getting thumbnail")
+                stream.get_thumbnail(options)
+    else:
+        log.debug("no thumb requested")
 
 
 def setup_log(silent, verbose=False):
