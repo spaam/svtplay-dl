@@ -59,38 +59,26 @@ class Viaplay(Service, OpenGraphThumbMixin):
             log.error("Cant find video file")
             sys.exit(2)
 
-        url = "http://viastream.viasat.tv/PlayProduct/%s" % vid
+        url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""
         data = get_http_data(url)
-        xml = ET.XML(data)
-        error = xml.find("Error")
-        if error is not None:
-            log.error("%s" % error.text)
+        dataj = json.loads(data)
+        if "msg" in dataj:
+            log.error("%s" % dataj["msg"])
             return
-        live = xml.find("Product").find("LiveInfo")
-        if live is not None:
-            live = live.find("Live").text
-            if live == "true":
-                options.live = True
 
-        if xml.find("Product").find("SamiFile").text:
-            yield subtitle_sami(xml.find("Product").find("SamiFile").text)
+        if dataj["type"] == "live":
+            options.live = True
 
-        # Fulhack.. expose error code from get_http_data.
-        filename = xml.find("Product").find("Videos").find("Video").find("Url").text
-        if filename[:4] != "rtmp":
-            if filename[len(filename)-3:] == "f4m":
-                filename = "%s?hdcore=2.8.0&g=hejsan" % filename
-            filedata = get_http_data(filename)
-            geoxml = ET.XML(filedata)
-            if geoxml.find("Success") is not None:
-                if geoxml.find("Success").text == "false":
-                    log.error("Can't download file:")
-                    log.error(xml.find("Msg").text)
-                    sys.exit(2)
+        if dataj["sami_path"]:
+            yield subtitle_sami(dataj["sami_path"])
 
-        streams = get_http_data("http://playapi.mtgx.tv/v1/videos/stream/%s" % vid)
+        streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         streamj = json.loads(streams)
+
+        if "msg" in streamj:
+            log.error("Can't play this because the video is either not found or geoblocked.")
+            return
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
