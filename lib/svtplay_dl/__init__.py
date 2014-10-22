@@ -16,7 +16,7 @@ from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 
-__version__ = "0.9.2014.10.13"
+__version__ = "0.9.2014.10.23"
 
 class Options(object):
     """
