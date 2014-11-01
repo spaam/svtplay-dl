@@ -10,7 +10,7 @@ import re
 import json
 import copy
 
-from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.utils.urllib import urlparse, HTTPError
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
@@ -60,7 +60,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""
-        data = get_http_data(url)
+        try:
+            data = get_http_data(url)
+        except HTTPError as e:
+            log.error("Can't play this because the video is either not found or geoblocked.")
+            return
         dataj = json.loads(data)
         if "msg" in dataj:
             log.error("%s" % dataj["msg"])
@@ -71,8 +75,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if dataj["sami_path"]:
             yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
-
-        streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
+        try:
+            streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
+        except HTTPError as e:
+            log.error("Can't play this because the video is either not found or geoblocked.")
+            return
         streamj = json.loads(streams)
 
         if "msg" in streamj:
