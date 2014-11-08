@@ -30,7 +30,7 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.options, self.url, "mp4")
+        file_d = output(self.options, self.options.output, "mp4")
         if hasattr(file_d, "read") is False:
             return
 
