@@ -90,6 +90,7 @@ from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.dbtv import Dbtv
+from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.hbo import Hbo
@@ -117,6 +118,7 @@ sites = [
     Bambuser,
     Bigbrother,
     Dbtv,
+    Disney,
     Dr,
     Expressen,
     Hbo,
