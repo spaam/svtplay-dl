@@ -12,7 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 
-class Bigbrother(Service):
+class Bigbrother(Service, OpenGraphThumbMixin):
     supported_domains = ["bigbrother.se"]
 
     def get(self, options):
