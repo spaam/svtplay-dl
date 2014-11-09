@@ -7,7 +7,6 @@
 from __future__ import absolute_import
 import sys
 import re
-import xml.etree.ElementTree as ET
 import json
 import copy
 
