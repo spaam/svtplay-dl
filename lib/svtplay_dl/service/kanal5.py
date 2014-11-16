@@ -58,6 +58,7 @@ class Kanal5(Service):
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
         data = json.loads(get_http_data(url, cookiejar=self.cj))
+        options.cookiejar = self.cj
         if not options.live:
             options.live = data["isLive"]
         if data["hasSubtitle"]:

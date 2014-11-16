@@ -44,7 +44,7 @@ class subtitle_tt(subtitle):
 
 class subtitle_json(subtitle):
     def download(self, options):
-        self.subtitle = get_http_data(self.url)
+        self.subtitle = get_http_data(self.url, cookiejar=options.cookiejar)
         data = json.loads(self.subtitle)
         number = 1
         subs = ""
