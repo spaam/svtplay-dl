@@ -27,7 +27,7 @@ class Kanal5(Service):
         match = re.search(r".*video/([0-9]+)", self.url)
         if not match:
             log.error("Can't find video file")
-            sys.exit(2)
+            return
 
         video_id = match.group(1)
         if options.username and options.password:
@@ -43,7 +43,7 @@ class Kanal5(Service):
             jsondata = json.loads(match.group(1))
             if jsondata["success"] is False:
                 log.error(jsondata["message"])
-                sys.exit(2)
+                return
             authToken = jsondata["userData"]["auth"]
             cc = Cookie(version=0, name='authToken',
                         value=authToken,
@@ -77,23 +77,26 @@ class Kanal5(Service):
         if options.force_subtitle:
             return
 
-        for i in data["streams"]:
-            if i["drmProtected"]:
-                log.error("We cant download drm files for this site.")
-                sys.exit(2)
-            steambaseurl = data["streamBaseUrl"]
-            bitrate = i["bitrate"]
-            if bitrate > 1000:
-                bitrate = bitrate / 1000
-            options2 = copy.copy(options)
-            options2.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
-            options2.live = True
-            yield RTMP(options2, steambaseurl, bitrate)
-
-        url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
-        data = json.loads(get_http_data(url, cookiejar=self.cj))
-        if "streams" in data.keys():
+        if "streams" in data:
             for i in data["streams"]:
-                streams = hlsparse(i["source"])
-                for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                if i["drmProtected"]:
+                    log.error("We cant download drm files for this site.")
+                    return
+                steambaseurl = data["streamBaseUrl"]
+                bitrate = i["bitrate"]
+                if bitrate > 1000:
+                    bitrate = bitrate / 1000
+                options2 = copy.copy(options)
+                options2.other = "-W %s -y %s " % ("http://www.kanal5play.se/flash/K5StandardPlayer.swf", i["source"])
+                options2.live = True
+                yield RTMP(options2, steambaseurl, bitrate)
+
+            url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
+            data = json.loads(get_http_data(url, cookiejar=self.cj))
+            if "streams" in data.keys():
+                for i in data["streams"]:
+                    streams = hlsparse(i["source"])
+                    for n in list(streams.keys()):
+                        yield HLS(copy.copy(options), streams[n], n)
+        if "reasonsForNoStreams" in data:
+            log.error(data["reasonsForNoStreams"][0])
