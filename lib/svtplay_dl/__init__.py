@@ -176,16 +176,16 @@ def setup_log(silent, verbose=False):
 
 def main():
     """ Main program """
-    usage = "usage: %prog [options] url"
+    usage = "Usage: %prog [options] url"
     parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--output",
-                      metavar="OUTPUT", help="Outputs to the given filename.")
+                      metavar="OUTPUT", help="outputs to the given filename")
     parser.add_option("-r", "--resume",
                       action="store_true", dest="resume", default=False,
-                      help="Resume a download (RTMP based ones)")
+                      help="resume a download (RTMP based ones)")
     parser.add_option("-l", "--live",
                       action="store_true", dest="live", default=False,
-                      help="Enable for live streams (RTMP based ones)")
+                      help="enable for live streams (RTMP based ones)")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False)
     parser.add_option("-v", "--verbose",
@@ -193,26 +193,26 @@ def main():
     parser.add_option("-f", "--force",
                       action="store_true", dest="force", default=False)
     parser.add_option("-q", "--quality", default=0,
-                      metavar="quality", help="Choose what format to download.\nIt will download the best format by default")
+                      metavar="quality", help="choose what format to download.\nit will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
-                      metavar="amount", dest="flexibleq", help="Allow given quality (as above) to differ by an amount.")
+                      metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
     parser.add_option("-H", "--hls",
                       action="store_true", dest="hls", default=False, help="obsolete use -P")
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
-                      help="Download subtitle from the site if available.")
+                      help="download subtitle from the site if available")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
-                      action="store_true", help="Download only subtitle if its used with -S")
+                      action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("-u", "--username", default=None,
-                      help="Username")
+                      help="username")
     parser.add_option("-p", "--password", default=None,
-                      help="Password")
+                      help="password")
     parser.add_option("-t", "--thumbnail",
                       action="store_true", dest="thumbnail", default=False,
-                      help="Download thumbnail from the site if available.")
+                      help="download thumbnail from the site if available")
     parser.add_option("-A", "--all-episodes",
                       action="store_true", dest="all_episodes", default=False,
-                      help="Try to download all episodes.")
+                      help="try to download all episodes")
     parser.add_option("-P", "--preferred", default=None,
                       metavar="preferred", help="preferred download method (rtmp, hls or hds)")
     (options, args) = parser.parse_args()
@@ -220,7 +220,7 @@ def main():
         parser.print_help()
         sys.exit(0)
     if len(args) != 1:
-        parser.error("incorrect number of arguments")
+        parser.error("Incorrect number of arguments")
     options = mergeParserOption(Options(), options)
     setup_log(options.silent, options.verbose)
 

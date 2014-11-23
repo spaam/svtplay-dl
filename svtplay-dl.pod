@@ -54,7 +54,7 @@ Download subtitle with the media if available.
 
 =head3 --force-subtitle
 
-Download only subtitle if its used with -S
+Download only subtitle if its used with -S.
 
 =head3 --username=USERNAME  -u USERNAME
 
@@ -74,7 +74,7 @@ Try to download all episodes.
 
 =head3 -P preferred, --preferred=preferred
 
-Preferred download method
+Preferred download method.
 
 =head3 --version
 
