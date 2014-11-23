@@ -3,7 +3,7 @@ import json
 import re
 import os
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, get_http_data
+from svtplay_dl.utils import is_py2, is_py3, get_http_data
 
 class subtitle(object):
     def __init__(self, url):
@@ -80,16 +80,23 @@ class subtitle_sami(subtitle):
 class subtitle_smi(subtitle):
     def download(self, options):
         self.subtitle = get_http_data(self.url)
-        recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
+        if is_py3:
+            self.subtitle = self.subtitle.decode("latin1")
+        recomp = re.compile(r'<SYNC Start=(\d+)>(\r\n)?\s+<P Class=\w+>(.*)(<br>)?(\r\n)?\s+<SYNC Start=(\d+)>', re.U|re.M|re.I)
         number = 1
         subs = ""
-        for i in recomp.finditer(str(self.subtitle)):
-            subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
-            text = "%s\n\n" % i.group(2)
-            subs += text.replace("<br>", "\n")
+        TAG_RE = re.compile(r'<[^>]+>')
+        bad_char = re.compile(r'\x96')
+        for i in recomp.finditer(self.subtitle):
+            subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(6)))
+            text = "%s\n\n" % TAG_RE.sub('', i.group(3).replace("<br>", "\n"))
+            if text[0] == "\x0a":
+                text = text[1:]
+            subs += text
             number += 1
-
-        save(options, subs)
+        recomp = re.compile(r'\r')
+        text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
+        save(options, text)
 
 class subtitle_wsrt(subtitle):
     def download(self, options):
