@@ -5,9 +5,10 @@ from __future__ import absolute_import
 import json
 import re
 import copy
+import os
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, check_redirect
+from svtplay_dl.utils import get_http_data, check_redirect, filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
@@ -54,6 +55,16 @@ class Disney(Service, OpenGraphThumbMixin):
             match = re.search(r"window.kalturaIframePackageData = ({.*});", data)
             jsondata = json.loads(match.group(1))
             ks = jsondata["enviornmentConfig"]["ks"]
+            if options.output_auto:
+                name = jsondata["entryResult"]["meta"]["name"]
+                directory = os.path.dirname(options.output)
+                options.service = "disney"
+                title = "%s-%s" % (name, options.service)
+                title = filenamify(title)
+                if len(directory):
+                    options.output = "%s/%s" % (directory, title)
+                else:
+                    options.output = title
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
             redirect  = check_redirect(url)
