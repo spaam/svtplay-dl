@@ -68,8 +68,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if xml.find("live").text != "false":
                 options.live = True
         if xml.find("drmProtected").text == "true":
-            log.error("DRM protected content.")
-            sys.exit(2)
+            log.error("We cant download DRM protected content from this site.")
+            return
 
         if options.output_auto:
             directory = os.path.dirname(options.output)

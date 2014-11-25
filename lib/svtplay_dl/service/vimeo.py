@@ -29,4 +29,4 @@ class Vimeo(Service, OpenGraphThumbMixin):
                 yield HTTP(copy.copy(options), avail_quality[i]["url"], avail_quality[i]["bitrate"])
         else:
             log.error("Can't find any streams.")
-            sys.exit(2)
+            return

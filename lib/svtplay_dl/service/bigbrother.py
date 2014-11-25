@@ -19,7 +19,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         match = re.search(r'id="(bcPl[^"]+)"', self.get_urldata())
         if not match:
             log.error("Can't find flash id.")
-            sys.exit(2)
+            return
         flashid = match.group(1)
 
         match = re.search(r'playerID" value="([^"]+)"', self.get_urldata())

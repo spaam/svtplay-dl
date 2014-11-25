@@ -59,7 +59,7 @@ class Urplay(Service, OpenGraphThumbMixin):
                           self.get_urldata())
         if match is None:
             log.error("Couldn't retrieve episode list")
-            sys.exit(2)
+            return
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
         xml = ET.XML(get_http_data(url))
 

@@ -98,8 +98,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 parse = urlparse(filename)
                 match = re.search("^(/[^/]+)/(.*)", parse.path)
                 if not match:
-                    log.error("Somthing wrong with rtmpparse")
-                    sys.exit(2)
+                    log.error("Something wrong with rtmpparse")
+                    return
                 filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y %s" % match.group(2)
                 options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
@@ -113,8 +113,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, options):
         format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
         if not format_id:
-            log.error("Can't find video info")
-            sys.exit(2)
+            log.error("Can't find video info for all episodes")
+            return
         data = get_http_data("http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1))
         jsondata = json.loads(data)
         videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
