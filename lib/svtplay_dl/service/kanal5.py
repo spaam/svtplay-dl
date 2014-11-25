@@ -58,8 +58,6 @@ class Kanal5(Service):
         options.cookiejar = self.cj
         if not options.live:
             options.live = data["isLive"]
-        if data["hasSubtitle"]:
-            yield subtitle(copy.copy(options), "json", "http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
         if options.output_auto:
             directory = os.path.dirname(options.output)
@@ -71,6 +69,9 @@ class Kanal5(Service):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
+
+        if data["hasSubtitle"]:
+            yield subtitle(copy.copy(options), "json", "http://www.kanal5play.se/api/subtitles/%s" % video_id)
 
         if options.force_subtitle:
             return
