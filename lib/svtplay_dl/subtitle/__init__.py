@@ -50,7 +50,10 @@ class subtitle_json(subtitle):
         subs = ""
         for i in data:
             subs += "%s\n%s --> %s\n" % (number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
-            subs += "%s\n\n" % i["text"].encode("utf-8")
+            if is_py2:
+                subs += "%s\n\n" % i["text"].encode("utf-8")
+            else:
+                subs += "%s\n\n" % i["text"]
             number += 1
 
         save(options, subs)
