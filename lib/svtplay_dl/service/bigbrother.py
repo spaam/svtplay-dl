@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse, HLS
@@ -15,7 +15,12 @@ class Bigbrother(Service, OpenGraphThumbMixin):
     supported_domains = ["bigbrother.se"]
 
     def get(self, options):
-        match = re.search(r'id="(bcPl[^"]+)"', self.get_urldata())
+        try:
+            data = self.get_urldata()
+        except HTTPError as e:
+            log.error("Can't download page.")
+            return
+        match = re.search(r'id="(bcPl[^"]+)"', data)
         if not match:
             log.error("Can't find flash id.")
             return

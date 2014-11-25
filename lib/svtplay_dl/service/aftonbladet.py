@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
@@ -14,7 +14,11 @@ class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
 
     def get(self, options):
-        data = self.get_urldata()
+        try:
+            data = self.get_urldata()
+        except HTTPError as e:
+            log.error("Cant download page")
+            return
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
             log.error("Can't find video info")
@@ -27,7 +31,11 @@ class Aftonbladet(Service):
         if match.group(1) == "true":
             options.live = True
         if not options.live:
-            dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
+            try:
+                dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
+            except HTTPError as e:
+                log.error("Cant get video info")
+                return
             data = get_http_data(dataurl)
             data = json.loads(data)
             videoId = data["videoId"]

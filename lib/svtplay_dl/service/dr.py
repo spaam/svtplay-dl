@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
@@ -16,11 +16,18 @@ class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
     def get(self, options):
-        data = self.get_urldata()
+        try:
+            data = self.get_urldata()
+        except HTTPError as e:
+            log.error("Can't download page.")
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)
-            resource_data = get_http_data(resource_url)
+            try:
+                resource_data = get_http_data(resource_url)
+            except HTTPError as e:
+                log.error("Can't get resource data")
+                return
             resource = json.loads(resource_data)
             streams = find_stream(options, resource)
             for i in streams:
@@ -31,7 +38,11 @@ class Dr(Service, OpenGraphThumbMixin):
                 log.error("Cant find resource info for this video")
                 return
             resource_url = "%s" % match.group(1)
-            resource_data = get_http_data(resource_url)
+            try:
+                resource_data = get_http_data(resource_url)
+            except HTTPError as e:
+                log.error("Can't get resource data")
+                return
             resource = json.loads(resource_data)
 
             if "Data" in resource:
