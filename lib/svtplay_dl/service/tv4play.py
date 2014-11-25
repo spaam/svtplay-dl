@@ -133,7 +133,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 days = int(i["availability"]["availability_group_free"])
             except ValueError:
                 days = 999
-            if  days > 0:
+            if days > 0:
                 video_id = i["id"]
                 url = "http://www.tv4play.se/program/%s?video_id=%s" % (
                     show, video_id)
