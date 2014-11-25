@@ -51,6 +51,7 @@ class Kanal5(Service):
                         expires=None, discard=True, comment=None,
                         comment_url=None, rest={'HttpOnly': None})
             self.cj.set_cookie(cc)
+            options.cookies = self.cj
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
         data = json.loads(get_http_data(url, cookiejar=self.cj))
