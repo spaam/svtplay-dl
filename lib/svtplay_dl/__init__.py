@@ -193,7 +193,8 @@ def main():
     parser.add_option("-f", "--force",
                       action="store_true", dest="force", default=False)
     parser.add_option("-q", "--quality", default=0,
-                      metavar="quality", help="choose what format to download.\nit will download the best format by default")
+                      metavar="quality", help="choose what format to download based on bitrate / video resolution."
+                                              "it will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
                       metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
     parser.add_option("-H", "--hls",
