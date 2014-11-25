@@ -5,7 +5,6 @@
 # pylint: disable=E1103
 
 from __future__ import absolute_import
-import sys
 import re
 import json
 import copy

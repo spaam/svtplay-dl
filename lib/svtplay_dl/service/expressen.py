@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 import copy
-import sys
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service

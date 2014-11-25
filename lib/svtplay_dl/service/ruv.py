@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 import copy
-import sys
 import json
 
 from svtplay_dl.service import Service

@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import sys
 import re
 import os
 import xml.etree.ElementTree as ET

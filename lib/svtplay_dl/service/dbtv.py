@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import re
-import sys
 import json
 import copy
 

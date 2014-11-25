@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 import json
-import sys
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
