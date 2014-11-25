@@ -12,19 +12,16 @@ class subtitle(object):
         self.options = options
         self.subtype = subtype
 
-    def get_subdata(self):
-        if self.subtitle is None:
-            try:
-                self.subtitle = get_http_data(self.url)
-            except HTTPError:
-                return None
-        return self.subtitle
-
     def download(self):
-        subdata = self.get_subdata()
-        if subdata is None:
-            log.error("Can't download subtitle.")
-            return
+        try:
+            subdata = get_http_data(self.url, cookiejar=self.options.cookies)
+        except HTTPError as e:
+            if e.code == 403:
+                log.error("Permission denied")
+                return
+            else:
+                log.error("Can't download subtitle")
+                return
 
         data = None
         if self.subtype == "tt":
