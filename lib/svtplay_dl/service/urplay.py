@@ -7,7 +7,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
@@ -21,7 +21,11 @@ class Urplay(Service, OpenGraphThumbMixin):
         self.subtitle = None
 
     def get(self, options):
-        match = re.search(r"urPlayer.init\((.*)\);", self.get_urldata())
+        try:
+            match = re.search(r"urPlayer.init\((.*)\);", self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page")
+            return
         if not match:
             log.error("Can't find json info")
             return
