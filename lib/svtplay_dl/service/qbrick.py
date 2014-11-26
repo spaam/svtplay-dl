@@ -6,7 +6,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old, HTTPError
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -15,8 +15,12 @@ class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['di.se', 'sydsvenskan.se']
 
     def get(self, options):
-        if re.findall(r"sydsvenskan.se", self.url):
+        try:
             data = self.get_urldata()
+        except HTTPError:
+            log.error("Can't get the page")
+            return
+        if re.findall(r"sydsvenskan.se", self.url):
             match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:
                 log.error("Can't find video file for: %s", self.url)
@@ -24,7 +28,6 @@ class Qbrick(Service, OpenGraphThumbMixin):
             mcid = match.group(1)
             host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
         elif re.findall(r"di.se", self.url):
-            data = self.get_urldata()
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
                 log.error("Can't find video info for: %s", self.url)
