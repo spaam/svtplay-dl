@@ -7,14 +7,18 @@ import json
 
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
 class Ruv(Service):
     supported_domains = ['ruv.is']
 
     def get(self, options):
-        match = re.search(r'"([^"]+geo.php)"', self.get_urldata())
+        try:
+            match = re.search(r'"([^"]+geo.php)"', self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page")
+            return
         if match:
             data = get_http_data(match.group(1))
             match = re.search(r'punktur=\(([^ ]+)\)', data)
