@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import HTTP
 
@@ -16,24 +16,27 @@ class Lemonwhale(Service):
 
     def get(self, options):
         vid = None
-        data = self.get_urldata()
-        match = re.search(r'video url-([^"]+)', data)
+        try:
+            match = re.search(r'video url-([^"]+)', self.get_urldata())
+        except HTTPError:
+            log.error("Can't get data from that page")
+            return
         if not match:
-            match = re.search(r'embed.jsp\?id=([^&]+)&', data)
+            match = re.search(r'embed.jsp\?([^"]+)"', self.get_urldata())
             if not match:
-                log.error("Cant find video id")
+                log.error("Can't find video id")
                 return
             vid = match.group(1)
         if not vid:
             path = unquote_plus(match.group(1))
             data = get_http_data("http://www.svd.se%s" % path)
-            match = re.search(r'embed.jsp\?id=([^&]+)&', data)
+            match = re.search(r'embed.jsp\?([^"]+)', data)
             if not match:
-                log.error("Cant find second video id")
+                log.error("Can't find video id")
                 return
             vid = match.group(1)
 
-        url = "http://amz.lwcdn.com/api/cache/VideoCache.jsp?id=%s" % vid
+        url = "http://amz.lwcdn.com/api/cache/VideoCache.jsp?%s" % vid
         data = get_http_data(url)
         xml = ET.XML(data)
         videofile = xml.find("{http://www.lemonwhale.com/xml11}VideoFile")
