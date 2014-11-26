@@ -7,7 +7,7 @@ import os
 import xml.etree.ElementTree as ET
 import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, filenamify
+from svtplay_dl.utils import get_http_data, filenamify, HTTPError
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -25,7 +25,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         if re.findall("svt.se", self.url):
-            match = re.search(r"data-json-href=\"(.*)\"", self.get_urldata())
+            try:
+                match = re.search(r"data-json-href=\"(.*)\"", self.get_urldata())
+            except HTTPError:
+                log.error("Can't get the page")
+                return
             if match:
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
@@ -40,7 +44,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
             dataurl = "%s?&output=json&format=json" % url
         else:
             dataurl = "%s&output=json&format=json" % url
-        data = json.loads(get_http_data(dataurl))
+        try:
+            data = json.loads(get_http_data(dataurl))
+        except HTTPError:
+            log.error("Can't get api page.")
+            return
         if "live" in data["video"]:
             options.live = data["video"]["live"]
         else:
