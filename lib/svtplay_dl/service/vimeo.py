@@ -6,7 +6,7 @@ import re
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.log import log
 
@@ -14,7 +14,10 @@ class Vimeo(Service, OpenGraphThumbMixin):
     supported_domains = ['vimeo.com']
 
     def get(self, options):
-        match = re.search('data-config-url="([^"]+)" data-fallback-url', self.get_urldata())
+        try:
+            match = re.search('data-config-url="([^"]+)" data-fallback-url', self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page")
         if not match:
             log.error("Can't find video file for: %s", self.url)
             return
