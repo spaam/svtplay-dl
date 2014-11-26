@@ -52,7 +52,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
         return None
 
     def get(self, options):
-        vid = self._get_video_id()
+        try:
+            vid = self._get_video_id()
+        except HTTPError:
+            log.error("Can't get the page")
+            return
         if vid is None:
             log.error("Can't find video file for: %s", self.url)
             return
