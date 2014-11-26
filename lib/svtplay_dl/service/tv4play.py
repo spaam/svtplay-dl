@@ -32,7 +32,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
         else:
-            match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
+            try:
+                match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
+            except HTTPError:
+                log.error("Can't get the page")
+                return
             if match:
                 vid = match.group(1)
             else:
