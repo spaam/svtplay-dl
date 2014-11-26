@@ -4,7 +4,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old, HTTPError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
@@ -13,7 +13,11 @@ class Mtvnn(Service, OpenGraphThumbMixin):
     supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no"]
 
     def get(self, options):
-        match = re.search(r'mrss\s+:\s+"([^"]+)"', self.get_urldata())
+        try:
+            match = re.search(r'mrss\s+:\s+"([^"]+)"', self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page")
+            return
         if not match:
             log.error("Can't find id for the video")
             return
