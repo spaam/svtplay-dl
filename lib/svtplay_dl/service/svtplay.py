@@ -47,7 +47,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         try:
             data = json.loads(get_http_data(dataurl))
         except HTTPError:
-            log.error("Can't get api page.")
+            log.error("Can't get api page. this is a bug.")
             return
         if "live" in data["video"]:
             options.live = data["video"]["live"]
