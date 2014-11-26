@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -17,8 +17,12 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no']
 
     def get(self, options):
-        data = self.get_urldata()
-        match = re.search("data-subtitlesurl = \"(/.*)\"", data)
+        try:
+            match = re.search("data-subtitlesurl = \"(/.*)\"", self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page")
+            return
+
         if match:
             parse = urlparse(self.url)
             suburl = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
@@ -27,16 +31,16 @@ class Nrk(Service, OpenGraphThumbMixin):
         if options.force_subtitle:
             return
 
-        match = re.search(r'data-media="(.*manifest.f4m)"', data)
+        match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata())
         if match:
             manifest_url = match.group(1)
         else:
-            match = re.search(r'data-video-id="(\d+)"', data)
+            match = re.search(r'data-video-id="(\d+)"', self.get_urldata())
             if match is None:
                 log.error("Can't find video id.")
                 return
             vid = match.group(1)
-            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", data)
+            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata())
             if match is None:
                 log.error("Can't find server address with media info")
                 return
