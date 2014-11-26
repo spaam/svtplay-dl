@@ -22,7 +22,7 @@ class Sr(Service, OpenGraphThumbMixin):
         try:
             match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', self.get_urldata())
         except HTTPError as e:
-            log.error("Can't find webpage")
+            log.error("Can't get the page")
             return
         if not match:
             log.error("Can't find audio info")
