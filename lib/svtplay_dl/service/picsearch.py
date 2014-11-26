@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.log import log
 
@@ -14,14 +14,17 @@ class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se']
 
     def get(self, options):
-        data = self.get_urldata()
-        ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
+        try:
+            ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", self.get_urldata())
+        except HTTPError:
+            log.error("Can't get the page.")
+            return
         if not ajax_auth:
             log.error("Cant find token for video")
             return
-        mediaid = re.search(r"mediaId = '([^']+)';", data)
+        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
         if not mediaid:
-            mediaid = re.search(r'media-id="([^"]+)"', data)
+            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata())
             if not mediaid:
                 log.error("Cant find media id")
                 return
