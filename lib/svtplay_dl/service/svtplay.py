@@ -59,7 +59,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 suburl = data["video"]["subtitleReferences"][0]["url"]
             except KeyError:
                 pass
-            if subtitle and len(subtitle) > 0:
+            if suburl and len(suburl) > 0:
                 yield subtitle(copy.copy(options), "wrst", suburl)
 
         if options.output_auto:
