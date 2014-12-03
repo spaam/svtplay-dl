@@ -8,6 +8,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, HTTPError
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.fetcher.hds import HDS, hdsparse
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
