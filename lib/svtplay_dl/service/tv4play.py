@@ -93,9 +93,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
-                    query = ""
-                    if i.find("url").text[-1] != "?":
+                    pos = i.find("url").text.find("?")
+                    if pos < 0:
                         query = "?"
+                    else:
+                        query = "&"
                     manifest = "%s%shdcore=2.8.0&g=hejsan" % (i.find("url").text, query)
                     streams = hdsparse(copy.copy(options), manifest)
                     if streams:
