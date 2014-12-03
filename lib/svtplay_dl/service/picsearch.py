@@ -30,9 +30,18 @@ class Picsearch(Service, OpenGraphThumbMixin):
                 return
         jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
         jsondata = json.loads(jsondata)
-        files = jsondata["media"]["playerconfig"]["playlist"][1]["bitrates"]
-        server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
+        playlist = jsondata["media"]["playerconfig"]["playlist"][1]
+        if "bitrates" in playlist:
+            files = playlist["bitrates"]
+            server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
 
-        for i in files:
-            options.other = "-y '%s'" % i["url"]
-            yield RTMP(copy.copy(options), server, i["height"])
+            for i in files:
+                options.other = "-y '%s'" % i["url"]
+                yield RTMP(copy.copy(options), server, i["height"])
+        if "provider" in playlist:
+            options.live = playlist["live"]
+            if playlist["url"].endswith(".f4m"):
+                    streams = hdsparse(copy.copy(options), playlist["url"])
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
