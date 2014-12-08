@@ -5,7 +5,7 @@ import copy
 import os
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import urlparse, HTTPError
+from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.utils import get_http_data, filenamify
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hds import hdsparse
@@ -16,11 +16,11 @@ class Vg(Service, OpenGraphThumbMixin):
     supported_domains = ['vg.no', 'vgtv.no']
 
     def get(self, options):
-        try:
-            match = re.search(r'data-videoid="([^"]+)"', self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
+        match = re.search(r'data-videoid="([^"]+)"', data)
         if not match:
             parse = urlparse(self.url)
             match = re.search(r'video/(\d+)/', parse.fragment)
@@ -28,7 +28,10 @@ class Vg(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
         videoid = match.group(1)
-        data = get_http_data("http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid)
+        error, data = get_http_data("http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid)
+        if error:
+            log.error("Cant get video info")
+            return
         jsondata = json.loads(data)
 
         if options.output_auto:

@@ -20,7 +20,11 @@ class Disney(Service, OpenGraphThumbMixin):
     def get(self, options):
         parse = urlparse(self.url)
         if parse.hostname == "video.disney.se":
-            match = re.search(r"Grill.burger=({.*}):", self.get_urldata())
+            error, data = self.get_urldata()
+            if error:
+                log.error("Can't get the page")
+                return
+            match = re.search(r"Grill.burger=({.*}):", data)
             if not match:
                 log.error("Can't find video info")
                 return
@@ -33,22 +37,29 @@ class Disney(Service, OpenGraphThumbMixin):
                                 if i["format"] == "mp4":
                                     yield HTTP(copy.copy(options), i["url"], i["bitrate"])
         else:
-            match = re.search(r"uniqueId : '([^']+)'", self.get_urldata())
+            error, data = self.get_urldata()
+            if error:
+                log.error("Cant get the page")
+                return
+            match = re.search(r"uniqueId : '([^']+)'", data)
             if not match:
                 log.error("Can't find video info")
                 return
             uniq = match.group(1)
-            match = re.search("entryId : '([^']+)'", self.get_urldata())
+            match = re.search("entryId : '([^']+)'", self.get_urldata()[1])
             entryid = match.group(1)
-            match = re.search("partnerId : '([^']+)'", self.get_urldata())
+            match = re.search("partnerId : '([^']+)'", self.get_urldata()[1])
             partnerid = match.group(1)
-            match = re.search("uiConfId : '([^']+)'", self.get_urldata())
+            match = re.search("uiConfId : '([^']+)'", self.get_urldata()[1])
             uiconfid = match.group(1)
 
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
-            data = get_http_data(url)
+            error, data = get_http_data(url)
+            if error:
+                log.error("Cant get video info")
+                return
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
             data = jsondata["content"]

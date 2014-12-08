@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, HTTPError
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
@@ -14,9 +14,8 @@ class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
 
     def get(self, options):
-        try:
-            data = self.get_urldata()
-        except HTTPError as e:
+        error, data = self.get_urldata()
+        if error:
             log.error("Cant download page")
             return
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
@@ -31,17 +30,20 @@ class Aftonbladet(Service):
         if match.group(1) == "true":
             options.live = True
         if not options.live:
-            try:
-                dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
-            except HTTPError as e:
-                log.error("Cant get video info")
+            dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
+            error, data = get_http_data(dataurl)
+            if error:
+                log.error("Cant get vidoe info")
                 return
-            data = get_http_data(dataurl)
             data = json.loads(data)
             videoId = data["videoId"]
 
         streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
-        streams = json.loads(get_http_data(streamsurl))
+        error, data = get_http_data(streamsurl)
+        if error:
+            log.error("Cant download video info")
+            return
+        streams = json.loads(data)
         hlsstreams = streams["formats"]["hls"]
         if "level3" in hlsstreams.keys():
             hls = hlsstreams["level3"]

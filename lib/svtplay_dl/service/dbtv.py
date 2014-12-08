@@ -4,7 +4,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import urlparse, HTTPError
+from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
@@ -13,9 +13,8 @@ class Dbtv(Service, OpenGraphThumbMixin):
     supported_domains = ['dbtv.no']
 
     def get(self, options):
-        try:
-            data = self.get_urldata()
-        except HTTPError as e:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't download webpage")
             return
         parse = urlparse(self.url)

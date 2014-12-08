@@ -42,7 +42,7 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
+def get_http_data(url, header=None, post=None, useragent=FIREFOX_UA,
                   referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
@@ -50,7 +50,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
 
     log.debug("HTTP getting %r", url)
     starttime = time.time()
-
+    error = None
     request = Request(url)
     standard_header = {'Referer': referer, 'User-Agent': useragent}
     for key, value in [head for head in standard_header.items() if head[1]]:
@@ -58,12 +58,18 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
     if header:
         for key, value in [head for head in header.items() if head[1]]:
             request.add_header(key, value)
-    if data:
-        request.add_data(data)
+    if post:
+        request.add_data(post)
 
     opener = build_opener(HTTPCookieProcessor(cookiejar))
 
-    response = opener.open(request)
+    try:
+        response = opener.open(request)
+    except HTTPError as e:
+        error = True
+        data = e.read()
+        return error, data
+
     if is_py3:
         data = response.read()
         try:
@@ -74,8 +80,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
         try:
             data = response.read()
         except socket.error as e:
-            log.error("Lost the connection to the server")
-            sys.exit(5)
+            return True, "Lost the connection to the server"
     response.close()
 
     spent_time = time.time() - starttime
@@ -84,7 +89,7 @@ def get_http_data(url, header=None, data=None, useragent=FIREFOX_UA,
     log.debug("HTTP got %d bytes from %r in %.2fs (= %dbps)",
               len(data), url, spent_time, bps)
 
-    return data
+    return error, data
 
 def check_redirect(url):
     opener = build_opener(NoRedirectHandler())
@@ -181,7 +186,7 @@ def filenamify(title):
     return title
 
 def download_thumbnail(options, url):
-    data = get_http_data(url)
+    error, data = get_http_data(url)
 
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     tbn = "%s.tbn" % filename.group(1)

@@ -12,7 +12,8 @@ class OppetArkiv(Svtplay):
 
     def find_all_episodes(self, options):
         page = 1
-        match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', self.get_urldata())
+        error, data = self.get_urldata()
+        match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', data)
         if match is None:
             match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', self.url)
             if match is None:
@@ -23,7 +24,7 @@ class OppetArkiv(Svtplay):
         episodes = []
         while more:
             url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=tid_stigande&embed=true" % (program, page)
-            data = get_http_data(url)
+            error, data = get_http_data(url)
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False

@@ -9,7 +9,7 @@ import re
 import json
 import copy
 
-from svtplay_dl.utils.urllib import urlparse, HTTPError
+from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.log import log
@@ -36,7 +36,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         to scrape it from the HTML document. Returns None in case it's
         unable to extract the ID at all.
         """
-        html_data = self.get_urldata()
+        error, html_data = self.get_urldata()
+        if error:
+            return None
         match = re.search(r'data-video-id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
@@ -48,24 +50,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r'/\w+/(\d+)', parse.path)
         if match:
             return match.group(1)
-
         return None
 
     def get(self, options):
-        try:
-            vid = self._get_video_id()
-        except HTTPError:
-            log.error("Can't get the page")
-            return
+        vid = self._get_video_id()
         if vid is None:
             log.error("Can't find video file for: %s", self.url)
             return
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""
-        try:
-            data = get_http_data(url)
-        except HTTPError as e:
+        error, data = get_http_data(url)
+        if error:
             log.error("Can't play this because the video is either not found or geoblocked.")
             return
         dataj = json.loads(data)
@@ -78,9 +74,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if dataj["sami_path"]:
             yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
-        try:
-            streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
-        except HTTPError as e:
+
+        error, streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
+        if error:
             log.error("Can't play this because the video is either not found or geoblocked.")
             return
         streamj = json.loads(streams)
@@ -114,11 +110,14 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
-        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
+        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata()[1])
         if not format_id:
             log.error("Can't find video info for all episodes")
             return
-        data = get_http_data("http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1))
+        error, data = get_http_data("http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1))
+        if error:
+            log.error("Cant get stream info")
+            return
         jsondata = json.loads(data)
         videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
 

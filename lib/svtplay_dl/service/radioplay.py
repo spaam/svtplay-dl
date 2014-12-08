@@ -10,19 +10,17 @@ import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.utils import HTTPError
-
 from svtplay_dl.log import log
 
 class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
     def get(self, options):
-        try:
-            match = re.search(r"RP.vcdData = ({.*});</script>", self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
+        match = re.search(r"RP.vcdData = ({.*});</script>", )
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):

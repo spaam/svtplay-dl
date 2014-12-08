@@ -6,7 +6,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, HTTPError
+from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -15,9 +15,8 @@ class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['di.se', 'sydsvenskan.se']
 
     def get(self, options):
-        try:
-            data = self.get_urldata()
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
         if re.findall(r"sydsvenskan.se", self.url):
@@ -32,19 +31,19 @@ class Qbrick(Service, OpenGraphThumbMixin):
             if not match:
                 log.error("Can't find video info for: %s", self.url)
                 return
-            data = get_http_data(match.group(1))
+            error, data = get_http_data(match.group(1))
             match = re.search(r"data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
                 log.error("Can't find video file for: %s", self.url)
                 return
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
         elif re.findall(r"svd.se", self.url):
-            match = re.search(r'video url-([^"]*)\"', self.get_urldata())
+            match = re.search(r'video url-([^"]*)\"', self.get_urldata()[1])
             if not match:
                 log.error("Can't find video file for: %s", self.url)
                 return
             path = unquote_plus(match.group(1))
-            data = get_http_data("http://www.svd.se%s" % path)
+            error, data = get_http_data("http://www.svd.se%s" % path)
             match = re.search(r"mcid=([A-F0-9]+)\&width=", data)
             if not match:
                 log.error("Can't find video file for: %s", self.url)
@@ -54,7 +53,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             log.error("Can't find any info for %s", self.url)
             return
 
-        data = get_http_data(host)
+        error, data = get_http_data(host)
         xml = ET.XML(data)
         try:
             url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
@@ -64,7 +63,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
         live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
         if live == "true":
             options.live = True
-        data = get_http_data(url)
+        error, data = get_http_data(url)
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")

@@ -16,6 +16,7 @@ class Service(object):
     def __init__(self, _url):
         self._url = _url
         self._urldata = None
+        self._error = False
 
     @property
     def url(self):
@@ -23,8 +24,8 @@ class Service(object):
 
     def get_urldata(self):
         if self._urldata is None:
-            self._urldata = get_http_data(self.url)
-        return self._urldata
+            self._error, self._urldata = get_http_data(self.url)
+        return self._error, self._urldata
 
     @classmethod
     def handles(cls, url):
@@ -80,7 +81,7 @@ class OpenGraphThumbMixin(object):
     Mix this into the service class to grab thumbnail from OpenGraph properties.
     """
     def get_thumbnail(self, options):
-        url = opengraph_get(self.get_urldata(), "image")
+        url = opengraph_get(self.get_urldata()[1], "image")
         if url is None:
             return
         download_thumbnail(options, url)

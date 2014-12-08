@@ -103,10 +103,9 @@ def get_media(url, options):
 
 def get_one_media(stream, options):
     if not options.output or os.path.isdir(options.output):
-        try:
-            data = stream.get_urldata()
-        except URLError as e:
-            log.error("Cant find that page: %s", e.reason)
+        error, data = stream.get_urldata()
+        if error:
+            log.error("Cant find that page")
             return
         if data is None:
             return

@@ -31,10 +31,10 @@ class Kanal5(Service):
         video_id = match.group(1)
         if options.username and options.password:
             # get session cookie
-            data = get_http_data("http://www.kanal5play.se/", cookiejar=self.cj)
+            error, data = get_http_data("http://www.kanal5play.se/", cookiejar=self.cj)
             authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % \
                       (options.username, options.password)
-            data = get_http_data(authurl)
+            error, data = get_http_data(authurl)
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
             if jsondata["success"] is False:
@@ -54,7 +54,11 @@ class Kanal5(Service):
             options.cookies = self.cj
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
-        data = json.loads(get_http_data(url, cookiejar=self.cj))
+        error, data = get_http_data(url, cookiejar=self.cj)
+        if error:
+            log.error("Can't download video info")
+            return
+        data = json.loads(data)
         options.cookiejar = self.cj
         if not options.live:
             options.live = data["isLive"]
@@ -91,7 +95,11 @@ class Kanal5(Service):
                 yield RTMP(options2, steambaseurl, bitrate)
 
             url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
-            data = json.loads(get_http_data(url, cookiejar=self.cj))
+            error, data = get_http_data(url, cookiejar=self.cj)
+            if error:
+                log.error("Cant get video info")
+                return
+            data = json.loads(data)
             if "streams" in data.keys():
                 for i in data["streams"]:
                     streams = hlsparse(i["source"])

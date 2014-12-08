@@ -7,7 +7,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, HTTPError
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
@@ -21,11 +21,11 @@ class Urplay(Service, OpenGraphThumbMixin):
         self.subtitle = None
 
     def get(self, options):
-        try:
-            match = re.search(r"urPlayer.init\((.*)\);", self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
+        match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
             log.error("Can't find json info")
             return
@@ -59,11 +59,11 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata())
+                          self.get_urldata()[1])
         if match is None:
             log.error("Couldn't retrieve episode list")
             return
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
-        xml = ET.XML(get_http_data(url))
+        xml = ET.XML(get_http_data(url)[1])
 
         return sorted(x.text for x in xml.findall(".//item/link"))

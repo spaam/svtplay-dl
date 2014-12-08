@@ -4,7 +4,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, HTTPError
+from svtplay_dl.utils import get_http_data, is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
@@ -13,17 +13,20 @@ class Mtvnn(Service, OpenGraphThumbMixin):
     supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no"]
 
     def get(self, options):
-        try:
-            match = re.search(r'mrss\s+:\s+"([^"]+)"', self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
+        match = re.search(r'mrss\s+:\s+"([^"]+)"', data)
         if not match:
             log.error("Can't find id for the video")
             return
-        swfurl = re.search(r'embedSWF\( "([^"]+)"', self.get_urldata())
+        swfurl = re.search(r'embedSWF\( "([^"]+)"', self.get_urldata()[1])
         options.other = "-W %s" % swfurl.group(1)
-        data = get_http_data(match.group(1))
+        error, data = get_http_data(match.group(1))
+        if error:
+            log.error("Cant get video info")
+            return
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
@@ -34,7 +37,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             else:
                 options.output = title
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
-        content = get_http_data(contenturl)
+        error, content = get_http_data(contenturl)
+        if error:
+            log.error("Cant download stream info")
+            return
         xml = ET.XML(content)
         ss = xml.find("video").find("item")
         if is_py2_old:
@@ -46,12 +52,12 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             yield RTMP(options, i.find("src").text, i.attrib["bitrate"])
 
     def find_all_episodes(self, options):
-        match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
+        match = re.search(r"data-franchise='([^']+)'", self.get_urldata()[1])
         if match is None:
             log.error("Couldn't program id")
             return
         programid = match.group(1)
-        match = re.findall(r"<li class='(divider playlist-item|playlist-item)'( data-item-id='([^']+)')?", self.get_urldata())
+        match = re.findall(r"<li class='(divider playlist-item|playlist-item)'( data-item-id='([^']+)')?", self.get_urldata()[1])
         if not match:
             log.error("Couldn't retrieve episode list")
             return

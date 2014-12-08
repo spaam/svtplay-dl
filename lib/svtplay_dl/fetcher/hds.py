@@ -40,7 +40,10 @@ class LiveHDSException(HDSException):
             url, "This is a live HDS stream, and they are not supported.")
 
 def hdsparse(options, manifest):
-    data = get_http_data(manifest)
+    error, data = get_http_data(manifest)
+    if error:
+        log.error("Cant get manifest file")
+        return
     streams = {}
     bootstrap = {}
     xml = ET.XML(data)
@@ -106,7 +109,10 @@ class HDS(VideoRetriever):
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-            data = get_http_data(url)
+            error, data = get_http_data(url)
+            if error:
+                log.error("Missing segment in playlist")
+                return
             number = decode_f4f(i, data)
             file_d.write(data[number:])
             i += 1

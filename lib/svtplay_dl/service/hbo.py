@@ -26,11 +26,17 @@ class Hbo(Service):
             log.error("Cant find video file")
             return
         url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
-        data = get_http_data(url)
+        error, data = get_http_data(url)
+        if error:
+            log.error("Cant get stream info")
+            return
         xml = ET.XML(data)
         videoid = xml.find("content")[1].find("videoId").text
         url = "http://render.cdn.hbo.com/data/content/global/videos/data/%s.xml" % videoid
-        data = get_http_data(url)
+        error, data = get_http_data(url)
+        if error:
+            log.error("Cant get stream info")
+            return
         xml = ET.XML(data)
         ss = xml.find("videos")
         if is_py2_old:

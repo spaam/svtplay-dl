@@ -7,7 +7,7 @@ import os
 import xml.etree.ElementTree as ET
 import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, filenamify, HTTPError
+from svtplay_dl.utils import get_http_data, filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -25,11 +25,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def get(self, options):
         if re.findall("svt.se", self.url):
-            try:
-                match = re.search(r"data-json-href=\"(.*)\"", self.get_urldata())
-            except HTTPError:
+            error, data = self.get_urldata()
+            if error:
                 log.error("Can't get the page")
                 return
+            match = re.search(r"data-json-href=\"(.*)\"", data)
             if match:
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
@@ -44,11 +44,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
             dataurl = "%s?&output=json&format=json" % url
         else:
             dataurl = "%s&output=json&format=json" % url
-        try:
-            data = json.loads(get_http_data(dataurl))
-        except HTTPError:
+        error, data = get_http_data(dataurl)
+        if error:
             log.error("Can't get api page. this is a bug.")
             return
+        data = json.loads(data)
         if "live" in data["video"]:
             options.live = data["video"]["live"]
         else:
@@ -98,7 +98,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                             yield streams[n]
             elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
-                data = get_http_data(embedurl)
+                error, data = get_http_data(embedurl)
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
                 swf = "http://www.svtplay.se%s" % match.group(1)
                 options.other = "-W %s" % swf
@@ -112,7 +112,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if match is None:
             log.error("Couldn't retrieve episode list")
             return
-
-        xml = ET.XML(get_http_data(match.group(1)))
+        error, data = get_http_data(match.group(1))
+        xml = ET.XML(data)
 
         return sorted(x.text for x in xml.findall(".//item/link"))

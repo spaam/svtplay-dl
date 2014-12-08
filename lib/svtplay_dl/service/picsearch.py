@@ -6,30 +6,33 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, HTTPError
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hds import HDS, hdsparse
+from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se']
 
     def get(self, options):
-        try:
-            ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page.")
             return
+        ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
         if not ajax_auth:
             log.error("Cant find token for video")
             return
-        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
+        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata()[1])
         if not mediaid:
-            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata())
+            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata()[1])
             if not mediaid:
                 log.error("Cant find media id")
                 return
-        jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
+        error, jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
+        if error:
+            log.error("Cant get stream info")
+            return
         jsondata = json.loads(jsondata)
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:

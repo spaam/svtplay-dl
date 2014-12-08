@@ -20,19 +20,23 @@ class Expressen(Service):
     supported_domains = ['expressen.se']
 
     def get(self, options):
-        match = re.search("xmlUrl=([^ ]+)\" ", self.get_urldata())
+        error, data = self.get_urldata()
+        if error:
+            log.error("Can't get the page")
+            return
+        match = re.search("xmlUrl=([^ ]+)\" ", data)
         if match:
             xmlurl = unquote_plus(match.group(1))
         else:
             match = re.search(
                 r"moviesList: \[\{\"VideoId\":\"(\d+)\"",
-                self.get_urldata())
+                self.get_urldata()[1])
             if not match:
                 log.error("Can't find video id")
                 return
             vid = match.group(1)
             xmlurl = "http://www.expressen.se/Handlers/WebTvHandler.ashx?id=%s" % vid
-        data = get_http_data(xmlurl)
+        error, data = get_http_data(xmlurl)
 
         xml = ET.XML(data)
         live = xml.find("live").text

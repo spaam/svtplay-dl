@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, HTTPError
+from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -17,11 +17,11 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no']
 
     def get(self, options):
-        try:
-            match = re.search("data-subtitlesurl = \"(/.*)\"", self.get_urldata())
-        except HTTPError:
+        error, data = self.get_urldata()
+        if error:
             log.error("Can't get the page")
             return
+        match = re.search("data-subtitlesurl = \"(/.*)\"", data)
 
         if match:
             parse = urlparse(self.url)
@@ -31,21 +31,22 @@ class Nrk(Service, OpenGraphThumbMixin):
         if options.force_subtitle:
             return
 
-        match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata())
+        match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata()[1])
         if match:
             manifest_url = match.group(1)
         else:
-            match = re.search(r'data-video-id="(\d+)"', self.get_urldata())
+            match = re.search(r'data-video-id="(\d+)"', self.get_urldata()[1])
             if match is None:
                 log.error("Can't find video id.")
                 return
             vid = match.group(1)
-            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata())
+            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata()[1])
             if match is None:
                 log.error("Can't find server address with media info")
                 return
             dataurl = "%smediaelement/%s" % (match.group(1), vid)
-            data = json.loads(get_http_data(dataurl))
+            error, data = get_http_data(dataurl)
+            data = json.loads(data)
             manifest_url = data["mediaUrl"]
             options.live = data["isLive"]
 

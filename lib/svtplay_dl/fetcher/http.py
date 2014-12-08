@@ -21,8 +21,7 @@ class HTTP(VideoRetriever):
             response = urlopen(request)
         except HTTPError as e:
             log.error("Something wrong with that url")
-            log.error("Error code: %s", e.code)
-            sys.exit(5)
+            return
         try:
             total_size = response.info()['Content-Length']
         except KeyError:

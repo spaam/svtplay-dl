@@ -3,7 +3,7 @@ import json
 import re
 import os
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, is_py3, get_http_data, HTTPError
+from svtplay_dl.utils import is_py2, is_py3, get_http_data
 
 class subtitle(object):
     def __init__(self, options, subtype, url):
@@ -13,15 +13,10 @@ class subtitle(object):
         self.subtype = subtype
 
     def download(self):
-        try:
-            subdata = get_http_data(self.url, cookiejar=self.options.cookies)
-        except HTTPError as e:
-            if e.code == 403:
-                log.error("Permission denied")
-                return
-            else:
-                log.error("Can't download subtitle")
-                return
+        error, subdata = get_http_data(self.url, cookiejar=self.options.cookies)
+        if error:
+            log.error("Can't download subtitle")
+            return
 
         data = None
         if self.subtype == "tt":

@@ -9,7 +9,7 @@ import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, filenamify, HTTPError
+from svtplay_dl.utils import get_http_data, is_py2_old, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -32,11 +32,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
         else:
-            try:
-                match = re.search(r"\"vid\":\"(\d+)\",", self.get_urldata())
-            except HTTPError:
+            error, data = self.get_urldata()
+            if error:
                 log.error("Can't get the page")
                 return
+            match = re.search(r"\"vid\":\"(\d+)\",", data)
             if match:
                 vid = match.group(1)
             else:
@@ -48,10 +48,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     return
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        try:
-            data = get_http_data(url)
-        except HTTPError as e:
-            xml = ET.XML(e.read())
+        error, data = get_http_data(url)
+        if error:
+            xml = ET.XML(data)
             code = xml.find("code").text
             if code == "SESSION_NOT_AUTHENTICATED":
                 log.error("Can't access premium content")
@@ -107,9 +106,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
-        try:
-            data = get_http_data(url)
-        except HTTPError as e:
+        error, data = get_http_data(url)
+        if error:
             log.warning("Can't get HLS video.")
             return
         xml = ET.XML(data)
@@ -127,11 +125,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
-        parse =  urlparse(self.url)
+        parse = urlparse(self.url)
         show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
             show = quote_plus(show)
-        data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
+        error, data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
         jsondata = json.loads(data)
         episodes = []
         for i in jsondata["results"]:

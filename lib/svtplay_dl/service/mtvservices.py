@@ -15,12 +15,19 @@ class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
     def get(self, options):
-        match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", self.get_urldata())
+        error, data = self.get_urldata()
+        if error:
+            log.error("Cant get page")
+            return
+        match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", )
         if not match:
             log.error("Can't find video file")
             return
         url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
-        data = get_http_data(url)
+        error, data = get_http_data(url)
+        if error:
+            log.error("Cant get stream info")
+            return
         start = data.index("<?xml version=")
         data = data[start:]
         xml = ET.XML(data)
