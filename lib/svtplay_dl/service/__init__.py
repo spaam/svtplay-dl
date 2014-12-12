@@ -146,7 +146,9 @@ sites = [
 class Generic(object):
     ''' Videos embed in sites '''
     def get(self, url):
-        data = get_http_data(url)
+        error, data = get_http_data(url)
+        if error:
+            return
         match = re.search(r"src=\"(http://www.svt.se/wd.*)\" height", data)
         stream = None
         if match:
