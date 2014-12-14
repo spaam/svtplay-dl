@@ -7,9 +7,9 @@ import xml.etree.ElementTree as ET
 import json
 import copy
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
+from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus, Cookie
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, filenamify
+from svtplay_dl.utils import get_http_data, is_py2_old, filenamify, CookieJar
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -22,6 +22,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def __init__(self, url):
         Service.__init__(self, url)
         self.subtitle = None
+        self.cj = CookieJar()
 
     def get(self, options):
         parse = urlparse(self.url)
@@ -47,8 +48,33 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     log.error("Can't find video id for %s", self.url)
                     return
 
+        if options.username and options.password:
+            # Need a dummy cookie to save cookies..
+            cc = Cookie(version=0, name='dummy',
+                        value="",
+                        port=None, port_specified=False,
+                        domain='www.tv4play.se',
+                        domain_specified=True,
+                        domain_initial_dot=True, path='/',
+                        path_specified=True, secure=False,
+                        expires=None, discard=True, comment=None,
+                        comment_url=None, rest={'HttpOnly': None})
+            self.cj.set_cookie(cc)
+            options.cookies = self.cj
+            error, data = get_http_data("https://www.tv4play.se/session/new?https=", cookiejar=self.cj)
+            auth_token = re.search('authenticity_token" type="hidden" value="([^"]+)"', data)
+            if not auth_token:
+                log.error("Can't find authenticity_token needed for user / passwdord")
+                return
+            url = "https://www.tv4play.se/session"
+            postdata3 = quote_plus("user_name=%s&password=%s&authenticity_token=%s" % (options.username, options.password, auth_token.group(1)),"=&")
+            error, data = get_http_data(url, post=postdata3, cookiejar=self.cj)
+            fail = re.search("<p class='failed-login'>([^<]+)</p>", data)
+            if fail:
+                log.error(fail.group(1))
+                return
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        error, data = get_http_data(url)
+        error, data = get_http_data(url, cookiejar=self.cj)
         if error:
             xml = ET.XML(data)
             code = xml.find("code").text
