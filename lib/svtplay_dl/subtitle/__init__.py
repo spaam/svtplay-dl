@@ -99,14 +99,14 @@ class subtitle(object):
     def smi(self, subdata):
         if is_py3:
             subdata = subdata.decode("latin1")
-        recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)<br>\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
+        recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
         number = 1
         subs = ""
         TAG_RE = re.compile(r'<[^>]+>')
         bad_char = re.compile(r'\x96')
         for i in recomp.finditer(subdata):
-            subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(6)))
-            text = "%s\n\n" % TAG_RE.sub('', i.group(3).replace("<br>", "\n"))
+            subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
+            text = "%s\n\n" % TAG_RE.sub('', i.group(2).replace("<br>", "\n"))
             if text[0] == "\x0a":
                 text = text[1:]
             subs += text
