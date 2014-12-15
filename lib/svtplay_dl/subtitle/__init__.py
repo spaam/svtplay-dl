@@ -84,10 +84,11 @@ class subtitle(object):
         for i in subt.getiterator():
             if i.tag == "Subtitle":
                 n = i.attrib["SpotNumber"]
+
                 if i.attrib["SpotNumber"] == "1":
-                    subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+                    subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], timecolon(i.attrib["TimeIn"]), timecolon(i.attrib["TimeOut"]))
                 else:
-                    subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], i.attrib["TimeIn"], i.attrib["TimeOut"])
+                    subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], timecolon(i.attrib["TimeIn"]), timecolon(i.attrib["TimeOut"]))
             else:
                 if int(n) > 0:
                     subs += "%s\n" % i.text
@@ -175,6 +176,10 @@ def timestr(msec):
 
     output = "%02d:%02d:%05.2f" % (hours, minutes, sec)
     return output.replace(".", ",")
+
+def timecolon(data):
+    match = re.search("(\d+:\d+:\d+):(\d+)", data)
+    return "%s,%s" % (match.group(1), match.group(2))
 
 def norm(name):
     if name[0] == "{":
