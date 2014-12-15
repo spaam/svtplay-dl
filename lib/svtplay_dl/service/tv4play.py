@@ -134,7 +134,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
         error, data = get_http_data(url)
         if error:
-            log.warning("Can't get HLS video.")
             return
         xml = ET.XML(data)
         ss = xml.find("items")
