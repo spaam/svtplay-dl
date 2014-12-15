@@ -51,15 +51,18 @@ def get_http_data(url, header=None, post=None, useragent=FIREFOX_UA,
     log.debug("HTTP getting %r", url)
     starttime = time.time()
     error = None
-    request = Request(url)
+    if post:
+        if is_py3:
+            post = bytes(post, encoding="utf-8")
+        request = Request(url, data=post)
+    else:
+        request = Request(url)
     standard_header = {'Referer': referer, 'User-Agent': useragent}
     for key, value in [head for head in standard_header.items() if head[1]]:
         request.add_header(key, value)
     if header:
         for key, value in [head for head in header.items() if head[1]]:
             request.add_header(key, value)
-    if post:
-        request.add_data(post)
 
     opener = build_opener(HTTPCookieProcessor(cookiejar))
 
