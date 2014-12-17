@@ -113,6 +113,7 @@ from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.vg import Vg
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
+from svtplay_dl.service.youplay import Youplay
 
 sites = [
     Aftonbladet,
@@ -140,7 +141,8 @@ sites = [
     Urplay,
     Viaplay,
     Vimeo,
-    Vg]
+    Vg,
+    Youplay]
 
 
 class Generic(object):
