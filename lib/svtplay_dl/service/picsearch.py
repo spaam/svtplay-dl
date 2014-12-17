@@ -43,9 +43,11 @@ class Picsearch(Service, OpenGraphThumbMixin):
                 options.other = "-y '%s'" % i["url"]
                 yield RTMP(copy.copy(options), server, i["height"])
         if "provider" in playlist:
-            options.live = playlist["live"]
-            if playlist["url"].endswith(".f4m"):
-                    streams = hdsparse(copy.copy(options), playlist["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+            if playlist["provider"] != "rtmp":
+                if "live" in playlist:
+                    options.live = playlist["live"]
+                if playlist["url"].endswith(".f4m"):
+                        streams = hdsparse(copy.copy(options), playlist["url"])
+                        if streams:
+                            for n in list(streams.keys()):
+                                yield streams[n]
