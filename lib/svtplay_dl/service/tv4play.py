@@ -160,7 +160,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         for i in jsondata["results"]:
             try:
                 days = int(i["availability"]["availability_group_free"])
-            except ValueError:
+            except (ValueError, TypeError):
                 days = 999
             if days > 0:
                 video_id = i["id"]
