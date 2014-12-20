@@ -132,7 +132,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
-        error, data = get_http_data(url)
+        error, data = get_http_data(url, cookiejar=self.cj)
         if error:
             return
         xml = ET.XML(data)
