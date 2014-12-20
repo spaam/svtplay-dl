@@ -83,7 +83,10 @@ class HLS(VideoRetriever):
                 sys.exit(2)
 
             match = re.search(r'URI="(https?://.*?)"', keydata)
-            key = get_http_data(match.group(1))
+            error, key = get_http_data(match.group(1))
+            if error:
+                log.error("Can't get crypto key to decode files.")
+                return
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
