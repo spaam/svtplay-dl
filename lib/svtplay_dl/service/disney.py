@@ -53,6 +53,30 @@ class Disney(Service, OpenGraphThumbMixin):
             match = re.search("uiConfId : '([^']+)'", self.get_urldata()[1])
             uiconfid = match.group(1)
 
+            match = re.search("json : ({.*}}),", self.get_urldata()[1])
+            jsondata = json.loads(match.group(1))
+            parse = urlparse(self.url)
+            if len(parse.fragment) > 0:
+                entry = parse.fragment[parse.fragment.rindex("/")+1:]
+                if entry in jsondata["idlist"]:
+                    entryid = jsondata["idlist"][entry]
+                else:
+                    log.error("Cant find video info")
+                    return
+            if options.output_auto:
+                for i in jsondata["playlists"][0]["playlist"]:
+                    if entryid in i["id"]:
+                        title = i["longId"]
+                        break
+
+                directory = os.path.dirname(options.output)
+                options.service = "disney"
+                title = "%s-%s" % (title, options.service)
+                title = filenamify(title)
+                if len(directory):
+                    options.output = "%s/%s" % (directory, title)
+                else:
+                    options.output = title
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
