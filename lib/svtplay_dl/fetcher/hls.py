@@ -69,11 +69,9 @@ class HLS(VideoRetriever):
         globaldata, files = parsem3u(m3u8)
         encrypted = False
         key = None
-        try:
+        if "KEY" in globaldata:
             keydata = globaldata["KEY"]
             encrypted = True
-        except KeyError:
-            pass
 
         if encrypted:
             try:
