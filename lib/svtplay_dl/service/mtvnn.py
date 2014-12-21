@@ -69,6 +69,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 break
 
         episodes = []
+        n = 0
         for i in sorted(episodNr):
+            if n == options.all_last:
+                break
             episodes.append("http://www.nickelodeon.se/serier/%s-something/videos/%s-something" % (programid, i))
+            n += 1
         return episodes
