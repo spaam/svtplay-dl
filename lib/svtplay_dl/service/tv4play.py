@@ -167,4 +167,4 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 url = "http://www.tv4play.se/program/%s?video_id=%s" % (
                     show, video_id)
                 episodes.append(url)
-        return sorted(episodes)
+        return episodes
