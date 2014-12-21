@@ -22,15 +22,25 @@ class OppetArkiv(Svtplay):
         program = match.group(1)
         more = True
         episodes = []
+
+        n = 0
+        if options.all_last > 0:
+            sort = "tid_fallande"
+        else:
+            sort = "tid_stigande"
+
         while more:
-            url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=tid_stigande&embed=true" % (program, page)
+            url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=%s&embed=true" % (program, page, sort)
             error, data = get_http_data(url)
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False
             regex = re.compile(r'(http://www.oppetarkiv.se/video/[^"]+)')
             for match in regex.finditer(data):
+                if n == options.all_last:
+                    break
                 episodes.append(match.group(1))
+                n += 1
             page += 1
 
         return episodes
