@@ -157,6 +157,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         error, data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
         jsondata = json.loads(data)
         episodes = []
+        n = 1
         for i in jsondata["results"]:
             try:
                 days = int(i["availability"]["availability_group_free"])
@@ -167,4 +168,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 url = "http://www.tv4play.se/program/%s?video_id=%s" % (
                     show, video_id)
                 episodes.append(url)
+                if n == options.all_last:
+                    break
+                n += 1
+
         return episodes
