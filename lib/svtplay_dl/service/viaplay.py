@@ -121,4 +121,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
         jsondata = json.loads(data)
         videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
 
-        return sorted(x["sharing"]["url"] for x in videos)
+        n=0
+        episodes = []
+        for i in videos:
+            if n == options.all_last:
+                break
+            episodes.append(i["sharing"]["url"])
+            n += 1
+        return episodes
