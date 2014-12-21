@@ -66,4 +66,12 @@ class Urplay(Service, OpenGraphThumbMixin):
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
         xml = ET.XML(get_http_data(url)[1])
 
-        return sorted(x.text for x in xml.findall(".//item/link"))
+        episodes = [x.text for x in xml.findall(".//item/link")]
+        episodes_new = []
+        n = 0
+        for i in episodes:
+            if n == options.all_last:
+                break
+            episodes_new.append(i)
+            n += 1
+        return episodes_new
