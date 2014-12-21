@@ -115,4 +115,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
         error, data = get_http_data(match.group(1))
         xml = ET.XML(data)
 
-        return sorted(x.text for x in xml.findall(".//item/link"))
+        episodes = [x.text for x in xml.findall(".//item/link")]
+        episodes_new = []
+        n = 1
+        for i in episodes:
+            episodes_new.append(i)
+            if n == options.all_last:
+                break
+            n += 1
+        return sorted(episodes_new)
