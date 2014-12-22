@@ -178,7 +178,7 @@ def timestr(msec):
     return output.replace(".", ",")
 
 def timecolon(data):
-    match = re.search("(\d+:\d+:\d+):(\d+)", data)
+    match = re.search(r"(\d+:\d+:\d+):(\d+)", data)
     return "%s,%s" % (match.group(1), match.group(2))
 
 def norm(name):

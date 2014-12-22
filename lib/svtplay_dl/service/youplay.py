@@ -29,17 +29,17 @@ class Youplay(Service, OpenGraphThumbMixin):
         if error:
             log.error("Cant get video info")
             return
-        match = re.search('decodeURIComponent\("([^"]+)"\)\)', data)
+        match = re.search(r'decodeURIComponent\("([^"]+)"\)\)', data)
         if not match:
             log.error("Can't decode video info")
             return
         data = unquote_plus(match.group(1))
-        match = re.search("videoData = ({[^;]+});", data)
+        match = re.search(r"videoData = ({[^;]+});", data)
         if not match:
             log.error("Cant find vidoe info")
             return
         # fix broken json.
-        regex = re.compile("\s(\w+):")
+        regex = re.compile(r"\s(\w+):")
         data = regex.sub(r"'\1':", match.group(1))
         data = data.replace("'", "\"")
         j = re.sub(r"{\s*(\w)", r'{"\1', data)
