@@ -54,14 +54,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             options.live = False
 
-        if data["video"]["subtitleReferences"]:
-            try:
-                suburl = data["video"]["subtitleReferences"][0]["url"]
-            except KeyError:
-                pass
-            if suburl and len(suburl) > 0:
-                yield subtitle(copy.copy(options), "wrst", suburl)
-
         if options.output_auto:
             directory = os.path.dirname(options.output)
             options.service = "svtplay"
@@ -76,6 +68,14 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
+
+        if data["video"]["subtitleReferences"]:
+            try:
+                suburl = data["video"]["subtitleReferences"][0]["url"]
+            except KeyError:
+                pass
+            if suburl and len(suburl) > 0:
+                yield subtitle(copy.copy(options), "wrst", suburl)
 
         if options.force_subtitle:
             return
