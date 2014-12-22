@@ -47,7 +47,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
                 if "live" in playlist:
                     options.live = playlist["live"]
                 if playlist["url"].endswith(".f4m"):
-                        streams = hdsparse(copy.copy(options), playlist["url"])
-                        if streams:
-                            for n in list(streams.keys()):
-                                yield streams[n]
+                    streams = hdsparse(copy.copy(options), playlist["url"])
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
