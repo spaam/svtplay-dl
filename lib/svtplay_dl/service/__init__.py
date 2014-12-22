@@ -51,9 +51,10 @@ class Service(object):
         pass
 
     def exclude(self, options):
-        for i in options.exclude:
-            if i in options.output:
-                return True
+        if options.exclude:
+            for i in options.exclude:
+                if i in options.output:
+                    return True
         return False
 
     # the options parameter is unused, but is part of the
