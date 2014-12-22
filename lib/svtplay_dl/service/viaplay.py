@@ -66,7 +66,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return
         dataj = json.loads(data)
         if "msg" in dataj:
-            log.error("%s" % dataj["msg"])
+            log.error(dataj["msg"])
             return
 
         if dataj["type"] == "live":
