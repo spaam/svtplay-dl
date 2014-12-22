@@ -42,6 +42,10 @@ class Vg(Service, OpenGraphThumbMixin):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
+
+        if self.exclude(options):
+            return
+
         if "hds" in jsondata["streamUrls"]:
             parse = urlparse(jsondata["streamUrls"]["hds"])
             manifest = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)

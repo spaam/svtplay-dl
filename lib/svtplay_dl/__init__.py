@@ -62,6 +62,7 @@ class Options(object):
         self.output_auto = False
         self.service = None
         self.cookies = None
+        self.exclude = None
 
 def get_media(url, options):
 
@@ -229,12 +230,16 @@ def main():
                       metavar="NN", help="get last NN episodes instead of all episodes")
     parser.add_option("-P", "--preferred", default=None,
                       metavar="preferred", help="preferred download method (rtmp, hls or hds)")
+    parser.add_option("--exclude", dest="exclude", default=None,
+                      metavar="WORD,WORD2", help="exclude videos with the WORD(s) in the filename. comma seperated.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
         sys.exit(0)
     if len(args) != 1:
         parser.error("Incorrect number of arguments")
+    if options.exclude:
+        options.exclude = options.exclude.split(",")
     options = mergeParserOption(Options(), options)
     setup_log(options.silent, options.verbose)
 
@@ -267,4 +272,5 @@ def mergeParserOption(options, parser):
     options.force_subtitle = parser.force_subtitle
     options.preferred = parser.preferred
     options.verbose = parser.verbose
+    options.exclude = parser.exclude
     return options

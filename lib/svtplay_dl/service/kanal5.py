@@ -74,6 +74,9 @@ class Kanal5(Service):
             else:
                 options.output = title
 
+        if self.exclude(options):
+            return
+
         if data["hasSubtitle"]:
             yield subtitle(copy.copy(options), "json", "http://www.kanal5play.se/api/subtitles/%s" % video_id)
 

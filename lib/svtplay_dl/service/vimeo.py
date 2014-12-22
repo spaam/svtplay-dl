@@ -18,6 +18,10 @@ class Vimeo(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't get the page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search('data-config-url="([^"]+)" data-fallback-url', data)
         if not match:
             log.error("Can't find video file for: %s", self.url)

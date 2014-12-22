@@ -20,6 +20,9 @@ class Youplay(Service, OpenGraphThumbMixin):
             log.error("Can't get the page.")
             return
 
+        if self.exclude(options):
+            return
+
         match = re.search(r'script async defer src="(//content.youplay.se[^"]+)"', data)
         if not match:
             log.error("Cant find video info")

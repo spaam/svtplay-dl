@@ -21,6 +21,10 @@ class Nrk(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't get the page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search("data-subtitlesurl = \"(/.*)\"", data)
 
         if match:

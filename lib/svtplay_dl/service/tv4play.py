@@ -109,6 +109,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 options.output = title
 
+        if self.exclude(options):
+            return
+
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
                 base = urlparse(i.find("base").text)

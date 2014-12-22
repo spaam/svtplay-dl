@@ -18,6 +18,10 @@ class Aftonbladet(Service):
         if error:
             log.error("Cant download page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
             log.error("Can't find video info")

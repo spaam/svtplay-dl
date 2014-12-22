@@ -19,6 +19,10 @@ class Qbrick(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't get the page")
             return
+
+        if self.exclude(options):
+            return
+
         if re.findall(r"sydsvenskan.se", self.url):
             match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
             if not match:

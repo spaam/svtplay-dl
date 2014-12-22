@@ -24,6 +24,10 @@ class Disney(Service, OpenGraphThumbMixin):
             if error:
                 log.error("Can't get the page")
                 return
+
+            if self.exclude(options):
+                return
+
             match = re.search(r"Grill.burger=({.*}):", data)
             if not match:
                 log.error("Can't find video info")
@@ -77,6 +81,9 @@ class Disney(Service, OpenGraphThumbMixin):
                     options.output = "%s/%s" % (directory, title)
                 else:
                     options.output = title
+
+            if self.exclude(options):
+                return
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)

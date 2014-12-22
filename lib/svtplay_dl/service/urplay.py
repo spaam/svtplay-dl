@@ -29,6 +29,10 @@ class Urplay(Service, OpenGraphThumbMixin):
         if not match:
             log.error("Can't find json info")
             return
+
+        if self.exclude(options):
+            return
+
         data = match.group(1)
         jsondata = json.loads(data)
         yield subtitle(copy.copy(options), "tt", jsondata["subtitles"].split(",")[0])

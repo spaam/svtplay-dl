@@ -18,6 +18,10 @@ class Ruv(Service):
         if error:
             log.error("Can't get the page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search(r'"([^"]+geo.php)"', data)
         if match:
             error, data = get_http_data(match.group(1))

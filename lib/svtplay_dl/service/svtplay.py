@@ -69,6 +69,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             else:
                 options.output = title
 
+        if self.exclude(options):
+            return
+
         if data["video"]["subtitleReferences"]:
             try:
                 suburl = data["video"]["subtitleReferences"][0]["url"]

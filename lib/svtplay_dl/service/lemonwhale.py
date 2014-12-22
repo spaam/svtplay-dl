@@ -20,6 +20,10 @@ class Lemonwhale(Service):
         if error:
             log.error("Can't get data from that page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search(r'video url-([^"]+)', data)
         if not match:
             match = re.search(r'embed.jsp\?([^"]+)"', self.get_urldata()[1])

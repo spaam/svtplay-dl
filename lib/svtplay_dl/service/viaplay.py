@@ -72,6 +72,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if dataj["type"] == "live":
             options.live = True
 
+        if self.exclude(options):
+            return
+
         if dataj["sami_path"]:
             yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
         if dataj["subtitles_for_hearing_impaired"]:

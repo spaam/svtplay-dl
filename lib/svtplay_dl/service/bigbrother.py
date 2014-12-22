@@ -19,6 +19,10 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't download page.")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search(r'id="(bcPl[^"]+)"', data)
         if not match:
             log.error("Can't find flash id.")

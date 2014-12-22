@@ -24,6 +24,10 @@ class Expressen(Service):
         if error:
             log.error("Can't get the page")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search("xmlUrl=([^ ]+)\" ", data)
         if match:
             xmlurl = unquote_plus(match.group(1))

@@ -19,6 +19,10 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't get the page.")
             return
+
+        if self.exclude(options):
+            return
+
         ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
         if not ajax_auth:
             log.error("Cant find token for video")

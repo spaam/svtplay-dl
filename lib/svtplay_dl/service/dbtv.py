@@ -17,6 +17,10 @@ class Dbtv(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't download webpage")
             return
+
+        if self.exclude(options):
+            return
+
         parse = urlparse(self.url)
         vidoid = parse.path[parse.path.rfind("/")+1:]
         match = re.search(r'JSONdata = ({.*});', data)

@@ -20,6 +20,10 @@ class Dr(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't download page.")
             return
+
+        if self.exclude(options):
+            return
+
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)

@@ -48,6 +48,9 @@ class Justin(Service):
         urlp = urlparse(self.url)
         success = False
 
+        if self.exclude(options):
+            return
+
         for jtv_video_type in [self._get_chapter, self._get_archive,
                                self._get_channel]:
             try:

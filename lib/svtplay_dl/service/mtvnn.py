@@ -36,6 +36,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 options.output = "%s/%s" % (directory, title)
             else:
                 options.output = title
+
+        if self.exclude(options):
+            return
+
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         error, content = get_http_data(contenturl)
         if error:

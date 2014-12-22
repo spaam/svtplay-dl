@@ -50,6 +50,12 @@ class Service(object):
     def get_subtitle(self, options):
         pass
 
+    def exclude(self, options):
+        for i in options.exclude:
+            if i in options.output:
+                return True
+        return False
+
     # the options parameter is unused, but is part of the
     # interface, so we don't want to remove it. Thus, the
     # pylint ignore.
