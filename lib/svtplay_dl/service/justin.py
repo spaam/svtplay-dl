@@ -67,6 +67,9 @@ class Justin(Service):
         url = "http://api.justin.tv/api/broadcast/by_%s/%s.xml?onsite=true" % (
             vidtype, vid)
         error, data = get_http_data(url)
+        if error:
+            log.error("Cant get api page")
+            return
 
         xml = ET.XML(data)
         url = xml.find("archive").find("video_file_url").text

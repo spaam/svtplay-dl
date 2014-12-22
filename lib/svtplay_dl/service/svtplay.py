@@ -113,6 +113,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             log.error("Couldn't retrieve episode list")
             return
         error, data = get_http_data(match.group(1))
+        if error:
+            log.error("Cant get rss page")
+            return
         xml = ET.XML(data)
 
         episodes = [x.text for x in xml.findall(".//item/link")]

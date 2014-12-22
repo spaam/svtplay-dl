@@ -155,6 +155,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if not re.search("%", show):
             show = quote_plus(show)
         error, data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
+        if error:
+            log.error("Can't get api page")
+            return
         jsondata = json.loads(data)
         episodes = []
         n = 1

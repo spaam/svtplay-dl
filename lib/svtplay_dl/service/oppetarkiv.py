@@ -13,6 +13,9 @@ class OppetArkiv(Svtplay):
     def find_all_episodes(self, options):
         page = 1
         error, data = self.get_urldata()
+        if error:
+            log.error("Cant get web page")
+            return
         match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', data)
         if match is None:
             match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', self.url)
