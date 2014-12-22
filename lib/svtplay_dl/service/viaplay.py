@@ -74,6 +74,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if dataj["sami_path"]:
             yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
+        if dataj["subtitles_for_hearing_impaired"]:
+            yield subtitle(copy.copy(options), "sami", dataj["subtitles_for_hearing_impaired"])
 
         error, streams = get_http_data("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if error:
