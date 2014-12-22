@@ -151,13 +151,13 @@ class Generic(object):
         error, data = get_http_data(url)
         if error:
             return
-        match = re.search(r"src=\"(http://www.svt.se/wd.*)\" height", data)
+        match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:
-            url = match.group(1)
+            url = match.group(2)
             for i in sites:
                 if i.handles(url):
-                    url = url.replace("&amp;", "&")
+                    url = url.replace("&amp;", "&").replace("&#038;","&")
                     return url, i(url)
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
