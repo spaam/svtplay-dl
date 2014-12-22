@@ -19,7 +19,7 @@ class Mtvservices(Service):
         if error:
             log.error("Cant get page")
             return
-        match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", )
+        match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
         if not match:
             log.error("Can't find video file")
             return
