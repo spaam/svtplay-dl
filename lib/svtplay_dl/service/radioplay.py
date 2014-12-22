@@ -20,7 +20,7 @@ class Radioplay(Service):
         if error:
             log.error("Can't get the page")
             return
-        match = re.search(r"RP.vcdData = ({.*});</script>", )
+        match = re.search(r"RP.vcdData = ({.*});</script>", data)
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):
