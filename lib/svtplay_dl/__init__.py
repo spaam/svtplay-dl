@@ -98,10 +98,18 @@ def get_media(url, options):
 
             log.info("Episode %d of %d", idx + 1, len(episodes))
 
-            # get_one_media overwrites options.output...
-            get_one_media(substream, copy.copy(options))
+            try:
+                # get_one_media overwrites options.output...
+                get_one_media(substream, copy.copy(options))
+            except URLError as e:
+                log.error("Cant find that page: %s", e.reason)
+                return
     else:
-        get_one_media(stream, options)
+        try:
+            get_one_media(stream, options)
+        except URLError as e:
+            log.error("Cant find that page: %s", e.reason)
+            sys.exit(2)
 
 def get_one_media(stream, options):
     if not options.output or os.path.isdir(options.output):
