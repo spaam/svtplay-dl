@@ -89,7 +89,8 @@ def get_media(url, options):
                 return
 
         episodes = stream.find_all_episodes(options)
-
+        if episodes is None:
+            return
         for idx, o in enumerate(episodes):
             if o == url:
                 substream = stream
