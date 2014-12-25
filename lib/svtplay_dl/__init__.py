@@ -55,7 +55,7 @@ class Options(object):
         self.password = None
         self.thumbnail = False
         self.all_episodes = False
-        self.all_last = 0
+        self.all_last = -1
         self.force_subtitle = False
         self.preferred = None
         self.verbose = False
@@ -235,7 +235,7 @@ def main():
     parser.add_option("-A", "--all-episodes",
                       action="store_true", dest="all_episodes", default=False,
                       help="try to download all episodes")
-    parser.add_option("--all-last", dest="all_last", default=0, type=int,
+    parser.add_option("--all-last", dest="all_last", default=-1, type=int,
                       metavar="NN", help="get last NN episodes instead of all episodes")
     parser.add_option("-P", "--preferred", default=None,
                       metavar="preferred", help="preferred download method (rtmp, hls or hds)")
