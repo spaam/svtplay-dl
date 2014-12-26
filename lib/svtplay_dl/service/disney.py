@@ -109,7 +109,7 @@ class Disney(Service, OpenGraphThumbMixin):
                     options.output = title
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
-            redirect  = check_redirect(url)
+            redirect = check_redirect(url)
             streams = hlsparse(redirect)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)

@@ -46,9 +46,9 @@ class Youplay(Service, OpenGraphThumbMixin):
         data = regex.sub(r"'\1':", match.group(1))
         data = data.replace("'", "\"")
         j = re.sub(r"{\s*(\w)", r'{"\1', data)
-        j = j.replace("\n","")
+        j = j.replace("\n", "")
         j = re.sub(r'",\s*}', '"}', j)
-        jsondata  = json.loads(j)
+        jsondata = json.loads(j)
         for i in jsondata["episode"]["sources"]:
             match = re.search(r"mp4_(\d+)", i)
             if match:

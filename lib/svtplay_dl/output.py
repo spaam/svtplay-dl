@@ -77,7 +77,7 @@ class ETA(object):
         return str(timedelta(seconds=int(elm_time * self.left)))
 
 
-def progress(byte, total, extra = ""):
+def progress(byte, total, extra=""):
     """ Print some info about how much we have downloaded """
     if total == 0:
         progresstr = "Downloaded %dkB bytes" % (byte >> 10)

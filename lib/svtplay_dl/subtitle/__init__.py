@@ -53,7 +53,7 @@ class subtitle(object):
                     end = "%02d:%02d:%06.3f" % (int(begin[0]), int(begin[1]), sec)
                 else:
                     end = node.attrib["end"]
-                data += '%s\n%s --> %s\n' % (i, begin.replace(".",","), end.replace(".",","))
+                data += '%s\n%s --> %s\n' % (i, begin.replace(".", ","), end.replace(".", ","))
                 data = tt_text(node, data)
                 data += "\n"
                 i += 1
