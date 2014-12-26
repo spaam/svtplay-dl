@@ -1,8 +1,13 @@
+PYLINT_OPTS = --report=no -d I -d C -d R -d W0511
+
 all: svtplay-dl
 
 clean:
 	find . -name '*.pyc' -exec rm {} \;
 	rm -f svtplay-dl
+
+pylint:
+	pylint $(PYLINT_OPTS) svtplay_dl
 
 export PACKAGES = svtplay_dl \
                  svtplay_dl.fetcher \
