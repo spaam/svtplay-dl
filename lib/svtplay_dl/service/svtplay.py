@@ -163,7 +163,9 @@ def seasoninfo(data):
         if match.group(2) is None:
             season = 1
         else:
-            season = match.group(2)
+            season = int(match.group(2))
+        if season < 10:
+            season = "0%s" % season
         return "S%sE%s" % (season, match.group(3))
     else:
         return None
