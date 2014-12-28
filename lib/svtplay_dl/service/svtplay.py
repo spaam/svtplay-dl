@@ -59,19 +59,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
             options.live = False
 
         if options.output_auto:
-            directory = os.path.dirname(options.output)
             options.service = "svtplay"
-
-            name = data["statistics"]["folderStructure"]
-            if name.find(".") > 0:
-                title = "%s-%s-%s-%s" % (name[:name.find(".")], data["statistics"]["title"], data["videoId"], options.service)
-            else:
-                title = "%s-%s-%s-%s" % (name, data["statistics"]["title"], data["videoId"], options.service)
-            title = filenamify(title)
-            if len(directory):
-                options.output = "%s/%s" % (directory, title)
-            else:
-                options.output = title
+            options.output = outputfilename(data, options.output, self.get_urldata()[1])
 
         if self.exclude(options):
             return
@@ -134,3 +123,40 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 break
             n += 1
         return sorted(episodes_new)
+
+
+def outputfilename(data, filename, raw):
+    directory = os.path.dirname(filename)
+    name = data["statistics"]["folderStructure"]
+    if name.find(".") > 0:
+        name = name[:name.find(".")]
+    name = name.replace("-", ".")
+    season = seasoninfo(raw)
+    other = data["statistics"]["title"].replace("-",".")
+    if season:
+        title = "%s.%s.%s-%s-svtplay" % (name, season, other, data["videoId"])
+    else:
+        title = "%s.%s.%s-svtplay" % (name, other, data["videoId"])
+    title = filenamify(title)
+    if len(directory):
+        output = "%s/%s" % (directory, title)
+    else:
+        output = title
+    return output
+
+
+def seasoninfo(line):
+    match = re.search(r'play_video-area-aside__sub-title">([^<]+)<span', line)
+    if match:
+        line = re.sub(" +", "", match.group(1)).replace('\n','')
+        match = re.search(r"(\w+(\d+)-)?Avsnitt(\d+)", line)
+        if match:
+            if match.group(2) is None:
+                season = 1
+            else:
+                season = match.group(2)
+            return "S%sE%s" % (season, match.group(3))
+        else:
+            return None
+    else:
+        return None
