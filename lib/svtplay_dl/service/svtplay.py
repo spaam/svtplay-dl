@@ -148,18 +148,24 @@ def outputfilename(data, filename, raw):
     return output
 
 
-def seasoninfo(line):
-    match = re.search(r'play_video-area-aside__sub-title">([^<]+)<span', line)
+def seasoninfo(data):
+    match = re.search(r'play_video-area-aside__sub-title">([^<]+)<span', data)
     if match:
-        line = re.sub(" +", "", match.group(1)).replace('\n','')
-        match = re.search(r"(\w+(\d+)-)?Avsnitt(\d+)", line)
+        line = match.group(1)
+    else:
+        match = re.search(r'data-title="([^"]+)"', data)
         if match:
-            if match.group(2) is None:
-                season = 1
-            else:
-                season = match.group(2)
-            return "S%sE%s" % (season, match.group(3))
+            line = match.group(1)
         else:
             return None
+
+    line = re.sub(" +", "", match.group(1)).replace('\n','')
+    match = re.search(r"(song(\d+)-)?Avsnitt(\d+)", line)
+    if match:
+        if match.group(2) is None:
+            season = 1
+        else:
+            season = match.group(2)
+        return "S%sE%s" % (season, match.group(3))
     else:
         return None
