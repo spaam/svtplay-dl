@@ -178,7 +178,7 @@ def filenamify(title):
     title = unicodedata.normalize('NFD', title)
 
     # Drop any non ascii letters/digits
-    title = re.sub(r'[^a-zA-Z0-9 -]', '', title)
+    title = re.sub(r'[^a-zA-Z0-9 -.]', '', title)
     # Drop any leading/trailing whitespace that may have appeared
     title = title.strip()
     # Lowercase
