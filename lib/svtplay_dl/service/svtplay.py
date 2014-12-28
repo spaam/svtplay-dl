@@ -130,13 +130,16 @@ def outputfilename(data, filename, raw):
     name = data["statistics"]["folderStructure"]
     if name.find(".") > 0:
         name = name[:name.find(".")]
+    match = re.search("^arkiv-", name)
+    if match:
+        name = name.replace("arkiv-", "")
     name = name.replace("-", ".")
     season = seasoninfo(raw)
     other = data["statistics"]["title"].replace("-",".")
     if season:
         title = "%s.%s.%s-%s-svtplay" % (name, season, other, data["videoId"])
     else:
-        title = "%s.%s.%s-svtplay" % (name, other, data["videoId"])
+        title = "%s.%s-%s-svtplay" % (name, other, data["videoId"])
     title = filenamify(title)
     if len(directory):
         output = "%s/%s" % (directory, title)
