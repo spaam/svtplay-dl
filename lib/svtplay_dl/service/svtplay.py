@@ -55,8 +55,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return
         if "live" in data["video"]:
             options.live = data["video"]["live"]
-        else:
-            options.live = False
 
         if options.output_auto:
             options.service = "svtplay"
