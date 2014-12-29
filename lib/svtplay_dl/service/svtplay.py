@@ -166,6 +166,9 @@ def seasoninfo(data):
             season = int(match.group(2))
         if season < 10:
             season = "0%s" % season
-        return "S%sE%s" % (season, match.group(3))
+        episode = int(match.group(3))
+        if episode < 10:
+            episode = "0%s" % episode
+        return "S%sE%s" % (season, episode)
     else:
         return None
