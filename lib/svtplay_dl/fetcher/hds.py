@@ -90,7 +90,7 @@ class HDS(VideoRetriever):
             antal = readbox(bootstrap, box[0])
         baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
 
-        file_d = output(self.options, self.options.output, "flv")
+        file_d = output(self.options, "flv")
         if hasattr(file_d, "read") is False:
             return
 

@@ -88,7 +88,7 @@ class HLS(VideoRetriever):
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
-        file_d = output(self.options, self.options.output, "ts")
+        file_d = output(self.options, "ts")
         if hasattr(file_d, "read") is False:
             return
 

@@ -113,14 +113,14 @@ def progressbar(total, pos, msg=""):
 
     progress_stream.write(fmt % (pos, total, bar, msg))
 
-def output(options, filename, extention="mp4", openfd=True):
+def output(options, extention="mp4", openfd=True):
     if is_py3:
         file_d = io.IOBase
     else:
         file_d = file
 
     if options.output != "-":
-        ext = re.search(r"(\.[a-z0-9]+)$", filename)
+        ext = re.search(r"(\.[a-z0-9]+)$", options.output)
         if not ext:
             options.output = "%s.%s" % (options.output, extention)
         log.info("Outfile: %s", options.output)
