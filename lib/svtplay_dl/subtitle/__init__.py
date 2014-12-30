@@ -4,6 +4,7 @@ import re
 import os
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, is_py3, get_http_data
+from svtplay_dl.output import output
 
 class subtitle(object):
     def __init__(self, options, subtype, url):
@@ -30,7 +31,11 @@ class subtitle(object):
         if self.subtype == "wrst":
             data = self.wrst(subdata)
 
-        save(self.options, data)
+        file_d = output(self.options, "srt")
+        if hasattr(file_d, "read") is False:
+            return
+        file_d.write(data)
+        file_d.close()
 
     def tt(self, subdata):
         i = 1
@@ -140,21 +145,6 @@ class subtitle(object):
             srt += sub
 
         return srt
-
-def save(options, data):
-    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-    if filename:
-        options.output = "%s.srt" % filename.group(1)
-    else:
-        options.output = "%s.srt" % options.output
-
-    log.info("Subtitle: %s", options.output)
-    if os.path.isfile(options.output) and not options.force:
-        log.info("File already exists. use --force to overwrite")
-        return
-    fd = open(options.output, "w")
-    fd.write(data)
-    fd.close()
 
 def timestr(msec):
     """
