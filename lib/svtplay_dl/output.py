@@ -141,16 +141,21 @@ def output(options, extention="mp4", openfd=True):
     return file_d
 
 def findexpisode(directory, service, name):
-    match = re.search(r"-(\w+)-\w+.(?!srt)\w{2,3}$", name)
+    match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)
     if not match:
         return False
     videoid = match.group(1)
+    extention = match.group(2)
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     for i in files:
-        match = re.search(r"-(\w+)-\w+.(?!srt)\w{2,3}$", i)
+        match = re.search(r"-(\w+)-\w+.(\w{2,3})$", i)
         if match:
             if service:
-                if name.find(service) and match.group(1) == videoid:
-                    return True
+                if extention == "srt":
+                    if name.find(service) and match.group(1) == videoid and match.group(2) == extention:
+                        return True
+                else:
+                    if name.find(service) and match.group(1) == videoid:
+                        return True
 
     return False
