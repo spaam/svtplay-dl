@@ -125,10 +125,15 @@ def output(options, extention="mp4", openfd=True):
             options.output = "%s.%s" % (options.output, extention)
         log.info("Outfile: %s", options.output)
         if (os.path.isfile(options.output) or \
-            findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))) and \
-            not options.force:
-            log.error("File already exists. Use --force to overwrite")
-            return None
+            findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))):
+            if extention == "srt":
+                if not options.force_subtitle:
+                    log.error("File already exists. Use --force-subtitle to overwrite")
+                    return None
+            else:
+                if not options.force:
+                    log.error("File already exists. Use --force to overwrite")
+                    return None
         if openfd:
             file_d = open(options.output, "wb")
     else:
