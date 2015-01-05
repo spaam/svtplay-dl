@@ -85,7 +85,7 @@ def get_media(url, options):
             try:
                 os.makedirs(options.output)
             except OSError as e:
-                log.error("%s: %s" % (e.strerror,  e.filename))
+                log.error("%s: %s" % (e.strerror, e.filename))
                 return
 
         episodes = stream.find_all_episodes(options)
@@ -159,7 +159,7 @@ def get_one_media(stream, options):
     else:
         stream = select_quality(options, videos)
         log.info("Selected to download %s, bitrate: %s",
-            stream.name(), stream.bitrate)
+                 stream.name(), stream.bitrate)
         try:
             stream.download()
         except UIException as e:

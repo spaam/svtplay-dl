@@ -133,7 +133,7 @@ def outputfilename(data, filename, raw):
         name = name.replace("arkiv-", "")
     name = name.replace("-", ".")
     season = seasoninfo(raw)
-    other = data["statistics"]["title"].replace("-",".")
+    other = data["statistics"]["title"].replace("-", ".")
     if season:
         title = "%s.%s.%s-%s-svtplay" % (name, season, other, data["videoId"])
     else:
@@ -157,7 +157,7 @@ def seasoninfo(data):
         else:
             return None
 
-    line = re.sub(" +", "", match.group(1)).replace('\n','')
+    line = re.sub(" +", "", match.group(1)).replace('\n', '')
     match = re.search(r"(song(\d+)-)?Avsnitt(\d+)", line)
     if match:
         if match.group(2) is None:
