@@ -219,7 +219,7 @@ def main():
     parser.add_option("-Q", "--flexible-quality", default=0,
                       metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
     parser.add_option("-H", "--hls",
-                      action="store_true", dest="hls", default=False, help="obsolete use -P")
+                      action="store_true", dest="hls", default=False, help="obsolete use -P hls")
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
                       help="download subtitle from the site if available")
