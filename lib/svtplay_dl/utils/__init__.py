@@ -103,6 +103,19 @@ def check_redirect(url):
     else:
         return url
 
+def sort_quality(data):
+    data = sorted(data, key=lambda x: (x.bitrate, x.name()), reverse=True)
+    datas = []
+    for i in data:
+        datas.append([i.bitrate, i.name()])
+    return datas
+
+def list_quality(videos):
+    data = sort_quality(videos)
+    log.info("Quality\tMethod")
+    for i in data:
+        log.info("%s\t%s" % (i[0], i[1].upper()))
+
 def select_quality(options, streams):
     available = sorted(int(x.bitrate) for x in streams)
     try:
@@ -129,11 +142,8 @@ def select_quality(options, streams):
             selected = q
             break
     if not selected and selected != 0:
-        data = sorted(streams, key=lambda x: (x.bitrate, x.name()), reverse=True)
-        datas = []
-        for i in data:
-            datas.append([i.bitrate, i.name()])
-        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in datas)
+        data = sort_quality(streams)
+        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
 
         sys.exit(4)

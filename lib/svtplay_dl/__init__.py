@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, URLError
+from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, URLError, list_quality
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -48,6 +48,7 @@ class Options(object):
         self.force = False
         self.quality = 0
         self.flexibleq = None
+        self.list_quality = False
         self.hls = False
         self.other = None
         self.subtitle = False
@@ -141,7 +142,7 @@ def get_one_media(stream, options):
     for i in streams:
         if isinstance(i, VideoRetriever):
             if options.preferred:
-                if options.preferred == i.name():
+                if options.preferred.lower() == i.name():
                     videos.append(i)
             else:
                 videos.append(i)
@@ -157,6 +158,9 @@ def get_one_media(stream, options):
     if len(videos) == 0:
         log.error("Can't find any streams for that url")
     else:
+        if options.list_quality:
+            list_quality(videos)
+            return
         stream = select_quality(options, videos)
         log.info("Selected to download %s, bitrate: %s",
                  stream.name(), stream.bitrate)
@@ -218,6 +222,8 @@ def main():
                                               "it will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
                       metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
+    parser.add_option("--list-quality", dest="list_quality", action="store_true", default=False,
+                      help="list the quality for a video")
     parser.add_option("-H", "--hls",
                       action="store_true", dest="hls", default=False, help="obsolete use -P hls")
     parser.add_option("-S", "--subtitle",
@@ -271,6 +277,7 @@ def mergeParserOption(options, parser):
     options.force = parser.force
     options.quality = parser.quality
     options.flexibleq = parser.flexibleq
+    options.list_quality = parser.list_quality
     options.hls = parser.hls
     options.subtitle = parser.subtitle
     options.username = parser.username
