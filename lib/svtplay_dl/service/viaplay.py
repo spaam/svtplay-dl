@@ -111,8 +111,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if streamj["streams"]["hls"]:
             streams = hlsparse(streamj["streams"]["hls"])
-            for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+            if streams:
+                for n in list(streams.keys()):
+                    yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
         format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata()[1])
