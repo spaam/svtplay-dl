@@ -123,6 +123,8 @@ def output(options, extention="mp4", openfd=True):
         ext = re.search(r"(\.[a-z0-9]+)$", options.output)
         if not ext:
             options.output = "%s.%s" % (options.output, extention)
+        if extention == "srt" and ext:
+            options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
         log.info("Outfile: %s", options.output)
         if (os.path.isfile(options.output) or \
             findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))):
