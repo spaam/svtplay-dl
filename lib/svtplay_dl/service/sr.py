@@ -42,6 +42,6 @@ class Sr(Service, OpenGraphThumbMixin):
             url = i["Url"]
             if not url.startswith('http'):
                 url = 'http:%s' % url
-            yield HTTP(copy.copy(options), url, i["Quality"])
+            yield HTTP(copy.copy(options), url, i["Quality"]/1000)
 
 
