@@ -113,6 +113,7 @@ from svtplay_dl.service.picsearch import Picsearch
 from svtplay_dl.service.qbrick import Qbrick
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.ruv import Ruv
+from svtplay_dl.service.raw import Raw
 from svtplay_dl.service.sr import Sr
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.service.tv4play import Tv4play
@@ -204,6 +205,10 @@ class Generic(object):
                 if i.handles(url):
                     return url, i(url)
 
+        if url.find(".f4m") > 0:
+            return url, Raw(url)
+        if url.find(".m3u8") > 0:
+            return url, Raw(url)
         return url, stream
 
 def service_handler(url):
