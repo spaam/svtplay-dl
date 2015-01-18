@@ -255,6 +255,8 @@ def main():
         parser.error("Incorrect number of arguments")
     if options.exclude:
         options.exclude = options.exclude.split(",")
+    if options.force_subtitle:
+        options.subtitle = True
     options = mergeParserOption(Options(), options)
     setup_log(options.silent, options.verbose)
 
