@@ -54,8 +54,7 @@ class Dr(Service, OpenGraphThumbMixin):
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        manifest = "%s?hdcore=2.8.0&g=hejsan" % stream["Uri"]
-                        streams = hdsparse(copy.copy(options), manifest)
+                        streams = hdsparse(copy.copy(options), stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]

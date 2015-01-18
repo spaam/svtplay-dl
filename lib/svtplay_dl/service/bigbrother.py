@@ -60,8 +60,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
-                manifest = "%s?hdcore=3.3.0" % i["defaultURL"]
-                streams = hdsparse(copy.copy(options), manifest)
+                streams = hdsparse(copy.copy(options), i["defaultURL"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]

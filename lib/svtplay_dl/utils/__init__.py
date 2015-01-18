@@ -23,7 +23,7 @@ FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/
 
 from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
                                     HTTPRedirectHandler, HTTPError, URLError, \
-                                    addinfourl, CookieJar
+                                    addinfourl, CookieJar, urlparse
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -47,6 +47,10 @@ def get_http_data(url, header=None, post=None, useragent=FIREFOX_UA,
     """ Get the page to parse it for streams """
     if not cookiejar:
         cookiejar = CookieJar()
+
+    if url.find("manifest.f4m") > 0:
+        parse = urlparse(url)
+        url = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)
 
     log.debug("HTTP getting %r", url)
     starttime = time.time()

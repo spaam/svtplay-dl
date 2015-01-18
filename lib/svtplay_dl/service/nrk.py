@@ -59,7 +59,6 @@ class Nrk(Service, OpenGraphThumbMixin):
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
 
-        manifest_url = "%s?hdcore=2.8.0&g=hejsan" % manifest_url
         streams = hdsparse(copy.copy(options), manifest_url)
         if streams:
             for n in list(streams.keys()):
