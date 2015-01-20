@@ -25,28 +25,15 @@ class Tv4play(Service, OpenGraphThumbMixin):
         self.cj = CookieJar()
 
     def get(self, options):
-        parse = urlparse(self.url)
-        if "tv4play.se" in self.url:
-            try:
-                vid = parse_qs(parse.query)["video_id"][0]
-            except KeyError:
-                log.error("Can't find video file for: %s", self.url)
-                return
-        else:
-            error, data = self.get_urldata()
-            if error:
-                log.error("Can't get the page")
-                return
-            match = re.search(r"\"vid\":\"(\d+)\",", data)
-            if match:
-                vid = match.group(1)
-            else:
-                match = re.search(r"-(\d+)$", self.url)
-                if match:
-                    vid = match.group(1)
-                else:
-                    log.error("Can't find video id for %s", self.url)
-                    return
+        error, data = self.get_urldata()
+        if error:
+            log.error("Can't get the page")
+            return
+
+        vid = findvid(self.url, data)
+        if vid is None:
+            log.error("Can't find video id for %s", self.url)
+            return
 
         if options.username and options.password:
             # Need a dummy cookie to save cookies..
@@ -173,3 +160,22 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 n += 1
 
         return episodes
+
+def findvid(url, data):
+    parse = urlparse(url)
+    if "tv4play.se" in url:
+        try:
+            vid = parse_qs(parse.query)["video_id"][0]
+        except KeyError:
+            return None
+    else:
+        match = re.search(r"\"vid\":\"(\d+)\",", data)
+        if match:
+            vid = match.group(1)
+        else:
+            match = re.search(r"-(\d+)$", url)
+            if match:
+                vid = match.group(1)
+            else:
+                return None
+    return vid
