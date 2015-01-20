@@ -177,5 +177,14 @@ def findvid(url, data):
             if match:
                 vid = match.group(1)
             else:
-                return None
+                match = re.search(r"meta content='([^']+)' property='og:video'", data)
+                if match:
+                    match = re.search(r"vid=(\d+)&", match.group(1))
+                    if match:
+                        vid = match.group(1)
+                    else:
+                        log.error("Can't find video id for %s", url)
+                        return
+                else:
+                    return None
     return vid
