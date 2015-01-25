@@ -133,7 +133,7 @@ def get_one_media(stream, options):
 
     if platform.system() == "Windows":
         # ugly hack. replace \ with / or add extra \ because c:\test\kalle.flv will add c:_tab_est\kalle.flv
-        if options.output.find("\\") > 0:
+        if options.output and options.output.find("\\") > 0:
             options.output = options.output.replace("\\", "/")
 
     videos = []
