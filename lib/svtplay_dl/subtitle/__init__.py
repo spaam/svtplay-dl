@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as ET
 import json
 import re
-import os
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, is_py3, get_http_data
 from svtplay_dl.output import output
+
 
 class subtitle(object):
     def __init__(self, options, subtype, url):

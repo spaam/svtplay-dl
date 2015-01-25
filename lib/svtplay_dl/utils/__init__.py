@@ -22,7 +22,7 @@ is_py2_old = (sys.version_info < (2, 7))
 FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 
 from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
-                                    HTTPRedirectHandler, HTTPError, URLError, \
+                                    HTTPRedirectHandler, HTTPError, \
                                     addinfourl, CookieJar, urlparse
 
 log = logging.getLogger('svtplay_dl')
