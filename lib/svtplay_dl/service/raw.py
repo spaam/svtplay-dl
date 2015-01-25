@@ -18,8 +18,10 @@ class Raw(Service):
             return
 
         if self.url.find(".f4m") > 0:
-            if options.output is None:
+            if options.output is None or os.path.isdir(options.output):
                 filename = os.path.basename(self.url[:self.url.rfind("/")-1])
+                if os.path.isdir(options.output):
+                    filename = "%s/%s" % (os.path.dirname(options.output), filename)
                 options.output = "%s.flv" % filename
             streams = hdsparse(copy.copy(options), self.url)
             if streams:
@@ -27,8 +29,10 @@ class Raw(Service):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
             streams = hlsparse(self.url)
-            if options.output is None:
+            if options.output is None or os.path.isdir(options.output):
                 filename = os.path.basename(self.url[:self.url.rfind("/")-1])
+                if os.path.isdir(options.output):
+                    filename = "%s/%s" % (os.path.dirname(options.output), filename)
                 options.output = "%s.ts" % filename
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
