@@ -94,68 +94,9 @@ class OpenGraphThumbMixin(object):
         download_thumbnail(options, url)
 
 
-from svtplay_dl.service.aftonbladet import Aftonbladet
-from svtplay_dl.service.bambuser import Bambuser
-from svtplay_dl.service.bigbrother import Bigbrother
-from svtplay_dl.service.dbtv import Dbtv
-from svtplay_dl.service.disney import Disney
-from svtplay_dl.service.dr import Dr
-from svtplay_dl.service.expressen import Expressen
-from svtplay_dl.service.hbo import Hbo
-from svtplay_dl.service.justin import Justin
-from svtplay_dl.service.kanal5 import Kanal5
-from svtplay_dl.service.lemonwhale import Lemonwhale
-from svtplay_dl.service.mtvnn import Mtvnn
-from svtplay_dl.service.mtvservices import Mtvservices
-from svtplay_dl.service.nrk import Nrk
-from svtplay_dl.service.oppetarkiv import OppetArkiv
-from svtplay_dl.service.picsearch import Picsearch
-from svtplay_dl.service.qbrick import Qbrick
-from svtplay_dl.service.radioplay import Radioplay
-from svtplay_dl.service.ruv import Ruv
-from svtplay_dl.service.raw import Raw
-from svtplay_dl.service.sr import Sr
-from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.service.tv4play import Tv4play
-from svtplay_dl.service.urplay import Urplay
-from svtplay_dl.service.vg import Vg
-from svtplay_dl.service.viaplay import Viaplay
-from svtplay_dl.service.vimeo import Vimeo
-from svtplay_dl.service.youplay import Youplay
-
-sites = [
-    Aftonbladet,
-    Bambuser,
-    Bigbrother,
-    Dbtv,
-    Disney,
-    Dr,
-    Expressen,
-    Hbo,
-    Justin,
-    Lemonwhale,
-    Kanal5,
-    Mtvservices,
-    Mtvnn,
-    Nrk,
-    Qbrick,
-    Picsearch,
-    Ruv,
-    Radioplay,
-    Sr,
-    Svtplay,
-    OppetArkiv,
-    Tv4play,
-    Urplay,
-    Viaplay,
-    Vimeo,
-    Vg,
-    Youplay]
-
-
 class Generic(object):
     ''' Videos embed in sites '''
-    def get(self, url):
+    def get(self, sites, url):
         error, data = get_http_data(url)
         if error:
             return
@@ -211,7 +152,7 @@ class Generic(object):
             return url, Raw(url)
         return url, stream
 
-def service_handler(url):
+def service_handler(sites, url):
     handler = None
 
     for i in sites:

@@ -11,12 +11,71 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, URLError, list_quality
+from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, list_quality
+from svtplay_dl.utils.urllib import URLError
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 
+from svtplay_dl.service.aftonbladet import Aftonbladet
+from svtplay_dl.service.bambuser import Bambuser
+from svtplay_dl.service.bigbrother import Bigbrother
+from svtplay_dl.service.dbtv import Dbtv
+from svtplay_dl.service.disney import Disney
+from svtplay_dl.service.dr import Dr
+from svtplay_dl.service.expressen import Expressen
+from svtplay_dl.service.hbo import Hbo
+from svtplay_dl.service.justin import Justin
+from svtplay_dl.service.kanal5 import Kanal5
+from svtplay_dl.service.lemonwhale import Lemonwhale
+from svtplay_dl.service.mtvnn import Mtvnn
+from svtplay_dl.service.mtvservices import Mtvservices
+from svtplay_dl.service.nrk import Nrk
+from svtplay_dl.service.oppetarkiv import OppetArkiv
+from svtplay_dl.service.picsearch import Picsearch
+from svtplay_dl.service.qbrick import Qbrick
+from svtplay_dl.service.radioplay import Radioplay
+from svtplay_dl.service.ruv import Ruv
+from svtplay_dl.service.raw import Raw
+from svtplay_dl.service.sr import Sr
+from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.tv4play import Tv4play
+from svtplay_dl.service.urplay import Urplay
+from svtplay_dl.service.vg import Vg
+from svtplay_dl.service.viaplay import Viaplay
+from svtplay_dl.service.vimeo import Vimeo
+from svtplay_dl.service.youplay import Youplay
+
 __version__ = "0.10.2015.01.05"
+
+sites = [
+    Aftonbladet,
+    Bambuser,
+    Bigbrother,
+    Dbtv,
+    Disney,
+    Dr,
+    Expressen,
+    Hbo,
+    Justin,
+    Lemonwhale,
+    Kanal5,
+    Mtvservices,
+    Mtvnn,
+    Nrk,
+    Qbrick,
+    Picsearch,
+    Ruv,
+    Radioplay,
+    Sr,
+    Svtplay,
+    OppetArkiv,
+    Tv4play,
+    Urplay,
+    Viaplay,
+    Vimeo,
+    Vg,
+    Youplay]
 
 class Options(object):
     """
@@ -67,10 +126,10 @@ class Options(object):
 
 def get_media(url, options):
 
-    stream = service_handler(url)
+    stream = service_handler(sites, url)
     if not stream:
         try:
-            url, stream = Generic().get(url)
+            url, stream = Generic().get(sites, url)
         except URLError as e:
             log.error("Cant find that page: %s", e.reason)
             return
