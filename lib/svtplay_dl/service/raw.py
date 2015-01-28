@@ -17,26 +17,27 @@ class Raw(Service):
         if self.exclude(options):
             return
 
+        extention = False
+        filename = os.path.basename(self.url[:self.url.rfind("/")-1])
+        if options.output and os.path.isdir(options.output):
+            options.output = "%s/%s" % (os.path.dirname(options.output), filename)
+            extention = True
+        elif options.output is None:
+            options.output = "%s" % filename
+            extention = True
+
         if self.url.find(".f4m") > 0:
-            filename = os.path.basename(self.url[:self.url.rfind("/")-1])
-            if options.output and os.path.isdir(options.output):
-                filename = "%s/%s" % (os.path.dirname(options.output), filename)
-                options.output = "%s.ts" % filename
-            elif options.output is None:
-                options.output = "%s.flv" % filename
+            if extention:
+                options.output = "%s.flv" % options.output
+
             streams = hdsparse(copy.copy(options), self.url)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
             streams = hlsparse(self.url)
-
-            filename = os.path.basename(self.url[:self.url.rfind("/")-1])
-            if options.output and os.path.isdir(options.output):
-                filename = "%s/%s" % (os.path.dirname(options.output), filename)
-                options.output = "%s.ts" % filename
-            elif options.output is None:
-                options.output = "%s.ts" % filename
+            if extention:
+                options.output = "%s.ts" % options.output
 
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
