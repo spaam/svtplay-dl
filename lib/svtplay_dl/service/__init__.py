@@ -146,10 +146,6 @@ class Generic(object):
                 if i.handles(url):
                     return url, i(url)
 
-        if url.find(".f4m") > 0:
-            return url, Raw(url)
-        if url.find(".m3u8") > 0:
-            return url, Raw(url)
         return url, stream
 
 def service_handler(sites, url):

@@ -134,8 +134,13 @@ def get_media(url, options):
             log.error("Cant find that page: %s", e.reason)
             return
     if not stream:
-        log.error("That site is not supported. Make a ticket or send a message")
-        sys.exit(2)
+        if url.find(".f4m") > 0:
+            stream = Raw(url)
+        if url.find(".m3u8") > 0:
+            stream = Raw(url)
+        if not stream:
+            log.error("That site is not supported. Make a ticket or send a message")
+            sys.exit(2)
 
     if options.all_episodes:
         if options.output and os.path.isfile(options.output):
