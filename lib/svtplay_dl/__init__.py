@@ -155,7 +155,7 @@ def get_media(url, options):
             if o == url:
                 substream = stream
             else:
-                substream = service_handler(o)
+                substream = service_handler(sites, o)
 
             log.info("Episode %d of %d", idx + 1, len(episodes))
 
