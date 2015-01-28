@@ -99,7 +99,7 @@ class Generic(object):
     def get(self, sites, url):
         error, data = get_http_data(url)
         if error:
-            return
+            return url, None
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:
