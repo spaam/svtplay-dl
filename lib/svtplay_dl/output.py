@@ -126,8 +126,8 @@ def output(options, extention="mp4", openfd=True):
         if extention == "srt" and ext:
             options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
         log.info("Outfile: %s", options.output)
-        if (os.path.isfile(options.output) or \
-            findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output))):
+        if os.path.isfile(options.output) or \
+                findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
             if extention == "srt":
                 if not options.force_subtitle:
                     log.error("File already exists. Use --force-subtitle to overwrite")
