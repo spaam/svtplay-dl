@@ -79,8 +79,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
             if parse.path.find("m3u8") > 0:
                 streams = hlsparse(i["url"])
-                for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                if streams:
+                    for n in list(streams.keys()):
+                        yield HLS(copy.copy(options), streams[n], n)
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
