@@ -30,7 +30,7 @@ install: svtplay-dl $(MANFILE)
 	install -d $(DESTDIR)$(BINDIR)
 	install -d $(DESTDIR)$(MANDIR)
 	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
-	install -m 755 $(MANFILE) $(DESTDIR)$(MANDIR)
+	install -m 644 $(MANFILE) $(DESTDIR)$(MANDIR)
 
 svtplay-dl: $(PYFILES)
 	$(MAKE) -C lib
