@@ -19,8 +19,8 @@ export PYFILES = $(addsuffix /*.py,$(subst .,/,$(PACKAGES)))
 PYTHON ?= /usr/bin/env python
 
 svtplay-dl: $(PYFILES)
-	zip --quiet svtplay-dl $(PYFILES)
-	zip --quiet --junk-paths svtplay-dl svtplay_dl/__main__.py
+	zip -X --quiet svtplay-dl $(PYFILES)
+	zip -X --quiet --junk-paths svtplay-dl svtplay_dl/__main__.py
 	echo '#!$(PYTHON)' > svtplay-dl
 	cat svtplay-dl.zip >> svtplay-dl
 	rm svtplay-dl.zip
