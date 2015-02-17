@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, decode_html_entities
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
@@ -24,15 +24,21 @@ class Aftonbladet(Service):
 
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
         if not match:
-            log.error("Can't find video info")
-            return
-        videoId = match.group(1)
-        match = re.search(r'data-isLive="(\w+)"', data)
-        if not match:
-            log.error("Can't find live info")
-            return
-        if match.group(1) == "true":
-            options.live = True
+            match = re.search('data-player-config="([^"]+)"', data)
+            if not match:
+                log.error("Can't find video info")
+                return
+            janson = json.loads(decode_html_entities(match.group(1)))
+            videoId = janson["videoId"]
+        else:
+            videoId = match.group(1)
+            match = re.search(r'data-isLive="(\w+)"', data)
+            if not match:
+                log.error("Can't find live info")
+                return
+            if match.group(1) == "true":
+                options.live = True
+
         if not options.live:
             dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
             error, data = get_http_data(dataurl)
