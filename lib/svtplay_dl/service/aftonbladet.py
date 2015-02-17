@@ -67,5 +67,6 @@ class Aftonbladet(Service):
                 plist = "http://%s/%s/%s" % (address, path, hls["filename"])
 
             streams = hlsparse(plist)
-            for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+            if streams:
+                for n in list(streams.keys()):
+                    yield HLS(copy.copy(options), streams[n], n)
