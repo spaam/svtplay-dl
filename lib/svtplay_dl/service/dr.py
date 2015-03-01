@@ -10,6 +10,7 @@ from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.log import log
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -47,6 +48,9 @@ class Dr(Service, OpenGraphThumbMixin):
                 return
             resource = json.loads(resource_data)
 
+            if "SubtitlesList" in resource:
+                suburl = resource["SubtitlesList"][0]["Uri"]
+                yield subtitle(copy.copy(options), "wrst", suburl)
             if "Data" in resource:
                 streams = find_stream(options, resource)
                 for i in streams:
