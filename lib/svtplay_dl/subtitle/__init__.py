@@ -3,6 +3,7 @@ import json
 import re
 from svtplay_dl.log import log
 from svtplay_dl.utils import is_py2, is_py3, get_http_data
+from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
 
 
@@ -122,29 +123,52 @@ class subtitle(object):
         return text
 
     def wrst(self, subdata):
-        recomp = re.compile(r"(\d+)\r\n([\d:\.]+ --> [\d:\.]+)?([^\r\n]+)?\r\n([^\r\n]+)\r\n(([^\r\n]*)\r\n)?")
+        if is_py3:
+            subdata = subdata.encode("utf-8")
+        ssubdata = StringIO(subdata)
         srt = ""
         subtract = False
-        for i in recomp.finditer(subdata):
-            number = int(i.group(1))
-            match = re.search(r'(\d+):(\d+):([\d\.]+) --> (\d+):(\d+):([\d\.]+)', i.group(2))
-            hour1 = int(match.group(1))
-            hour2 = int(match.group(4))
-            if number == 1:
-                if hour1 > 9:
-                    subtract = True
-            if subtract:
-                hour1 -= 10
-                hour2 -= 10
-            time = "%s:%s:%s --> %s:%s:%s" % (hour1, match.group(2), match.group(3).replace(".", ","), hour2, match.group(5), match.group(6).replace(".", ","))
-            sub = "%s\n%s\n%s\n" % (i.group(1), time, i.group(4))
-            if len(i.group(6)) > 0:
-                sub += "%s\n" % i.group(6)
-            sub += "\n"
-            sub = re.sub('<[^>]*>', '', sub)
-            srt += sub
+        number_b = 1
+        number = 0
+        block = 0
+        subnr = False
+        for i in ssubdata.readlines():
+            i = i.decode("utf8")
+            match = re.search("^[\r\n]+", i)
+            match2 = re.search("([\d:\.]+ --> [\d:\.]+)", i)
+            match3 = re.search("^(\d+)\s", i)
+            if i[:6] == "WEBVTT":
+                pass
+            elif match and number_b > 1:
+                block = 0
+                srt += "\n"
+            elif match2:
+                if not subnr:
+                    srt += "%s\n" % number_b
+                matchx = re.search(r'(\d+):(\d+)[.:]([\d\.]+) --> (\d+):(\d+)[.:]([\d\.]+)', i)
+                hour1 = int(matchx.group(1))
+                hour2 = int(matchx.group(4))
+                if number == 1:
+                    if hour1 > 9:
+                        subtract = True
+                if subtract:
+                    hour1 -= 10
+                    hour2 -= 10
+                time = "%s:%s:%s --> %s:%s:%s\n" % (hour1, matchx.group(2), matchx.group(3).replace(".", ","), hour2, matchx.group(5), matchx.group(6).replace(".", ","))
+                srt += time
+                block = 1
+                subnr = False
+                number_b += 1
 
-        return srt
+            elif match3 and block == 0:
+                number = match3.group(1)
+                srt += "%s\n" % number
+                subnr = True
+            else:
+                sub = re.sub('<[^>]*>', '', i)
+                srt += sub.lstrip()
+
+        return srt.encode("utf8")
 
 def timestr(msec):
     """
