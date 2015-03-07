@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.log import log
@@ -61,12 +62,24 @@ class Urplay(Service, OpenGraphThumbMixin):
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
             yield RTMP(copy.copy(options), rtmp, "720")
 
+    def scrape_episodes(self, options):
+        res = []
+        for relurl in re.findall(r'<a class="puff tv video"\s+title="[^"]*"\s+href="([^"]*)"',
+                                 self.get_urldata()[1]):
+            res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
+
+        if options.all_last != -1:
+            res = res[-options.all_last:]
+
+        return res
+
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
                           self.get_urldata()[1])
         if match is None:
-            log.error("Couldn't retrieve episode list")
-            return
+            log.info("Couldn't retrieve episode list as rss, trying to scrape")
+            return self.scrape_episodes(options)
+
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
         xml = ET.XML(get_http_data(url)[1])
 
