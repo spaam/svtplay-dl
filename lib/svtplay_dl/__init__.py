@@ -226,6 +226,9 @@ def get_one_media(stream, options):
         stream = select_quality(options, videos)
         log.info("Selected to download %s, bitrate: %s",
                  stream.name(), stream.bitrate)
+        if options.get_url:
+            print stream.url
+            return
         try:
             stream.download()
         except UIException as e:
@@ -309,6 +312,9 @@ def main():
                       metavar="preferred", help="preferred download method (rtmp, hls or hds)")
     parser.add_option("--exclude", dest="exclude", default=None,
                       metavar="WORD,WORD2", help="exclude videos with the WORD(s) in the filename. comma seperated.")
+    parser.add_option("-g", "--get-url",
+                      action="store_true", dest="get_url", default=False,
+                      help="do not download any video, but instead print the URL.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -353,4 +359,5 @@ def mergeParserOption(options, parser):
     options.preferred = parser.preferred
     options.verbose = parser.verbose
     options.exclude = parser.exclude
+    options.get_url = parser.get_url
     return options
