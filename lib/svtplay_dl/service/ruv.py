@@ -9,6 +9,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.http import HTTP
 
 class Ruv(Service):
     supported_domains = ['ruv.is']
@@ -30,6 +31,7 @@ class Ruv(Service):
                 return
             match = re.search(r'punktur=\(([^ ]+)\)', data)
             if match:
+                print match.group(1)
                 janson = json.loads(match.group(1))
                 options.live = checklive(janson["result"][1])
                 streams = hlsparse(janson["result"][1])
@@ -40,9 +42,12 @@ class Ruv(Service):
             if not match:
                 log.error("Can't find video info for: %s", self.url)
                 return
-            m3u8_url = match.group(1)
-            options.live = checklive(m3u8_url)
-            yield HLS(copy.copy(options), m3u8_url, 800)
+            if match.group(1).endswith("mp4"):
+                yield HTTP(copy.copy(options), match.group(1), 800)
+            else:
+                m3u8_url = match.group(1)
+                options.live = checklive(m3u8_url)
+                yield HLS(copy.copy(options), m3u8_url, 800)
 
 def checklive(url):
     return True if re.search("live", url) else False
