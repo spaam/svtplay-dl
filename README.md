@@ -73,7 +73,6 @@ This script works for:
 * svd.se
 * sverigesradio.se
 * svtplay.se
-* sydsvenskan.se
 * tv10play.se
 * tv3play.dk
 * tv3play.ee

@@ -12,7 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
 class Qbrick(Service, OpenGraphThumbMixin):
-    supported_domains = ['di.se', 'sydsvenskan.se']
+    supported_domains = ['di.se']
 
     def get(self, options):
         error, data = self.get_urldata()
@@ -23,14 +23,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
         if self.exclude(options):
             return
 
-        if re.findall(r"sydsvenskan.se", self.url):
-            match = re.search(r"data-qbrick-mcid=\"([0-9A-F]+)\"", data)
-            if not match:
-                log.error("Can't find video file for: %s", self.url)
-                return
-            mcid = match.group(1)
-            host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % mcid
-        elif re.findall(r"di.se", self.url):
+        if re.findall(r"di.se", self.url):
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
                 log.error("Can't find video info for: %s", self.url)
@@ -41,18 +34,6 @@ class Qbrick(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
             host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
-        elif re.findall(r"svd.se", self.url):
-            match = re.search(r'video url-([^"]*)\"', self.get_urldata()[1])
-            if not match:
-                log.error("Can't find video file for: %s", self.url)
-                return
-            path = unquote_plus(match.group(1))
-            error, data = get_http_data("http://www.svd.se%s" % path)
-            match = re.search(r"mcid=([A-F0-9]+)\&width=", data)
-            if not match:
-                log.error("Can't find video file for: %s", self.url)
-                return
-            host = "http://vms.api.qbrick.com/rest/v3/getsingleplayer/%s" % match.group(1)
         else:
             log.error("Can't find any info for %s", self.url)
             return
