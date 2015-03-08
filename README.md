@@ -60,8 +60,6 @@ This script works for:
 * dr.dk
 * expressen.se
 * hbo.com
-* justin.tv
-* kanal5.se
 * kanal5play.se
 * kanal9play.se
 * nickelodeon.nl

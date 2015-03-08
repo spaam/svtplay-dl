@@ -94,8 +94,6 @@ Show description of options.
 
 =item * HBO: L<http://hbo.com/>
 
-=item * Justin.tv: L<http://justin.tv/>
-
 =item * Twitch: L<http://twitch.tv/>
 
 =item * Vimeo: L<http://vimeo.com/>
@@ -117,8 +115,6 @@ Show description of options.
 =item * DR: L<http://dr.dk/>
 
 =item * Expressen: L<http://expressen.se/>
-
-=item * Kanal5: L<http://kanal5.se/>
 
 =item * Kanal5 Play: L<http://kanal5play.se/>
 
