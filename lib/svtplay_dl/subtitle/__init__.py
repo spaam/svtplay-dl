@@ -120,6 +120,8 @@ class subtitle(object):
             number += 1
         recomp = re.compile(r'\r')
         text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
+        if is_py3:
+            return text.encode("utf-8")
         return text
 
     def wrst(self, subdata):
