@@ -64,8 +64,7 @@ class subtitle(object):
                 data += "\n"
                 i += 1
 
-        if is_py2:
-            data = data.encode('utf8')
+        data = data.encode('utf8')
         return data
 
     def json(self, subdata):
@@ -99,8 +98,8 @@ class subtitle(object):
                 if int(n) > 0:
                     subs += "%s\n" % i.text
 
-        if is_py2:
-            subs = subs.encode('utf8')
+
+        subs = subs.encode('utf8')
         return subs
 
     def smi(self, subdata):
