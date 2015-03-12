@@ -31,7 +31,6 @@ class Ruv(Service):
                 return
             match = re.search(r'punktur=\(([^ ]+)\)', data)
             if match:
-                print match.group(1)
                 janson = json.loads(match.group(1))
                 options.live = checklive(janson["result"][1])
                 streams = hlsparse(janson["result"][1])
