@@ -2,7 +2,7 @@ all: svtplay-dl
 
 .PHONY: test cover pylint svtplay-dl
 
-VERSION = 0.10
+VERSION = 0.10.$(shell date +%Y.%m.%d)
 
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
