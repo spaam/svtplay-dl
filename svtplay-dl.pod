@@ -27,7 +27,7 @@ Outputs to the given filename.
 
 Resume a download.
 
-=head3 --live  -v
+=head3 --live  -l
 
 Enable support for live streams. (rtmp based ones)
 
