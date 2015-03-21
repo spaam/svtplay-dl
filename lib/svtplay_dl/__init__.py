@@ -267,6 +267,9 @@ def main():
     parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--output",
                       metavar="OUTPUT", help="outputs to the given filename")
+    parser.add_option("-f", "--force",
+                      action="store_true", dest="force", default=False,
+                      help="overwrite if file exists already")
     parser.add_option("-r", "--resume",
                       action="store_true", dest="resume", default=False,
                       help="resume a download (RTMP based ones)")
@@ -274,11 +277,11 @@ def main():
                       action="store_true", dest="live", default=False,
                       help="enable for live streams (RTMP based ones)")
     parser.add_option("-s", "--silent",
-                      action="store_true", dest="silent", default=False)
+                      action="store_true", dest="silent", default=False,
+                      help="be less verbose")
     parser.add_option("-v", "--verbose",
-                      action="store_true", dest="verbose", default=False)
-    parser.add_option("-f", "--force",
-                      action="store_true", dest="force", default=False)
+                      action="store_true", dest="verbose", default=False,
+                      help="explain what is going on")
     parser.add_option("-q", "--quality", default=0,
                       metavar="quality", help="choose what format to download based on bitrate / video resolution."
                                               "it will download the best format by default")
@@ -308,7 +311,7 @@ def main():
     parser.add_option("-P", "--preferred", default=None,
                       metavar="preferred", help="preferred download method (rtmp, hls or hds)")
     parser.add_option("--exclude", dest="exclude", default=None,
-                      metavar="WORD,WORD2", help="exclude videos with the WORD(s) in the filename. comma seperated.")
+                      metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()

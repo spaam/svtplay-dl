@@ -19,9 +19,21 @@ to do itself.
 
 =head2 OPTIONS
 
+=head3 --version
+
+Show the program's version number and exit.
+
+=head3 --help  -h
+
+Show description of options.
+
 =head3 --output=filename  -o filename
 
 Outputs to the given filename.
+
+=head3 --force  -f
+
+Overwrite the output file if it exists already.
 
 =head3 --resume  -r
 
@@ -35,6 +47,11 @@ Enable support for live streams. (rtmp based ones)
 
 Be less verbose.
 
+=head3 --verbose  -v
+
+Explain what is going on, including HTTP requests and other useful
+debugging data.
+
 =head3 --quality=quality  -q quality
 
 Choose what format to download. It will download the best format
@@ -43,6 +60,10 @@ by default.
 =head3 --flexible-quality=amount  -Q amount
 
 Allow given quality (as above) to differ by an amount.
+
+=head3 --list-quality
+
+List the available qualities for a video.
 
 =head3 --hls  -H
 
@@ -72,17 +93,18 @@ Download thumbnail from the site if available.
 
 Try to download all episodes.
 
+=head3 --all-last=NN
+
+Get last NN episodes instead of all episodes, when used with
+--all-episodes.
+
 =head3 -P preferred, --preferred=preferred
 
 Preferred download method.
 
-=head3 --version
+=head3 --exclude=WORD1,WORD2,...
 
-Show the program's version number and exit.
-
-=head3 --help  -h
-
-Show description of options.
+Exclude videos with the WORD(s) in the filename. Comma separated.
 
 =head1 SUPPORTED SERVICES
 
