@@ -36,20 +36,20 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         data = match.group(1)
         jsondata = json.loads(data)
-        yield subtitle(copy.copy(options), "tt", jsondata["subtitles"].split(",")[0])
+        yield subtitle(copy.copy(options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
-        http = "http://%s/%s" % (basedomain, jsondata["file_html5"])
+        http = "http://%s/%s" % (basedomain, jsondata["file_http"])
         hd = None
-        if len(jsondata["file_html5_hd"]) > 0:
-            http_hd = "http://%s/%s" % (basedomain, jsondata["file_html5_hd"])
+        if len(jsondata["file_http_hd"]) > 0:
+            http_hd = "http://%s/%s" % (basedomain, jsondata["file_http_hd"])
             hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-            tmp = jsondata["file_html5_hd"]
+            tmp = jsondata["file_http_hd"]
             match = re.search(".*(mp[34]:.*$)", tmp)
             path_hd = match.group(1)
             hd = True
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
-        path = "mp%s:%s" % (jsondata["file_flash"][-1], jsondata["file_flash"])
+        path = "mp%s:%s" % (jsondata["file_rtmp"][-1], jsondata["file_rtmp"])
         streams = hlsparse(hls)
         for n in list(streams.keys()):
             yield HLS(options, streams[n], n)
