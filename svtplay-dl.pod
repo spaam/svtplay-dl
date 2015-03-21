@@ -128,8 +128,6 @@ Show description of options.
 
 =item * SVT Play: L<http://svtplay.se/>
 
-=item * Sydsvenskan: L<http://sydsvenskan.se/>
-
 =item * TV10 Play: L<http://tv10play.se/>
 
 =item * TV3 Play: L<http://tv3play.se/>
