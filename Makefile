@@ -1,6 +1,6 @@
 all: svtplay-dl
 
-.PHONY: test cover pylint svtplay-dl
+.PHONY: test cover doctest pylint svtplay-dl
 
 VERSION = 0.10.$(shell date +%Y.%m.%d)
 
@@ -52,6 +52,9 @@ cover:
 
 pylint:
 	$(MAKE) -C lib pylint
+
+doctest: svtplay-dl
+	sh scripts/diff_man_help.sh
 
 clean:
 	$(MAKE) -C lib clean

@@ -1,7 +1,5 @@
 #!/bin/sh
 # Make sure the options listed in --help and the manual are in sync.
-diff_opts="$@"
-diff_opts=${diff_opts:-"-u"}
 TMPDIR=$(mktemp -d svtplay-man-test-XXXXXX)
 [ "$TMPDIR" ] || {
 	echo "mktemp not available, using static dir"
@@ -35,6 +33,7 @@ for file in $TMPDIR/options.*; do
 	perl -i -pe 's/^(-.(?: [^-][^ ]+)?) (--.*)/\2 \1/' $file
 done
 
-# There should be no difference.
-diff $diff_opts $TMPDIR/options.*
-#sha1sum $TMPDIR/options.*
+[ "$(sha1sum<$TMPDIR/options.help)" = "$(sha1sum<$TMPDIR/options.man)" ] || {
+	diff -u $TMPDIR/options.help $TMPDIR/options.man
+	exit 1
+}
