@@ -6,7 +6,7 @@ all: svtplay-dl
 VERSION = 0.10
 RELEASE = $(VERSION).$(shell date +%Y.%m.%d)
 RELEASE_DIR = svtplay-dl-$(RELEASE)
-LATEST_RELEASE = 0.10.2015.01.28
+LATEST_RELEASE = 0.10.2015.03.25
 
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
