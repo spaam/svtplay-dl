@@ -68,9 +68,10 @@ clean_releasedir:
 	rm -rf $(RELEASE_DIR)
 
 release: $(RELEASE_DIR) release-test
-	cd $(RELEASE_DIR) && \
+	set -e; cd $(RELEASE_DIR) && \
 		sed -i -r -e 's/^(LATEST_RELEASE = ).*/\1$(RELEASE)/' Makefile;\
-		git add svtplay-dl Makefile; \
+		sed -i -r -e 's/^(__version__ = ).*/\1"$(RELEASE)"/' lib/svtplay_dl/__init__.py;\
+		git add svtplay-dl Makefile lib/svtplay_dl/__init__.py; \
 		git commit -m "Prepare for release $(RELEASE)";
 	(cd $(RELEASE_DIR) && git format-patch --stdout HEAD^) | git am
 
