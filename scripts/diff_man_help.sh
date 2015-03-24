@@ -33,7 +33,13 @@ for file in $TMPDIR/options.*; do
 	perl -i -pe 's/^(-.(?: [^-][^ ]+)?) (--.*)/\2 \1/' $file
 done
 
-[ "$(sha1sum<$TMPDIR/options.help)" = "$(sha1sum<$TMPDIR/options.man)" ] || {
+OS=$(uname -s)
+SHA1="sha1sum"
+[ "$OS" = "Darwin*" ] || {
+	SHA1="shasum"
+}
+
+[ "$($SHA1<$TMPDIR/options.help)" = "$($SHA1<$TMPDIR/options.man)" ] || {
 	diff -u $TMPDIR/options.help $TMPDIR/options.man
 	exit 1
 }
