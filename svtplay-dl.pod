@@ -106,6 +106,10 @@ Preferred download method.
 
 Exclude videos with the WORD(s) in the filename. Comma separated.
 
+=head3 --get-url -g
+
+Do not download any video, but instead print the URL.
+
 =head1 SUPPORTED SERVICES
 
 =head2 English
