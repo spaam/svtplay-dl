@@ -24,6 +24,7 @@ from svtplay_dl.service.dbtv import Dbtv
 from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.expressen import Expressen
+from svtplay_dl.service.facebook import Facebook
 from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.justin import Justin
 from svtplay_dl.service.kanal5 import Kanal5
@@ -56,6 +57,7 @@ sites = [
     Disney,
     Dr,
     Expressen,
+    Facebook,
     Hbo,
     Justin,
     Lemonwhale,
