@@ -136,7 +136,7 @@ def outputfilename(data, filename, raw):
         name = name.replace("arkiv-", "")
     name = name.replace("-", ".")
     season = seasoninfo(raw)
-    other = data["statistics"]["title"].replace("-", ".")
+    other = filenamify(data["context"]["title"])
     if season:
         title = "%s.%s.%s-%s-svtplay" % (name, season, other, data["videoId"])
     else:
