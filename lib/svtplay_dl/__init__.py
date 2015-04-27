@@ -178,6 +178,8 @@ def get_media(url, options):
             sys.exit(2)
 
 def get_one_media(stream, options):
+    if options.output:
+        options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
     if not options.output or os.path.isdir(options.output):
         error, data = stream.get_urldata()
         if error:
