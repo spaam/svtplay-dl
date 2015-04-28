@@ -105,18 +105,26 @@ class subtitle(object):
     def smi(self, subdata):
         if is_py3:
             subdata = subdata.decode("latin1")
-        recomp = re.compile(r'<SYNC Start=(\d+)>\s+<P Class=\w+>(.*)\s+<SYNC Start=(\d+)>\s+<P Class=\w+>', re.M|re.I|re.U)
+        ssubdata = StringIO(subdata)
+        timea = 0
         number = 1
+        data = None
         subs = ""
         TAG_RE = re.compile(r'<[^>]+>')
         bad_char = re.compile(r'\x96')
-        for i in recomp.finditer(subdata):
-            subs += "%s\n%s --> %s\n" % (number, timestr(i.group(1)), timestr(i.group(3)))
-            text = "%s\n\n" % TAG_RE.sub('', i.group(2).replace("<br>", "\n"))
-            if text[0] == "\x0a":
-                text = text[1:]
-            subs += text
-            number += 1
+        for i in ssubdata.readlines():
+            sync = re.search("<SYNC Start=(\d+)>", i)
+            if sync:
+                if int(sync.group(1)) != int(timea):
+                    if data != "&nbsp;\r":
+                        subs += "%s\n%s --> %s\n" % (number, timestr(timea), timestr(sync.group(1)))
+                        text = "%s\n" % TAG_RE.sub('', data.replace("<br>", "\n"))
+                        subs += text
+                        number += 1
+                timea = sync.group(1)
+            text = re.search("<P Class=SVCC>(.*)", i)
+            if text:
+                data = text.group(1)
         recomp = re.compile(r'\r')
         text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
         if is_py3:
