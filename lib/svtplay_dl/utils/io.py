@@ -10,6 +10,6 @@ from __future__ import absolute_import
 from svtplay_dl.utils import is_py3
 
 if is_py3:
-    from io import BytesIO as StringIO
+    from io import StringIO
 else:
     from StringIO import StringIO
