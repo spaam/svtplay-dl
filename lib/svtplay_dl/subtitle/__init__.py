@@ -113,7 +113,7 @@ class subtitle(object):
         TAG_RE = re.compile(r'<[^>]+>')
         bad_char = re.compile(r'\x96')
         for i in ssubdata.readlines():
-            sync = re.search("<SYNC Start=(\d+)>", i)
+            sync = re.search(r"<SYNC Start=(\d+)>", i)
             if sync:
                 if int(sync.group(1)) != int(timea):
                     if data != "&nbsp;\r":
@@ -140,9 +140,9 @@ class subtitle(object):
         block = 0
         subnr = False
         for i in ssubdata.readlines():
-            match = re.search("^[\r\n]+", i)
-            match2 = re.search("([\d:\.]+ --> [\d:\.]+)", i)
-            match3 = re.search("^(\d+)\s", i)
+            match = re.search(r"^[\r\n]+", i)
+            match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
+            match3 = re.search(r"^(\d+)\s", i)
             if i[:6] == "WEBVTT":
                 pass
             elif match and number_b > 1:
