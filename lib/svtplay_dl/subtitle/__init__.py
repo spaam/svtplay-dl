@@ -124,8 +124,6 @@ class subtitle(object):
         return text
 
     def wrst(self, subdata):
-        if is_py3:
-            subdata = subdata.encode("utf-8")
         ssubdata = StringIO(subdata)
         srt = ""
         subtract = False
@@ -134,7 +132,6 @@ class subtitle(object):
         block = 0
         subnr = False
         for i in ssubdata.readlines():
-            i = i.decode("utf8")
             match = re.search("^[\r\n]+", i)
             match2 = re.search("([\d:\.]+ --> [\d:\.]+)", i)
             match3 = re.search("^(\d+)\s", i)
@@ -169,7 +166,9 @@ class subtitle(object):
                 sub = re.sub('<[^>]*>', '', i)
                 srt += sub.lstrip()
 
-        return srt.encode("utf8")
+        if is_py3:
+            return srt.encode("utf-8")
+        return srt
 
 def timestr(msec):
     """
