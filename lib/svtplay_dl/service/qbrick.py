@@ -7,7 +7,6 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import get_http_data, is_py2_old
-from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
