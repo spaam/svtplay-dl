@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, list_quality
+from svtplay_dl.utils import decode_html_entities, filenamify, select_quality, list_quality, is_py2
 from svtplay_dl.utils.urllib import URLError
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
@@ -179,6 +179,8 @@ def get_media(url, options):
 
 def get_one_media(stream, options):
     if options.output:
+        if is_py2:
+            options.output = options.output.decode("utf-8")
         options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
     if not options.output or os.path.isdir(options.output):
         error, data = stream.get_urldata()
