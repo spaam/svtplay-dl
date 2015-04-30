@@ -118,7 +118,7 @@ def filename(options, stream):
     if options.output:
         if is_py2:
             if platform.system() == "Windows":
-                options.output = options.output.decode("lain1")
+                options.output = options.output.decode("latin1")
             else:
                 options.output = options.output.decode("utf-8")
         options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
