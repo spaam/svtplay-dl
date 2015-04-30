@@ -2,11 +2,9 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import sys
-import re
 import os
 import logging
 import copy
-import platform
 from optparse import OptionParser
 
 from svtplay_dl.error import UIException
@@ -16,6 +14,7 @@ from svtplay_dl.utils.urllib import URLError
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.output import filename
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.bambuser import Bambuser
@@ -178,34 +177,9 @@ def get_media(url, options):
             sys.exit(2)
 
 def get_one_media(stream, options):
-    if options.output:
-        if is_py2:
-            if platform.system() == "Windows":
-                options.output = options.output.decode("lain1")
-            else:
-                options.output = options.output.decode("utf-8")
-        options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
-    if not options.output or os.path.isdir(options.output):
-        error, data = stream.get_urldata()
-        if error:
-            log.error("Cant find that page")
-            return
-        if data is None:
-            return
-        match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
-        if match:
-            options.output_auto = True
-            title_tag = decode_html_entities(match.group(1))
-            if not options.output:
-                options.output = filenamify(title_tag)
-            else:
-                # output is a directory
-                options.output = os.path.join(options.output, filenamify(title_tag))
-
-    if platform.system() == "Windows":
-        # ugly hack. replace \ with / or add extra \ because c:\test\kalle.flv will add c:_tab_est\kalle.flv
-        if options.output and options.output.find("\\") > 0:
-            options.output = options.output.replace("\\", "/")
+    # Make an automagic filename
+    if not filename(options, stream):
+        return
 
     videos = []
     subs = []

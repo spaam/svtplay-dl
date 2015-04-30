@@ -6,9 +6,10 @@ import time
 import re
 import os
 import io
+import platform
 from datetime import timedelta
 
-from svtplay_dl.utils import is_py3
+from svtplay_dl.utils import is_py3, is_py2, filenamify, decode_html_entities
 from svtplay_dl.utils.terminal import get_terminal_size
 from svtplay_dl.log import log
 
@@ -112,6 +113,37 @@ def progressbar(total, pos, msg=""):
     fmt = "\r[" + fmt_width + "/" + fmt_width + "][%s] %s"
 
     progress_stream.write(fmt % (pos, total, bar, msg))
+
+def filename(options, stream):
+    if options.output:
+        if is_py2:
+            if platform.system() == "Windows":
+                options.output = options.output.decode("lain1")
+            else:
+                options.output = options.output.decode("utf-8")
+        options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
+    if not options.output or os.path.isdir(options.output):
+        error, data = stream.get_urldata()
+        if error:
+            log.error("Cant find that page")
+            return False
+        if data is None:
+            return False
+        match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
+        if match:
+            options.output_auto = True
+            title_tag = decode_html_entities(match.group(1))
+            if not options.output:
+                options.output = filenamify(title_tag)
+            else:
+                # output is a directory
+                options.output = os.path.join(options.output, filenamify(title_tag))
+
+    if platform.system() == "Windows":
+        # ugly hack. replace \ with / or add extra \ because c:\test\kalle.flv will add c:_tab_est\kalle.flv
+        if options.output and options.output.find("\\") > 0:
+            options.output = options.output.replace("\\", "/")
+    return True
 
 def output(options, extention="mp4", openfd=True):
     if is_py3:
