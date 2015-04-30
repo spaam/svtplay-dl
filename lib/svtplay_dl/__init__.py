@@ -180,7 +180,10 @@ def get_media(url, options):
 def get_one_media(stream, options):
     if options.output:
         if is_py2:
-            options.output = options.output.decode("utf-8")
+            if platform.system() == "Windows":
+                options.output = options.output.decode("lain1")
+            else:
+                options.output = options.output.decode("utf-8")
         options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
     if not options.output or os.path.isdir(options.output):
         error, data = stream.get_urldata()
