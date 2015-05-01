@@ -113,12 +113,15 @@ class subtitle(object):
         TAG_RE = re.compile(r'<[^>]+>')
         bad_char = re.compile(r'\x96')
         for i in ssubdata.readlines():
+            i = i.rstrip()
             sync = re.search(r"<SYNC Start=(\d+)>", i)
             if sync:
                 if int(sync.group(1)) != int(timea):
-                    if data != "&nbsp;\r":
+                    if data and data != "&nbsp;":
                         subs += "%s\n%s --> %s\n" % (number, timestr(timea), timestr(sync.group(1)))
                         text = "%s\n" % TAG_RE.sub('', data.replace("<br>", "\n"))
+                        if text[len(text)-2] != "\n":
+                            text += "\n"
                         subs += text
                         number += 1
                 timea = sync.group(1)
