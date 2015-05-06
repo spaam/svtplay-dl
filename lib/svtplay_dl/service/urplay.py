@@ -45,12 +45,13 @@ class Urplay(Service, OpenGraphThumbMixin):
             http_hd = "http://%s/%s" % (basedomain, jsondata["file_http_hd"])
             hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
             tmp = jsondata["file_http_hd"]
-            match = re.search(".*(mp[34]:.*$)", tmp)
+            match = re.search("(mp[34]:.*$)", tmp)
             path_hd = match.group(1)
             hd = True
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
-        path = "mp%s:%s" % (jsondata["file_rtmp"][-1], jsondata["file_rtmp"])
+        match = re.search("(mp[34]:.*$)", jsondata["file_rtmp"])
+        path = match.group(1)
         streams = hlsparse(hls)
         for n in list(streams.keys()):
             yield HLS(options, streams[n], n)
