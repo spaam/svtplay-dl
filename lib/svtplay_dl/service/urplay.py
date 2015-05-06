@@ -36,7 +36,8 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         data = match.group(1)
         jsondata = json.loads(data)
-        yield subtitle(copy.copy(options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
+        if len(jsondata["subtitles"]) > 0:
+            yield subtitle(copy.copy(options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
         basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_http"])
         hd = None
