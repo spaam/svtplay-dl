@@ -52,24 +52,19 @@ class Justin(Service):
 
         match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)
         if not match:
-            try:
-                for i in self._get_channel(options, urlp):
-                    yield i
-            except JustinUrlException as e:
-                log.debug(str(e))
-                log.error("This twitch/justin video type is unsupported")
-                return
+            data = self._get_channel(options, urlp)
         else:
             if match.group(2) in ["b", "c"]:
                 log.error("This twitch video type is unsupported")
                 return
-            try:
-                for i in self._get_archive(options, match.group(3)):
-                    yield i
-            except JustinUrlException as e:
-                log.debug(str(e))
-                log.error("This twitch video type is unsupported")
-                return
+            data = self._get_archive(options, match.group(3))
+        try:
+            for i in data:
+                yield i
+        except JustinUrlException as e:
+            log.debug(str(e))
+            log.error("This twitch video type is unsupported")
+            return
 
     def _get_static_video(self, options, videoid):
         access = self._get_access_token(videoid)
