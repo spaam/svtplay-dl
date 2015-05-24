@@ -45,7 +45,6 @@ class Justin(Service):
 
     def get(self, options):
         urlp = urlparse(self.url)
-        success = False
 
         if self.exclude(options):
             return
