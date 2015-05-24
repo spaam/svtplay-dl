@@ -49,12 +49,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
             self.cj.set_cookie(cc)
             options.cookies = self.cj
             error, data = get_http_data("https://www.tv4play.se/session/new?https=", cookiejar=self.cj)
-            auth_token = re.search('authenticity_token" type="hidden" value="([^"]+)"', data)
+            auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data)
             if not auth_token:
                 log.error("Can't find authenticity_token needed for user / passwdord")
                 return
             url = "https://www.tv4play.se/session"
-            postdata3 = quote_plus("user_name=%s&password=%s&authenticity_token=%s" % (options.username, options.password, auth_token.group(1)), "=&")
+            postdata3 = quote_plus("user_name=%s&password=%s&authenticity_token=%s" % (options.username, options.password, auth_token.group(2)), "=&")
             error, data = get_http_data(url, post=postdata3, cookiejar=self.cj)
             fail = re.search("<p class='failed-login'>([^<]+)</p>", data)
             if fail:
