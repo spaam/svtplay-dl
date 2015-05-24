@@ -11,7 +11,7 @@ import copy
 
 from svtplay_dl.utils.urllib import urlparse, quote_plus
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data
+from svtplay_dl.utils import get_http_data, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
@@ -68,6 +68,13 @@ class Justin(Service):
 
     def _get_static_video(self, options, videoid):
         access = self._get_access_token(videoid)
+
+        if options.output_auto:
+            info = json.loads(get_http_data("https://api.twitch.tv/kraken/videos/v%s" % videoid)[1])
+            if info["description"]:
+                options.output = "twitch-%s-%s_%s" % (info["channel"]["name"], filenamify(info["title"]), filenamify(info["description"]))
+            else:
+                options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
 
         if "token" not in access:
             raise JustinUrlException('video', self.url)
@@ -135,6 +142,9 @@ class Justin(Service):
             raise JustinUrlException('channel', urlp.geturl())
 
         channel = match.group(1)
+        if options.output_auto:
+            options.output = "twitch-%s" % channel
+
         hls_url = self._get_hls_url(channel)
         urlp = urlparse(hls_url)
 
