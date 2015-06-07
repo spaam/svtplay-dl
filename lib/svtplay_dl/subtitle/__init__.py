@@ -157,7 +157,7 @@ class subtitle(object):
                 matchx = re.search(r'(\d+):(\d+)[.:]([\d\.]+) --> (\d+):(\d+)[.:]([\d\.]+)', i)
                 hour1 = int(matchx.group(1))
                 hour2 = int(matchx.group(4))
-                if number == 1:
+                if int(number) == 1:
                     if hour1 > 9:
                         subtract = True
                 if subtract:
