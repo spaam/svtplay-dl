@@ -16,9 +16,9 @@ class OppetArkiv(Svtplay):
         if error:
             log.error("Cant get web page")
             return
-        match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', data)
+        match = re.search(r'"/etikett/titel/([^"/]+)', data)
         if match is None:
-            match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^"/]+)', self.url)
+            match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^/]+)/', self.url)
             if match is None:
                 log.error("Couldn't find title")
                 return
@@ -38,11 +38,11 @@ class OppetArkiv(Svtplay):
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False
-            regex = re.compile(r'(http://www.oppetarkiv.se/video/[^"]+)')
+            regex = re.compile(r'href="(/video/[^"]+)"')
             for match in regex.finditer(data):
                 if n == options.all_last:
                     break
-                episodes.append(match.group(1))
+                episodes.append("http://www.oppetarkiv.se%s" % match.group(1))
                 n += 1
             page += 1
 
