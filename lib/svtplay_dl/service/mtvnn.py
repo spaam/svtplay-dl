@@ -4,7 +4,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import get_http_data, is_py2_old, check_redirect, urlparse
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
@@ -17,12 +17,11 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         if error:
             log.error("Can't get the page")
             return
-        match = re.search(r'mrss\s+:\s+"([^"]+)"', data)
+        match = re.search(r'"(http://api.mtvnn.com/v2/mrss.xml[^"]+)"', data)
         if not match:
             log.error("Can't find id for the video")
             return
-        swfurl = re.search(r'embedSWF\( "([^"]+)"', self.get_urldata()[1])
-        options.other = "-W %s" % swfurl.group(1)
+
         error, data = get_http_data(match.group(1))
         if error:
             log.error("Cant get video info")
@@ -39,6 +38,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
         if self.exclude(options):
             return
+
+        swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
+        parse = urlparse(swfurl)
+        options.other = "-W %s://%s%s" % (parse.scheme, parse.hostname, check_redirect(swfurl))
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         error, content = get_http_data(contenturl)
