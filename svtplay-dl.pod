@@ -140,6 +140,8 @@ Do not download any video, but instead print the URL.
 
 =item * DR: L<http://dr.dk/>
 
+=item * EFN: L<http://www.efn.se/>
+
 =item * Expressen: L<http://expressen.se/>
 
 =item * Kanal5 Play: L<http://kanal5play.se/>

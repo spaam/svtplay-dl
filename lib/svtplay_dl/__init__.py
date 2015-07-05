@@ -22,6 +22,7 @@ from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.dbtv import Dbtv
 from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dr import Dr
+from svtplay_dl.service.efn import Efn
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.facebook import Facebook
 from svtplay_dl.service.hbo import Hbo
@@ -55,6 +56,7 @@ sites = [
     Dbtv,
     Disney,
     Dr,
+    Efn,
     Expressen,
     Facebook,
     Hbo,
