@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 import re
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.utils import download_thumbnail, get_http_data
+from svtplay_dl.utils import download_thumbnail, get_http_data, is_py2
 
 import logging
 
@@ -53,6 +53,8 @@ class Service(object):
     def exclude(self, options):
         if options.exclude:
             for i in options.exclude:
+                if is_py2:
+                    i = i.decode("utf-8")
                 if i in options.output:
                     return True
         return False
