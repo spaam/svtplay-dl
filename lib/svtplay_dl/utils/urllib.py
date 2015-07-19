@@ -9,15 +9,20 @@ from __future__ import absolute_import
 from svtplay_dl.utils import is_py3
 if is_py3:
     # pylint: disable=E0611
-    from urllib.parse import quote, unquote_plus, quote_plus, urlparse, parse_qs, urljoin
+    from urllib.parse import quote, unquote_plus, quote_plus, urlparse, parse_qs, urljoin, urlencode
     from urllib.request import urlopen, Request, build_opener, \
                                HTTPCookieProcessor, HTTPRedirectHandler
     from urllib.error import HTTPError, URLError
     from urllib.response import addinfourl
     from http.cookiejar import CookieJar, Cookie
+    from http.cookies import SimpleCookie
+    import httplib2
+
 else:
-    from urllib import addinfourl, quote, unquote_plus, quote_plus
+    from urllib import addinfourl, quote, unquote_plus, quote_plus, urlencode
     from urlparse import urlparse, parse_qs, urljoin
     from urllib2 import urlopen, Request, HTTPError, URLError, build_opener, \
                         HTTPCookieProcessor, HTTPRedirectHandler
     from cookielib import CookieJar, Cookie
+    from Cookie import SimpleCookie
+    import httplib2

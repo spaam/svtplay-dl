@@ -23,10 +23,11 @@ FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/
 
 from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
                                     HTTPRedirectHandler, HTTPError, \
-                                    addinfourl, CookieJar, urlparse
+                                    addinfourl, Cookie, CookieJar, SimpleCookie, urlparse, urlencode, httplib2
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
+h = httplib2.Http()
 
 class NoRedirectHandler(HTTPRedirectHandler):
     def __init__(self):
@@ -42,7 +43,84 @@ class NoRedirectHandler(HTTPRedirectHandler):
     http_error_303 = http_error_302
     http_error_307 = http_error_302
 
-def get_http_data(url, header=None, post=None, useragent=FIREFOX_UA,
+def get_http_data(url, header=None, post=None, useragent=FIREFOX_UA, referer=None, cookiejar=None):
+    error = None
+    method = "GET"
+    standard_headers = {'Referer': referer, 'User-Agent': useragent}
+    request_headers = {}
+    for key, value in [head for head in standard_headers.items() if head[1]]:
+        request_headers[key] = value
+    if header:
+        for key, value in [head for head in header.items() if head[1]]:
+            request_headers[key] = value
+
+    body = ""
+    if post:
+        method = "POST"
+        body = urlencode(post)
+
+    if not cookiejar:
+        cookiejar = CookieJar()
+    cookie_header = []
+    for cookie in cookiejar:
+        cookie_header.append(cookie.name + "=\"" + cookie.value.replace('"', r'\"') + "\"")
+    if len(cookie_header) > 0:
+        request_headers["Cookie"] = "; ".join(cookie_header)
+
+    if url.find("manifest.f4m") > 0:
+        parse = urlparse(url)
+        url = "%s://%s%s?%s&hdcore=3.3.0" % (parse.scheme, parse.netloc, parse.path, parse.query)
+
+    log.debug("HTTP getting %r", url)
+    starttime = time.time()
+
+    (response_headers, content) = h.request(url, method, headers = request_headers, body = body)
+    if "set-cookie" in response_headers:
+        cookies = SimpleCookie()
+        cookies.load(response_headers["set-cookie"])
+        for key, c in cookies.items():
+            expires = c['expires'] or None
+            if expires:
+                try:
+                    expires = time.strptime(expires, "%a, %d %b %Y %H:%M:%S GMT")
+                except ValueError:
+                    log.debug("Failed to decode cookie expires field '%s' as a time" % expires)
+                    expires = None
+                    pass
+            cookie = Cookie(version=int(c['version'] or '0'),
+                            name=key,
+                            value=c.value,
+                            port=None,
+                            port_specified=False,
+                            domain=c['domain'] or '',
+                            domain_specified=True if c['domain'] else False,
+                            domain_initial_dot=True if (c['domain'] and c['domain'].startswith(".")) else False,
+                            path=c['path'] or None,
+                            path_specified=True if c['path'] else False,
+                            secure=True if c['secure'] else False,
+                            expires=expires,
+                            discard=True,
+                            comment=None,
+                            comment_url=None,
+                            rest={'HttpOnly': None}
+                            )
+            cookiejar.set_cookie(cookie)
+
+    if is_py3:
+        try:
+            content = content.decode("utf-8")
+        except UnicodeDecodeError:
+            pass
+
+    spent_time = time.time() - starttime
+    bps = 8 * len(content) / max(spent_time, 0.001)
+
+    log.debug("HTTP got %d bytes from %r in %.2fs (= %dbps)",
+              len(content), url, spent_time, bps)
+
+    return error, content
+
+def get_http_data_old(url, header=None, post=None, useragent=FIREFOX_UA,
                   referer=None, cookiejar=None):
     """ Get the page to parse it for streams """
     if not cookiejar:
