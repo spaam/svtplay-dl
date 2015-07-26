@@ -27,7 +27,10 @@ svtplay-dl: $(PYFILES)
 	mkdir -p .build
 
 	@# Stage the files in .build for postprocessing
-	for py in $(PYFILES); do install -D $$py .build/$$py; done
+	for py in $(PYFILES); do \
+		install -d ".build/$${py%/*}"; \
+		install $$py .build/$$py; \
+	done
 
 	@# reset timestamps, to avoid non-determinism in zip file
 	find .build/ -exec touch -m -t 198001010000 {} \;
