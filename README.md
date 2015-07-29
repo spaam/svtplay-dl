@@ -89,3 +89,8 @@ This script works for:
 * vg.no
 * viagame.com
 * viasat4play.no
+
+## License
+
+This project is licensed under [The MIT License (MIT)](LICENSE).
+
