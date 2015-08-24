@@ -70,10 +70,7 @@ class Twitch(Service):
 
         if options.output_auto:
             info = json.loads(get_http_data("https://api.twitch.tv/kraken/videos/v%s" % videoid)[1])
-            if info["description"]:
-                options.output = "twitch-%s-%s_%s" % (info["channel"]["name"], filenamify(info["title"]), filenamify(info["description"]))
-            else:
-                options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
+            options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
 
         if "token" not in access:
             raise TwitchUrlException('video', self.url)
