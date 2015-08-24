@@ -16,29 +16,29 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
 
-class JustinException(Exception):
+class TwitchException(Exception):
     pass
 
 
-class JustinUrlException(JustinException):
+class TwitchUrlException(TwitchException):
     """
     Used to indicate an invalid URL for a given media_type. E.g.:
 
-      JustinUrlException('video', 'http://twitch.tv/example')
+      TwitchUrlException('video', 'http://twitch.tv/example')
     """
     def __init__(self, media_type, url):
-        super(JustinUrlException, self).__init__(
+        super(TwitchUrlException, self).__init__(
             "'%s' is not recognized as a %s URL" % (url, media_type)
         )
 
 
-class Justin(Service):
-    # Justin and Twitch uses language subdomains, e.g. en.www.twitch.tv. They
+class Twitch(Service):
+    # Twitch uses language subdomains, e.g. en.www.twitch.tv. They
     # are usually two characters, but may have a country suffix as well (e.g.
     # zh-tw, zh-cn and pt-br.
     supported_domains_re = [
         r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?twitch\.tv$',
-        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?justin\.tv$']
+    ]
 
     api_base_url = 'https://api.twitch.tv'
     hls_base_url = 'http://usher.justin.tv/api/channel/hls'
@@ -60,7 +60,7 @@ class Justin(Service):
         try:
             for i in data:
                 yield i
-        except JustinUrlException as e:
+        except TwitchUrlException as e:
             log.debug(str(e))
             log.error("This twitch video type is unsupported")
             return
@@ -70,13 +70,10 @@ class Justin(Service):
 
         if options.output_auto:
             info = json.loads(get_http_data("https://api.twitch.tv/kraken/videos/v%s" % videoid)[1])
-            if info["description"]:
-                options.output = "twitch-%s-%s_%s" % (info["channel"]["name"], filenamify(info["title"]), filenamify(info["description"]))
-            else:
-                options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
+            options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
 
         if "token" not in access:
-            raise JustinUrlException('video', self.url)
+            raise TwitchUrlException('video', self.url)
         nauth = quote_plus(str(access["token"]))
         authsig = access["sig"]
 
@@ -92,7 +89,7 @@ class Justin(Service):
         try:
             for n in self._get_static_video(options, vid):
                 yield n
-        except JustinUrlException as e:
+        except TwitchUrlException as e:
             log.error(str(e))
 
     def _get_access_token(self, channel, vtype="vods"):
@@ -138,7 +135,7 @@ class Justin(Service):
         match = re.match(r'/(\w+)', urlp.path)
 
         if not match:
-            raise JustinUrlException('channel', urlp.geturl())
+            raise TwitchUrlException('channel', urlp.geturl())
 
         channel = match.group(1)
         if options.output_auto:
