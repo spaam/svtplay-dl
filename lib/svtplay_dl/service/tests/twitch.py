@@ -8,10 +8,10 @@
 from __future__ import absolute_import
 import unittest
 from svtplay_dl.service.tests import HandlesURLsTestMixin
-from svtplay_dl.service.justin import Justin
+from svtplay_dl.service.twitch import Twitch
 
 class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
-    service = Justin
+    service = Twitch
     urls = {
         'ok': [
             "http://twitch.tv/foo/c/123456",

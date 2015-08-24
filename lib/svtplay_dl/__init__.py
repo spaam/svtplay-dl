@@ -26,7 +26,7 @@ from svtplay_dl.service.efn import Efn
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.facebook import Facebook
 from svtplay_dl.service.hbo import Hbo
-from svtplay_dl.service.justin import Justin
+from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.kanal5 import Kanal5
 from svtplay_dl.service.lemonwhale import Lemonwhale
 from svtplay_dl.service.mtvnn import Mtvnn
@@ -60,7 +60,7 @@ sites = [
     Expressen,
     Facebook,
     Hbo,
-    Justin,
+    Twitch,
     Lemonwhale,
     Kanal5,
     Mtvservices,
