@@ -92,7 +92,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             title = "%s-%s-%s" % (options.output, vid, options.service)
             title = filenamify(title)
             if len(directory):
-                options.output = "%s/%s" % (directory, title)
+                options.output = os.path.join(directory, title)
             else:
                 options.output = title
 

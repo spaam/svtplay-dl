@@ -32,7 +32,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         if options.output_auto:
             directory = os.path.dirname(options.output)
             if len(directory):
-                options.output = "%s/%s" % (directory, title)
+                options.output = os.path.join(directory, title)
             else:
                 options.output = title
 

@@ -39,7 +39,7 @@ class Vg(Service, OpenGraphThumbMixin):
             title = "%s" % jsondata["title"]
             title = filenamify(title)
             if len(directory):
-                options.output = "%s/%s" % (directory, title)
+                options.output = os.path.join(directory, title)
             else:
                 options.output = title
 

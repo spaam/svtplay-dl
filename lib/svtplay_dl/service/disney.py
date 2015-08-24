@@ -78,7 +78,7 @@ class Disney(Service, OpenGraphThumbMixin):
                 title = "%s-%s" % (title, options.service)
                 title = filenamify(title)
                 if len(directory):
-                    options.output = "%s/%s" % (directory, title)
+                    options.output = os.path.join(directory, title)
                 else:
                     options.output = title
 
@@ -104,7 +104,7 @@ class Disney(Service, OpenGraphThumbMixin):
                 title = "%s-%s" % (name, options.service)
                 title = filenamify(title)
                 if len(directory):
-                    options.output = "%s/%s" % (directory, title)
+                    options.output = os.path.join(directory, title)
                 else:
                     options.output = title
 

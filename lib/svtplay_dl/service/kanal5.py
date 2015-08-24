@@ -70,7 +70,7 @@ class Kanal5(Service):
             title = "%s-s%s-%s-%s-%s" % (data["program"]["name"], data["seasonNumber"], data["episodeText"], data["id"], options.service)
             title = filenamify(title)
             if len(directory):
-                options.output = "%s/%s" % (directory, title)
+                options.output = os.path.join(directory, title)
             else:
                 options.output = title
 

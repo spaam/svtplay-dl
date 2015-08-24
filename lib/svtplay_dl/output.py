@@ -139,10 +139,6 @@ def filename(options, stream):
                 # output is a directory
                 options.output = os.path.join(options.output, filenamify(title_tag))
 
-    if platform.system() == "Windows":
-        # ugly hack. replace \ with / or add extra \ because c:\test\kalle.flv will add c:_tab_est\kalle.flv
-        if options.output and options.output.find("\\") > 0:
-            options.output = options.output.replace("\\", "/")
     return True
 
 def output(options, extention="mp4", openfd=True):

@@ -20,7 +20,7 @@ class Raw(Service):
         extention = False
         filename = os.path.basename(self.url[:self.url.rfind("/")-1])
         if options.output and os.path.isdir(options.output):
-            options.output = "%s/%s" % (os.path.dirname(options.output), filename)
+            options.output = os.path.join(os.path.dirname(options.output), filename)
             extention = True
         elif options.output is None:
             options.output = "%s" % filename

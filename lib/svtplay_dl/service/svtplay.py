@@ -149,7 +149,7 @@ def outputfilename(data, filename, raw):
         title = "%s.%s-%s-svtplay" % (name, other, data["videoId"])
     title = filenamify(title)
     if len(directory):
-        output = "%s/%s" % (directory, title)
+        output = os.path.join(directory, title)
     else:
         output = title
     return output
