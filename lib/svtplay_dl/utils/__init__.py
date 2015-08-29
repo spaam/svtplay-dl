@@ -172,7 +172,7 @@ def ensure_unicode(s):
     Ensure string is a unicode string. If it isn't it assumed it is
     utf-8 and decodes it to a unicode string.
     """
-    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)  ):
+    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)):
         s = s.decode('utf-8', 'replace')
     return s
 
