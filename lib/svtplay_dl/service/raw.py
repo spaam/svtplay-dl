@@ -9,10 +9,7 @@ from svtplay_dl.log import log
 
 class Raw(Service):
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -30,12 +27,12 @@ class Raw(Service):
             if extention:
                 options.output = "%s.flv" % options.output
 
-            streams = hdsparse(copy.copy(options), self.url)
+            streams = hdsparse(copy.copy(options), self.http.get(self.url, params={"hdcore": "3.7.0"}).text, self.url)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
-            streams = hlsparse(self.url)
+            streams = hlsparse(self.http.get(self.url).text)
             if extention:
                 options.output = "%s.ts" % options.output
 

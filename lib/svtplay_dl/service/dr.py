@@ -6,7 +6,6 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
@@ -17,10 +16,7 @@ class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't download page.")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -28,10 +24,7 @@ class Dr(Service, OpenGraphThumbMixin):
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)
-            error, resource_data = get_http_data(resource_url)
-            if error:
-                log.error("Can't get resource data")
-                return
+            resource_data = self.http.get(resource_url).content
             resource = json.loads(resource_data)
             streams = find_stream(options, resource)
             for i in streams:
@@ -42,10 +35,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 log.error("Cant find resource info for this video")
                 return
             resource_url = "%s" % match.group(1)
-            error, resource_data = get_http_data(resource_url)
-            if error:
-                log.error("Can't get resource data")
-                return
+            resource_data = self.http.get(resource_url).content
             resource = json.loads(resource_data)
 
             if "SubtitlesList" in resource:
@@ -58,12 +48,12 @@ class Dr(Service, OpenGraphThumbMixin):
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(options), stream["Uri"])
+                        streams = hdsparse(copy.copy(options), self.http.get(stream["Uri"], params={"hdcore": "3.7.0"}).text, stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(stream["Uri"])
+                        streams = hlsparse(self.http.get(stream["Uri"]).text)
                         for n in list(streams.keys()):
                             yield HLS(copy.copy(options), streams[n], n)
                     if stream["Target"] == "Streaming":

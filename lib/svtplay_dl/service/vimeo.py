@@ -6,7 +6,6 @@ import re
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.log import log
 
@@ -27,7 +26,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
             log.error("Can't find video file for: %s", self.url)
             return
         player_url = match.group(1).replace("&amp;", "&")
-        error, player_data = get_http_data(player_url)
+        player_data = self.http.get(player_url)
 
         if player_data:
             jsondata = json.loads(player_data)

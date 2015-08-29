@@ -7,7 +7,6 @@ import json
 
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
 
@@ -25,19 +24,16 @@ class Ruv(Service):
 
         match = re.search(r'"([^"]+geo.php)"', data)
         if match:
-            error, data = get_http_data(match.group(1))
-            if error:
-                log.error("Cant get stream info")
-                return
+            data = self.http.get(match.group(1)).content
             match = re.search(r'punktur=\(([^ ]+)\)', data)
             if match:
                 janson = json.loads(match.group(1))
                 options.live = checklive(janson["result"][1])
-                streams = hlsparse(janson["result"][1])
+                streams = hlsparse(self.http.get(janson["result"][1]).text)
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
         else:
-            match = re.search(r'<source [^ ]*[ ]*src="([^"]+)" ', self.get_urldata()[1])
+            match = re.search(r'<source [^ ]*[ ]*src="([^"]+)" ', self.get_urldata())
             if not match:
                 log.error("Can't find video info for: %s", self.url)
                 return

@@ -6,7 +6,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import is_py2_old
 from svtplay_dl.fetcher.http import HTTP
 
 from svtplay_dl.log import log
@@ -24,10 +24,7 @@ class Mtvservices(Service):
             log.error("Can't find video file")
             return
         url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
-        error, data = get_http_data(url)
-        if error:
-            log.error("Cant get stream info")
-            return
+        data = self.http.get(url)
         start = data.index("<?xml version=")
         data = data[start:]
         xml = ET.XML(data)

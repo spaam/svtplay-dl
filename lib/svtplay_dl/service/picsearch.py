@@ -15,10 +15,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page.")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -27,16 +24,13 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not ajax_auth:
             log.error("Cant find token for video")
             return
-        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata()[1])
+        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
         if not mediaid:
-            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata()[1])
+            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata())
             if not mediaid:
                 log.error("Cant find media id")
                 return
-        error, jsondata = get_http_data("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1)))
-        if error:
-            log.error("Cant get stream info")
-            return
+        jsondata = self.http.get("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).content
         jsondata = json.loads(jsondata)
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
@@ -51,7 +45,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
                 if "live" in playlist:
                     options.live = playlist["live"]
                 if playlist["url"].endswith(".f4m"):
-                    streams = hdsparse(copy.copy(options), playlist["url"])
+                    streams = hdsparse(copy.copy(options), self.http.get(playlist["url"], params={"hdcore": "3.7.0"}).text, playlist["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]

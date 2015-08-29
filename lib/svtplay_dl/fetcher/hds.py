@@ -8,7 +8,7 @@ import binascii
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils import get_http_data, is_py2_old, is_py2, is_py3
+from svtplay_dl.utils import is_py2_old, is_py2, is_py3
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
@@ -39,11 +39,7 @@ class LiveHDSException(HDSException):
         super(LiveHDSException, self).__init__(
             url, "This is a live HDS stream, and they are not supported.")
 
-def hdsparse(options, manifest):
-    error, data = get_http_data(manifest)
-    if error:
-        log.error("Cant get manifest file")
-        return
+def hdsparse(options, data, manifest):
     streams = {}
     bootstrap = {}
     xml = ET.XML(data)
@@ -109,10 +105,10 @@ class HDS(VideoRetriever):
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-            error, data = get_http_data(url)
-            if error:
-                log.error("Missing segment in playlist")
-                return
+            data = self.http.get(url)
+            if data.status_code == 404:
+                break
+            data = data.content
             number = decode_f4f(i, data)
             file_d.write(data[number:])
             i += 1

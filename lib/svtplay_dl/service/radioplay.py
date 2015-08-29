@@ -16,10 +16,7 @@ class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return

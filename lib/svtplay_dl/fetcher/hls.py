@@ -5,12 +5,12 @@ import sys
 import os
 import re
 
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils import ensure_unicode
 
 
 class HLSException(UIException):
@@ -41,11 +41,7 @@ def _get_full_url(url, srcurl):
 
     return returl
 
-def hlsparse(url):
-    error, data = get_http_data(url)
-    if error:
-        log.error("Cant get hls playlist")
-        return
+def hlsparse(url, data):
     files = (parsem3u(data))[1]
     streams = {}
 
@@ -62,10 +58,7 @@ class HLS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
 
-        error, m3u8 = get_http_data(self.url)
-        if error:
-            log.error("Cant get m3u8 file.")
-            return
+        m3u8 = self.http.get(self.url).text
         globaldata, files = parsem3u(m3u8)
         encrypted = False
         key = None
@@ -81,10 +74,7 @@ class HLS(VideoRetriever):
                 sys.exit(2)
 
             match = re.search(r'URI="(https?://.*?)"', keydata)
-            error, key = get_http_data(match.group(1))
-            if error:
-                log.error("Can't get crypto key to decode files.")
-                return
+            key = self.http.get(match.group(1)).content
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
@@ -102,10 +92,10 @@ class HLS(VideoRetriever):
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
 
-            error, data = get_http_data(item)
-            if error:
-                log.error("Missing segment in playlist")
-                return
+            data = self.http.get(item)
+            if data.status_code == 404:
+                break
+            data = data.content
             if encrypted:
                 data = decryptor.decrypt(data)
             file_d.write(data)

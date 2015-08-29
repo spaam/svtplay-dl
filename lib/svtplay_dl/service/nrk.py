@@ -6,7 +6,6 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -17,10 +16,7 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -35,31 +31,31 @@ class Nrk(Service, OpenGraphThumbMixin):
         if options.force_subtitle:
             return
 
-        match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata()[1])
+        match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata())
         if match:
             manifest_url = match.group(1)
         else:
-            match = re.search(r'data-video-id="(\d+)"', self.get_urldata()[1])
+            match = re.search(r'data-video-id="(\d+)"', self.get_urldata())
             if match is None:
                 log.error("Can't find video id.")
                 return
             vid = match.group(1)
-            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata()[1])
+            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata())
             if match is None:
                 log.error("Can't find server address with media info")
                 return
             dataurl = "%smediaelement/%s" % (match.group(1), vid)
-            error, data = get_http_data(dataurl)
+            data = self.http.get(dataurl).content
             data = json.loads(data)
             manifest_url = data["mediaUrl"]
             options.live = data["isLive"]
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-        streams = hlsparse(hlsurl)
+        streams = hlsparse(self.http.get(hlsurl).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
 
-        streams = hdsparse(copy.copy(options), manifest_url)
+        streams = hdsparse(copy.copy(options), self.http.get(manifest_url, params={"hdcore": "3.7.0"}).text, manifest_url)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

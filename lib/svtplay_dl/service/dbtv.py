@@ -13,10 +13,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
     supported_domains = ['dbtv.no']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't download webpage")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -32,11 +29,9 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == vidoid:
                 if i["HLSURL"]:
-                    streams = hlsparse(i["HLSURL"])
+                    streams = hlsparse(self.http.get(i["HLSURL"]).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
                         yield HTTP(copy.copy(options), n["URL"], int(n["rate"])/1000)
-
-

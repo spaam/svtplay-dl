@@ -24,9 +24,20 @@ FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/
 from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
                                     HTTPRedirectHandler, HTTPError, \
                                     addinfourl, CookieJar, urlparse
+from requests import Session
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
+
+
+class HTTP(Session):
+    def __init__(self, *args, **kwargs):
+        Session.__init__(self, *args, **kwargs)
+
+    def check_redirect(self, url):
+        return self.get(url, stream=True).url
+
+
 
 class NoRedirectHandler(HTTPRedirectHandler):
     def __init__(self):
@@ -161,7 +172,7 @@ def ensure_unicode(s):
     Ensure string is a unicode string. If it isn't it assumed it is
     utf-8 and decodes it to a unicode string.
     """
-    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)):
+    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)  ):
         s = s.decode('utf-8', 'replace')
     return s
 

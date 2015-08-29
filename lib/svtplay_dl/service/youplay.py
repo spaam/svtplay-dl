@@ -6,7 +6,6 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.log import log
@@ -15,10 +14,7 @@ class Youplay(Service, OpenGraphThumbMixin):
     supported_domains = ['www.affarsvarlden.se']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page.")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -28,10 +24,7 @@ class Youplay(Service, OpenGraphThumbMixin):
             log.error("Cant find video info")
             return
 
-        error, data = get_http_data("http:%s" % match.group(1))
-        if error:
-            log.error("Cant get video info")
-            return
+        data = self.http.get("http:%s" % match.group(1)).content
         match = re.search(r'decodeURIComponent\("([^"]+)"\)\)', data)
         if not match:
             log.error("Can't decode video info")

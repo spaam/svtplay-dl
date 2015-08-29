@@ -13,10 +13,7 @@ class Facebook(Service, OpenGraphThumbMixin):
     supported_domains_re = ["www.facebook.com"]
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Cant download page")
-            return
+        data = self.get_urldata()
 
         match = re.search('params","([^"]+)"', data)
         if not match:

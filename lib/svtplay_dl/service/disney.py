@@ -8,7 +8,7 @@ import copy
 import os
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, check_redirect, filenamify
+from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
@@ -20,10 +20,7 @@ class Disney(Service, OpenGraphThumbMixin):
     def get(self, options):
         parse = urlparse(self.url)
         if parse.hostname == "video.disney.se":
-            error, data = self.get_urldata()
-            if error:
-                log.error("Can't get the page")
-                return
+            data = self.get_urldata()
 
             if self.exclude(options):
                 return
@@ -41,23 +38,20 @@ class Disney(Service, OpenGraphThumbMixin):
                                 if i["format"] == "mp4":
                                     yield HTTP(copy.copy(options), i["url"], i["bitrate"])
         else:
-            error, data = self.get_urldata()
-            if error:
-                log.error("Cant get the page")
-                return
+            data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
             if not match:
                 log.error("Can't find video info")
                 return
             uniq = match.group(1)
-            match = re.search("entryId : '([^']+)'", self.get_urldata()[1])
+            match = re.search("entryId : '([^']+)'", self.get_urldata())
             entryid = match.group(1)
-            match = re.search("partnerId : '([^']+)'", self.get_urldata()[1])
+            match = re.search("partnerId : '([^']+)'", self.get_urldata())
             partnerid = match.group(1)
-            match = re.search("uiConfId : '([^']+)'", self.get_urldata()[1])
+            match = re.search("uiConfId : '([^']+)'", self.get_urldata())
             uiconfid = match.group(1)
 
-            match = re.search("json : ({.*}}),", self.get_urldata()[1])
+            match = re.search("json : ({.*}}),", self.get_urldata())
             jsondata = json.loads(match.group(1))
             parse = urlparse(self.url)
             if len(parse.fragment) > 0:
@@ -87,10 +81,7 @@ class Disney(Service, OpenGraphThumbMixin):
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
-            error, data = get_http_data(url)
-            if error:
-                log.error("Cant get video info")
-                return
+            data = self.http.get(url)
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
             data = jsondata["content"]
@@ -109,7 +100,7 @@ class Disney(Service, OpenGraphThumbMixin):
                     options.output = title
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
-            redirect = check_redirect(url)
-            streams = hlsparse(redirect)
+            redirect = self.http.check_redirect(url)
+            streams = hlsparse(self.http.get(redirect))
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)

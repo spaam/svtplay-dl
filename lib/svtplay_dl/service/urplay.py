@@ -7,7 +7,6 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
@@ -22,10 +21,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         self.subtitle = None
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
         match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
             log.error("Can't find json info")
@@ -52,13 +48,13 @@ class Urplay(Service, OpenGraphThumbMixin):
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         match = re.search("(mp[34]:.*$)", jsondata["file_rtmp"])
         path = match.group(1)
-        streams = hlsparse(hls)
+        streams = hlsparse(self.http.get(hls).text)
         for n in list(streams.keys()):
             yield HLS(options, streams[n], n)
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         yield RTMP(options, rtmp, "480")
         if hd:
-            streams = hlsparse(hls_hd)
+            streams = hlsparse(self.http.get(hls_hd).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
@@ -67,7 +63,7 @@ class Urplay(Service, OpenGraphThumbMixin):
     def scrape_episodes(self, options):
         res = []
         for relurl in re.findall(r'<a class="puff tv video"\s+title="[^"]*"\s+href="([^"]*)"',
-                                 self.get_urldata()[1]):
+                                 self.get_urldata()):
             res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
 
         if options.all_last != -1:
@@ -77,13 +73,13 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata()[1])
+                          self.get_urldata())
         if match is None:
             log.info("Couldn't retrieve episode list as rss, trying to scrape")
             return self.scrape_episodes(options)
 
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
-        xml = ET.XML(get_http_data(url)[1])
+        xml = ET.XML(self.http.get(url).content)
 
         episodes = [x.text for x in xml.findall(".//item/link")]
         episodes_new = []

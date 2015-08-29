@@ -9,7 +9,7 @@ import io
 import platform
 from datetime import timedelta
 
-from svtplay_dl.utils import is_py3, is_py2, filenamify, decode_html_entities
+from svtplay_dl.utils import is_py3, is_py2, filenamify, decode_html_entities, ensure_unicode
 from svtplay_dl.utils.terminal import get_terminal_size
 from svtplay_dl.log import log
 
@@ -123,10 +123,7 @@ def filename(options, stream):
                 options.output = options.output.decode("utf-8")
         options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
     if not options.output or os.path.isdir(options.output):
-        error, data = stream.get_urldata()
-        if error:
-            log.error("Cant find that page")
-            return False
+        data = ensure_unicode(stream.get_urldata())
         if data is None:
             return False
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)

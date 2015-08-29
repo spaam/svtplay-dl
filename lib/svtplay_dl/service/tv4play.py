@@ -9,7 +9,7 @@ import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus, Cookie
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import get_http_data, is_py2_old, filenamify, CookieJar
+from svtplay_dl.utils import is_py2_old, filenamify, CookieJar
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -22,13 +22,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def __init__(self, url):
         Service.__init__(self, url)
         self.subtitle = None
-        self.cj = CookieJar()
+        self.cookies = {}
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         vid = findvid(self.url, data)
         if vid is None:
@@ -36,34 +33,23 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         if options.username and options.password:
-            # Need a dummy cookie to save cookies..
-            cc = Cookie(version=0, name='dummy',
-                        value="",
-                        port=None, port_specified=False,
-                        domain='www.tv4play.se',
-                        domain_specified=True,
-                        domain_initial_dot=True, path='/',
-                        path_specified=True, secure=False,
-                        expires=None, discard=True, comment=None,
-                        comment_url=None, rest={'HttpOnly': None})
-            self.cj.set_cookie(cc)
-            options.cookies = self.cj
-            error, data = get_http_data("https://www.tv4play.se/session/new?https=", cookiejar=self.cj)
-            auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data)
+            data = self.http.get("https://www.tv4play.se/session/new?https=")
+            auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
             if not auth_token:
                 log.error("Can't find authenticity_token needed for user / passwdord")
                 return
             url = "https://www.tv4play.se/session"
-            postdata3 = quote_plus("user_name=%s&password=%s&authenticity_token=%s" % (options.username, options.password, auth_token.group(2)), "=&")
-            error, data = get_http_data(url, post=postdata3, cookiejar=self.cj)
-            fail = re.search("<p class='failed-login'>([^<]+)</p>", data)
+            postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2)}
+            data = self.http.post(url, data=postdata)
+            self.cookies = data.cookies
+            fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
             if fail:
                 log.error(fail.group(1))
                 return
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        error, data = get_http_data(url, cookiejar=self.cj)
-        if error:
-            xml = ET.XML(data)
+        data = self.http.get(url, cookies=self.cookies)
+        if data.error_code == 403:
+            xml = ET.XML(data.content)
             code = xml.find("code").text
             if code == "SESSION_NOT_AUTHENTICATED":
                 log.error("Can't access premium content")
@@ -72,7 +58,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 log.error("Can't find any info for that video")
             return
-        xml = ET.XML(data)
+        xml = ET.XML(data.content)
         ss = xml.find("items")
         if is_py2_old:
             sa = list(ss.getiterator("item"))
@@ -108,7 +94,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
-                    streams = hdsparse(copy.copy(options), i.find("url").text)
+                    streams = hdsparse(copy.copy(options), self.http.get(i.find("url").text, params={"hdcore": "3.7.0"}).text, i.find("url").text)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -116,9 +102,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
-        error, data = get_http_data(url, cookiejar=self.cj)
-        if error:
-            return
+        data = self.http.get(url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
         if is_py2_old:
@@ -129,7 +113,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(i.find("url").text)
+                    streams = hlsparse(self.http.get(i.find("url").text).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
 
@@ -138,10 +122,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
             show = quote_plus(show)
-        error, data = get_http_data("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
-        if error:
-            log.error("Can't get api page")
-            return
+        data = self.http.get("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show)
         jsondata = json.loads(data)
         episodes = []
         n = 1

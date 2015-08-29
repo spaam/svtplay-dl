@@ -19,7 +19,7 @@ class Kanal5(Service):
 
     def __init__(self, url):
         Service.__init__(self, url)
-        self.cj = CookieJar()
+        self.cookies = {}
         self.subtitle = None
 
     def get(self, options):
@@ -31,35 +31,23 @@ class Kanal5(Service):
         video_id = match.group(1)
         if options.username and options.password:
             # get session cookie
-            error, data = get_http_data("http://www.kanal5play.se/", cookiejar=self.cj)
+            data = self.http.get("http://www.kanal5play.se/", cookies=self.cookies)
             authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % \
                       (options.username, options.password)
-            error, data = get_http_data(authurl)
+            data = self.http.get(authurl, cookies=self.cookies).text
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
             if jsondata["success"] is False:
                 log.error(jsondata["message"])
                 return
             authToken = jsondata["userData"]["auth"]
-            cc = Cookie(version=0, name='authToken',
-                        value=authToken,
-                        port=None, port_specified=False,
-                        domain='www.kanal5play.se',
-                        domain_specified=True,
-                        domain_initial_dot=True, path='/',
-                        path_specified=True, secure=False,
-                        expires=None, discard=True, comment=None,
-                        comment_url=None, rest={'HttpOnly': None})
-            self.cj.set_cookie(cc)
-            options.cookies = self.cj
+            self.cookies = {"authToken": authToken}
+            options.cookies = self.cookies
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
-        error, data = get_http_data(url, cookiejar=self.cj)
-        if error:
-            log.error("Can't download video info")
-            return
+        data = self.http.get(url, cookies=self.cookies).content
         data = json.loads(data)
-        options.cookiejar = self.cj
+        options.cookies = self.cookies
         if not options.live:
             options.live = data["isLive"]
 

@@ -10,7 +10,7 @@ from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.utils import get_http_data, is_py2_old
+from svtplay_dl.utils import is_py2_old
 from svtplay_dl.utils.urllib import unquote_plus
 
 class ExpressenException(UIException):
@@ -20,10 +20,7 @@ class Expressen(Service):
     supported_domains = ['expressen.se']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return
@@ -40,7 +37,7 @@ class Expressen(Service):
                 return
             vid = match.group(1)
             xmlurl = "http://www.expressen.se/Handlers/WebTvHandler.ashx?id=%s" % vid
-        error, data = get_http_data(xmlurl)
+        data = self.http.get(xmlurl).content
 
         xml = ET.XML(data)
         live = xml.find("live").text
@@ -60,6 +57,6 @@ class Expressen(Service):
             yield RTMP(options2, filename, int(i.attrib["bitrate"]))
 
         ipadurl = xml.find("mobileurls").find("ipadurl").text
-        streams = hlsparse(ipadurl)
+        streams = hlsparse(self.http.get(ipadurl).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)

@@ -2,9 +2,10 @@ import xml.etree.ElementTree as ET
 import json
 import re
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, is_py3, get_http_data
+from svtplay_dl.utils import is_py2, is_py3
 from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
+from requests import Session
 
 
 class subtitle(object):
@@ -13,12 +14,10 @@ class subtitle(object):
         self.subtitle = None
         self.options = options
         self.subtype = subtype
+        self.http = Session()
 
     def download(self):
-        error, subdata = get_http_data(self.url, cookiejar=self.options.cookies)
-        if error:
-            log.error("Can't download subtitle")
-            return
+        subdata = self.http.get(self.url, cookies=self.options.cookies)
 
         data = None
         if self.subtype == "tt":

@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 
-from svtplay_dl.utils import get_http_data
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.log import log
 
@@ -34,7 +33,7 @@ class OppetArkiv(Svtplay):
 
         while more:
             url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=%s&embed=true" % (program, page, sort)
-            error, data = get_http_data(url)
+            data = self.http.get(url).content
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False
