@@ -36,11 +36,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
             data = self.http.get("https://www.tv4play.se/session/new?https=")
             auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
             if not auth_token:
-                log.error("Can't find authenticity_token needed for user / passwdord")
+                log.error("Can't find authenticity_token needed for user / password")
                 return
             url = "https://www.tv4play.se/session"
-            postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2)}
-            data = self.http.post(url, data=postdata)
+            postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2), "https": ""}
+            data = self.http.post(url, data=postdata, cookies=self.cookies)
             self.cookies = data.cookies
             fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
             if fail:
@@ -48,7 +48,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 return
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = self.http.get(url, cookies=self.cookies)
-        if data.error_code == 403:
+        if data.status_code == 401:
             xml = ET.XML(data.content)
             code = xml.find("code").text
             if code == "SESSION_NOT_AUTHENTICATED":
@@ -113,7 +113,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(self.http.get(i.find("url").text).text)
+                    streams = hlsparse(i.find("url").text, self.http.get(i.find("url").text).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
 
