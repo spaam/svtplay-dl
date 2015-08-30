@@ -14,15 +14,9 @@ class HTTP(VideoRetriever):
 
     def download(self):
         """ Get the stream from HTTP """
-        request = Request(self.url)
-        request.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+        data = self.http.get(self.url, stream=True)
         try:
-            response = urlopen(request)
-        except HTTPError as e:
-            log.error("Something wrong with that url")
-            return
-        try:
-            total_size = response.info()['Content-Length']
+            total_size = data.headers['content-length']
         except KeyError:
             total_size = 0
         total_size = int(total_size)
@@ -33,14 +27,9 @@ class HTTP(VideoRetriever):
             return
 
         lastprogress = 0
-        while 1:
-            chunk = response.read(8192)
-            bytes_so_far += len(chunk)
-
-            if not chunk:
-                break
-
-            file_d.write(chunk)
+        for i in data.iter_content(8192):
+            bytes_so_far += len(i)
+            file_d.write(i)
             if self.options.output != "-":
                 now = time.time()
                 if lastprogress + 1 < now:
@@ -49,4 +38,3 @@ class HTTP(VideoRetriever):
 
         if self.options.output != "-":
             file_d.close()
-
