@@ -214,7 +214,7 @@ def filenamify(title):
     return title
 
 def download_thumbnail(options, url):
-    error, data = get_http_data(url)
+    data = Session.get(url).content
 
     filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
     tbn = "%s.tbn" % filename.group(1)
