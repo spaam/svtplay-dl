@@ -4,8 +4,6 @@ from __future__ import absolute_import
 import time
 
 from svtplay_dl.output import progress, output # FIXME use progressbar() instead
-from svtplay_dl.log import log
-from svtplay_dl.utils.urllib import urlopen, Request, HTTPError
 from svtplay_dl.fetcher import VideoRetriever
 
 class HTTP(VideoRetriever):
