@@ -97,12 +97,10 @@ class OpenGraphThumbMixin(object):
         download_thumbnail(options, url)
 
 
-class Generic(object):
+class Generic(Service):
     ''' Videos embed in sites '''
     def get(self, sites, url):
-        error, data = get_http_data(url)
-        if error:
-            return url, None
+        data = self.http.get(url).content
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:
