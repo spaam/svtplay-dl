@@ -58,6 +58,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 log.error("Can't find any info for that video")
             return
+        if data.status_code == 404:
+            log.error("Can't find the video")
+            return
         xml = ET.XML(data.content)
         ss = xml.find("items")
         if is_py2_old:

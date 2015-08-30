@@ -14,10 +14,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['di.se']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Can't get the page")
-            return
+        data = self.get_urldata()
 
         if self.exclude(options):
             return

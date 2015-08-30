@@ -48,6 +48,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             else:
                 dataurl = "%s&output=json" % url
         data = self.http.get(dataurl)
+        if data.status_code == 404:
+            log.error("Can't find the video")
+            return
         data = data.json()
         if "live" in data["video"]:
             options.live = data["video"]["live"]

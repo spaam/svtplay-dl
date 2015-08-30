@@ -15,10 +15,8 @@ class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
     def get(self, options):
-        error, data = self.get_urldata()
-        if error:
-            log.error("Cant get page")
-            return
+        data = self.get_urldata()
+
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
         if not match:
             log.error("Can't find video file")
