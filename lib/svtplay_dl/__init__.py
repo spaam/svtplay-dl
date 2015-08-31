@@ -130,11 +130,7 @@ def get_media(url, options):
 
     stream = service_handler(sites, url)
     if not stream:
-        try:
-            url, stream = Generic().get(sites, url)
-        except URLError as e:
-            log.error("Cant find that page: %s", e.reason)
-            return
+        url, stream = Generic().get(sites, url)
     if not stream:
         if url.find(".f4m") > 0 or url.find(".m3u8") > 0:
             stream = Raw(url)
@@ -164,18 +160,10 @@ def get_media(url, options):
 
             log.info("Episode %d of %d", idx + 1, len(episodes))
 
-            try:
-                # get_one_media overwrites options.output...
-                get_one_media(substream, copy.copy(options))
-            except URLError as e:
-                log.error("Cant find that page: %s", e.reason)
-                return
+            # get_one_media overwrites options.output...
+            get_one_media(substream, copy.copy(options))
     else:
-        try:
-            get_one_media(stream, options)
-        except URLError as e:
-            log.error("Cant find that page: %s", e.reason)
-            sys.exit(2)
+        get_one_media(stream, options)
 
 def get_one_media(stream, options):
     # Make an automagic filename
