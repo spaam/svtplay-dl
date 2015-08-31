@@ -10,7 +10,6 @@ from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils import ensure_unicode
 
 
 class HLSException(UIException):
