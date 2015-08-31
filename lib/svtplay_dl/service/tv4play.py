@@ -7,9 +7,9 @@ import xml.etree.ElementTree as ET
 import json
 import copy
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus, Cookie
+from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old, filenamify, CookieJar
+from svtplay_dl.utils import is_py2_old, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
