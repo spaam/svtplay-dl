@@ -236,7 +236,7 @@ possible, open a pull request!
 
 =head1 COPYRIGHT
 
- Copyright (C) 2011--2014, Johan Andersson et al
+ Copyright (C) 2011--2015, Johan Andersson et al
 
  This software is licensed under the MIT license.
 
