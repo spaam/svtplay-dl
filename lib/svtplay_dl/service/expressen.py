@@ -31,7 +31,7 @@ class Expressen(Service):
         else:
             match = re.search(
                 r"moviesList: \[\{\"VideoId\":\"(\d+)\"",
-                self.get_urldata()[1])
+                self.get_urldata())
             if not match:
                 log.error("Can't find video id")
                 return

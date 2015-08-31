@@ -101,9 +101,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata()[1])
+                          self.get_urldata())
         if match is None:
-            match = re.findall(r'a class="play[^"]+"\s+href="(/video[^"]+)"', self.get_urldata()[1])
+            match = re.findall(r'a class="play[^"]+"\s+href="(/video[^"]+)"', self.get_urldata())
             if not match:
                 log.error("Couldn't retrieve episode list")
                 return

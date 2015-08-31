@@ -91,7 +91,7 @@ class OpenGraphThumbMixin(object):
     Mix this into the service class to grab thumbnail from OpenGraph properties.
     """
     def get_thumbnail(self, options):
-        url = opengraph_get(self.get_urldata()[1], "image")
+        url = opengraph_get(self.get_urldata(), "image")
         if url is None:
             return
         download_thumbnail(options, url)
