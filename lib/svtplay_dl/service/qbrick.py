@@ -11,7 +11,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
 class Qbrick(Service, OpenGraphThumbMixin):
-    supported_domains = ['di.se']
+    supported_domains = ['di.seXX']
 
     def get(self, options):
         data = self.get_urldata()
