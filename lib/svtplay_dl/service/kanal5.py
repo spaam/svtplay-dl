@@ -44,7 +44,7 @@ class Kanal5(Service):
             options.cookies = self.cookies
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
-        data = self.http.request("get", url, cookies=self.cookies).content
+        data = self.http.request("get", url, cookies=self.cookies).text
         data = json.loads(data)
         options.cookies = self.cookies
         if not options.live:
@@ -87,7 +87,7 @@ class Kanal5(Service):
 
             url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
             data = self.http.request("get", url, cookies=self.cookies)
-            data = json.loads(data.content)
+            data = json.loads(data.text)
             if "reasonsForNoStreams" in data:
                 show = False
             if "streams" in data.keys():
