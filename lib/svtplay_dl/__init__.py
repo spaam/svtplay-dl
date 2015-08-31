@@ -10,7 +10,6 @@ from optparse import OptionParser
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.utils import select_quality, list_quality
-from svtplay_dl.utils.urllib import URLError
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
