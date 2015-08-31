@@ -11,7 +11,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.log import log
 
 class Picsearch(Service, OpenGraphThumbMixin):
-    supported_domains = ['dn.se', 'mobil.dn.se']
+    supported_domains = ['dn.se', 'mobil.dn.se', 'di.se']
 
     def get(self, options):
         data = self.get_urldata()
