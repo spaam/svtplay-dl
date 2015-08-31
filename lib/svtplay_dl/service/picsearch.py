@@ -21,15 +21,19 @@ class Picsearch(Service, OpenGraphThumbMixin):
 
         ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
         if not ajax_auth:
-            log.error("Cant find token for video")
-            return
+            ajax_auth = re.search(r'screen9-ajax-auth="([^"]+)"', data)
+            if not ajax_auth:
+                log.error("Cant find token for video")
+                return
         mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
         if not mediaid:
             mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata())
             if not mediaid:
-                log.error("Cant find media id")
-                return
-        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).content
+                mediaid = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
+                if not mediaid:
+                    log.error("Cant find media id")
+                    return
+        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).text
         jsondata = json.loads(jsondata)
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
