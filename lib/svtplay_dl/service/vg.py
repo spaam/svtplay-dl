@@ -25,7 +25,7 @@ class Vg(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
         videoid = match.group(1)
-        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).content
+        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).text
         jsondata = json.loads(data)
 
         if options.output_auto:
@@ -46,7 +46,7 @@ class Vg(Service, OpenGraphThumbMixin):
                 for n in list(streams.keys()):
                     yield streams[n]
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(self.http.request("get", jsondata["streamUrls"]["hls"]).text)
+            streams = hlsparse(jsondata["streamUrls"]["hls"], self.http.request("get", jsondata["streamUrls"]["hls"]).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
         if "mp4" in jsondata["streamUrls"]:
