@@ -23,7 +23,7 @@ class Sr(Service, OpenGraphThumbMixin):
         if self.exclude(options):
             return
 
-        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+\d+)" aria-label', data)
+        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+playaudio=\d+)"', data)
         if not match:
             log.error("Can't find audio info")
             return
