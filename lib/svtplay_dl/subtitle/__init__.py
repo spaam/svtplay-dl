@@ -17,7 +17,7 @@ class subtitle(object):
         self.http = Session()
 
     def download(self):
-        subdata = self.http.request("get", self.url, cookies=self.options.cookies)
+        subdata = self.http.request("get", self.url, cookies=self.options.cookies).text
 
         data = None
         if self.subtype == "tt":
@@ -31,7 +31,7 @@ class subtitle(object):
         if self.subtype == "wrst":
             data = self.wrst(subdata)
 
-        file_d = output(self.options, "srt")
+        file_d = output(self.options, "srt", mode="wt")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
