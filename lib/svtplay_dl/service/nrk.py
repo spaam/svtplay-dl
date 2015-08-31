@@ -13,7 +13,7 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.log import log
 
 class Nrk(Service, OpenGraphThumbMixin):
-    supported_domains = ['nrk.no', 'tv.nrk.no']
+    supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no']
 
     def get(self, options):
         data = self.get_urldata()
