@@ -2,7 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import sys
-import socket
 import logging
 import re
 import time
@@ -21,9 +20,6 @@ is_py2_old = (sys.version_info < (2, 7))
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 
-from svtplay_dl.utils.urllib import build_opener, Request, HTTPCookieProcessor, \
-                                    HTTPRedirectHandler, HTTPError, \
-                                    addinfourl, CookieJar, urlparse
 from requests import Session
 
 log = logging.getLogger('svtplay_dl')
