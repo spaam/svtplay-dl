@@ -57,6 +57,6 @@ class Expressen(Service):
             yield RTMP(options2, filename, int(i.attrib["bitrate"]))
 
         ipadurl = xml.find("mobileurls").find("ipadurl").text
-        streams = hlsparse(self.http.request("get", ipadurl).text)
+        streams = hlsparse(ipadurl, self.http.request("get", ipadurl).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
