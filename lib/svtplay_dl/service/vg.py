@@ -25,7 +25,7 @@ class Vg(Service, OpenGraphThumbMixin):
                 log.error("Can't find video file for: %s", self.url)
                 return
         videoid = match.group(1)
-        data = self.http.get("http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).content
+        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).content
         jsondata = json.loads(data)
 
         if options.output_auto:
@@ -41,12 +41,12 @@ class Vg(Service, OpenGraphThumbMixin):
             return
 
         if "hds" in jsondata["streamUrls"]:
-            streams = hdsparse(copy.copy(options), self.http.get(jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}).text, jsondata["streamUrls"]["hds"])
+            streams = hdsparse(copy.copy(options), self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}).text, jsondata["streamUrls"]["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(self.http.get(jsondata["streamUrls"]["hls"]).text)
+            streams = hlsparse(self.http.request("get", jsondata["streamUrls"]["hls"]).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
         if "mp4" in jsondata["streamUrls"]:

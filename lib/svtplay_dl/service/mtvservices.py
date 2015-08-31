@@ -22,7 +22,7 @@ class Mtvservices(Service):
             log.error("Can't find video file")
             return
         url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
-        data = self.http.get(url)
+        data = self.http.request("get", url)
         start = data.index("<?xml version=")
         data = data[start:]
         xml = ET.XML(data)

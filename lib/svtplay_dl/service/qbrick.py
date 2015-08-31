@@ -24,7 +24,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             if not match:
                 log.error("Can't find video info for: %s", self.url)
                 return
-            data = self.http.get(match.group(1)).content
+            data = self.http.request("get", match.group(1)).content
             match = re.search(r"data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
                 log.error("Can't find video file for: %s", self.url)
@@ -34,7 +34,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             log.error("Can't find any info for %s", self.url)
             return
 
-        data = self.http.get(host).content
+        data = self.http.request("get", host).content
         xml = ET.XML(data)
         try:
             url = xml.find("media").find("item").find("playlist").find("stream").find("format").find("substream").text
@@ -44,7 +44,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
         live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
         if live == "true":
             options.live = True
-        data = self.http.get(url).content
+        data = self.http.request("get", url).content
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")

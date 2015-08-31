@@ -44,7 +44,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         videoplayer = match.group(1)
 
         dataurl = "http://c.brightcove.com/services/viewer/htmlFederated?flashID=%s&playerID=%s&playerKey=%s&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer=%s" % (flashid, playerid, playerkey, videoplayer)
-        data = self.http.get(dataurl).content
+        data = self.http.request("get", dataurl).content
         match = re.search(r'experienceJSON = ({.*});', data)
         if not match:
             log.error("Can't find json data")
@@ -53,12 +53,12 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
-                streams = hdsparse(copy.copy(options), self.http.get(i["defaultURL"], params={"hdcore": "3.7.0"}).text, i["defaultURL"])
+                streams = hdsparse(copy.copy(options), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}).text, i["defaultURL"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
 
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(self.http.get(i["defaultURL"]).text)
+                streams = hlsparse(self.http.request("get", i["defaultURL"]).text)
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)

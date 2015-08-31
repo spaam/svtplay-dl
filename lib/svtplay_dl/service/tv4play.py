@@ -33,21 +33,21 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         if options.username and options.password:
-            data = self.http.get("https://www.tv4play.se/session/new?https=")
+            data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
             auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
             if not auth_token:
                 log.error("Can't find authenticity_token needed for user / password")
                 return
             url = "https://www.tv4play.se/session"
             postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2), "https": ""}
-            data = self.http.post(url, data=postdata, cookies=self.cookies)
+            data = self.http.request("post", url, data=postdata, cookies=self.cookies)
             self.cookies = data.cookies
             fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
             if fail:
                 log.error(fail.group(1))
                 return
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
-        data = self.http.get(url, cookies=self.cookies)
+        data = self.http.request("get", url, cookies=self.cookies)
         if data.status_code == 401:
             xml = ET.XML(data.content)
             code = xml.find("code").text
@@ -97,7 +97,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
-                    streams = hdsparse(copy.copy(options), self.http.get(i.find("url").text, params={"hdcore": "3.7.0"}).text, i.find("url").text)
+                    streams = hdsparse(copy.copy(options), self.http.request("get", i.find("url").text, params={"hdcore": "3.7.0"}).text, i.find("url").text)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -105,7 +105,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(options), "smi", i.find("url").text)
 
         url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
-        data = self.http.get(url, cookies=self.cookies).content
+        data = self.http.request("get", url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
         if is_py2_old:
@@ -116,7 +116,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(i.find("url").text, self.http.get(i.find("url").text).text)
+                    streams = hlsparse(i.find("url").text, self.http.request("get", i.find("url").text).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
 
@@ -125,7 +125,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
             show = quote_plus(show)
-        data = self.http.get("http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).content
+        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).content
         jsondata = json.loads(data)
         episodes = []
         n = 1

@@ -38,12 +38,12 @@ class Aftonbladet(Service):
 
         if not options.live:
             dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
-            data = self.http.get(dataurl).content
+            data = self.http.request("get", dataurl).content
             data = json.loads(data)
             videoId = data["videoId"]
 
         streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
-        data = self.http.get(streamsurl).content
+        data = self.http.request("get", streamsurl).content
         streams = json.loads(data)
         hlsstreams = streams["formats"]["hls"]
         if "level3" in hlsstreams.keys():
@@ -63,7 +63,7 @@ class Aftonbladet(Service):
             else:
                 plist = "http://%s/%s/%s" % (address, path, hls["filename"])
 
-            streams = hlsparse(plist, self.http.get(plist).text)
+            streams = hlsparse(plist, self.http.request("get", plist).text)
             if streams:
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)

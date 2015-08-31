@@ -30,7 +30,7 @@ class OppetArkiv(Svtplay):
 
         while more:
             url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=%s&embed=true" % (program, page, sort)
-            data = self.http.get(url).content
+            data = self.http.request("get", url).content
             visa = re.search(r'svtXColorDarkLightGrey', data)
             if not visa:
                 more = False

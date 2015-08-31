@@ -24,7 +24,7 @@ class Dr(Service, OpenGraphThumbMixin):
         match = re.search(r'resource:[ ]*"([^"]*)",', data)
         if match:
             resource_url = match.group(1)
-            resource_data = self.http.get(resource_url).content
+            resource_data = self.http.request("get", resource_url).content
             resource = json.loads(resource_data)
             streams = find_stream(options, resource)
             for i in streams:
@@ -35,7 +35,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 log.error("Cant find resource info for this video")
                 return
             resource_url = "%s" % match.group(1)
-            resource_data = self.http.get(resource_url).content
+            resource_data = self.http.request("get", resource_url).content
             resource = json.loads(resource_data)
 
             if "SubtitlesList" in resource:
@@ -48,12 +48,12 @@ class Dr(Service, OpenGraphThumbMixin):
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(options), self.http.get(stream["Uri"], params={"hdcore": "3.7.0"}).text, stream["Uri"])
+                        streams = hdsparse(copy.copy(options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}).text, stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(self.http.get(stream["Uri"]).text)
+                        streams = hlsparse(self.http.request("get", stream["Uri"]).text)
                         for n in list(streams.keys()):
                             yield HLS(copy.copy(options), streams[n], n)
                     if stream["Target"] == "Streaming":

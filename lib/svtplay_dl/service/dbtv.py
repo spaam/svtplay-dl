@@ -29,7 +29,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == vidoid:
                 if i["HLSURL"]:
-                    streams = hlsparse(i["HLSURL"], self.http.get(i["HLSURL"]).text)
+                    streams = hlsparse(i["HLSURL"], self.http.request("get", i["HLSURL"]).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
                 for n in i["renditions"]:

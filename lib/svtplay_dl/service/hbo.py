@@ -30,11 +30,11 @@ class Hbo(Service):
             log.error("Cant find video file")
             return
         url = "http://www.hbo.com/data/content/%s.xml" % match.group(1)
-        data = self.http.get(url).content
+        data = self.http.request("get", url).content
         xml = ET.XML(data)
         videoid = xml.find("content")[1].find("videoId").text
         url = "http://render.cdn.hbo.com/data/content/global/videos/data/%s.xml" % videoid
-        data = self.http.get(url).content
+        data = self.http.request("get", url).content
         xml = ET.XML(data)
         ss = xml.find("videos")
         if is_py2_old:

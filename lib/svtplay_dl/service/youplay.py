@@ -24,7 +24,7 @@ class Youplay(Service, OpenGraphThumbMixin):
             log.error("Cant find video info")
             return
 
-        data = self.http.get("http:%s" % match.group(1)).content
+        data = self.http.request("get", "http:%s" % match.group(1)).content
         match = re.search(r'decodeURIComponent\("([^"]+)"\)\)', data)
         if not match:
             log.error("Can't decode video info")

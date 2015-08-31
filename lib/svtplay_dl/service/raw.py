@@ -27,12 +27,12 @@ class Raw(Service):
             if extention:
                 options.output = "%s.flv" % options.output
 
-            streams = hdsparse(copy.copy(options), self.http.get(self.url, params={"hdcore": "3.7.0"}).text, self.url)
+            streams = hdsparse(copy.copy(options), self.http.request("get", self.url, params={"hdcore": "3.7.0"}).text, self.url)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
-            streams = hlsparse(self.http.get(self.url).text)
+            streams = hlsparse(self.http.request("get", self.url).text)
             if extention:
                 options.output = "%s.ts" % options.output
 

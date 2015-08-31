@@ -47,7 +47,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 dataurl = "%s&format=json" % url
             else:
                 dataurl = "%s&output=json" % url
-        data = self.http.get(dataurl)
+        data = self.http.request("get", dataurl)
         if data.status_code == 404:
             log.error("Can't find the video")
             return
@@ -77,20 +77,21 @@ class Svtplay(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
 
             if parse.path.find("m3u8") > 0:
-                streams = hlsparse(i["url"], self.http.get(i["url"]).text)
+                streams = hlsparse(i["url"], self.http.request("get", i["url"]).text)
                 if streams:
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    streams = hdsparse(copy.copy(options), self.http.get(i["url"], params={"hdcore": "3.7.0"}).text, i["url"])
+                    res = self.http.request("get", i["url"], params={"hdcore": "3.7.0"})
+                    streams = hdsparse(copy.copy(options), res.text, i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
             elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
-                data = self.http.get(embedurl).content
+                data = self.http.request("get", embedurl).content
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
                 swf = "http://www.svtplay.se%s" % match.group(1)
                 options.other = "-W %s" % swf
@@ -108,7 +109,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 return
             episodes = [urljoin("http://www.svtplay.se", x) for x in match]
         else:
-            data = self.http.get(match.group(1))
+            data = self.http.request("get", match.group(1))
             xml = ET.XML(data)
 
             episodes = [x.text for x in xml.findall(".//item/link")]

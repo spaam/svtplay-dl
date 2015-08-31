@@ -45,17 +45,17 @@ class Nrk(Service, OpenGraphThumbMixin):
                 log.error("Can't find server address with media info")
                 return
             dataurl = "%smediaelement/%s" % (match.group(1), vid)
-            data = self.http.get(dataurl).content
+            data = self.http.request("get", dataurl).content
             data = json.loads(data)
             manifest_url = data["mediaUrl"]
             options.live = data["isLive"]
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-        streams = hlsparse(self.http.get(hlsurl).text)
+        streams = hlsparse(self.http.request("get", hlsurl).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
 
-        streams = hdsparse(copy.copy(options), self.http.get(manifest_url, params={"hdcore": "3.7.0"}).text, manifest_url)
+        streams = hdsparse(copy.copy(options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}).text, manifest_url)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

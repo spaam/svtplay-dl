@@ -37,7 +37,7 @@ class Expressen(Service):
                 return
             vid = match.group(1)
             xmlurl = "http://www.expressen.se/Handlers/WebTvHandler.ashx?id=%s" % vid
-        data = self.http.get(xmlurl).content
+        data = self.http.request("get", xmlurl).content
 
         xml = ET.XML(data)
         live = xml.find("live").text
@@ -57,6 +57,6 @@ class Expressen(Service):
             yield RTMP(options2, filename, int(i.attrib["bitrate"]))
 
         ipadurl = xml.find("mobileurls").find("ipadurl").text
-        streams = hlsparse(self.http.get(ipadurl).text)
+        streams = hlsparse(self.http.request("get", ipadurl).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)

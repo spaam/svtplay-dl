@@ -48,13 +48,13 @@ class Urplay(Service, OpenGraphThumbMixin):
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         match = re.search("(mp[34]:.*$)", jsondata["file_rtmp"])
         path = match.group(1)
-        streams = hlsparse(self.http.get(hls).text)
+        streams = hlsparse(self.http.request("get", hls).text)
         for n in list(streams.keys()):
             yield HLS(options, streams[n], n)
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         yield RTMP(options, rtmp, "480")
         if hd:
-            streams = hlsparse(self.http.get(hls_hd).text)
+            streams = hlsparse(self.http.request("get", hls_hd).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
@@ -79,7 +79,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             return self.scrape_episodes(options)
 
         url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
-        xml = ET.XML(self.http.get(url).content)
+        xml = ET.XML(self.http.request("get", url).content)
 
         episodes = [x.text for x in xml.findall(".//item/link")]
         episodes_new = []

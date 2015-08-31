@@ -21,12 +21,12 @@ class Ruv(Service):
 
         match = re.search(r'"([^"]+geo.php)"', data)
         if match:
-            data = self.http.get(match.group(1)).content
+            data = self.http.request("get", match.group(1)).content
             match = re.search(r'punktur=\(([^ ]+)\)', data)
             if match:
                 janson = json.loads(match.group(1))
                 options.live = checklive(janson["result"][1])
-                streams = hlsparse(self.http.get(janson["result"][1]).text)
+                streams = hlsparse(self.http.request("get", janson["result"][1]).text)
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
         else:

@@ -19,7 +19,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             log.error("Can't find id for the video")
             return
 
-        data = self.http.get(match.group(1)).content
+        data = self.http.request("get", match.group(1)).content
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
@@ -38,7 +38,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         options.other = "-W %s://%s%s" % (parse.scheme, parse.hostname, self.http.check_redirect(swfurl))
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
-        content = self.http.get(contenturl).content
+        content = self.http.request("get", contenturl).content
         xml = ET.XML(content)
         ss = xml.find("video").find("item")
         if is_py2_old:

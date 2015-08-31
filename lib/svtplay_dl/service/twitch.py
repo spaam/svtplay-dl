@@ -69,7 +69,7 @@ class Twitch(Service):
         access = self._get_access_token(videoid)
 
         if options.output_auto:
-            info = json.loads(self.http.get("https://api.twitch.tv/kraken/videos/v%s" % videoid).content)
+            info = json.loads(self.http.request("get", "https://api.twitch.tv/kraken/videos/v%s" % videoid).content)
             options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
 
         if "token" not in access:
@@ -80,7 +80,7 @@ class Twitch(Service):
         url = "http://usher.twitch.tv/vod/%s?nauth=%s&nauthsig=%s" % (
             videoid, nauth, authsig)
 
-        streams = hlsparse(url, self.http.get(url).text)
+        streams = hlsparse(url, self.http.request("get", url).text)
         if streams:
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
@@ -120,7 +120,7 @@ class Twitch(Service):
         # There are references to a api_token in global.js; it's used
         # with the "Twitch-Api-Token" HTTP header. But it doesn't seem
         # to be necessary.
-        payload = self.http.get(url, headers={
+        payload = self.http.request("get", url, headers={
             'Accept': 'application/vnd.twitchtv.v2+json'
         })
         return json.loads(payload.content)
@@ -148,6 +148,6 @@ class Twitch(Service):
         if not options.output:
             options.output = channel
 
-        streams = hlsparse(self.http.get(hls_url).text)
+        streams = hlsparse(self.http.request("get", hls_url).text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)

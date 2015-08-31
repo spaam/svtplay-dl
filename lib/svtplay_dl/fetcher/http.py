@@ -12,7 +12,7 @@ class HTTP(VideoRetriever):
 
     def download(self):
         """ Get the stream from HTTP """
-        data = self.http.get(self.url, stream=True)
+        data = self.http.request("get", self.url, stream=True)
         try:
             total_size = data.headers['content-length']
         except KeyError:

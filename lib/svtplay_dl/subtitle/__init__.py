@@ -17,7 +17,7 @@ class subtitle(object):
         self.http = Session()
 
     def download(self):
-        subdata = self.http.get(self.url, cookies=self.options.cookies)
+        subdata = self.http.request("get", self.url, cookies=self.options.cookies)
 
         data = None
         if self.subtype == "tt":

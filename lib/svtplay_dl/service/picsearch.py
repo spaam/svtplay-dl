@@ -29,7 +29,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not mediaid:
                 log.error("Cant find media id")
                 return
-        jsondata = self.http.get("http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).content
+        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).content
         jsondata = json.loads(jsondata)
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
@@ -44,7 +44,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
                 if "live" in playlist:
                     options.live = playlist["live"]
                 if playlist["url"].endswith(".f4m"):
-                    streams = hdsparse(copy.copy(options), self.http.get(playlist["url"], params={"hdcore": "3.7.0"}).text, playlist["url"])
+                    streams = hdsparse(copy.copy(options), self.http.request("get", playlist["url"], params={"hdcore": "3.7.0"}).text, playlist["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]

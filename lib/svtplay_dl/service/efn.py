@@ -18,7 +18,7 @@ class Efn(Service, OpenGraphThumbMixin):
             log.error("Cant find video info")
             return
 
-        streams = hlsparse(self.http.get(match.group(1)))
+        streams = hlsparse(self.http.request("get", match.group(1)))
         if streams:
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)

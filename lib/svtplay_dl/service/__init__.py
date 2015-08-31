@@ -25,7 +25,7 @@ class Service(object):
 
     def get_urldata(self):
         if self._urldata is None:
-            self._urldata = self.http.get(self.url).content
+            self._urldata = self.http.request("get", self.url).content
         return self._urldata
 
     @classmethod
@@ -100,7 +100,7 @@ class OpenGraphThumbMixin(object):
 class Generic(Service):
     ''' Videos embed in sites '''
     def get(self, sites, url):
-        data = self.http.get(url).content
+        data = self.http.request("get", url).content
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:

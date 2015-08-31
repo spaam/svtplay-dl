@@ -58,7 +58,7 @@ class HLS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
 
-        m3u8 = self.http.get(self.url).text
+        m3u8 = self.http.request("get", self.url).text
         globaldata, files = parsem3u(m3u8)
         encrypted = False
         key = None
@@ -74,7 +74,7 @@ class HLS(VideoRetriever):
                 sys.exit(2)
 
             match = re.search(r'URI="(https?://.*?)"', keydata)
-            key = self.http.get(match.group(1)).content
+            key = self.http.request("get", match.group(1)).content
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
@@ -92,7 +92,7 @@ class HLS(VideoRetriever):
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
 
-            data = self.http.get(item)
+            data = self.http.request("get", item)
             if data.status_code == 404:
                 break
             data = data.content

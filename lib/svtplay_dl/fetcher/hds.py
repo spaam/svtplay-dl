@@ -105,7 +105,7 @@ class HDS(VideoRetriever):
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-            data = self.http.get(url)
+            data = self.http.request("get", url)
             if data.status_code == 404:
                 break
             data = data.content

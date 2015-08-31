@@ -29,7 +29,7 @@ class Lemonwhale(Service):
             vid = match.group(1)
         if not vid:
             path = unquote_plus(match.group(1))
-            data = self.http.get("http://www.svd.se%s" % path).content
+            data = self.http.request("get", "http://www.svd.se%s" % path).content
             match = re.search(r'embed.jsp\?([^"]+)', data)
             if not match:
                 log.error("Can't find video id")
@@ -37,7 +37,7 @@ class Lemonwhale(Service):
             vid = match.group(1)
 
         url = "http://amz.lwcdn.com/api/cache/VideoCache.jsp?%s" % vid
-        data = self.http.get(url).content
+        data = self.http.request("get", url).content
         xml = ET.XML(data)
         videofile = xml.find("{http://www.lemonwhale.com/xml11}VideoFile")
         mediafiles = videofile.find("{http://www.lemonwhale.com/xml11}MediaFiles")

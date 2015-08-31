@@ -30,10 +30,10 @@ class Kanal5(Service):
         video_id = match.group(1)
         if options.username and options.password:
             # get session cookie
-            data = self.http.get("http://www.kanal5play.se/", cookies=self.cookies)
+            data = self.http.request("get", "http://www.kanal5play.se/", cookies=self.cookies)
             authurl = "https://kanal5swe.appspot.com/api/user/login?callback=jQuery171029989&email=%s&password=%s&_=136250" % \
                       (options.username, options.password)
-            data = self.http.get(authurl, cookies=data.cookies).text
+            data = self.http.request("get", authurl, cookies=data.cookies).text
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
             if jsondata["success"] is False:
@@ -44,7 +44,7 @@ class Kanal5(Service):
             options.cookies = self.cookies
 
         url = "http://www.kanal5play.se/api/getVideo?format=FLASH&videoId=%s" % video_id
-        data = self.http.get(url, cookies=self.cookies).content
+        data = self.http.request("get", url, cookies=self.cookies).content
         data = json.loads(data)
         options.cookies = self.cookies
         if not options.live:
@@ -86,13 +86,13 @@ class Kanal5(Service):
                 yield RTMP(options2, steambaseurl, bitrate)
 
             url = "http://www.kanal5play.se/api/getVideo?format=IPAD&videoId=%s" % video_id
-            data = self.http.get(url, cookies=self.cookies)
+            data = self.http.request("get", url, cookies=self.cookies)
             data = json.loads(data.content)
             if "reasonsForNoStreams" in data:
                 show = False
             if "streams" in data.keys():
                 for i in data["streams"]:
-                    streams = hlsparse(i["source"], self.http.get(i["source"]).text)
+                    streams = hlsparse(i["source"], self.http.request("get", i["source"]).text)
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
         if "reasonsForNoStreams" in data and show:

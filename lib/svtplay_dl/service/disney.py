@@ -81,7 +81,7 @@ class Disney(Service, OpenGraphThumbMixin):
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
-            data = self.http.get(url).content
+            data = self.http.request("get", url).content
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
             data = jsondata["content"]
@@ -101,6 +101,6 @@ class Disney(Service, OpenGraphThumbMixin):
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(redirect, self.http.get(redirect).text)
+            streams = hlsparse(redirect, self.http.request("get", redirect).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)

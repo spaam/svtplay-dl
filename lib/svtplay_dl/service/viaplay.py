@@ -57,7 +57,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""
-        data = self.http.get(url)
+        data = self.http.request("get", url)
         if data.status_code == 403:
             print data.status_code
             log.error("Can't play this because the video is geoblocked.")
@@ -78,7 +78,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if dataj["subtitles_for_hearing_impaired"]:
             yield subtitle(copy.copy(options), "sami", dataj["subtitles_for_hearing_impaired"])
 
-        streams = self.http.get("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
+        streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
             log.error("Can't play this because the video is geoblocked.")
             return
@@ -91,7 +91,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if filename.endswith("f4m"):
-                streams = hdsparse(copy.copy(options), self.http.get(filename, params={"hdcore": "3.7.0"}).text, filename)
+                streams = hdsparse(copy.copy(options), self.http.request("get", filename, params={"hdcore": "3.7.0"}).text, filename)
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
@@ -107,7 +107,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 yield RTMP(copy.copy(options), filename, 800)
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(streamj["streams"]["hls"], self.http.get(streamj["streams"]["hls"]).text)
+            streams = hlsparse(streamj["streams"]["hls"], self.http.request("get", streamj["streams"]["hls"]).text)
             if streams:
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
@@ -117,7 +117,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if not format_id:
             log.error("Can't find video info for all episodes")
             return
-        data = self.http.get("http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1)).content
+        data = self.http.request("get", "http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1)).content
         jsondata = json.loads(data)
         videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
 
