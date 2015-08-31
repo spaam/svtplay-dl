@@ -25,7 +25,7 @@ class Service(object):
 
     def get_urldata(self):
         if self._urldata is None:
-            self._urldata = self.http.request("get", self.url).content
+            self._urldata = self.http.request("get", self.url).text
         return self._urldata
 
     @classmethod
