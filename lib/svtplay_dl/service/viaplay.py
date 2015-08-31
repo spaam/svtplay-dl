@@ -35,9 +35,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         to scrape it from the HTML document. Returns None in case it's
         unable to extract the ID at all.
         """
-        error, html_data = self.get_urldata()
-        if error:
-            return None
+        html_data = self.get_urldata()
         match = re.search(r'data-video-id="([0-9]+)"', html_data)
         if match:
             return match.group(1)
@@ -61,7 +59,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
         options.other = ""
         data = self.http.get(url)
         if data.status_code == 403:
-            log.error("Can't play this because the video is either not found or geoblocked.")
+            print data.status_code
+            log.error("Can't play this because the video is geoblocked.")
             return
         dataj = json.loads(data.content)
         if "msg" in dataj:
@@ -81,7 +80,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         streams = self.http.get("http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
-            log.error("Can't play this because the video is either not found or geoblocked.")
+            log.error("Can't play this because the video is geoblocked.")
             return
         streamj = json.loads(streams.content)
 
@@ -108,13 +107,13 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 yield RTMP(copy.copy(options), filename, 800)
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(self.http.get(streamj["streams"]["hls"]).text)
+            streams = hlsparse(streamj["streams"]["hls"], self.http.get(streamj["streams"]["hls"]).text)
             if streams:
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
 
     def find_all_episodes(self, options):
-        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata()[1])
+        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
         if not format_id:
             log.error("Can't find video info for all episodes")
             return
