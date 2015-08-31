@@ -35,23 +35,25 @@ class Nrk(Service, OpenGraphThumbMixin):
         if match:
             manifest_url = match.group(1)
         else:
-            match = re.search(r'data-video-id="(\d+)"', self.get_urldata())
+            match = re.search(r'data-nrk-id="([^"]+)"></div><script', self.get_urldata())
             if match is None:
-                log.error("Can't find video id.")
-                return
+                match = re.search(r'video-id="([^"]+)"', self.get_urldata())
+                if match is None:
+                    log.error("Can't find video id.")
+                    return
             vid = match.group(1)
-            match = re.search(r"PS_VIDEO_API_URL : '([^']*)',", self.get_urldata())
-            if match is None:
-                log.error("Can't find server address with media info")
-                return
-            dataurl = "%smediaelement/%s" % (match.group(1), vid)
-            data = self.http.request("get", dataurl).content
+            dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % vid
+            data = self.http.request("get", dataurl).text
             data = json.loads(data)
             manifest_url = data["mediaUrl"]
             options.live = data["isLive"]
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-        streams = hlsparse(self.http.request("get", hlsurl).text)
+        data = self.http.request("get", hlsurl)
+        if data.status_code == 403:
+            log.error("Can't fetch the video because of geoblocked")
+            return
+        streams = hlsparse(hlsurl, data.text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
 
