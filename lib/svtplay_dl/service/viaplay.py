@@ -61,7 +61,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if data.status_code == 403:
             log.error("Can't play this because the video is geoblocked.")
             return
-        dataj = json.loads(data.content)
+        dataj = json.loads(data.text)
         if "msg" in dataj:
             log.error(dataj["msg"])
             return
@@ -81,7 +81,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streams.status_code == 403:
             log.error("Can't play this because the video is geoblocked.")
             return
-        streamj = json.loads(streams.content)
+        streamj = json.loads(streams.text)
 
         if "msg" in streamj:
             log.error("Can't play this because the video is either not found or geoblocked.")
