@@ -59,7 +59,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         options.other = ""
         data = self.http.request("get", url)
         if data.status_code == 403:
-            print data.status_code
             log.error("Can't play this because the video is geoblocked.")
             return
         dataj = json.loads(data.content)
