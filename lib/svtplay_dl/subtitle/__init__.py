@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import json
 import re
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2
+from svtplay_dl.utils import is_py2, decode_html_entities
 from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
 from requests import Session
@@ -173,7 +173,7 @@ class subtitle(object):
             else:
                 sub = re.sub('<[^>]*>', '', i)
                 srt += sub.lstrip()
-
+        srt = decode_html_entities(srt)
         if is_py2:
             return srt.encode("utf-8")
         return srt
