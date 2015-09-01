@@ -15,6 +15,7 @@ setup(
     packages = find_packages(
         'lib',
         exclude=["tests", "*.tests", "*.tests.*"]),
+    install_requires=["requests>=2.0.0"],
     package_dir = {'': 'lib'},
     scripts = ['bin/svtplay-dl'],
 
