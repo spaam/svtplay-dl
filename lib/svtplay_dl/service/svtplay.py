@@ -91,7 +91,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                             yield streams[n]
             elif parse.scheme == "rtmp":
                 embedurl = "%s?type=embed" % url
-                data = self.http.request("get", embedurl).content
+                data = self.http.request("get", embedurl).text
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
                 swf = "http://www.svtplay.se%s" % match.group(1)
                 options.other = "-W %s" % swf
@@ -109,7 +109,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 return
             episodes = [urljoin("http://www.svtplay.se", x) for x in match]
         else:
-            data = self.http.request("get", match.group(1))
+            data = self.http.request("get", match.group(1)).content
             xml = ET.XML(data)
 
             episodes = [x.text for x in xml.findall(".//item/link")]
