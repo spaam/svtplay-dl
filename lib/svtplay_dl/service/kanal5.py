@@ -97,3 +97,34 @@ class Kanal5(Service):
                         yield HLS(copy.copy(options), streams[n], n)
         if "reasonsForNoStreams" in data and show:
             log.error(data["reasonsForNoStreams"][0])
+
+    def find_all_episodes(self, options):
+        program = re.search(".*/program/(\d+)", self.url)
+        if not program:
+            log.error("Can't find program id in url")
+            return None
+        baseurl = "http://www.kanal5play.se/content/program/%s" % program.group(1)
+        data = self.http.request("get", baseurl).text
+        sasong = re.search("/program/\d+/sasong/(\d+)", data)
+        if not sasong:
+            log.error("Can't find seasong id")
+            return None
+        seasong = int(sasong.group(1))
+        episodes = []
+        n = 0
+        more = True
+        while more:
+            url = "%s/sasong/%s" % (baseurl, seasong)
+            data = self.http.request("get", url)
+            if data.status_code == 404:
+                more = False
+            else:
+                regex = re.compile(r'href="(/play/program/\d+/video/\d+)"')
+                for match in regex.finditer(data.text):
+                    if n == options.all_last:
+                        break
+                    episodes.append("http://www.kanal5play.se%s" % match.group(1))
+                    n += 1
+                seasong -= 1
+
+        return episodes
