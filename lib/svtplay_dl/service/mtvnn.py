@@ -35,8 +35,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             return
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
-        parse = urlparse(swfurl)
-        options.other = "-W %s://%s%s" % (parse.scheme, parse.hostname, self.http.check_redirect(swfurl))
+        options.other = "-W %s" % self.http.check_redirect(swfurl)
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         content = self.http.request("get", contenturl).content
