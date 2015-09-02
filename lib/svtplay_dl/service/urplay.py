@@ -54,7 +54,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         yield RTMP(options, rtmp, "480")
         if hd:
-            streams = hlsparse(self.http.request("get", hls_hd).text)
+            streams = hlsparse(hls_hd, self.http.request("get", hls_hd).text)
             for n in list(streams.keys()):
                 yield HLS(copy.copy(options), streams[n], n)
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
