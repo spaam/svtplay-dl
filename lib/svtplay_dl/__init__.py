@@ -127,7 +127,8 @@ class Options(object):
         self.exclude = None
 
 def get_media(url, options):
-
+    if "http" not in url[:4]:
+        url = "http://%s" % url
     stream = service_handler(sites, url)
     if not stream:
         url, stream = Generic().get(sites, url)
