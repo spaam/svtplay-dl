@@ -123,7 +123,9 @@ class Kanal5(Service):
                 for match in regex.finditer(data.text):
                     if n == options.all_last:
                         break
-                    episodes.append("http://www.kanal5play.se%s" % match.group(1))
+                    url2 = "http://www.kanal5play.se%s" % match.group(1)
+                    if url2 not in episodes:
+                        episodes.append(url2)
                     n += 1
                 seasong -= 1
 
