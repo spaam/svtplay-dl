@@ -131,7 +131,8 @@ def get_media(url, options):
         url = "http://%s" % url
     stream = service_handler(sites, url)
     if not stream:
-        url, stream = Generic().get(sites, url)
+        generic = Generic(url)
+        url, stream = generic.get(sites)
     if not stream:
         if url.find(".f4m") > 0 or url.find(".m3u8") > 0:
             stream = Raw(url)
