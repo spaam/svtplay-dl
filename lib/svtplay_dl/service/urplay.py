@@ -10,7 +10,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-#from svtplay_dl.log import log
+from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
 
