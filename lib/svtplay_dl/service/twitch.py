@@ -14,6 +14,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.error import ServiceError
 
 
 class TwitchException(Exception):
@@ -69,7 +70,11 @@ class Twitch(Service):
         access = self._get_access_token(videoid)
 
         if options.output_auto:
-            info = json.loads(self.http.request("get", "https://api.twitch.tv/kraken/videos/v%s" % videoid).content)
+            data = self.http.request("get", "https://api.twitch.tv/kraken/videos/v%s" % videoid)
+            if data.status_code == 404:
+                yield ServiceError("Can't find the video")
+                return
+            info = json.loads(data.text)
             options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
 
         if "token" not in access:
@@ -147,7 +152,10 @@ class Twitch(Service):
         options.live = True
         if not options.output:
             options.output = channel
-
-        streams = hlsparse(self.http.request("get", hls_url).text)
+        data = self.http.request("get", hls_url)
+        if data.status_code == 404:
+            yield ServiceError("Stream is not online.")
+            return
+        streams = hlsparse(hls_url, data.text)
         for n in list(streams.keys()):
             yield HLS(copy.copy(options), streams[n], n)
