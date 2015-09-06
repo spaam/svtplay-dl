@@ -20,6 +20,7 @@ class Bambuser(Service, OpenGraphThumbMixin):
             return
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         json_url = "http://player-c.api.bambuser.com/getVideo.json?api_key=005f64509e19a868399060af746a00aa&vid=%s" % match.group(1)

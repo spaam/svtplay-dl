@@ -32,6 +32,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 options.output = title
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]

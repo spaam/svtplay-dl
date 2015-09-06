@@ -29,6 +29,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             return
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         data = match.group(1)

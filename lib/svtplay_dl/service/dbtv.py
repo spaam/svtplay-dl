@@ -16,6 +16,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         parse = urlparse(self.url)

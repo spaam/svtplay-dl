@@ -19,6 +19,7 @@ class Nrk(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         match = re.search("data-subtitlesurl = \"(/.*)\"", data)

@@ -48,6 +48,7 @@ class Twitch(Service):
         urlp = urlparse(self.url)
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)

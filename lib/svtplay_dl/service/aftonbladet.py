@@ -17,6 +17,7 @@ class Aftonbladet(Service):
         data = self.get_urldata()
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         match = re.search('data-aptomaId="([-0-9a-z]+)"', data)

@@ -63,6 +63,7 @@ class Kanal5(Service):
                 options.output = title
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         if data["hasSubtitle"]:

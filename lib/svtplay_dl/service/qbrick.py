@@ -17,6 +17,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         if re.findall(r"di.se", self.url):

@@ -17,6 +17,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)

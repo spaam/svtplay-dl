@@ -60,6 +60,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             options.output = outputfilename(data, options.output, ensure_unicode(self.get_urldata()))
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         if data["video"]["subtitleReferences"]:

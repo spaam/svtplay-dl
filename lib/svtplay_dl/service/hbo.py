@@ -23,6 +23,7 @@ class Hbo(Service):
             return
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         match = re.search("^/(.*).html", other)

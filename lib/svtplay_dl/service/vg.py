@@ -38,6 +38,7 @@ class Vg(Service, OpenGraphThumbMixin):
                 options.output = title
 
         if self.exclude(options):
+            yield ServiceError("Excluding video")
             return
 
         if "hds" in jsondata["streamUrls"]:
