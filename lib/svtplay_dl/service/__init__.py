@@ -99,8 +99,8 @@ class OpenGraphThumbMixin(object):
 
 class Generic(Service):
     ''' Videos embed in sites '''
-    def get(self, sites, url):
-        data = self.http.request("get", url).content
+    def get(self, sites):
+        data = self.http.request("get", self.url).text
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:
