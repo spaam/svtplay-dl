@@ -175,17 +175,25 @@ def get_one_media(stream, options):
     subs = []
     error = []
     streams = stream.get(options)
-    for i in streams:
-        if isinstance(i, VideoRetriever):
-            if options.preferred:
-                if options.preferred.lower() == i.name():
+    try:
+        for i in streams:
+            if isinstance(i, VideoRetriever):
+                if options.preferred:
+                    if options.preferred.lower() == i.name():
+                        videos.append(i)
+                else:
                     videos.append(i)
-            else:
-                videos.append(i)
-        if isinstance(i, subtitle):
-            subs.append(i)
-        if isinstance(i, Exception):
-            error.append(i)
+            if isinstance(i, subtitle):
+                subs.append(i)
+            if isinstance(i, Exception):
+                error.append(i)
+    except Exception as e:
+        if options.verbose:
+            raise e
+        else:
+            print("Script crashed. please run the script again and add --verbose as an argument")
+            print("Make an issue with the url you used and include the stacktrace. please include the version of the script")
+        sys.exit(3)
 
 
     if options.subtitle and options.output != "-":
