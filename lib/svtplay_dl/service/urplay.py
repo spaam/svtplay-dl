@@ -88,6 +88,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         for i in episodes:
             if n == options.all_last:
                 break
-            episodes_new.append(i)
+            if i not in episodes_new:
+                episodes_new.append(i)
             n += 1
         return episodes_new
