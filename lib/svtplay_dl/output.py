@@ -148,6 +148,8 @@ def output(options, extention="mp4", openfd=True, mode="wb"):
         ext = re.search(r"(\.[a-z0-9]+)$", options.output)
         if not ext:
             options.output = "%s.%s" % (options.output, extention)
+        if options.output_auto and ext:
+            options.output = "%s.%s" % (options.output, extention)
         if extention == "srt" and ext:
             options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
         log.info("Outfile: %s", options.output)
