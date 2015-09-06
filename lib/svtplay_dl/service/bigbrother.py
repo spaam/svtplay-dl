@@ -6,7 +6,7 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 
@@ -21,25 +21,25 @@ class Bigbrother(Service, OpenGraphThumbMixin):
 
         match = re.search(r'id="(bcPl[^"]+)"', data)
         if not match:
-            log.error("Can't find flash id.")
+            yield ServiceError("Can't find flash id.")
             return
         flashid = match.group(1)
 
         match = re.search(r'playerID" value="([^"]+)"', self.get_urldata())
         if not match:
-            log.error("Can't find playerID")
+            yield ServiceError("Can't find playerID")
             return
         playerid = match.group(1)
 
         match = re.search(r'playerKey" value="([^"]+)"', self.get_urldata())
         if not match:
-            log.error("Can't find playerKey")
+            yield ServiceError("Can't find playerKey")
             return
         playerkey = match.group(1)
 
         match = re.search(r'videoPlayer" value="([^"]+)"', self.get_urldata())
         if not match:
-            log.error("Can't find videoPlayer info")
+            yield ServiceError("Can't find videoPlayer info")
             return
         videoplayer = match.group(1)
 
@@ -47,7 +47,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         data = self.http.request("get", dataurl).content
         match = re.search(r'experienceJSON = ({.*});', data)
         if not match:
-            log.error("Can't find json data")
+            yield ServiceError("Can't find json data")
             return
         jsondata = json.loads(match.group(1))
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]

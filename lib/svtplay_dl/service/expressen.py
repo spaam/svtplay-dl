@@ -13,9 +13,6 @@ from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.utils import is_py2_old
 from svtplay_dl.utils.urllib import unquote_plus
 
-class ExpressenException(UIException):
-    pass
-
 class Expressen(Service):
     supported_domains = ['expressen.se']
 

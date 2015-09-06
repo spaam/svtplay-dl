@@ -10,7 +10,7 @@ from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
@@ -32,7 +32,7 @@ class Dr(Service, OpenGraphThumbMixin):
         else:
             match = re.search(r'resource="([^"]*)"', data)
             if not match:
-                log.error("Cant find resource info for this video")
+                yield ServiceError("Cant find resource info for this video")
                 return
             resource_url = "http:%s" % match.group(1)
             resource_data = self.http.request("get", resource_url).text

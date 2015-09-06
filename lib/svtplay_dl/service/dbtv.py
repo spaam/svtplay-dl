@@ -7,7 +7,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Dbtv(Service, OpenGraphThumbMixin):
     supported_domains = ['dbtv.no']
@@ -22,7 +22,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
         vidoid = parse.path[parse.path.rfind("/")+1:]
         match = re.search(r'JSONdata = ({.*});', data)
         if not match:
-            log.error("Cant find json data")
+            yield ServiceError("Cant find json data")
             return
         janson = json.loads(match.group(1))
         playlist = janson["playlist"]

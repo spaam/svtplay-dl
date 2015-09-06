@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import is_py2_old
-from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
@@ -17,7 +17,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         match = re.search(r'"(http://api.mtvnn.com/v2/mrss.xml[^"]+)"', data)
         if not match:
-            log.error("Can't find id for the video")
+            yield ServiceError("Can't find id for the video")
             return
 
         data = self.http.request("get", match.group(1)).content

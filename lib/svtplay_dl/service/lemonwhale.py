@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.service import Service
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.http import HTTP
 
 class Lemonwhale(Service):
@@ -24,7 +24,7 @@ class Lemonwhale(Service):
         if not match:
             match = re.search(r'embed.jsp\?([^"]+)"', self.get_urldata())
             if not match:
-                log.error("Can't find video id")
+                yield ServiceError("Can't find video id")
                 return
             vid = match.group(1)
         if not vid:
@@ -32,7 +32,7 @@ class Lemonwhale(Service):
             data = self.http.request("get", "http://www.svd.se%s" % path).content
             match = re.search(r'embed.jsp\?([^"]+)', data)
             if not match:
-                log.error("Can't find video id")
+                yield ServiceError("Can't find video id")
                 return
             vid = match.group(1)
 

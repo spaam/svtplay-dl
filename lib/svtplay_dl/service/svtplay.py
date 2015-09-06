@@ -2,10 +2,10 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import json
 import os
 import xml.etree.ElementTree as ET
 import copy
+from  svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify, ensure_unicode
 from svtplay_dl.utils.urllib import urlparse, urljoin
@@ -14,7 +14,7 @@ from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
@@ -31,7 +31,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
                 url = "http://www.svt.se%s" % filename
             else:
-                log.error("Can't find video file for: %s", self.url)
+                yield ServiceError("Can't find video file for: %s" % self.url)
                 return
         else:
             url = self.url
@@ -49,7 +49,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 dataurl = "%s&output=json" % url
         data = self.http.request("get", dataurl)
         if data.status_code == 404:
-            log.error("Can't find the video")
+            yield ServiceError("Can't get the json file for %s" % self.json)
             return
         data = data.json()
         if "live" in data["video"]:

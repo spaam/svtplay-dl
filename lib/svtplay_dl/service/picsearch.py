@@ -8,7 +8,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se', 'di.se']
@@ -23,7 +23,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not ajax_auth:
             ajax_auth = re.search(r'screen9-ajax-auth="([^"]+)"', data)
             if not ajax_auth:
-                log.error("Cant find token for video")
+                yield ServiceError("Cant find token for video")
                 return
         mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
         if not mediaid:
@@ -31,7 +31,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not mediaid:
                 mediaid = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
                 if not mediaid:
-                    log.error("Cant find media id")
+                    yield ServiceError("Cant find media id")
                     return
         jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).text
         jsondata = json.loads(jsondata)

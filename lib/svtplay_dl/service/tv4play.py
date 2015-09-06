@@ -15,6 +15,7 @@ from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.error import ServiceError
 
 class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
@@ -29,14 +30,14 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         vid = findvid(self.url, data)
         if vid is None:
-            log.error("Can't find video id for %s", self.url)
+            yield ServiceError("Can't find video id for %s" % self.url)
             return
 
         if options.username and options.password:
             data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
             auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
             if not auth_token:
-                log.error("Can't find authenticity_token needed for user / password")
+                yield ServiceError("Can't find authenticity_token needed for user / password")
                 return
             url = "https://www.tv4play.se/session"
             postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2), "https": ""}
@@ -44,7 +45,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             self.cookies = data.cookies
             fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
             if fail:
-                log.error(fail.group(1))
+                yield ServiceError(fail.group(1))
                 return
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = self.http.request("get", url, cookies=self.cookies)
@@ -52,14 +53,14 @@ class Tv4play(Service, OpenGraphThumbMixin):
             xml = ET.XML(data.content)
             code = xml.find("code").text
             if code == "SESSION_NOT_AUTHENTICATED":
-                log.error("Can't access premium content")
+                yield ServiceError("Can't access premium content")
             elif code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
-                log.error("Can't downoad this video because of geoblocked.")
+                yield ServiceError("Can't downoad this video because of geoblocked.")
             else:
-                log.error("Can't find any info for that video")
+                yield ServiceError("Can't find any info for that video")
             return
         if data.status_code == 404:
-            log.error("Can't find the video")
+            yield ServiceError("Can't find the video api")
             return
         xml = ET.XML(data.content)
         ss = xml.find("items")
@@ -72,7 +73,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if xml.find("live").text != "false":
                 options.live = True
         if xml.find("drmProtected").text == "true":
-            log.error("We cant download DRM protected content from this site.")
+            yield ServiceError("We cant download DRM protected content from this site.")
             return
 
         if options.output_auto:

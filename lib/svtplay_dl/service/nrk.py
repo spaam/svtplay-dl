@@ -10,7 +10,7 @@ from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no']
@@ -39,7 +39,7 @@ class Nrk(Service, OpenGraphThumbMixin):
             if match is None:
                 match = re.search(r'video-id="([^"]+)"', self.get_urldata())
                 if match is None:
-                    log.error("Can't find video id.")
+                    yield ServiceError("Can't find video id.")
                     return
             vid = match.group(1)
             dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % vid
@@ -51,7 +51,7 @@ class Nrk(Service, OpenGraphThumbMixin):
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         data = self.http.request("get", hlsurl)
         if data.status_code == 403:
-            log.error("Can't fetch the video because of geoblocked")
+            yield ServiceError("Can't fetch the video because of geoblocked")
             return
         streams = hlsparse(hlsurl, data.text)
         for n in list(streams.keys()):

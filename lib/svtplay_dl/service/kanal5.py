@@ -12,6 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.error import ServiceError
 
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se', 'kanal11play.se']
@@ -24,7 +25,7 @@ class Kanal5(Service):
     def get(self, options):
         match = re.search(r".*video/([0-9]+)", self.url)
         if not match:
-            log.error("Can't find video file")
+            yield ServiceError("Can't find video file")
             return
 
         video_id = match.group(1)
@@ -37,7 +38,7 @@ class Kanal5(Service):
             match = re.search(r"({.*})\);", data)
             jsondata = json.loads(match.group(1))
             if jsondata["success"] is False:
-                log.error(jsondata["message"])
+                yield ServiceError(jsondata["message"])
                 return
             authToken = jsondata["userData"]["auth"]
             self.cookies = {"authToken": authToken}
@@ -74,7 +75,7 @@ class Kanal5(Service):
         if "streams" in data.keys():
             for i in data["streams"]:
                 if i["drmProtected"]:
-                    log.error("We cant download drm files for this site.")
+                    yield ServiceError("We cant download drm files for this site.")
                     return
                 steambaseurl = data["streamBaseUrl"]
                 bitrate = i["bitrate"]
@@ -96,7 +97,7 @@ class Kanal5(Service):
                     for n in list(streams.keys()):
                         yield HLS(copy.copy(options), streams[n], n)
         if "reasonsForNoStreams" in data and show:
-            log.error(data["reasonsForNoStreams"][0])
+            yield ServiceError(data["reasonsForNoStreams"][0])
 
     def find_all_episodes(self, options):
         program = re.search(".*/program/(\d+)", self.url)

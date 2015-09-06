@@ -16,6 +16,7 @@ from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.error import ServiceError
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
@@ -26,7 +27,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def __init__(self, url):
         Service.__init__(self, url)
         self.subtitle = None
-
 
     def _get_video_id(self):
         """
@@ -52,18 +52,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def get(self, options):
         vid = self._get_video_id()
         if vid is None:
-            log.error("Can't find video file for: %s", self.url)
+            yield ServiceError("Can't find video file for: %s" % self.url)
             return
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         options.other = ""
         data = self.http.request("get", url)
         if data.status_code == 403:
-            log.error("Can't play this because the video is geoblocked.")
+            yield ServiceError("Can't play this because the video is geoblocked.")
             return
         dataj = json.loads(data.text)
         if "msg" in dataj:
-            log.error(dataj["msg"])
+            yield ServiceError(dataj["msg"])
             return
 
         if dataj["type"] == "live":
@@ -79,12 +79,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
-            log.error("Can't play this because the video is geoblocked.")
+            yield ServiceError("Can't play this because the video is geoblocked.")
             return
         streamj = json.loads(streams.text)
 
         if "msg" in streamj:
-            log.error("Can't play this because the video is either not found or geoblocked.")
+            yield ServiceError("Can't play this because the video is either not found or geoblocked.")
             return
 
         if streamj["streams"]["medium"]:
@@ -98,7 +98,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 parse = urlparse(filename)
                 match = re.search("^(/[^/]+)/(.*)", parse.path)
                 if not match:
-                    log.error("Something wrong with rtmpparse")
+                    yield ServiceError("Can't get rtmpparse info")
                     return
                 filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y %s" % match.group(2)

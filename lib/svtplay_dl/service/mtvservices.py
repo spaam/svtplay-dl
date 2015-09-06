@@ -8,8 +8,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service
 from svtplay_dl.utils import is_py2_old
 from svtplay_dl.fetcher.http import HTTP
-
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
@@ -19,7 +18,7 @@ class Mtvservices(Service):
 
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
         if not match:
-            log.error("Can't find video file")
+            yield ServiceError("Can't find video file")
             return
         url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
         data = self.http.request("get", url)

@@ -10,7 +10,8 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.log import log
+#from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
 
 class Urplay(Service, OpenGraphThumbMixin):
@@ -24,7 +25,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
-            log.error("Can't find json info")
+            yield ServiceError("Can't find json info")
             return
 
         if self.exclude(options):

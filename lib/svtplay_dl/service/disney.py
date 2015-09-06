@@ -12,7 +12,7 @@ from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Disney(Service, OpenGraphThumbMixin):
     supported_domains = ['disney.se', 'video.disney.se']
@@ -27,7 +27,7 @@ class Disney(Service, OpenGraphThumbMixin):
 
             match = re.search(r"Grill.burger=({.*}):", data)
             if not match:
-                log.error("Can't find video info")
+                yield ServiceError("Can't find video info")
                 return
             jsondata = json.loads(match.group(1))
             for n in jsondata["stack"]:
@@ -41,7 +41,7 @@ class Disney(Service, OpenGraphThumbMixin):
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
             if not match:
-                log.error("Can't find video info")
+                yield ServiceError("Can't find video info")
                 return
             uniq = match.group(1)
             match = re.search("entryId : '([^']+)'", self.get_urldata())
@@ -59,7 +59,7 @@ class Disney(Service, OpenGraphThumbMixin):
                 if entry in jsondata["idlist"]:
                     entryid = jsondata["idlist"][entry]
                 else:
-                    log.error("Cant find video info")
+                    yield ServiceError("Cant find video info")
                     return
             if options.output_auto:
                 for i in jsondata["playlists"][0]["playlist"]:

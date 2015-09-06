@@ -6,7 +6,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 
 class Facebook(Service, OpenGraphThumbMixin):
@@ -17,7 +17,7 @@ class Facebook(Service, OpenGraphThumbMixin):
 
         match = re.search('params","([^"]+)"', data)
         if not match:
-            log.error("Cant find params info. video need to be public.")
+            yield ServiceError("Cant find params info. video need to be public.")
             return
         data2 = json.loads('["%s"]' % match.group(1))
         data2 = json.loads(unquote_plus(data2[0]))

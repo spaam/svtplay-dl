@@ -10,7 +10,7 @@ from svtplay_dl.utils import filenamify
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Vg(Service, OpenGraphThumbMixin):
     supported_domains = ['vg.no', 'vgtv.no']
@@ -22,7 +22,7 @@ class Vg(Service, OpenGraphThumbMixin):
             parse = urlparse(self.url)
             match = re.search(r'video/(\d+)/', parse.fragment)
             if not match:
-                log.error("Can't find video file for: %s", self.url)
+                yield ServiceError("Can't find video file for: %s" % self.url)
                 return
         videoid = match.group(1)
         data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).text

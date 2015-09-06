@@ -11,8 +11,8 @@ import copy
 
 from svtplay_dl.utils.urllib import quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.error import ServiceError
 
 class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
@@ -25,7 +25,7 @@ class Sr(Service, OpenGraphThumbMixin):
 
         match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+playaudio=\d+)"', data)
         if not match:
-            log.error("Can't find audio info")
+            yield ServiceError("Can't find audio info")
             return
         path = quote_plus(match.group(1))
         dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path

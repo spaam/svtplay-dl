@@ -6,9 +6,9 @@ import copy
 import json
 
 from svtplay_dl.service import Service
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.error import ServiceError
 
 class Ruv(Service):
     supported_domains = ['ruv.is']
@@ -29,10 +29,12 @@ class Ruv(Service):
                 streams = hlsparse(self.http.request("get", janson["result"][1]).text)
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
+            else:
+                yield ServiceError("Can't find json info")
         else:
             match = re.search(r'<source [^ ]*[ ]*src="([^"]+)" ', self.get_urldata())
             if not match:
-                log.error("Can't find video info for: %s", self.url)
+                yield ServiceError("Can't find video info for: %s", self.url)
                 return
             if match.group(1).endswith("mp4"):
                 yield HTTP(copy.copy(options), match.group(1), 800)

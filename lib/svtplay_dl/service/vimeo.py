@@ -7,7 +7,7 @@ import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 
 class Vimeo(Service, OpenGraphThumbMixin):
     supported_domains = ['vimeo.com']
@@ -20,7 +20,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
 
         match = re.search('data-config-url="([^"]+)" data-fallback-url', data)
         if not match:
-            log.error("Can't find video file for: %s", self.url)
+            yield ServiceError("Can't find video file for: %s" % self.url)
             return
         player_url = match.group(1).replace("&amp;", "&")
         player_data = self.http.request("get", player_url).content
@@ -31,5 +31,5 @@ class Vimeo(Service, OpenGraphThumbMixin):
             for i in avail_quality.keys():
                 yield HTTP(copy.copy(options), avail_quality[i]["url"], avail_quality[i]["bitrate"])
         else:
-            log.error("Can't find any streams.")
+            yield ServiceError("Can't find any streams.")
             return

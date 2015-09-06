@@ -173,6 +173,7 @@ def get_one_media(stream, options):
 
     videos = []
     subs = []
+    error = []
     streams = stream.get(options)
     for i in streams:
         if isinstance(i, VideoRetriever):
@@ -183,6 +184,9 @@ def get_one_media(stream, options):
                 videos.append(i)
         if isinstance(i, subtitle):
             subs.append(i)
+        if isinstance(i, Exception):
+            error.append(i)
+
 
     if options.subtitle and options.output != "-":
         if subs:
@@ -191,7 +195,7 @@ def get_one_media(stream, options):
             return
 
     if len(videos) == 0:
-        log.error("Can't find any streams for that url")
+        log.error(error[0].args[0])
     else:
         if options.list_quality:
             list_quality(videos)

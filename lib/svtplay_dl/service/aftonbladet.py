@@ -7,7 +7,7 @@ import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import decode_html_entities
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
 class Aftonbladet(Service):
@@ -23,7 +23,7 @@ class Aftonbladet(Service):
         if not match:
             match = re.search('data-player-config="([^"]+)"', data)
             if not match:
-                log.error("Can't find video info")
+                yield ServiceError("Can't find video info")
                 return
             janson = json.loads(decode_html_entities(match.group(1)))
             videoId = janson["videoId"]
@@ -31,7 +31,7 @@ class Aftonbladet(Service):
             videoId = match.group(1)
             match = re.search(r'data-isLive="(\w+)"', data)
             if not match:
-                log.error("Can't find live info")
+                yield ServiceError("Can't find live info")
                 return
             if match.group(1) == "true":
                 options.live = True
