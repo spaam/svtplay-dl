@@ -35,11 +35,7 @@ class HTTP(Session):
 
     def request(self, method, url, *args, **kwargs):
         log.debug("HTTP getting %r", url)
-        starttime = time.time()
         res = Session.request(self, method, url, **kwargs)
-        spent_time = time.time() - starttime
-        bps = 8 * len(res.content) / max(spent_time, 0.001)
-        log.debug("HTTP got %d bytes from %r in %.2fs (= %dbps)", len(res.content), url, spent_time, bps)
         return res
 
 def sort_quality(data):
