@@ -30,7 +30,7 @@ class Sr(Service, OpenGraphThumbMixin):
             return
         path = quote_plus(match.group(1))
         dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path
-        data = self.http.request("get", dataurl).content
+        data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)["playerInfo"]
         for i in playerinfo["AudioSources"]:
             url = i["Url"]
