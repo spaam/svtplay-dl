@@ -129,7 +129,7 @@ class Twitch(Service):
         payload = self.http.request("get", url, headers={
             'Accept': 'application/vnd.twitchtv.v2+json'
         })
-        return json.loads(payload.content)
+        return json.loads(payload.text)
 
     def _get_hls_url(self, channel):
         access = self._get_access_token(channel, "channels")
