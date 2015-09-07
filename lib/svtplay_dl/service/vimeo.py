@@ -24,7 +24,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find video file for: %s" % self.url)
             return
         player_url = match.group(1).replace("&amp;", "&")
-        player_data = self.http.request("get", player_url).content
+        player_data = self.http.request("get", player_url).text
 
         if player_data:
             jsondata = json.loads(player_data)
