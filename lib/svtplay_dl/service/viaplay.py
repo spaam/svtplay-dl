@@ -22,7 +22,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
-        'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com']
+        'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
+        'juicyplay.se']
 
     def __init__(self, url):
         Service.__init__(self, url)
@@ -45,6 +46,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         parse = urlparse(self.url)
         match = re.search(r'/\w+/(\d+)', parse.path)
+        if match:
+            return match.group(1)
+        match = re.search('iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
         if match:
             return match.group(1)
         return None
