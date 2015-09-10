@@ -90,7 +90,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
-            if filename.endswith("f4m"):
+            if ".f4m" in filename:
                 streams = hdsparse(copy.copy(options), self.http.request("get", filename, params={"hdcore": "3.7.0"}).text, filename)
                 if streams:
                     for n in list(streams.keys()):
