@@ -220,7 +220,7 @@ def get_one_media(stream, options):
         except UIException as e:
             if options.verbose:
                 raise e
-            log.error(e.message)
+            log.error(e)
             sys.exit(2)
 
         if options.thumbnail and hasattr(stream, "get_thumbnail"):
