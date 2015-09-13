@@ -32,7 +32,7 @@ class Raw(Service):
                 for n in list(streams.keys()):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
-            streams = hlsparse(self.http.request("get", self.url).text)
+            streams = hlsparse(self.url, self.http.request("get", self.url).text)
             if extention:
                 options.output = "%s.ts" % options.output
 
