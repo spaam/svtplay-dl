@@ -85,7 +85,7 @@ release: $(RELEASE_DIR) release-test
 	(cd $(RELEASE_DIR) && git format-patch --stdout HEAD^) | git am
 
 	git tag -m "New version $(NEW_RELEASE)" \
-		-m "$$(git log --oneline $(LATEST_RELEASE)..HEAD^)" \
+		-m "$$(git log --oneline $(git describe --abbrev=0)..HEAD^)" \
 		$(NEW_RELEASE)
 
 	make clean_releasedir
