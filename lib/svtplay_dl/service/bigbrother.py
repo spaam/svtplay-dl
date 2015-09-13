@@ -60,6 +60,6 @@ class Bigbrother(Service, OpenGraphThumbMixin):
                         yield streams[n]
 
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(self.http.request("get", i["defaultURL"]).text)
+                streams = hlsparse(i["defaultURL"], self.http.request("get", i["defaultURL"]).text)
                 for n in list(streams.keys()):
                     yield HLS(copy.copy(options), streams[n], n)
