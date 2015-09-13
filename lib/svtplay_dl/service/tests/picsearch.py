@@ -19,6 +19,5 @@ class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
         ],
         "bad": [
             "http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1",
-            "http://www.di.se/nyheter/sverige/det-ar-en-dodsfalla"
         ]
     }
