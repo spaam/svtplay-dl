@@ -19,11 +19,14 @@ is_py2_old = (sys.version_info < (2, 7))
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 
-from requests import Session
-
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
+try:
+    from requests import Session
+except ImportError:
+    print("You need to install python-requests to use this script")
+    sys.exit(3)
 
 class HTTP(Session):
     def __init__(self, *args, **kwargs):
