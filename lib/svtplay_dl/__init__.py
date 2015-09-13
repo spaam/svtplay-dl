@@ -47,7 +47,7 @@ from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
 
-__version__ = "0.10.2015.08.24"
+__version__ = "0.20.2015.09.13"
 
 sites = [
     Aftonbladet,
