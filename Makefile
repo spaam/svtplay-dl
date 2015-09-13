@@ -4,7 +4,7 @@ all: svtplay-dl
         release clean_releasedir $(RELEASE_DIR)
 
 # These variables describe the latest release:
-VERSION = 0.10
+VERSION = 0.20
 LATEST_RELEASE_DATE = 2015.08.24
 LATEST_RELEASE = $(VERSION).$(LATEST_RELEASE_DATE)
 
