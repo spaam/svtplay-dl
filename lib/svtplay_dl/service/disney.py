@@ -14,6 +14,7 @@ from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
+
 class Disney(Service, OpenGraphThumbMixin):
     supported_domains = ['disney.se', 'video.disney.se']
 

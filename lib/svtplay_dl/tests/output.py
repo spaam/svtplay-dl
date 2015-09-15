@@ -10,6 +10,7 @@ import unittest
 import svtplay_dl.output
 from mock import patch
 
+
 # FIXME: use mock framework instead of this hack
 class mockfile(object):
     def __init__(self):
@@ -20,6 +21,7 @@ class mockfile(object):
 
     def read(self):
         return self.content.pop()
+
 
 class progressTest(unittest.TestCase):
     def setUp(self):
@@ -35,6 +37,7 @@ class progressTest(unittest.TestCase):
     def test_0_100(self, pbar):
         svtplay_dl.output.progress(0, 100)
         pbar.assert_any_call(100, 0, "")
+
 
 class progressbarTest(unittest.TestCase):
     def setUp(self):
@@ -90,6 +93,7 @@ class progressbarTest(unittest.TestCase):
             self.mockfile.read(),
             "\r[020/100][========................................] "
         )
+
 
 class EtaTest(unittest.TestCase):
     @patch('time.time')

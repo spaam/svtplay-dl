@@ -12,6 +12,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
+
 class Radioplay(Service):
     supported_domains = ['radioplay.se']
 

@@ -10,6 +10,7 @@ from svtplay_dl.utils import is_py2_old
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.rtmp import RTMP
 
+
 class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['di.seXX']
 

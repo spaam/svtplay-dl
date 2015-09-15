@@ -14,6 +14,7 @@ from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
 
+
 class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ['urplay.se', 'ur.se']
 

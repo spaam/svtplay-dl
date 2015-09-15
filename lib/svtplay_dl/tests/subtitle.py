@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import unittest
 import svtplay_dl.subtitle
 
+
 class timestrTest(unittest.TestCase):
     def test_1(self):
         self.assertEqual(svtplay_dl.subtitle.timestr(1), "00:00:00,00")

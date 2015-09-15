@@ -10,6 +10,7 @@ from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.error import ServiceError
 
+
 class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se', 'di.se']
 

@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import unittest
 import svtplay_dl.fetcher.hls as hls
 
+
 class HlsTest(unittest.TestCase):
     def test_get_full_url_1(self):
         for test in [

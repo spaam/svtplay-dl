@@ -14,6 +14,7 @@ from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Kanal5(Service):
     supported_domains = ['kanal5play.se', 'kanal9play.se', 'kanal11play.se']
 

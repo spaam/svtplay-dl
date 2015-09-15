@@ -39,6 +39,7 @@ class LiveHDSException(HDSException):
         super(LiveHDSException, self).__init__(
             url, "This is a live HDS stream, and they are not supported.")
 
+
 def hdsparse(options, data, manifest):
     streams = {}
     bootstrap = {}
@@ -69,6 +70,7 @@ def hdsparse(options, data, manifest):
         streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
                                                 metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
     return streams
+
 
 class HDS(VideoRetriever):
     def name(self):
@@ -118,28 +120,35 @@ class HDS(VideoRetriever):
             file_d.close()
             progress_stream.write('\n')
 
+
 def readbyte(data, pos):
     return struct.unpack("B", bytes(_chr(data[pos]), "ascii"))[0]
+
 
 def read16(data, pos):
     endpos = pos + 2
     return struct.unpack(">H", data[pos:endpos])[0]
 
+
 def read24(data, pos):
     end = pos + 3
     return struct.unpack(">L", "\x00" + data[pos:end])[0]
+
 
 def read32(data, pos):
     end = pos + 4
     return struct.unpack(">i", data[pos:end])[0]
 
+
 def readu32(data, pos):
     end = pos + 4
     return struct.unpack(">I", data[pos:end])[0]
 
+
 def read64(data, pos):
     end = pos + 8
     return struct.unpack(">Q", data[pos:end])[0]
+
 
 def readstring(data, pos):
     length = 0
@@ -150,6 +159,7 @@ def readstring(data, pos):
     pos += length + 1
     return pos, string
 
+
 def readboxtype(data, pos):
     boxsize = read32(data, pos)
     tpos = pos + 4
@@ -159,6 +169,7 @@ def readboxtype(data, pos):
         boxsize -= 8
         pos += 8
         return pos, boxsize, boxtype
+
 
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
@@ -234,6 +245,7 @@ def readbox(data, pos):
     antal[1]["first"] = first
     return antal
 
+
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
 def readafrtbox(data, pos):
@@ -269,6 +281,7 @@ def readafrtbox(data, pos):
         i += 1
     return first
 
+
 # Note! A lot of variable assignments are commented out. These are
 # accessible values that we currently don't use.
 def readasrtbox(data, pos):
@@ -300,6 +313,7 @@ def readasrtbox(data, pos):
         ret[tmp] = {"first": firstseg, "total": fragPerSeg}
         i += 1
     return ret
+
 
 def decode_f4f(fragID, fragData):
     start = fragData.find(b"mdat") + 4

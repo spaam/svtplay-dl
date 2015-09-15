@@ -9,6 +9,7 @@ from svtplay_dl.utils import is_py2
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.output import output
 
+
 class RTMP(VideoRetriever):
     def name(self):
         return "rtmp"

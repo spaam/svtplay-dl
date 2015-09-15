@@ -81,6 +81,7 @@ sites = [
     Vg,
     Youplay]
 
+
 class Options(object):
     """
     Options used when invoking the script from another Python script.
@@ -128,6 +129,7 @@ class Options(object):
         self.cookies = None
         self.exclude = None
 
+
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
@@ -168,6 +170,7 @@ def get_media(url, options):
             get_one_media(substream, copy.copy(options))
     else:
         get_one_media(stream, options)
+
 
 def get_one_media(stream, options):
     # Make an automagic filename
@@ -252,6 +255,7 @@ def setup_log(silent, verbose=False):
     log.addHandler(hdlr)
     log.setLevel(level)
 
+
 def main():
     """ Main program """
     usage = "Usage: %prog [options] url"
@@ -329,6 +333,7 @@ def main():
         get_media(url, options)
     except KeyboardInterrupt:
         print("")
+
 
 def mergeParserOption(options, parser):
     options.output = parser.output

@@ -15,6 +15,7 @@ from svtplay_dl.log import log
 
 progress_stream = sys.stderr
 
+
 class ETA(object):
     """
     An ETA class, used to calculate how long it takes to process
@@ -86,6 +87,7 @@ def progress(byte, total, extra=""):
         return
     progressbar(total, byte, extra)
 
+
 def progressbar(total, pos, msg=""):
     """
     Given a total and a progress position, output a progress bar
@@ -114,6 +116,7 @@ def progressbar(total, pos, msg=""):
 
     progress_stream.write(fmt % (pos, total, bar, msg))
 
+
 def filename(options, stream):
     if options.output:
         if is_py2:
@@ -137,6 +140,7 @@ def filename(options, stream):
                 options.output = os.path.join(options.output, filenamify(title_tag))
 
     return True
+
 
 def output(options, extention="mp4", openfd=True, mode="wb"):
     if is_py3:
@@ -173,6 +177,7 @@ def output(options, extention="mp4", openfd=True, mode="wb"):
                 file_d = sys.stdout
 
     return file_d
+
 
 def findexpisode(directory, service, name):
     match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)

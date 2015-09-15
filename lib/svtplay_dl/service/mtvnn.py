@@ -9,6 +9,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 
+
 # This is _very_ similar to mtvservices..
 class Mtvnn(Service, OpenGraphThumbMixin):
     supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no"]

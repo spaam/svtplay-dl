@@ -10,8 +10,10 @@ import unittest
 import mock
 from svtplay_dl.service import Service
 
+
 class MockService(Service):
     supported_domains = ['example.com', 'example.net']
+
 
 class ServiceTest(unittest.TestCase):
     def test_supports(self):

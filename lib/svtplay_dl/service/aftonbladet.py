@@ -10,6 +10,7 @@ from svtplay_dl.utils import decode_html_entities
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 
+
 class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
 

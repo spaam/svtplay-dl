@@ -10,6 +10,8 @@ from svtplay_dl.service import Service
 from svtplay_dl.utils import is_py2_old
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.error import ServiceError
+
 
 class Hbo(Service):
     supported_domains = ['hbo.com']

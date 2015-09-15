@@ -178,6 +178,7 @@ class subtitle(object):
             return srt.encode("utf-8")
         return srt
 
+
 def timestr(msec):
     """
     Convert a millisecond value to a string of the following
@@ -199,9 +200,11 @@ def timestr(msec):
     output = "%02d:%02d:%05.2f" % (hours, minutes, sec)
     return output.replace(".", ",")
 
+
 def timecolon(data):
     match = re.search(r"(\d+:\d+:\d+):(\d+)", data)
     return "%s,%s" % (match.group(1), match.group(2))
+
 
 def norm(name):
     if name[0] == "{":
@@ -209,6 +212,7 @@ def norm(name):
         return tag
     else:
         return name
+
 
 def tt_text(node, data):
     if node.text:

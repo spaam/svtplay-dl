@@ -10,6 +10,7 @@ from svtplay_dl.utils import is_py2_old
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
+
 class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 

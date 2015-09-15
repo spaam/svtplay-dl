@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no']
 

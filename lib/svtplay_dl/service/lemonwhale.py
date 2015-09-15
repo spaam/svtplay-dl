@@ -10,6 +10,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.http import HTTP
 
+
 class Lemonwhale(Service):
     supported_domains = ['svd.se']
 

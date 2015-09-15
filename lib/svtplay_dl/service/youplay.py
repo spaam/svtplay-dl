@@ -10,6 +10,7 @@ from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
+
 class Youplay(Service, OpenGraphThumbMixin):
     supported_domains = ['www.affarsvarlden.se']
 

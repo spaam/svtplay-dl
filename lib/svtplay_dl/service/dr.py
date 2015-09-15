@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 

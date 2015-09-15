@@ -16,6 +16,7 @@ from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 

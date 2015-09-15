@@ -14,6 +14,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
+
 class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
 

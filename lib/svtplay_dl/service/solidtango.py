@@ -8,6 +8,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.error import ServiceError
 
+
 class Solidtango(Service):
     supported_domains = ['skkplay.se', 'skkplay.solidtango.com']
 

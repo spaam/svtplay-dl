@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.error import ServiceError
 
+
 class Vg(Service, OpenGraphThumbMixin):
     supported_domains = ['vg.no', 'vgtv.no']
 

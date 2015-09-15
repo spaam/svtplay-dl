@@ -7,6 +7,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 from svtplay_dl.log import log
 
+
 class Raw(Service):
     def get(self, options):
         data = self.get_urldata()

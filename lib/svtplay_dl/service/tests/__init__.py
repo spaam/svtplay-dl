@@ -7,6 +7,7 @@
 
 import unittest
 
+
 class HandlesURLsTestMixin():
     """
     This should only be inherited from classes which also inherit

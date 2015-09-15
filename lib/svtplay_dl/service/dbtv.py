@@ -9,6 +9,7 @@ from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.error import ServiceError
 
+
 class Dbtv(Service, OpenGraphThumbMixin):
     supported_domains = ['dbtv.no']
 

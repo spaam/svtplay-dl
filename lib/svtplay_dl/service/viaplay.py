@@ -18,6 +18,7 @@ from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',

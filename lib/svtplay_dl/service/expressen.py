@@ -6,12 +6,13 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
-from svtplay_dl.error import UIException
+from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import HLS, hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.utils import is_py2_old
 from svtplay_dl.utils.urllib import unquote_plus
+
 
 class Expressen(Service):
     supported_domains = ['expressen.se']

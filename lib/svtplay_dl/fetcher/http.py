@@ -6,6 +6,7 @@ import time
 from svtplay_dl.output import progress, output # FIXME use progressbar() instead
 from svtplay_dl.fetcher import VideoRetriever
 
+
 class HTTP(VideoRetriever):
     def name(self):
         return "http"

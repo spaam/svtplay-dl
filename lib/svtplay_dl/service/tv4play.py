@@ -17,6 +17,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+
 class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
 
@@ -146,6 +147,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 n += 1
 
         return episodes
+
 
 def findvid(url, data):
     parse = urlparse(url)

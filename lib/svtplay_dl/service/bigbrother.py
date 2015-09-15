@@ -10,6 +10,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse, HLS
 
+
 class Bigbrother(Service, OpenGraphThumbMixin):
     supported_domains = ["bigbrother.se"]
 

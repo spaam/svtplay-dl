@@ -40,6 +40,7 @@ def _get_full_url(url, srcurl):
 
     return returl
 
+
 def hlsparse(url, data):
     files = (parsem3u(data))[1]
     streams = {}
@@ -48,6 +49,7 @@ def hlsparse(url, data):
         bitrate = float(i[1]["BANDWIDTH"])/1000
         streams[int(bitrate)] = _get_full_url(i[0], url)
     return streams
+
 
 class HLS(VideoRetriever):
     def name(self):
@@ -102,6 +104,7 @@ class HLS(VideoRetriever):
         if self.options.output != "-":
             file_d.close()
             progress_stream.write('\n')
+
 
 def parsem3u(data):
     if not data.startswith("#EXTM3U"):

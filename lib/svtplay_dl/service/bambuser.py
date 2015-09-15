@@ -10,6 +10,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
 
+
 class Bambuser(Service, OpenGraphThumbMixin):
     supported_domains = ["bambuser.com"]
 

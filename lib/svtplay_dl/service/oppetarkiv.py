@@ -2,9 +2,9 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.log import log
+
 
 class OppetArkiv(Svtplay):
     supported_domains = ['oppetarkiv.se']

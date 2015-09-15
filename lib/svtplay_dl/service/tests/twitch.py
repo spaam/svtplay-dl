@@ -10,6 +10,7 @@ import unittest
 from svtplay_dl.service.tests import HandlesURLsTestMixin
 from svtplay_dl.service.twitch import Twitch
 
+
 class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
     service = Twitch
     urls = {
