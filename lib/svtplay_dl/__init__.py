@@ -122,6 +122,7 @@ class Options(object):
         self.all_episodes = False
         self.all_last = -1
         self.force_subtitle = False
+        self.require_subtitle = False
         self.preferred = None
         self.verbose = False
         self.output_auto = False
@@ -201,6 +202,9 @@ def get_one_media(stream, options):
             print("Make an issue with the url you used and include the stacktrace. please include the version of the script")
         sys.exit(3)
 
+    if options.require_subtitle and not subs:
+        log.info("No subtitles available")
+        return
 
     if options.subtitle and options.output != "-":
         if subs:
@@ -291,6 +295,8 @@ def main():
                       help="download subtitle from the site if available")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
+    parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
+                      action="store_true", help="download only if a subtitle is available")
     parser.add_option("-u", "--username", default=None,
                       help="username")
     parser.add_option("-p", "--password", default=None,
@@ -319,6 +325,8 @@ def main():
     if options.exclude:
         options.exclude = options.exclude.split(",")
     if options.force_subtitle:
+        options.subtitle = True
+    if options.require_subtitle:
         options.subtitle = True
     options = mergeParserOption(Options(), options)
     setup_log(options.silent, options.verbose)
@@ -352,6 +360,7 @@ def mergeParserOption(options, parser):
     options.all_episodes = parser.all_episodes
     options.all_last = parser.all_last
     options.force_subtitle = parser.force_subtitle
+    options.require_subtitle = parser.require_subtitle
     options.preferred = parser.preferred
     options.verbose = parser.verbose
     options.exclude = parser.exclude
