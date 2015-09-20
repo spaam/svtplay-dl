@@ -134,6 +134,8 @@ class subtitle(object):
                 data = text.group(1)
         recomp = re.compile(r'\r')
         text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
+        if is_py2 and isinstance(text, unicode):
+            return text.encode("utf-8")
         return text
 
     def wrst(self, subdata):
