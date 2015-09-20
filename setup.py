@@ -24,4 +24,16 @@ setup(
     description = "Command-line program to download videos from various video on demand sites",
     license = "MIT",
     url = "https://github.com/spaam/svtplay-dl",
+    classifiers=["Development Status :: 5 - Production/Stable",
+                 "Environment :: Console",
+                 "Operating System :: POSIX",
+                 "Operating System :: Microsoft :: Windows",
+                 "Programming Language :: Python :: 2.6",
+                 "Programming Language :: Python :: 2.7",
+                 "Programming Language :: Python :: 3.3",
+                 "Programming Language :: Python :: 3.4",
+                 "Topic :: Internet :: WWW/HTTP",
+                 "Topic :: Multimedia :: Sound/Audio",
+                 "Topic :: Multimedia :: Video",
+                 "Topic :: Utilities"]
 )
