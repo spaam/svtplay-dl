@@ -34,6 +34,7 @@ working.
   download RTMP streams.
 * [PyCrypto](https://www.dlitz.net/software/pycrypto/) to
   download encrypted HLS streams
+* [Requests][http://www.python-requests.org/]
 
 To install it, run
 
