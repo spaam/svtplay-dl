@@ -150,6 +150,8 @@ Do not download any video, but instead print the URL.
 
 =item * Öppet Arkiv: L<http://oppetarkiv.se/>
 
+=item * Svenska kennelklubben play: L<http://www.skkplay.se/>
+
 =item * Svenska Dagbladet: L<http://svd.se/>
 
 =item * Sveriges Radio: L<http://sverigesradio.se/>
