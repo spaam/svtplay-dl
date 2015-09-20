@@ -2,10 +2,11 @@ import xml.etree.ElementTree as ET
 import json
 import re
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, decode_html_entities
+from svtplay_dl.utils import is_py2, is_py3, decode_html_entities
 from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
 from requests import Session
+from requests import __build__ as requests_version
 
 
 class subtitle(object):
@@ -17,7 +18,7 @@ class subtitle(object):
         self.http = Session()
 
     def download(self):
-        subdata = self.http.request("get", self.url, cookies=self.options.cookies).text
+        subdata = self.http.request("get", self.url, cookies=self.options.cookies)
 
         data = None
         if self.subtype == "tt":
@@ -40,7 +41,7 @@ class subtitle(object):
     def tt(self, subdata):
         i = 1
         data = ""
-        tree = ET.XML(subdata.encode("utf8"))
+        tree = ET.XML(subdata.text.encode("utf8"))
         xml = tree.find("{http://www.w3.org/2006/10/ttaf1}body").find("{http://www.w3.org/2006/10/ttaf1}div")
         plist = list(xml.findall("{http://www.w3.org/2006/10/ttaf1}p"))
         for node in plist:
@@ -67,7 +68,7 @@ class subtitle(object):
         return data
 
     def json(self, subdata):
-        data = json.loads(subdata)
+        data = json.loads(subdata.text)
         number = 1
         subs = ""
         for i in data:
@@ -81,7 +82,7 @@ class subtitle(object):
         return subs
 
     def sami(self, subdata):
-        tree = ET.XML(subdata.encode("utf8"))
+        tree = ET.XML(subdata.text.encode("utf8"))
         subt = tree.find("Font")
         subs = ""
         n = 0
@@ -102,6 +103,12 @@ class subtitle(object):
         return subs
 
     def smi(self, subdata):
+        if requests_version < 0x20300:
+            subdata = subdata.content
+            if is_py3:
+                subdata = subdata.decode("latin")
+        else:
+            subdata = subdata.text
         ssubdata = StringIO(subdata)
         timea = 0
         number = 1
@@ -127,12 +134,10 @@ class subtitle(object):
                 data = text.group(1)
         recomp = re.compile(r'\r')
         text = bad_char.sub('-', recomp.sub('', subs)).replace('&quot;', '"')
-        if is_py2:
-            return text.encode("utf-8")
         return text
 
     def wrst(self, subdata):
-        ssubdata = StringIO(subdata)
+        ssubdata = StringIO(subdata.text)
         srt = ""
         subtract = False
         number_b = 1
