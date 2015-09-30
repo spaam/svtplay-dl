@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+import os
 
 from svtplay_dl.utils.urllib import urlparse, quote_plus
 from svtplay_dl.service import Service
@@ -76,7 +77,11 @@ class Twitch(Service):
                 yield ServiceError("Can't find the video")
                 return
             info = json.loads(data.text)
-            options.output = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
+            name = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
+            directory = os.path.dirname(options.output)
+            if os.path.isdir(directory):
+                name = os.path.join(directory, name)
+            options.output = name
 
         if "token" not in access:
             raise TwitchUrlException('video', self.url)
