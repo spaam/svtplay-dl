@@ -213,7 +213,8 @@ def get_one_media(stream, options):
             return
 
     if len(videos) == 0:
-        log.error(error[0].args[0])
+        if len(error) > 0:
+            log.error(error[0].args[0])
     else:
         if options.list_quality:
             list_quality(videos)
