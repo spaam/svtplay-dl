@@ -50,7 +50,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 dataurl = "%s&output=json" % url
         data = self.http.request("get", dataurl)
         if data.status_code == 404:
-            yield ServiceError("Can't get the json file for %s" % self.json)
+            yield ServiceError("Can't get the json file for %s" % dataurl)
             return
         data = data.json()
         if "live" in data["video"]:
