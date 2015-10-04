@@ -40,10 +40,10 @@ class LiveHDSException(HDSException):
             url, "This is a live HDS stream, and they are not supported.")
 
 
-def hdsparse(options, data, manifest):
+def hdsparse(options, res, manifest):
     streams = {}
     bootstrap = {}
-    xml = ET.XML(data)
+    xml = ET.XML(res.text)
 
     if is_py2_old:
         bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
