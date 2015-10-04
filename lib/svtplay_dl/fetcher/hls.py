@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import sys
 import os
 import re
+import copy
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
@@ -41,13 +42,13 @@ def _get_full_url(url, srcurl):
     return returl
 
 
-def hlsparse(url, data):
-    files = (parsem3u(data))[1]
+def hlsparse(options, res, url):
+    files = (parsem3u(res.text))[1]
     streams = {}
 
     for i in files:
         bitrate = float(i[1]["BANDWIDTH"])/1000
-        streams[int(bitrate)] = _get_full_url(i[0], url)
+        streams[int(bitrate)] = HLS(copy.copy(options), _get_full_url(i[0], url), bitrate, cookies=res.cookies)
     return streams
 
 
