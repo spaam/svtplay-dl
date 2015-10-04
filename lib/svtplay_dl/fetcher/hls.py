@@ -60,7 +60,8 @@ class HLS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
 
-        m3u8 = self.http.request("get", self.url).text
+        cookies = self.kwargs["cookies"]
+        m3u8 = self.http.request("get", self.url, cookies=cookies).text
         globaldata, files = parsem3u(m3u8)
         encrypted = False
         key = None
@@ -94,7 +95,7 @@ class HLS(VideoRetriever):
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
 
-            data = self.http.request("get", item)
+            data = self.http.request("get", item, cookies=cookies)
             if data.status_code == 404:
                 break
             data = data.content
