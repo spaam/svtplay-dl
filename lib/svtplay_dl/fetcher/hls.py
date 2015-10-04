@@ -9,7 +9,7 @@ import copy
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.error import UIException
+from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 
 
@@ -43,8 +43,12 @@ def _get_full_url(url, srcurl):
 
 
 def hlsparse(options, res, url):
-    files = (parsem3u(res.text))[1]
     streams = {}
+
+    if res.status_code == 403:
+        streams[0] = ServiceError("Can't read HDS playlist. permission denied")
+        return streams
+    files = (parsem3u(res.text))[1]
 
     for i in files:
         bitrate = float(i[1]["BANDWIDTH"])/1000
