@@ -20,6 +20,7 @@ from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.dbtv import Dbtv
 from svtplay_dl.service.disney import Disney
+from svtplay_dl.service.dplay import Dplay
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.efn import Efn
 from svtplay_dl.service.expressen import Expressen
@@ -55,6 +56,7 @@ sites = [
     Bigbrother,
     Dbtv,
     Disney,
+    Dplay,
     Dr,
     Efn,
     Expressen,

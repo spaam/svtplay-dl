@@ -58,6 +58,7 @@ This script works for:
 * dbtv.no
 * di.se
 * dn.se
+* dplay.se
 * dr.dk
 * efn.se
 * expressen.se
