@@ -83,6 +83,7 @@ class HDS(VideoRetriever):
             raise LiveHDSException(self.url)
 
         querystring = self.kwargs["querystring"]
+        cookies = self.kwargs["cookies"]
         bootstrap = base64.b64decode(self.kwargs["bootstrap"])
         box = readboxtype(bootstrap, 0)
         antal = None
@@ -109,7 +110,7 @@ class HDS(VideoRetriever):
             if self.options.output != "-":
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-            data = self.http.request("get", url)
+            data = self.http.request("get", url, cookies=cookies)
             if data.status_code == 404:
                 break
             data = data.content
