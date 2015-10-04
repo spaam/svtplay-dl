@@ -5,6 +5,7 @@ import base64
 import struct
 import logging
 import binascii
+import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
@@ -62,13 +63,14 @@ def hdsparse(options, res, manifest):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
+    manifest = "%s://%s%s" % (parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         if len(bootstrap) == 1:
             bootstrapid = bootstrap["0"]
         else:
             bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
-        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
-                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
+        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
+                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring, cookies=res.cookies)
     return streams
 
 
