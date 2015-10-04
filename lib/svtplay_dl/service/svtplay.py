@@ -10,7 +10,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify, ensure_unicode
 from svtplay_dl.utils.urllib import urlparse, urljoin
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle
@@ -79,15 +79,14 @@ class Svtplay(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
 
             if parse.path.find("m3u8") > 0:
-                streams = hlsparse(i["url"], self.http.request("get", i["url"]).text)
+                streams = hlsparse(options, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
+                        yield streams[n]
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    res = self.http.request("get", i["url"], params={"hdcore": "3.7.0"})
-                    streams = hdsparse(copy.copy(options), res.text, i["url"])
+                    streams = hdsparse(options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]

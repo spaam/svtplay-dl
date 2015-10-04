@@ -10,7 +10,7 @@ import os
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
@@ -103,6 +103,6 @@ class Disney(Service, OpenGraphThumbMixin):
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(redirect, self.http.request("get", redirect).text)
+            streams = hlsparse(options, self.http.request("get", redirect), redirect)
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]

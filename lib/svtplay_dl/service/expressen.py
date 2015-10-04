@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.utils import is_py2_old
 from svtplay_dl.utils.urllib import unquote_plus
@@ -56,6 +56,6 @@ class Expressen(Service):
             yield RTMP(options2, filename, int(i.attrib["bitrate"]))
 
         ipadurl = xml.find("mobileurls").find("ipadurl").text
-        streams = hlsparse(ipadurl, self.http.request("get", ipadurl).text)
+        streams = hlsparse(options, self.http.request("get", ipadurl), ipadurl)
         for n in list(streams.keys()):
-            yield HLS(copy.copy(options), streams[n], n)
+            yield streams[n]

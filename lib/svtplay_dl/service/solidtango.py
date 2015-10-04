@@ -2,10 +2,9 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import copy
 
 from svtplay_dl.service import Service
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
@@ -25,9 +24,9 @@ class Solidtango(Service):
 
         match = re.search('html5_source: "([^"]+)"', data)
         if match:
-            streams = hlsparse(match.group(1), self.http.request("get", match.group(1)).text)
+            streams = hlsparse(options, self.http.request("get", match.group(1)), match.group(1))
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]
         else:
             yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")
             return

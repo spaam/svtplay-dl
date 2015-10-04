@@ -14,7 +14,7 @@ from svtplay_dl.utils.urllib import urlparse, quote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
@@ -91,10 +91,10 @@ class Twitch(Service):
         url = "http://usher.twitch.tv/vod/%s?nauth=%s&nauthsig=%s" % (
             videoid, nauth, authsig)
 
-        streams = hlsparse(url, self.http.request("get", url).text)
+        streams = hlsparse(options, self.http.request("get", url), url)
         if streams:
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]
 
     def _get_archive(self, options, vid):
         try:
@@ -162,6 +162,6 @@ class Twitch(Service):
         if data.status_code == 404:
             yield ServiceError("Stream is not online.")
             return
-        streams = hlsparse(hls_url, data.text)
+        streams = hlsparse(options, data, hls_url)
         for n in list(streams.keys()):
-            yield HLS(copy.copy(options), streams[n], n)
+            yield streams[n]

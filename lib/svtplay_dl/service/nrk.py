@@ -8,7 +8,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
@@ -55,11 +55,11 @@ class Nrk(Service, OpenGraphThumbMixin):
         if data.status_code == 403:
             yield ServiceError("Can't fetch the video because of geoblocked")
             return
-        streams = hlsparse(hlsurl, data.text)
+        streams = hlsparse(options, data, hlsurl)
         for n in list(streams.keys()):
-            yield HLS(copy.copy(options), streams[n], n)
+            yield streams[n]
 
-        streams = hdsparse(copy.copy(options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}).text, manifest_url)
+        streams = hdsparse(copy.copy(options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}), manifest_url)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

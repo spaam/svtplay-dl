@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 import re
-import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
@@ -18,7 +17,7 @@ class Efn(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video info")
             return
 
-        streams = hlsparse(match.group(1), self.http.request("get", match.group(1)).text)
+        streams = hlsparse(options, self.http.request("get", match.group(1)), match.group(1))
         if streams:
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]

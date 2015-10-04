@@ -6,7 +6,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.http import HTTP
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
@@ -31,9 +31,9 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == vidoid:
                 if i["HLSURL"]:
-                    streams = hlsparse(i["HLSURL"], self.http.request("get", i["HLSURL"]).text)
+                    streams = hlsparse(options, self.http.request("get", i["HLSURL"]), i["HLSURL"])
                     for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
+                        yield streams[n]
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
                         yield HTTP(copy.copy(options), n["URL"], int(n["rate"])/1000)

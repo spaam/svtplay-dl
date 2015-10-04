@@ -7,7 +7,7 @@ import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
@@ -51,14 +51,14 @@ class Dr(Service, OpenGraphThumbMixin):
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}).text, stream["Uri"])
+                        streams = hdsparse(copy.copy(options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}), stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(stream["Uri"], self.http.request("get", stream["Uri"]).text)
+                        streams = hlsparse(options, self.http.request("get", stream["Uri"]), stream["Uri"])
                         for n in list(streams.keys()):
-                            yield HLS(copy.copy(options), streams[n], n)
+                            yield streams[n]
                     if stream["Target"] == "Streaming":
                         options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
                         rtmp = "rtmp://vod.dr.dk/cms/"
@@ -73,9 +73,9 @@ class Dr(Service, OpenGraphThumbMixin):
                 break
         for i in links:
             if i["Target"] == "Ios" or i["Target"] == "HLS":
-                streams = hlsparse(i["Uri"], self.http.request("get", i["Uri"]).text)
+                streams = hlsparse(options, self.http.request("get", i["Uri"]), i["Uri"])
                 for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                    yield streams[n]
             else:
                 if i["Target"] == "Streaming":
                     options.other = "-y '%s'" % i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")

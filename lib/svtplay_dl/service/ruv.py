@@ -28,9 +28,9 @@ class Ruv(Service):
             if match:
                 janson = json.loads(match.group(1))
                 options.live = checklive(janson["result"][1])
-                streams = hlsparse(janson["result"][1], self.http.request("get", janson["result"][1]).text)
+                streams = hlsparse(options, self.http.request("get", janson["result"][1]), janson["result"][1])
                 for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                    yield streams[n]
             else:
                 yield ServiceError("Can't find json info")
         else:

@@ -3,12 +3,11 @@
 from __future__ import absolute_import
 import re
 import json
-import copy
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils import decode_html_entities
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 
 
 class Aftonbladet(Service):
@@ -65,7 +64,7 @@ class Aftonbladet(Service):
             else:
                 plist = "http://%s/%s/%s" % (address, path, hls["filename"])
 
-            streams = hlsparse(plist, self.http.request("get", plist).text)
+            streams = hlsparse(options, self.http.request("get", plist), plist)
             if streams:
                 for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                    yield streams[n]

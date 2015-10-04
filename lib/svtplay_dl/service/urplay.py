@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
@@ -51,15 +51,15 @@ class Urplay(Service, OpenGraphThumbMixin):
         rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
         match = re.search("(mp[34]:.*$)", jsondata["file_rtmp"])
         path = match.group(1)
-        streams = hlsparse(hls, self.http.request("get", hls).text)
+        streams = hlsparse(options, self.http.request("get", hls), hls)
         for n in list(streams.keys()):
-            yield HLS(options, streams[n], n)
+            yield streams[n]
         options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
         yield RTMP(options, rtmp, "480")
         if hd:
-            streams = hlsparse(hls_hd, self.http.request("get", hls_hd).text)
+            streams = hlsparse(options, self.http.request("get", hls_hd), hls_hd)
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]
             options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
             yield RTMP(copy.copy(options), rtmp, "720")
 

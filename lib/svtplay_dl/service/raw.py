@@ -4,7 +4,7 @@ import os
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import hlsparse, HLS
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 
 
@@ -28,14 +28,14 @@ class Raw(Service):
             if extention:
                 options.output = "%s.flv" % options.output
 
-            streams = hdsparse(copy.copy(options), self.http.request("get", self.url, params={"hdcore": "3.7.0"}).text, self.url)
+            streams = hdsparse(options, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if self.url.find(".m3u8") > 0:
-            streams = hlsparse(self.url, self.http.request("get", self.url).text)
+            streams = hlsparse(options, self.http.request("get", self.url), self.url)
             if extention:
                 options.output = "%s.ts" % options.output
 
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]

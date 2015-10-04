@@ -11,7 +11,7 @@ from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import is_py2_old, filenamify
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.hls import hlsparse, HLS
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
@@ -100,7 +100,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     options.other = "-W %s -y %s" % (swf, i.find("url").text)
                     yield RTMP(copy.copy(options), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
-                    streams = hdsparse(copy.copy(options), self.http.request("get", i.find("url").text, params={"hdcore": "3.7.0"}).text, i.find("url").text)
+                    streams = hdsparse(options, self.http.request("get", i.find("url").text, params={"hdcore": "3.7.0"}), i.find("url").text)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -119,9 +119,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(i.find("url").text, self.http.request("get", i.find("url").text).text)
+                    streams = hlsparse(options, self.http.request("get", i.find("url").text), i.find("url").text)
                     for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
+                        yield streams[n]
 
     def find_all_episodes(self, options):
         parse = urlparse(self.url)

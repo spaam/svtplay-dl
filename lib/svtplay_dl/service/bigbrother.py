@@ -8,7 +8,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import hlsparse, HLS
+from svtplay_dl.fetcher.hls import hlsparse
 
 
 class Bigbrother(Service, OpenGraphThumbMixin):
@@ -55,12 +55,12 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
-                streams = hdsparse(copy.copy(options), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}).text, i["defaultURL"])
+                streams = hdsparse(copy.copy(options), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}), i["defaultURL"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
 
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(i["defaultURL"], self.http.request("get", i["defaultURL"]).text)
+                streams = hlsparse(options, self.http.request("get", i["defaultURL"]), i["defaultURL"])
                 for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                    yield streams[n]

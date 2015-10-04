@@ -10,7 +10,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
@@ -95,9 +95,9 @@ class Kanal5(Service):
                 show = False
             if "streams" in data.keys():
                 for i in data["streams"]:
-                    streams = hlsparse(i["source"], self.http.request("get", i["source"]).text)
+                    streams = hlsparse(options, self.http.request("get", i["source"]), i["source"])
                     for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
+                        yield streams[n]
         if "reasonsForNoStreams" in data and show:
             yield ServiceError(data["reasonsForNoStreams"][0])
 
