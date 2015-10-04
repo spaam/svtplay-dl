@@ -13,6 +13,7 @@ from svtplay_dl.utils import is_py2_old, is_py2, is_py3
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.error import ServiceError
 
 log = logging.getLogger('svtplay_dl')
 
@@ -44,6 +45,9 @@ class LiveHDSException(HDSException):
 def hdsparse(options, res, manifest):
     streams = {}
     bootstrap = {}
+    if res.status_code == 403:
+        streams[0] = ServiceError("Can't read HDS playlist. permission denied")
+        return streams
     xml = ET.XML(res.text)
 
     if is_py2_old:
