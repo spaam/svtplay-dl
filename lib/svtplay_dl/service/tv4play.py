@@ -71,8 +71,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         if options.output_auto:
             directory = os.path.dirname(options.output)
+            basename = os.path.basename(options.output)
             options.service = "tv4play"
-            title = "%s-%s-%s" % (options.output, vid, options.service)
+            title = "%s-%s-%s" % (basename, vid, options.service)
             title = filenamify(title)
             if len(directory):
                 options.output = os.path.join(directory, title)
