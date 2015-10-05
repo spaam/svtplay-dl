@@ -35,19 +35,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         if options.username and options.password:
-            data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
-            auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
-            if not auth_token:
-                yield ServiceError("Can't find authenticity_token needed for user / password")
+            work = self._login(options.username, options.password)
+            if isinstance(work, Exception):
+                yield work
                 return
-            url = "https://www.tv4play.se/session"
-            postdata = {"user_name" : options.username, "password": options.password, "authenticity_token":auth_token.group(2), "https": ""}
-            data = self.http.request("post", url, data=postdata, cookies=self.cookies)
-            self.cookies = data.cookies
-            fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
-            if fail:
-                yield ServiceError(fail.group(1))
-                return
+
         url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
         data = self.http.request("get", url, cookies=self.cookies)
         if data.status_code == 401:
@@ -124,6 +116,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         yield streams[n]
 
     def find_all_episodes(self, options):
+        premium = False
+        if options.username and options.password:
+            premium = self._login(options.username, options.password)
+            if isinstance(premium, Exception):
+                log.error(premium.message)
+                return None
+
         parse = urlparse(self.url)
         show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
@@ -133,8 +132,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
         episodes = []
         n = 1
         for i in jsondata["results"]:
+            if premium:
+                text = "availability_group_premium"
+            else:
+                text = "availability_group_free"
+
             try:
-                days = int(i["availability"]["availability_group_free"])
+                days = int(i["availability"][text])
             except (ValueError, TypeError):
                 days = 999
             if days > 0:
@@ -147,6 +151,20 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 n += 1
 
         return episodes
+
+    def _login(self, username, password):
+        data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
+        auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
+        if not auth_token:
+            return ServiceError("Can't find authenticity_token needed for user / password")
+        url = "https://www.tv4play.se/session"
+        postdata = {"user_name" : username, "password": password, "authenticity_token":auth_token.group(2), "https": ""}
+        data = self.http.request("post", url, data=postdata, cookies=self.cookies)
+        self.cookies = data.cookies
+        fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
+        if fail:
+            return ServiceError(fail.group(1))
+        return True
 
 
 def findvid(url, data):
