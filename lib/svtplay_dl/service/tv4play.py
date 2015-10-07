@@ -71,8 +71,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         if options.output_auto:
             directory = os.path.dirname(options.output)
-            basename = os.path.basename(options.output)
             options.service = "tv4play"
+            basename = self._autoname(vid)
+            if basename is None:
+                yield ServiceError("Cant find vid id for autonaming")
+                return
             title = "%s-%s-%s" % (basename, vid, options.service)
             title = filenamify(title)
             if len(directory):
@@ -116,6 +119,22 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     for n in list(streams.keys()):
                         yield streams[n]
 
+    def _get_show_info(self):
+        parse = urlparse(self.url)
+        show = parse.path[parse.path.find("/", 1)+1:]
+        if not re.search("%", show):
+            show = quote_plus(show)
+        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).text
+        jsondata = json.loads(data)
+        return jsondata
+
+    def _autoname(self, vid):
+        jsondata = self._get_show_info()
+        for i in jsondata["results"]:
+            if vid == i["id"]:
+                return i["title"]
+        return None
+
     def find_all_episodes(self, options):
         premium = False
         if options.username and options.password:
@@ -124,12 +143,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 log.error(premium.message)
                 return None
 
-        parse = urlparse(self.url)
-        show = parse.path[parse.path.find("/", 1)+1:]
-        if not re.search("%", show):
-            show = quote_plus(show)
-        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).text
-        jsondata = json.loads(data)
+        jsondata = self._get_show_info()
+
         episodes = []
         n = 1
         for i in jsondata["results"]:
