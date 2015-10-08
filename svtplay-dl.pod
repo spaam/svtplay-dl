@@ -77,6 +77,10 @@ Download subtitle with the media if available.
 
 Download only subtitle if its used with -S.
 
+=head3 --require-subtitle
+
+Download only if a subtitle is available
+
 =head3 --username=USERNAME  -u USERNAME
 
 Username, if the service requires authentication.
