@@ -43,6 +43,10 @@ class Dr(Service, OpenGraphThumbMixin):
             resource_data = self.http.request("get", resource_url).text
             resource = json.loads(resource_data)
 
+            if "Links" not in resource:
+                yield ServiceError("Cant access this video. its geoblocked.")
+                return
+
             if "SubtitlesList" in resource:
                 suburl = resource["SubtitlesList"][0]["Uri"]
                 yield subtitle(copy.copy(options), "wrst", suburl)
