@@ -36,7 +36,10 @@ class Dr(Service, OpenGraphThumbMixin):
             if not match:
                 yield ServiceError("Cant find resource info for this video")
                 return
-            resource_url = "http:%s" % match.group(1)
+            if match.group(1)[:4] != "http":
+                resource_url = "http:%s" % match.group(1)
+            else:
+                resource_url = match.group(1)
             resource_data = self.http.request("get", resource_url).text
             resource = json.loads(resource_data)
 
@@ -44,7 +47,6 @@ class Dr(Service, OpenGraphThumbMixin):
                 suburl = resource["SubtitlesList"][0]["Uri"]
                 yield subtitle(copy.copy(options), "wrst", suburl)
             if "Data" in resource:
-
                 streams = self.find_stream(options, resource)
                 for i in streams:
                     yield i
