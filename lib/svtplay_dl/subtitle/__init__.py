@@ -41,9 +41,14 @@ class subtitle(object):
     def tt(self, subdata):
         i = 1
         data = ""
-        tree = ET.XML(subdata.text.encode("utf8"))
-        xml = tree.find("{http://www.w3.org/2006/10/ttaf1}body").find("{http://www.w3.org/2006/10/ttaf1}div")
-        plist = list(xml.findall("{http://www.w3.org/2006/10/ttaf1}p"))
+        if is_py3:
+            subs = subdata.text
+        else:
+            subs = subdata.text.encode("utf8")
+        subdata = re.sub(' xmlns="[^"]+"', '', subs, count=1)
+        tree = ET.XML(subdata)
+        xml = tree.find("body").find("div")
+        plist = list(xml.findall("p"))
         for node in plist:
             tag = norm(node.tag)
             if tag == "p" or tag == "span":
