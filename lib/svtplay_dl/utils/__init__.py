@@ -138,8 +138,8 @@ def filenamify(title):
     title = title.strip()
     # Lowercase
     title = title.lower()
-    # Replace whitespace with dash
-    title = re.sub(r'[-\s]+', '-', title)
+    # Replace whitespace with dot
+    title = re.sub(r'\s+', '.', title)
 
     return title
 
