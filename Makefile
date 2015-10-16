@@ -79,7 +79,7 @@ release: $(RELEASE_DIR) release-test
 	set -e; cd $(RELEASE_DIR) && \
 		sed -i -re 's/^(LATEST_RELEASE_DATE = ).*/\1$(NEW_RELEASE_DATE)/' Makefile;\
 		sed -i -re 's/^(__version__ = ).*/\1"$(NEW_RELEASE)"/' lib/svtplay_dl/__init__.py;\
-		make svtplay-dl; \
+		make svtplay-dl VERSION=$(NEW_RELEASE); \
 		git add svtplay-dl Makefile lib/svtplay_dl/__init__.py; \
 		git commit -m "Prepare for release $(NEW_RELEASE)";
 	(cd $(RELEASE_DIR) && git format-patch --stdout HEAD^) | git am
