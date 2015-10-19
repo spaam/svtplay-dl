@@ -160,7 +160,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if days > 0:
                 video_id = i["id"]
                 url = "http://www.tv4play.se/program/%s?video_id=%s" % (
-                    show, video_id)
+                    i["program"]["nid"], video_id)
                 episodes.append(url)
                 if n == options.all_last:
                     break
