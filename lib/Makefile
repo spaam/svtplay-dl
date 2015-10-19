@@ -18,6 +18,8 @@ export PYFILES = $(sort $(addsuffix /*.py,$(subst .,/,$(PACKAGES))))
 
 PYTHON ?= /usr/bin/env python
 
+VERSION = $(shell git describe 2>/dev/null || $(LATEST_RELEASE)-unknown)
+
 svtplay-dl: $(PYFILES)
 	@# Verify that there's no .build already \
 	! [ -d .build ] || { \
@@ -31,6 +33,10 @@ svtplay-dl: $(PYFILES)
 		install -d ".build/$${py%/*}"; \
 		install $$py .build/$$py; \
 	done
+
+	# Add git version info to __version__, seen in --version
+	sed -i -e 's/^__version__ = "\([^"]\+\)"$$/__version__ = "$(VERSION)"/' \
+		.build/svtplay_dl/__init__.py
 
 	@# reset timestamps, to avoid non-determinism in zip file
 	find .build/ -exec touch -m -t 198001010000 {} \;
