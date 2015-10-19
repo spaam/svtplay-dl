@@ -83,7 +83,7 @@ class Disney(Service, OpenGraphThumbMixin):
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
-            data = self.http.request("get", url).content
+            data = self.http.request("get", url).text
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
             data = jsondata["content"]
