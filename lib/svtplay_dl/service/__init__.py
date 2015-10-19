@@ -147,7 +147,7 @@ class Generic(Service):
                 if i.handles(url):
                     return url, i(url)
 
-        return url, stream
+        return self.url, stream
 
 def service_handler(sites, url):
     handler = None
