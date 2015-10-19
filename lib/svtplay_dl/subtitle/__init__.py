@@ -113,6 +113,7 @@ class subtitle(object):
             if is_py3:
                 subdata = subdata.decode("latin")
         else:
+            subdata.encoding = "ISO-8859-1"
             subdata = subdata.text
         ssubdata = StringIO(subdata)
         timea = 0
