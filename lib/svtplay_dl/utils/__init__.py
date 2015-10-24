@@ -37,7 +37,11 @@ class HTTP(Session):
         return self.get(url, stream=True).url
 
     def request(self, method, url, *args, **kwargs):
-        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"}
+        headers = kwargs.pop("headers", None)
+        if headers:
+            headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"
+        else:
+            headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"}
         log.debug("HTTP getting %r", url)
         res = Session.request(self, method, url, headers=headers, *args, **kwargs)
         return res
