@@ -8,13 +8,15 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+import os
 
+from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
@@ -93,6 +95,16 @@ class Viaplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't play this because the video is either not found or geoblocked.")
             return
 
+        if options.output_auto:
+            directory = os.path.dirname(options.output)
+            options.service = "tv3play"
+            basename = self._autoname(dataj)
+            title = "%s-%s-%s" % (basename, vid, options.service)
+            if len(directory):
+                options.output = os.path.join(directory, title)
+            else:
+                options.output = title
+
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
@@ -134,3 +146,17 @@ class Viaplay(Service, OpenGraphThumbMixin):
             episodes.append(i["sharing"]["url"])
             n += 1
         return episodes
+
+    def _autoname(self, dataj):
+        program = dataj["format_slug"]
+        season = dataj["format_position"]["season"]
+        episode = None
+        if season:
+            if len(dataj["format_position"]["episode"]) > 0:
+                episode = dataj["format_position"]["episode"]
+        name = filenamify(program)
+        if season:
+            name = "%s.s%s" % (name, season)
+        if episode:
+            name = "%se%s" % (name, episode)
+        return name
