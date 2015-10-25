@@ -75,6 +75,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if options.force_subtitle:
             return
 
+        if len(data["video"].get("videoReferences", [])) == 0:
+            yield ServiceError("Media doesn't have any associated videos (yet?)")
+            return
+
         for i in data["video"]["videoReferences"]:
             parse = urlparse(i["url"])
 
