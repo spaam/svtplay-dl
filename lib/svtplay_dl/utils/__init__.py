@@ -127,7 +127,7 @@ def filenamify(title):
     Convert a string to something suitable as a file name.
 
         >>> print(filenamify(u'Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play'))
-        matlagning-del-1-av-10-raksmorgas-svt-play
+        matlagning.del.1.av.10.-.raksmorgas.svt.play
 
     """
     # ensure it is unicode
