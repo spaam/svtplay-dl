@@ -25,6 +25,14 @@ svtplay-dl is available in Debian in Jessie and later and Ubuntu in
 
 … as root.
 
+Other systems with python
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+::
+
+    pip install svtplay-dl
+
 From source
 ~~~~~~~~~~~
 
