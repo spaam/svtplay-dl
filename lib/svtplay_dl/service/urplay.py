@@ -37,31 +37,26 @@ class Urplay(Service, OpenGraphThumbMixin):
         jsondata = json.loads(data)
         if len(jsondata["subtitles"]) > 0:
             yield subtitle(copy.copy(options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
-        basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
+        if "streamer" in jsondata["streaming_config"]:
+            basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
+        else:
+            lbjson = self.http.request("get", jsondata["streaming_config"]["loadbalancer"]).text
+            lbjson = json.loads(lbjson)
+            basedomain = lbjson["redirect"]
         http = "http://%s/%s" % (basedomain, jsondata["file_http"])
         hd = None
         if len(jsondata["file_http_hd"]) > 0:
             http_hd = "http://%s/%s" % (basedomain, jsondata["file_http_hd"])
             hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-            tmp = jsondata["file_http_hd"]
-            match = re.search("(mp[34]:.*$)", tmp)
-            path_hd = match.group(1)
             hd = True
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-        rtmp = "rtmp://%s/%s" % (basedomain, jsondata["streaming_config"]["rtmp"]["application"])
-        match = re.search("(mp[34]:.*$)", jsondata["file_rtmp"])
-        path = match.group(1)
         streams = hlsparse(options, self.http.request("get", hls), hls)
         for n in list(streams.keys()):
             yield streams[n]
-        options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path)
-        yield RTMP(options, rtmp, "480")
         if hd:
             streams = hlsparse(options, self.http.request("get", hls_hd), hls_hd)
             for n in list(streams.keys()):
                 yield streams[n]
-            options.other = "-v -a %s -y %s" % (jsondata["streaming_config"]["rtmp"]["application"], path_hd)
-            yield RTMP(copy.copy(options), rtmp, "720")
 
     def scrape_episodes(self, options):
         res = []
