@@ -16,7 +16,7 @@ from svtplay_dl.subtitle import subtitle
 
 
 class Urplay(Service, OpenGraphThumbMixin):
-    supported_domains = ['urplay.se', 'ur.se']
+    supported_domains = ['urplay.se', 'ur.se', 'betaplay.ur.se']
 
     def __init__(self, url):
         Service.__init__(self, url)
