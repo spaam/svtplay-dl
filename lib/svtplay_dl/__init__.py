@@ -131,6 +131,7 @@ class Options(object):
         self.service = None
         self.cookies = None
         self.exclude = None
+        self.get_url = False
 
 
 def get_media(url, options):
