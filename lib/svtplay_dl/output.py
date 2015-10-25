@@ -124,7 +124,6 @@ def filename(options, stream):
                 options.output = options.output.decode("latin1")
             else:
                 options.output = options.output.decode("utf-8")
-        options.output = options.output.replace('"', '').replace("'", "").rstrip('\\')
     if not options.output or os.path.isdir(options.output):
         data = ensure_unicode(stream.get_urldata())
         if data is None:
