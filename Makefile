@@ -56,10 +56,10 @@ svtplay-dl.1.gz: svtplay-dl.1
 	gzip -9 svtplay-dl.1
 
 test:
-	sh run-tests.sh $(TEST_OPTS)
+	sh scripts/run-tests.sh $(TEST_OPTS)
 
 cover:
-	sh run-tests.sh -C
+	sh scripts/run-tests.sh -C
 
 pylint:
 	$(MAKE) -C lib pylint
