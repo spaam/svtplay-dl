@@ -29,7 +29,7 @@ class HTTP(VideoRetriever):
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
-            if self.options.output != "-" or not self.options.silent:
+            if self.options.output != "-" and not self.options.silent:
                 now = time.time()
                 if lastprogress + 1 < now:
                     lastprogress = now

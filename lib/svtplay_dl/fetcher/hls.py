@@ -94,7 +94,7 @@ class HLS(VideoRetriever):
         for i in files:
             item = _get_full_url(i[0], self.url)
 
-            if self.options.output != "-" or not self.options.silent:
+            if self.options.output != "-" and not self.options.silent:
                 eta.increment()
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
