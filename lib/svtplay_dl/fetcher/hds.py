@@ -111,7 +111,7 @@ class HDS(VideoRetriever):
         eta = ETA(total)
         while i <= total:
             url = "%s/%sSeg1-Frag%s?%s" % (baseurl, self.url, start, querystring)
-            if self.options.output != "-":
+            if self.options.output != "-" or not self.options.silent:
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
             data = self.http.request("get", url, cookies=cookies)
