@@ -142,7 +142,7 @@ def filename(options, stream):
     return True
 
 
-def output(options, extention="mp4", openfd=True, mode="wb"):
+def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
     if is_py3:
         file_d = io.IOBase
     else:
@@ -168,7 +168,7 @@ def output(options, extention="mp4", openfd=True, mode="wb"):
                     log.error("File already exists. Use --force to overwrite")
                     return None
         if openfd:
-            file_d = open(options.output, mode)
+            file_d = open(options.output, mode, **kwargs)
     else:
         if openfd:
             if is_py3:
