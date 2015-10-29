@@ -13,6 +13,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils.urllib import quote
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils import filenamify
+from svtplay_dl.log import log
 
 class Dplay(Service):
     supported_domains = ['dplay.se']
@@ -38,15 +39,11 @@ class Dplay(Service):
                 yield ServiceError("Wrong username or password")
                 return
 
-        if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium" and not premium:
+        what = self._playable(dataj, premium)
+        if what == 1:
             yield ServiceError("Premium content")
             return
-
-        if dataj["data"][0]["video_metadata_drmid_playready"] != "none":
-            yield ServiceError("DRM protected. Can't do anything")
-            return
-
-        if dataj["data"][0]["video_metadata_drmid_flashaccess"] != "none":
+        if what == 2:
             yield ServiceError("DRM protected. Can't do anything")
             return
 
@@ -104,3 +101,46 @@ class Dplay(Service):
             return True
         else:
             return False
+
+    def _playable(self, dataj, premium):
+        if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium" and not premium:
+            return 1
+
+        if dataj["data"][0]["video_metadata_drmid_playready"] != "none":
+            return 2
+
+        if dataj["data"][0]["video_metadata_drmid_flashaccess"] != "none":
+            return 2
+        return 0
+
+    def find_all_episodes(self, options):
+        data = self.get_urldata()
+        match = re.search('data-show-id="([^"]+)"', data)
+        if not match:
+            log.error("Cant find show id")
+            return None
+
+        premium = None
+        if options.username and options.password:
+            premium = self._login(options)
+
+        url = "http://www.dplay.se/api/v2/ajax/shows/%s/seasons/?items=9999999&sort=episode_number_desc&page=" % match.group(1)
+        episodes = []
+        page = 0
+        data = self.http.request("get", "%s%s" % (url, page)).text
+        dataj = json.loads(data)
+        for i in dataj["data"]:
+            what = self._playable(dataj, premium)
+            if what == 0:
+                episodes.append(i["url"])
+        pages = dataj["total_pages"]
+        for n in range(1, pages):
+            data = self.http.request("get", "%s%s" % (url, n)).text
+            dataj = json.loads(data)
+            for i in dataj["data"]:
+                what = self._playable(dataj, premium)
+                if what == 0:
+                    episodes.append(i["url"])
+        if len(episodes) == 0:
+            log.error("Cant find any playable files")
+        return episodes
