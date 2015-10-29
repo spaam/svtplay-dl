@@ -9,6 +9,7 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.http import HTTP
 
 
 class Bigbrother(Service, OpenGraphThumbMixin):
@@ -64,3 +65,6 @@ class Bigbrother(Service, OpenGraphThumbMixin):
                 streams = hlsparse(options, self.http.request("get", i["defaultURL"]), i["defaultURL"])
                 for n in list(streams.keys()):
                     yield streams[n]
+
+            if i["defaultURL"].endswith("mp4"):
+                yield HTTP(copy.copy(options), i["defaultURL"], i["encodingRate"]/1024)
