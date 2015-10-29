@@ -19,7 +19,7 @@ class Dplay(Service):
 
     def get(self, options):
         data = self.get_urldata()
-
+        premium = False
         if self.exclude(options):
             yield ServiceError("Excluding video")
             return
@@ -32,8 +32,22 @@ class Dplay(Service):
         data = self.http.request("get", "http://www.dplay.se/api/v2/ajax/videos?video_id=%s" % vid).text
         dataj = json.loads(data)
 
-        if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium":
+        if options.username and options.password:
+            premium = self._login(options)
+            if not premium:
+                yield ServiceError("Wrong username or password")
+                return
+
+        if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium" and not premium:
             yield ServiceError("Premium content")
+            return
+
+        if dataj["data"][0]["video_metadata_drmid_playready"] != "none":
+            yield ServiceError("DRM protected. Can't do anything")
+            return
+
+        if dataj["data"][0]["video_metadata_drmid_flashaccess"] != "none":
+            yield ServiceError("DRM protected. Can't do anything")
             return
 
         if options.output_auto:
@@ -53,14 +67,18 @@ class Dplay(Service):
         geo = dataj["countryCode"]
         timestamp = (int(time.time())+3600)*1000
         cookie = {"dsc-geo": quote('{"countryCode":"%s","expiry":%s}' % (geo, timestamp))}
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % vid, cookies=cookie)
+        if options.cookies:
+            options.cookies.update(cookie)
+        else:
+            options.cookies = cookie
+        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % vid, cookies=options.cookies)
         dataj = json.loads(data.text)
         if "hds" in dataj:
             streams = hdsparse(copy.copy(options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % vid, cookies=cookie)
+        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % vid, cookies=options.cookies)
         dataj = json.loads(data.text)
         if "hls" in dataj:
             streams = hlsparse(options, self.http.request("get", dataj["hls"]), dataj["hls"])
@@ -74,3 +92,15 @@ class Dplay(Service):
         episode = jsondata["data"][0]["episode"]
         title = jsondata["data"][0]["title"]
         return filenamify("%s.s%se%s.%s" % (show, season, episode, title))
+
+    def _login(self, options):
+        data = self.http.request("get", "https://secure.dplay.se/login/", cookies={})
+        options.cookies = data.cookies
+        match = re.search('realm_code" value="([^"]+)"', data.text)
+        postdata = {"username" : options.username, "password": options.password, "remember_me": "true", "realm_code": match.group(1)}
+        data = self.http.request("post", "https://secure.dplay.se/secure/api/v1/user/auth/login", data=postdata, cookies=options.cookies)
+        if data.status_code == 200:
+            options.cookies = data.cookies
+            return True
+        else:
+            return False
