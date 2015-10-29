@@ -10,6 +10,7 @@ import os
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import quote
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils import filenamify
@@ -59,6 +60,13 @@ class Dplay(Service):
                 options.output = os.path.join(directory, title)
             else:
                 options.output = title
+        suburl = dataj["data"][0]["subtitles_sv_srt"]
+        if len(suburl) > 0:
+            yield subtitle(copy.copy(options), "raw", suburl)
+
+        if options.force_subtitle:
+            return
+
         data = self.http.request("get", "http://geo.dplay.se/geo.js").text
         dataj = json.loads(data)
         geo = dataj["countryCode"]
