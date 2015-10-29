@@ -54,6 +54,11 @@ class Bigbrother(Service, OpenGraphThumbMixin):
             return
         jsondata = json.loads(match.group(1))
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
+
+        if jsondata["data"]["publisherType"] == "PREMIUM":
+            yield ServiceError("Premium content")
+            return
+
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
                 streams = hdsparse(copy.copy(options), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}), i["defaultURL"])
