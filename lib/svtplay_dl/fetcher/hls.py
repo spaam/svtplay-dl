@@ -135,7 +135,10 @@ def parsem3u(data):
         elif l.startswith("#EXT-X-ENDLIST"):
             break
         elif l.startswith("#EXT-X-"):
-            globdata.update(dict([l[7:].strip().split(":", 1)]))
+            line = [l[7:].strip().split(":", 1)]
+            if len(line[0]) == 1:
+                line[0].append("None")
+            globdata.update(dict(line))
         elif l.startswith("#EXTINF:"):
             dur, title = l[8:].strip().split(",", 1)
             streaminfo['duration'] = dur
