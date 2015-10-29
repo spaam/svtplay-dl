@@ -37,20 +37,15 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             url = self.url
 
-        pos = url.find("?")
-        if pos < 0:
-            if "svt.se" in url:
-                dataurl = "%s?format=json" % url
-            else:
-                dataurl = "%s?output=json" % url
+
+        if "svt.se" in url:
+            params = {"format": "json"}
         else:
-            if "svt.se" in url:
-                dataurl = "%s&format=json" % url
-            else:
-                dataurl = "%s&output=json" % url
-        data = self.http.request("get", dataurl)
+            params = {"output": "json"}
+
+        data = self.http.request("get", url, params=params)
         if data.status_code == 404:
-            yield ServiceError("Can't get the json file for %s" % dataurl)
+            yield ServiceError("Can't get the json file for %s" % url)
             return
         data = data.json()
         if "live" in data["video"]:
