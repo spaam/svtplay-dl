@@ -87,7 +87,7 @@ class Dplay(Service):
                     yield streams[n]
 
     def _autoname(self, jsondata):
-        show = jsondata["data"][0]["taxonomy_items"][0]["slug"]
+        show = jsondata["data"][0]["video_metadata_show"]
         season = jsondata["data"][0]["season"]
         episode = jsondata["data"][0]["episode"]
         title = jsondata["data"][0]["title"]
