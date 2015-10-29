@@ -32,6 +32,11 @@ class subtitle(object):
             data = self.smi(subdata)
         if self.subtype == "wrst":
             data = self.wrst(subdata)
+        if self.subtype == "raw":
+            if is_py2:
+                data = subdata.text.encode("utf-8")
+            else:
+                data = subdata.text
 
         if platform.system() == "Windows" and is_py3:
             file_d = output(self.options, "srt", mode="wt", encoding="utf-8")
