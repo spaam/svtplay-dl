@@ -215,9 +215,11 @@ def get_one_media(stream, options):
         if options.force_subtitle:
             return
 
-    if len(videos) == 0:
-        if len(error) > 0:
-            log.error(error[0].args[0])
+    for exc in error:
+        log.error(str(exc))
+    if (len(videos) == 0):
+        sys.exit(2)
+
     else:
         if options.list_quality:
             list_quality(videos)
