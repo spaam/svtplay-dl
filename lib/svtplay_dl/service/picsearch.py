@@ -37,6 +37,9 @@ class Picsearch(Service, OpenGraphThumbMixin):
                     return
         jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).text
         jsondata = json.loads(jsondata)
+        if "playerconfig" not in jsondata["media"]:
+            yield ServiceError(jsondata["error"])
+            return
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
             files = playlist["bitrates"]
