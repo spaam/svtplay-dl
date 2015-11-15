@@ -3,13 +3,13 @@
 from __future__ import absolute_import
 import re
 import copy
-import xml.etree.ElementTree as ET
+import json
 
 from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.http import HTTP
-
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.utils import decode_html_entities
 
 class Lemonwhale(Service):
     supported_domains = ['svd.se']
@@ -38,14 +38,14 @@ class Lemonwhale(Service):
                 return
             vid = match.group(1)
 
-        url = "http://amz.lwcdn.com/api/cache/VideoCache.jsp?%s" % vid
-        data = self.http.request("get", url).content
-        xml = ET.XML(data)
-        videofile = xml.find("{http://www.lemonwhale.com/xml11}VideoFile")
-        mediafiles = videofile.find("{http://www.lemonwhale.com/xml11}MediaFiles")
-        high = mediafiles.find("{http://www.lemonwhale.com/xml11}VideoURLHigh")
-        if high.text:
-            yield HTTP(copy.copy(options), high.text, 720)
-        videourl = mediafiles.find(
-            "{http://www.lemonwhale.com/xml11}VideoURL").text
-        yield HTTP(copy.copy(options), videourl, 480)
+        url = "http://ljsp.lwcdn.com/web/public/item.json?type=video&%s" % decode_html_entities(vid)
+        data = self.http.request("get", url).text
+        jdata = json.loads(data)
+        videos = jdata["videos"][0]["media"]["streams"]
+        for i in videos:
+            if i["name"] == "auto":
+                hls = "%s%s" % (jdata["videos"][0]["media"]["base"], i["url"])
+        streams = hlsparse(options, self.http.request("get", hls), hls)
+        if streams:
+            for n in list(streams.keys()):
+                yield streams[n]
