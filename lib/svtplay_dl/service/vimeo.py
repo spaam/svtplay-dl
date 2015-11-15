@@ -29,9 +29,9 @@ class Vimeo(Service, OpenGraphThumbMixin):
 
         if player_data:
             jsondata = json.loads(player_data)
-            avail_quality = jsondata["request"]["files"]["h264"]
-            for i in avail_quality.keys():
-                yield HTTP(copy.copy(options), avail_quality[i]["url"], avail_quality[i]["bitrate"])
+            avail_quality = jsondata["request"]["files"]["progressive"]
+            for i in avail_quality:
+                yield HTTP(copy.copy(options), i["url"], i["height"])
         else:
             yield ServiceError("Can't find any streams.")
             return
