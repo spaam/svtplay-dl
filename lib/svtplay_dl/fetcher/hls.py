@@ -46,7 +46,7 @@ def hlsparse(options, res, url):
     streams = {}
 
     if res.status_code == 403:
-        streams[0] = ServiceError("Can't read HDS playlist. permission denied")
+        streams[0] = ServiceError("Can't read HLS playlist. permission denied")
         return streams
     files = (parsem3u(res.text))[1]
 
