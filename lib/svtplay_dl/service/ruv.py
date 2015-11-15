@@ -36,7 +36,7 @@ class Ruv(Service):
         else:
             match = re.search(r'<source [^ ]*[ ]*src="([^"]+)" ', self.get_urldata())
             if not match:
-                yield ServiceError("Can't find video info for: %s", self.url)
+                yield ServiceError("Can't find video info for: %s" % self.url)
                 return
             if match.group(1).endswith("mp4"):
                 yield HTTP(copy.copy(options), match.group(1), 800)
