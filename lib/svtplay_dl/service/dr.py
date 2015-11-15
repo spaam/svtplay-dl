@@ -46,8 +46,7 @@ class Dr(Service, OpenGraphThumbMixin):
             if "Links" not in resource:
                 yield ServiceError("Cant access this video. its geoblocked.")
                 return
-
-            if "SubtitlesList" in resource:
+            if "SubtitlesList" in resource and len(resource["SubtitlesList"]) > 0:
                 suburl = resource["SubtitlesList"][0]["Uri"]
                 yield subtitle(copy.copy(options), "wrst", suburl)
             if "Data" in resource:
