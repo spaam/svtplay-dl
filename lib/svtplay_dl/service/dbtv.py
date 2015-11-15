@@ -29,7 +29,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
         janson = json.loads(match.group(1))
         playlist = janson["playlist"]
         for i in playlist:
-            if i["brightcoveId"] == vidoid:
+            if i["brightcoveId"] == int(vidoid):
                 if i["HLSURL"]:
                     streams = hlsparse(options, self.http.request("get", i["HLSURL"]), i["HLSURL"])
                     for n in list(streams.keys()):
