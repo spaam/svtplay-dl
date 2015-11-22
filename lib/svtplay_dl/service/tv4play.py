@@ -48,7 +48,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if code == "SESSION_NOT_AUTHENTICATED":
                 yield ServiceError("Can't access premium content")
             elif code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
-                yield ServiceError("Can't downoad this video because of geoblocked.")
+                yield ServiceError("Can't download this video because of geoblock.")
             else:
                 yield ServiceError("Can't find any info for that video")
             return
