@@ -25,7 +25,7 @@ class Sr(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+playaudio=\d+)"', data)
+        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+play(?:audio|episode)=\d+)"', data)
         if not match:
             yield ServiceError("Can't find audio info")
             return
