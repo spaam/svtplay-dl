@@ -18,7 +18,7 @@ export PYFILES = $(sort $(addsuffix /*.py,$(subst .,/,$(PACKAGES))))
 
 PYTHON ?= /usr/bin/env python
 
-VERSION = $(shell git describe 2>/dev/null || $(LATEST_RELEASE)-unknown)
+VERSION = $(shell git describe 2>/dev/null || echo $(LATEST_RELEASE)-unknown)
 
 svtplay-dl: $(PYFILES)
 	@# Verify that there's no .build already \
