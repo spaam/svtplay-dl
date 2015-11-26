@@ -40,6 +40,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if "playerconfig" not in jsondata["media"]:
             yield ServiceError(jsondata["error"])
             return
+        if "live" in jsondata["media"]["playerconfig"]["clip"]:
+            options.live = jsondata["media"]["playerconfig"]["clip"]
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
             files = playlist["bitrates"]
