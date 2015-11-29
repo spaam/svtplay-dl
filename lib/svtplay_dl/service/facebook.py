@@ -21,12 +21,12 @@ class Facebook(Service, OpenGraphThumbMixin):
             return
         data2 = json.loads('["%s"]' % match.group(1))
         data2 = json.loads(unquote_plus(data2[0]))
-        if "sd_src_no_ratelimit" in data2["video_data"][0]:
-            yield HTTP(copy.copy(options), data2["video_data"][0]["sd_src_no_ratelimit"], "240")
+        if "sd_src_no_ratelimit" in data2["video_data"]["progressive"][0]:
+            yield HTTP(copy.copy(options), data2["video_data"]["progressive"][0]["sd_src_no_ratelimit"], "240")
         else:
-            yield HTTP(copy.copy(options), data2["video_data"][0]["sd_src"], "240")
-        if "hd_src_no_ratelimit" in data2["video_data"][0]:
-            yield HTTP(copy.copy(options), data2["video_data"][0]["hd_src_no_ratelimit"], "720")
+            yield HTTP(copy.copy(options), data2["video_data"]["progressive"][0]["sd_src"], "240")
+        if "hd_src_no_ratelimit" in data2["video_data"]["progressive"][0]:
+            yield HTTP(copy.copy(options), data2["video_data"]["progressive"][0]["hd_src_no_ratelimit"], "720")
         else:
-            if data2["video_data"][0]["hd_src"]:
-                yield HTTP(copy.copy(options), data2["video_data"][0]["hd_src"], "720")
+            if data2["video_data"]["progressive"][0]["hd_src"]:
+                yield HTTP(copy.copy(options), data2["video_data"]["progressive"][0]["hd_src"], "720")
