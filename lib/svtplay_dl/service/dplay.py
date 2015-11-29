@@ -17,7 +17,7 @@ from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 
 class Dplay(Service):
-    supported_domains = ['dplay.se']
+    supported_domains = ['dplay.se', 'dplay.dk', "it.dplay.com"]
 
     def get(self, options):
         data = self.get_urldata()
