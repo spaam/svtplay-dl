@@ -75,6 +75,7 @@ This script works for:
 
 -  aftonbladet.se
 -  bambuser.com
+-  comedycentral.se
 -  dbtv.no
 -  di.se
 -  dn.se

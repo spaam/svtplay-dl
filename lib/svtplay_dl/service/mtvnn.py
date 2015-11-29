@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import re
 import os
+import json
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -8,15 +9,16 @@ from svtplay_dl.utils import is_py2_old
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
+from svtplay_dl.fetcher.hls import hlsparse
 
 
 # This is _very_ similar to mtvservices..
 class Mtvnn(Service, OpenGraphThumbMixin):
-    supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no"]
+    supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no", "www.comedycentral.se"]
 
     def get(self, options):
         data = self.get_urldata()
-        match = re.search(r'"(http://api.mtvnn.com/v2/mrss.xml[^"]+)"', data)
+        match = re.search(r'data-mrss=[\'"](http://api.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
         if not match:
             yield ServiceError("Can't find id for the video")
             return
@@ -40,6 +42,9 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         options.other = "-W %s" % self.http.check_redirect(swfurl)
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
+        filename = os.path.basename(contenturl)
+        data = self.http.request("get", "http://videos.mtvnn.com/api/v2/%s.js?video_format=hls" % filename).text
+        dataj = json.loads(data)
         content = self.http.request("get", contenturl).content
         xml = ET.XML(content)
         ss = xml.find("video").find("item")
@@ -50,6 +55,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
         for i in sa:
             yield RTMP(options, i.find("src").text, i.attrib["bitrate"])
+        streams = hlsparse(options, self.http.request("get", dataj["src"]), dataj["src"])
+        if streams:
+            for n in list(streams.keys()):
+                yield streams[n]
 
     def find_all_episodes(self, options):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())

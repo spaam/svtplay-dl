@@ -138,6 +138,8 @@ Do not download any video, but instead print the URL.
 
 =item * Aftonbladet: L<http://www.aftonbladet.se/>
 
+=item * Comedycentral.se: L<http://www.comedycentral.se>
+
 =item * Dagens Industri: L<http://di.se/>
 
 =item * Dagens Nyheter: L<http://dn.se/>
