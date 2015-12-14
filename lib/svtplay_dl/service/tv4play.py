@@ -128,12 +128,35 @@ class Tv4play(Service, OpenGraphThumbMixin):
         jsondata = json.loads(data)
         return jsondata
 
+    def _get_clip_info(self, vid):
+        parse = urlparse(self.url)
+        show = parse.path[parse.path.find("/", 1)+1:]
+        if not re.search("%", show):
+            show = quote_plus(show)
+        page = 1
+        assets = page * 1000
+        run = True
+        while run:
+            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live=false&platform=web&node_nids=%s&per_page=1000&page=%s" % (show, page)).text
+            jsondata = json.loads(data)
+            for i in jsondata["results"]:
+                if vid == i["id"]:
+                    return i["title"]
+            if not run:
+                return None
+            total = jsondata["total_hits"]
+            if assets > total:
+                run = False
+            page += 1
+            assets = page * 1000
+        return None
+
     def _autoname(self, vid):
         jsondata = self._get_show_info()
         for i in jsondata["results"]:
             if vid == i["id"]:
                 return i["title"]
-        return None
+        return self._get_clip_info(vid)
 
     def find_all_episodes(self, options):
         premium = False
