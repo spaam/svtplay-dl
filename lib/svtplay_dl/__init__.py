@@ -131,6 +131,7 @@ class Options(object):
         self.exclude = None
         self.get_url = False
         self.ssl_verify = True
+        self.http_headers = None
 
 
 def get_media(url, options):
@@ -322,6 +323,8 @@ def main():
                       help="do not download any video, but instead print the URL.")
     parser.add_option("--dont-verify-ssl-cert", action="store_false", dest="ssl_verify", default=True,
                       help="Don't attempt to verify SSL certificates.")
+    parser.add_option("--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2",
+                      help="A header to add to each HTTP request.")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -372,4 +375,5 @@ def mergeParserOption(options, parser):
     options.exclude = parser.exclude
     options.get_url = parser.get_url
     options.ssl_verify = parser.ssl_verify
+    options.http_headers = parser.http_headers
     return options

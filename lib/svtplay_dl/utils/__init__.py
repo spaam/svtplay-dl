@@ -31,8 +31,11 @@ except ImportError:
 
 class HTTP(Session):
     def __init__(self, options, *args, **kwargs):
-        self.verify = options.ssl_verify
         Session.__init__(self, *args, **kwargs)
+        self.verify = options.ssl_verify
+        if options.http_headers:
+            self.headers.update(self.split_header(options.http_headers))
+        self.headers.update({"User-Agent": FIREFOX_UA})
 
     def check_redirect(self, url):
         return self.get(url, stream=True).url
@@ -40,12 +43,15 @@ class HTTP(Session):
     def request(self, method, url, *args, **kwargs):
         headers = kwargs.pop("headers", None)
         if headers:
-            headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"
-        else:
-            headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"}
+            for i in headers.keys():
+                self.headers[i] = headers[i]
+
         log.debug("HTTP getting %r", url)
-        res = Session.request(self, method, url, headers=headers, verify=self.verify, *args, **kwargs)
+        res = Session.request(self, method, url, verify=self.verify, *args, **kwargs)
         return res
+
+    def split_header(self, headers):
+        return dict(x.split('=') for x in headers.split(';'))
 
 
 def sort_quality(data):
