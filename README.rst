@@ -84,7 +84,6 @@ This script works for:
 -  efn.se
 -  expressen.se
 -  hbo.com
--  kanal5play.se
 -  kanal9play.se
 -  nickelodeon.nl
 -  nickelodeon.no
