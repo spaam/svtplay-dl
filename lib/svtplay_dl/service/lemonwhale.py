@@ -14,11 +14,11 @@ from svtplay_dl.utils import decode_html_entities
 class Lemonwhale(Service):
     supported_domains = ['svd.se']
 
-    def get(self, options):
+    def get(self):
         vid = None
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -45,7 +45,7 @@ class Lemonwhale(Service):
         for i in videos:
             if i["name"] == "auto":
                 hls = "%s%s" % (jdata["videos"][0]["media"]["base"], i["url"])
-        streams = hlsparse(options, self.http.request("get", hls), hls)
+        streams = hlsparse(self.options, self.http.request("get", hls), hls)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

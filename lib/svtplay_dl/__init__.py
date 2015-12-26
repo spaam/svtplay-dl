@@ -137,13 +137,14 @@ class Options(object):
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
-    stream = service_handler(sites, url)
+
+    stream = service_handler(sites, options, url)
     if not stream:
-        generic = Generic(url)
+        generic = Generic(options, url)
         url, stream = generic.get(sites)
     if not stream:
         if url.find(".f4m") > 0 or url.find(".m3u8") > 0:
-            stream = Raw(url)
+            stream = Raw(options, url)
         if not stream:
             log.error("That site is not supported. Make a ticket or send a message")
             sys.exit(2)
@@ -166,7 +167,7 @@ def get_media(url, options):
             if o == url:
                 substream = stream
             else:
-                substream = service_handler(sites, o)
+                substream = service_handler(sites, options, o)
 
             log.info("Episode %d of %d", idx + 1, len(episodes))
 
@@ -178,13 +179,13 @@ def get_media(url, options):
 
 def get_one_media(stream, options):
     # Make an automagic filename
-    if not filename(options, stream):
+    if not filename(stream):
         return
 
     videos = []
     subs = []
     error = []
-    streams = stream.get(options)
+    streams = stream.get()
     try:
         for i in streams:
             if isinstance(i, VideoRetriever):

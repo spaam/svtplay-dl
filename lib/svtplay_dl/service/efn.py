@@ -9,7 +9,7 @@ from svtplay_dl.error import ServiceError
 class Efn(Service, OpenGraphThumbMixin):
     supported_domains_re = ["www.efn.se"]
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
         match = re.search('data-hls="([^"]+)"', self.get_urldata())
@@ -17,7 +17,7 @@ class Efn(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video info")
             return
 
-        streams = hlsparse(options, self.http.request("get", match.group(1)), match.group(1))
+        streams = hlsparse(self.options, self.http.request("get", match.group(1)), match.group(1))
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

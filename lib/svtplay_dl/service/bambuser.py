@@ -14,13 +14,13 @@ from svtplay_dl.fetcher.http import HTTP
 class Bambuser(Service, OpenGraphThumbMixin):
     supported_domains = ["bambuser.com"]
 
-    def get(self, options):
+    def get(self):
         match = re.search(r"v/(\d+)", self.url)
         if not match:
             yield ServiceError("Can't find video id in url")
             return
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -31,10 +31,10 @@ class Bambuser(Service, OpenGraphThumbMixin):
         video = info["url"]
         if video[:4] == "rtmp":
             playpath = info["id"][len(info["id"])-36:]
-            options.other = "-y %s" % playpath
+            self.options.other = "-y %s" % playpath
             if info["type"] == "live":
-                options.live = True
-            yield RTMP(copy.copy(options), video, "0")
+                self.options.live = True
+            yield RTMP(copy.copy(self.options), video, "0")
         else:
-            yield HTTP(copy.copy(options), video, "0")
+            yield HTTP(copy.copy(self.options), video, "0")
 

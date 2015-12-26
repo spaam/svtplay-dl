@@ -13,10 +13,10 @@ from svtplay_dl.error import ServiceError
 class Vimeo(Service, OpenGraphThumbMixin):
     supported_domains = ['vimeo.com']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -31,7 +31,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
             jsondata = json.loads(player_data)
             avail_quality = jsondata["request"]["files"]["progressive"]
             for i in avail_quality:
-                yield HTTP(copy.copy(options), i["url"], i["height"])
+                yield HTTP(copy.copy(self.options), i["url"], i["height"])
         else:
             yield ServiceError("Can't find any streams.")
             return

@@ -13,10 +13,10 @@ from svtplay_dl.error import ServiceError
 class Dbtv(Service, OpenGraphThumbMixin):
     supported_domains = ['dbtv.no']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -31,9 +31,9 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == int(vidoid):
                 if i["HLSURL"]:
-                    streams = hlsparse(options, self.http.request("get", i["HLSURL"]), i["HLSURL"])
+                    streams = hlsparse(self.options, self.http.request("get", i["HLSURL"]), i["HLSURL"])
                     for n in list(streams.keys()):
                         yield streams[n]
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
-                        yield HTTP(copy.copy(options), n["URL"], int(n["rate"])/1000)
+                        yield HTTP(copy.copy(self.options), n["URL"], int(n["rate"])/1000)

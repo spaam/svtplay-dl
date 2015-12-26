@@ -11,10 +11,10 @@ from svtplay_dl.error import ServiceError
 class Solidtango(Service):
     supported_domains = ['skkplay.se', 'skkplay.solidtango.com']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -24,7 +24,7 @@ class Solidtango(Service):
 
         match = re.search('html5_source: "([^"]+)"', data)
         if match:
-            streams = hlsparse(options, self.http.request("get", match.group(1)), match.group(1))
+            streams = hlsparse(self.options, self.http.request("get", match.group(1)), match.group(1))
             for n in list(streams.keys()):
                 yield streams[n]
         else:

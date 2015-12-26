@@ -13,10 +13,10 @@ from svtplay_dl.fetcher.hls import hlsparse
 class Aftonbladet(Service):
     supported_domains = ['tv.aftonbladet.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -35,9 +35,9 @@ class Aftonbladet(Service):
                 yield ServiceError("Can't find live info")
                 return
             if match.group(1) == "true":
-                options.live = True
+                self.options.live = True
 
-        if not options.live:
+        if not self.options.live:
             dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
@@ -64,7 +64,7 @@ class Aftonbladet(Service):
             else:
                 plist = "http://%s/%s/%s" % (address, path, hls["filename"])
 
-            streams = hlsparse(options, self.http.request("get", plist), plist)
+            streams = hlsparse(self.options, self.http.request("get", plist), plist)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]

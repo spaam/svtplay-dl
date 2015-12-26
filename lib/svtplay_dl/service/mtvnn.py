@@ -16,7 +16,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 class Mtvnn(Service, OpenGraphThumbMixin):
     supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no", "www.comedycentral.se"]
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
         match = re.search(r'data-mrss=[\'"](http://api.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
         if not match:
@@ -27,19 +27,19 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
-        if options.output_auto:
-            directory = os.path.dirname(options.output)
+        if self.options.output_auto:
+            directory = os.path.dirname(self.options.output)
             if len(directory):
-                options.output = os.path.join(directory, title)
+                self.options.output = os.path.join(directory, title)
             else:
-                options.output = title
+                self.options.output = title
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
-        options.other = "-W %s" % self.http.check_redirect(swfurl)
+        self.options.other = "-W %s" % self.http.check_redirect(swfurl)
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         filename = os.path.basename(contenturl)
@@ -54,8 +54,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             sa = list(ss.iter("rendition"))
 
         for i in sa:
-            yield RTMP(options, i.find("src").text, i.attrib["bitrate"])
-        streams = hlsparse(options, self.http.request("get", dataj["src"]), dataj["src"])
+            yield RTMP(self.options, i.find("src").text, i.attrib["bitrate"])
+        streams = hlsparse(self.options, self.http.request("get", dataj["src"]), dataj["src"])
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

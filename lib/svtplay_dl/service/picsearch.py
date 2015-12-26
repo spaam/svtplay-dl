@@ -14,10 +14,10 @@ from svtplay_dl.error import ServiceError
 class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se', 'di.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -41,21 +41,21 @@ class Picsearch(Service, OpenGraphThumbMixin):
             yield ServiceError(jsondata["error"])
             return
         if "live" in jsondata["media"]["playerconfig"]["clip"]:
-            options.live = jsondata["media"]["playerconfig"]["clip"]
+            self.options.live = jsondata["media"]["playerconfig"]["clip"]
         playlist = jsondata["media"]["playerconfig"]["playlist"][1]
         if "bitrates" in playlist:
             files = playlist["bitrates"]
             server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
 
             for i in files:
-                options.other = "-y '%s'" % i["url"]
-                yield RTMP(copy.copy(options), server, i["height"])
+                self.options.other = "-y '%s'" % i["url"]
+                yield RTMP(copy.copy(self.options), server, i["height"])
         if "provider" in playlist:
             if playlist["provider"] != "rtmp":
                 if "live" in playlist:
-                    options.live = playlist["live"]
+                    self.options.live = playlist["live"]
                 if playlist["url"].endswith(".f4m"):
-                    streams = hdsparse(options, self.http.request("get", playlist["url"], params={"hdcore": "3.7.0"}), playlist["url"])
+                    streams = hdsparse(self.options, self.http.request("get", playlist["url"], params={"hdcore": "3.7.0"}), playlist["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]

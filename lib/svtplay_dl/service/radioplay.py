@@ -16,10 +16,10 @@ from svtplay_dl.error import ServiceError
 class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -27,7 +27,7 @@ class Radioplay(Service):
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):
-                yield HTTP(copy.copy(options), data["station"]["streams"][i], i)
+                yield HTTP(copy.copy(self.options), data["station"]["streams"][i], i)
         else:
             yield ServiceError("Can't find stream info")
             return

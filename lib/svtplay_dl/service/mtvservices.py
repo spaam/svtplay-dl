@@ -14,7 +14,7 @@ from svtplay_dl.error import ServiceError
 class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
@@ -32,11 +32,11 @@ class Mtvservices(Service):
         else:
             sa = list(ss.iter("rendition"))
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         for i in sa:
             temp = i.find("src").text.index("gsp.comedystor")
             url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/%s" % i.find("src").text[temp:]
-            yield HTTP(copy.copy(options), url, i.attrib["height"])
+            yield HTTP(copy.copy(self.options), url, i.attrib["height"])

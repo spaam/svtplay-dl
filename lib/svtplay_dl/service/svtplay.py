@@ -20,11 +20,7 @@ from svtplay_dl.error import ServiceError
 class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 
-    def __init__(self, url):
-        Service.__init__(self, url)
-        self.subtitle = None
-
-    def get(self, options):
+    def get(self):
         if re.findall("svt.se", self.url):
             data = self.get_urldata()
             match = re.search(r"data-json-href=\"(.*)\"", data)
@@ -49,13 +45,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return
         data = data.json()
         if "live" in data["video"]:
-            options.live = data["video"]["live"]
+            self.options.live = data["video"]["live"]
+        if self.options.output_auto:
+            self.options.service = "svtplay"
+            self.options.output = outputfilename(data, self.options.output, ensure_unicode(self.get_urldata()))
 
-        if options.output_auto:
-            options.service = "svtplay"
-            options.output = outputfilename(data, options.output, ensure_unicode(self.get_urldata()))
-
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -65,9 +60,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             except KeyError:
                 pass
             if suburl and len(suburl) > 0:
-                yield subtitle(copy.copy(options), "wrst", suburl)
+                yield subtitle(copy.copy(self.options), "wrst", suburl)
 
-        if options.force_subtitle:
+        if self.options.force_subtitle:
             return
 
         if len(data["video"].get("videoReferences", [])) == 0:
@@ -78,14 +73,14 @@ class Svtplay(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
 
             if parse.path.find("m3u8") > 0:
-                streams = hlsparse(options, self.http.request("get", i["url"]), i["url"])
+                streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
             elif parse.path.find("f4m") > 0:
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    streams = hdsparse(options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
+                    streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -94,10 +89,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 data = self.http.request("get", embedurl).text
                 match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
                 swf = "http://www.svtplay.se%s" % match.group(1)
-                options.other = "-W %s" % swf
-                yield RTMP(copy.copy(options), i["url"], i["bitrate"])
+                self.options.other = "-W %s" % swf
+                yield RTMP(copy.copy(self.options), i["url"], i["bitrate"])
             else:
-                yield HTTP(copy.copy(options), i["url"], "0")
+                yield HTTP(copy.copy(self.options), i["url"], "0")
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',

@@ -16,7 +16,7 @@ from svtplay_dl.error import ServiceError
 class Vg(Service, OpenGraphThumbMixin):
     supported_domains = ['vg.no', 'vgtv.no']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
         match = re.search(r'data-videoid="([^"]+)"', data)
         if not match:
@@ -29,27 +29,27 @@ class Vg(Service, OpenGraphThumbMixin):
         data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).text
         jsondata = json.loads(data)
 
-        if options.output_auto:
-            directory = os.path.dirname(options.output)
+        if self.options.output_auto:
+            directory = os.path.dirname(self.options.output)
             title = "%s" % jsondata["title"]
             title = filenamify(title)
             if len(directory):
-                options.output = os.path.join(directory, title)
+                self.options.output = os.path.join(directory, title)
             else:
-                options.output = title
+                self.options.output = title
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         if "hds" in jsondata["streamUrls"]:
-            streams = hdsparse(options, self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}), jsondata["streamUrls"]["hds"])
+            streams = hdsparse(self.options, self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}), jsondata["streamUrls"]["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(options, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"])
+            streams = hlsparse(self.options, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"])
             for n in list(streams.keys()):
                 yield streams[n]
         if "mp4" in jsondata["streamUrls"]:
-            yield HTTP(copy.copy(options), jsondata["streamUrls"]["mp4"])
+            yield HTTP(copy.copy(self.options), jsondata["streamUrls"]["mp4"])

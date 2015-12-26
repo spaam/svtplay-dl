@@ -14,10 +14,10 @@ from svtplay_dl.error import ServiceError
 class Youplay(Service, OpenGraphThumbMixin):
     supported_domains = ['www.affarsvarlden.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -47,4 +47,4 @@ class Youplay(Service, OpenGraphThumbMixin):
         for i in jsondata["episode"]["sources"]:
             match = re.search(r"mp4_(\d+)", i)
             if match:
-                yield HTTP(copy.copy(options), jsondata["episode"]["sources"][i], match.group(1))
+                yield HTTP(copy.copy(self.options), jsondata["episode"]["sources"][i], match.group(1))

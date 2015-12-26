@@ -16,10 +16,10 @@ from svtplay_dl.error import ServiceError
 class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -28,9 +28,9 @@ class Nrk(Service, OpenGraphThumbMixin):
         if match:
             parse = urlparse(self.url)
             suburl = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
-            yield subtitle(copy.copy(options), "tt", suburl)
+            yield subtitle(copy.copy(self.options), "tt", suburl)
 
-        if options.force_subtitle:
+        if self.options.force_subtitle:
             return
 
         match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata())
@@ -48,18 +48,18 @@ class Nrk(Service, OpenGraphThumbMixin):
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
             manifest_url = data["mediaUrl"]
-            options.live = data["isLive"]
+            self.options.live = data["isLive"]
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         data = self.http.request("get", hlsurl)
         if data.status_code == 403:
             yield ServiceError("Can't fetch the video because of geoblocked")
             return
-        streams = hlsparse(options, data, hlsurl)
+        streams = hlsparse(self.options, data, hlsurl)
         for n in list(streams.keys()):
             yield streams[n]
 
-        streams = hdsparse(copy.copy(options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}), manifest_url)
+        streams = hdsparse(copy.copy(self.options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}), manifest_url)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

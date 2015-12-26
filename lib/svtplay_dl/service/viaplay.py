@@ -28,10 +28,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
         'juicyplay.se']
 
-    def __init__(self, url):
-        Service.__init__(self, url)
-        self.subtitle = None
-
     def _get_video_id(self):
         """
         Extract video id. It will try to avoid making an HTTP request
@@ -56,14 +52,14 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return match.group(1)
         return None
 
-    def get(self, options):
+    def get(self):
         vid = self._get_video_id()
         if vid is None:
             yield ServiceError("Can't find video file for: %s" % self.url)
             return
 
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
-        options.other = ""
+        self.options.other = ""
         data = self.http.request("get", url)
         if data.status_code == 403:
             yield ServiceError("Can't play this because the video is geoblocked.")
@@ -74,16 +70,16 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return
 
         if dataj["type"] == "live":
-            options.live = True
+            self.options.live = True
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         if dataj["sami_path"]:
-            yield subtitle(copy.copy(options), "sami", dataj["sami_path"])
+            yield subtitle(copy.copy(self.options), "sami", dataj["sami_path"])
         if dataj["subtitles_for_hearing_impaired"]:
-            yield subtitle(copy.copy(options), "sami", dataj["subtitles_for_hearing_impaired"])
+            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"])
 
         streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
@@ -95,20 +91,20 @@ class Viaplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't play this because the video is either not found or geoblocked.")
             return
 
-        if options.output_auto:
-            directory = os.path.dirname(options.output)
-            options.service = "tv3play"
+        if self.options.output_auto:
+            directory = os.path.dirname(self.options.output)
+            self.options.service = "tv3play"
             basename = self._autoname(dataj)
-            title = "%s-%s-%s" % (basename, vid, options.service)
+            title = "%s-%s-%s" % (basename, vid, self.options.service)
             if len(directory):
-                options.output = os.path.join(directory, title)
+                self.options.output = os.path.join(directory, title)
             else:
-                options.output = title
+                self.options.output = title
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
-                streams = hdsparse(options, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
+                streams = hdsparse(self.options, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
@@ -120,11 +116,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     return
                 filename = "%s://%s:%s%s" % (parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y %s" % match.group(2)
-                options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
-                yield RTMP(copy.copy(options), filename, 800)
+                self.options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf %s" % path
+                yield RTMP(copy.copy(self.options), filename, 800)
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(options, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
+            streams = hlsparse(self.options, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]

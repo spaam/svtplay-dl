@@ -117,26 +117,26 @@ def progressbar(total, pos, msg=""):
     progress_stream.write(fmt % (pos, total, bar, msg))
 
 
-def filename(options, stream):
-    if options.output:
+def filename(stream):
+    if stream.options.output:
         if is_py2:
             if platform.system() == "Windows":
-                options.output = options.output.decode("latin1")
+                stream.options.output = stream.options.output.decode("latin1")
             else:
-                options.output = options.output.decode("utf-8")
-    if not options.output or os.path.isdir(options.output):
+                stream.options.output = stream.options.output.decode("utf-8")
+    if not stream.options.output or os.path.isdir(stream.options.output):
         data = ensure_unicode(stream.get_urldata())
         if data is None:
             return False
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
         if match:
-            options.output_auto = True
+            stream.options.output_auto = True
             title_tag = decode_html_entities(match.group(1))
-            if not options.output:
-                options.output = filenamify(title_tag)
+            if not stream.options.output:
+                stream.options.output = filenamify(title_tag)
             else:
                 # output is a directory
-                options.output = os.path.join(options.output, filenamify(title_tag))
+                stream.options.output = os.path.join(stream.options.output, filenamify(title_tag))
 
     return True
 

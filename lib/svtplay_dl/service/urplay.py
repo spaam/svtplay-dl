@@ -18,25 +18,21 @@ from svtplay_dl.subtitle import subtitle
 class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ['urplay.se', 'ur.se', 'betaplay.ur.se']
 
-    def __init__(self, url):
-        Service.__init__(self, url)
-        self.subtitle = None
-
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
         match = re.search(r"urPlayer.init\((.*)\);", data)
         if not match:
             yield ServiceError("Can't find json info")
             return
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         data = match.group(1)
         jsondata = json.loads(data)
         if len(jsondata["subtitles"]) > 0:
-            yield subtitle(copy.copy(options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
+            yield subtitle(copy.copy(self.options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:
@@ -50,11 +46,11 @@ class Urplay(Service, OpenGraphThumbMixin):
             hls_hd = "%s%s" % (http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
             hd = True
         hls = "%s%s" % (http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-        streams = hlsparse(options, self.http.request("get", hls), hls)
+        streams = hlsparse(self.options, self.http.request("get", hls), hls)
         for n in list(streams.keys()):
             yield streams[n]
         if hd:
-            streams = hlsparse(options, self.http.request("get", hls_hd), hls_hd)
+            streams = hlsparse(self.options, self.http.request("get", hls_hd), hls_hd)
             for n in list(streams.keys()):
                 yield streams[n]
 

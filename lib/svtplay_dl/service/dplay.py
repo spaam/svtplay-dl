@@ -19,10 +19,10 @@ from svtplay_dl.log import log
 class Dplay(Service):
     supported_domains = ['dplay.se', 'dplay.dk', "it.dplay.com"]
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
         premium = False
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -36,8 +36,8 @@ class Dplay(Service):
         if dataj["data"] == None:
             yield ServiceError("Cant find video. wrong url without video?")
             return
-        if options.username and options.password:
-            premium = self._login(options)
+        if self.options.username and self.options.password:
+            premium = self._login(self.options)
             if not premium:
                 yield ServiceError("Wrong username or password")
                 return
@@ -50,23 +50,23 @@ class Dplay(Service):
             yield ServiceError("DRM protected. Can't do anything")
             return
 
-        if options.output_auto:
-            directory = os.path.dirname(options.output)
-            options.service = "dplay"
+        if self.options.output_auto:
+            directory = os.path.dirname(self.options.output)
+            self.options.service = "dplay"
             name = self._autoname(dataj)
             if name is None:
                 yield ServiceError("Cant find vid id for autonaming")
                 return
-            title = "%s-%s-%s" % (name, vid, options.service)
+            title = "%s-%s-%s" % (name, vid, self.options.service)
             if len(directory):
-                options.output = os.path.join(directory, title)
+                self.options.output = os.path.join(directory, title)
             else:
-                options.output = title
+                self.options.output = title
         suburl = dataj["data"][0]["subtitles_sv_srt"]
         if len(suburl) > 0:
-            yield subtitle(copy.copy(options), "raw", suburl)
+            yield subtitle(copy.copy(self.options), "raw", suburl)
 
-        if options.force_subtitle:
+        if self.options.force_subtitle:
             return
 
         data = self.http.request("get", "http://geo.dplay.se/geo.js").text
@@ -74,21 +74,21 @@ class Dplay(Service):
         geo = dataj["countryCode"]
         timestamp = (int(time.time())+3600)*1000
         cookie = {"dsc-geo": quote('{"countryCode":"%s","expiry":%s}' % (geo, timestamp))}
-        if options.cookies:
-            options.cookies.update(cookie)
+        if self.options.cookies:
+            self.options.cookies.update(cookie)
         else:
-            options.cookies = cookie
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % vid, cookies=options.cookies)
+            self.options.cookies = cookie
+        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % vid, cookies=self.options.cookies)
         dataj = json.loads(data.text)
         if "hds" in dataj:
-            streams = hdsparse(copy.copy(options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
+            streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % vid, cookies=options.cookies)
+        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % vid, cookies=self.options.cookies)
         dataj = json.loads(data.text)
         if "hls" in dataj:
-            streams = hlsparse(options, self.http.request("get", dataj["hls"]), dataj["hls"])
+            streams = hlsparse(self.options, self.http.request("get", dataj["hls"]), dataj["hls"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]

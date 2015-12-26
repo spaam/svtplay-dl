@@ -16,10 +16,10 @@ from svtplay_dl.error import ServiceError
 class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -28,7 +28,7 @@ class Dr(Service, OpenGraphThumbMixin):
             resource_url = match.group(1)
             resource_data = self.http.request("get", resource_url).content
             resource = json.loads(resource_data)
-            streams = self.find_stream(options, resource)
+            streams = self.find_stream(self.options, resource)
             for i in streams:
                 yield i
         else:
@@ -48,26 +48,26 @@ class Dr(Service, OpenGraphThumbMixin):
                 return
             if "SubtitlesList" in resource and len(resource["SubtitlesList"]) > 0:
                 suburl = resource["SubtitlesList"][0]["Uri"]
-                yield subtitle(copy.copy(options), "wrst", suburl)
+                yield subtitle(copy.copy(self.options), "wrst", suburl)
             if "Data" in resource:
-                streams = self.find_stream(options, resource)
+                streams = self.find_stream(self.options, resource)
                 for i in streams:
                     yield i
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}), stream["Uri"])
+                        streams = hdsparse(copy.copy(self.options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}), stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(options, self.http.request("get", stream["Uri"]), stream["Uri"])
+                        streams = hlsparse(self.options, self.http.request("get", stream["Uri"]), stream["Uri"])
                         for n in list(streams.keys()):
                             yield streams[n]
                     if stream["Target"] == "Streaming":
-                        options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
+                        self.options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
                         rtmp = "rtmp://vod.dr.dk/cms/"
-                        yield RTMP(copy.copy(options), rtmp, stream['Bitrate'])
+                        yield RTMP(copy.copy(self.options), rtmp, stream['Bitrate'])
 
     def find_stream(self, options, resource):
         tempresource = resource['Data'][0]['Assets']

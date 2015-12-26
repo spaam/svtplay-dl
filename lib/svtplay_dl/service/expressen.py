@@ -17,10 +17,10 @@ from svtplay_dl.utils.urllib import unquote_plus
 class Expressen(Service):
     supported_domains = ['expressen.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -41,7 +41,7 @@ class Expressen(Service):
         xml = ET.XML(data)
         live = xml.find("live").text
         if live != "0":
-            options.live = True
+            self.options.live = True
         ss = xml.find("vurls")
         if is_py2_old:
             sa = list(ss.getiterator("vurl"))
@@ -49,13 +49,13 @@ class Expressen(Service):
             sa = list(ss.iter("vurl"))
 
         for i in sa:
-            options2 = copy.copy(options)
+            options2 = copy.copy(self.options)
             match = re.search(r"rtmp://([-0-9a-z\.]+/[-a-z0-9]+/)(.*)", i.text)
             filename = "rtmp://%s" % match.group(1)
             options2.other = "-y %s" % match.group(2)
             yield RTMP(options2, filename, int(i.attrib["bitrate"]))
 
         ipadurl = xml.find("mobileurls").find("ipadurl").text
-        streams = hlsparse(options, self.http.request("get", ipadurl), ipadurl)
+        streams = hlsparse(self.options, self.http.request("get", ipadurl), ipadurl)
         for n in list(streams.keys()):
             yield streams[n]

@@ -16,7 +16,7 @@ from svtplay_dl.error import ServiceError
 class Hbo(Service):
     supported_domains = ['hbo.com']
 
-    def get(self, options):
+    def get(self):
         parse = urlparse(self.url)
         try:
             other = parse.fragment
@@ -24,7 +24,7 @@ class Hbo(Service):
             log.error("Something wrong with that url")
             return
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -48,5 +48,5 @@ class Hbo(Service):
         for i in sa:
             videourl = i.find("tv14").find("path").text
             match = re.search("/([a-z0-9]+:[a-z0-9]+)/", videourl)
-            options.other = "-y %s" % videourl[videourl.index(match.group(1)):]
-            yield RTMP(copy.copy(options), videourl[:videourl.index(match.group(1))], i.attrib["width"])
+            self.options.other = "-y %s" % videourl[videourl.index(match.group(1)):]
+            yield RTMP(copy.copy(self.options), videourl[:videourl.index(match.group(1))], i.attrib["width"])

@@ -14,10 +14,10 @@ from svtplay_dl.error import ServiceError
 class Ruv(Service):
     supported_domains = ['ruv.is']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -27,8 +27,8 @@ class Ruv(Service):
             match = re.search(r'punktur=\(([^ ]+)\)', data)
             if match:
                 janson = json.loads(match.group(1))
-                options.live = checklive(janson["result"][1])
-                streams = hlsparse(options, self.http.request("get", janson["result"][1]), janson["result"][1])
+                self.options.live = checklive(janson["result"][1])
+                streams = hlsparse(self.options, self.http.request("get", janson["result"][1]), janson["result"][1])
                 for n in list(streams.keys()):
                     yield streams[n]
             else:
@@ -39,11 +39,11 @@ class Ruv(Service):
                 yield ServiceError("Can't find video info for: %s" % self.url)
                 return
             if match.group(1).endswith("mp4"):
-                yield HTTP(copy.copy(options), match.group(1), 800)
+                yield HTTP(copy.copy(self.options), match.group(1), 800)
             else:
                 m3u8_url = match.group(1)
-                options.live = checklive(m3u8_url)
-                yield HLS(copy.copy(options), m3u8_url, 800)
+                self.options.live = checklive(m3u8_url)
+                yield HLS(copy.copy(self.options), m3u8_url, 800)
 
 
 def checklive(url):

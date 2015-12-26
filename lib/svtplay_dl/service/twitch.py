@@ -45,21 +45,21 @@ class Twitch(Service):
     api_base_url = 'https://api.twitch.tv'
     hls_base_url = 'http://usher.justin.tv/api/channel/hls'
 
-    def get(self, options):
+    def get(self):
         urlp = urlparse(self.url)
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
         match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)
         if not match:
-            data = self._get_channel(options, urlp)
+            data = self._get_channel(self.options, urlp)
         else:
             if match.group(2) in ["b", "c"]:
                 yield ServiceError("This twitch video type is unsupported")
                 return
-            data = self._get_archive(options, match.group(3))
+            data = self._get_archive(self.options, match.group(3))
         try:
             for i in data:
                 yield i

@@ -18,10 +18,10 @@ from svtplay_dl.error import ServiceError
 class Sr(Service, OpenGraphThumbMixin):
     supported_domains = ['sverigesradio.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -37,6 +37,6 @@ class Sr(Service, OpenGraphThumbMixin):
             url = i["Url"]
             if not url.startswith('http'):
                 url = 'http:%s' % url
-            yield HTTP(copy.copy(options), url, i["Quality"]/1000)
+            yield HTTP(copy.copy(self.options), url, i["Quality"]/1000)
 
 

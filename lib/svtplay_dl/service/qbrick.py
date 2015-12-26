@@ -14,10 +14,10 @@ from svtplay_dl.fetcher.rtmp import RTMP
 class Qbrick(Service, OpenGraphThumbMixin):
     supported_domains = ['di.seXX']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
+        if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
@@ -45,7 +45,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             return
         live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
         if live == "true":
-            options.live = True
+            self.options.live = True
         data = self.http.request("get", url).content
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
@@ -56,5 +56,5 @@ class Qbrick(Service, OpenGraphThumbMixin):
             sa = list(streams.iter("video"))
 
         for i in sa:
-            options.other = "-y '%s'" % i.attrib["src"]
-            yield RTMP(copy.copy(options), server, i.attrib["system-bitrate"])
+            self.options.other = "-y '%s'" % i.attrib["src"]
+            yield RTMP(copy.copy(self.options), server, i.attrib["system-bitrate"])

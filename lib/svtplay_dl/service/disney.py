@@ -18,12 +18,12 @@ from svtplay_dl.error import ServiceError
 class Disney(Service, OpenGraphThumbMixin):
     supported_domains = ['disney.se', 'video.disney.se']
 
-    def get(self, options):
+    def get(self):
         parse = urlparse(self.url)
         if parse.hostname == "video.disney.se":
             data = self.get_urldata()
 
-            if self.exclude(options):
+            if self.exclude(self.options):
                 yield ServiceError("Excluding video")
                 return
 
@@ -38,7 +38,7 @@ class Disney(Service, OpenGraphThumbMixin):
                         if "flavors" in x:
                             for i in x["flavors"]:
                                 if i["format"] == "mp4":
-                                    yield HTTP(copy.copy(options), i["url"], i["bitrate"])
+                                    yield HTTP(copy.copy(self.options), i["url"], i["bitrate"])
         else:
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
@@ -63,22 +63,22 @@ class Disney(Service, OpenGraphThumbMixin):
                 else:
                     yield ServiceError("Cant find video info")
                     return
-            if options.output_auto:
+            if self.options.output_auto:
                 for i in jsondata["playlists"][0]["playlist"]:
                     if entryid in i["id"]:
                         title = i["longId"]
                         break
 
-                directory = os.path.dirname(options.output)
-                options.service = "disney"
-                title = "%s-%s" % (title, options.service)
+                directory = os.path.dirname(self.options.output)
+                self.options.service = "disney"
+                title = "%s-%s" % (title, self.options.service)
                 title = filenamify(title)
                 if len(directory):
-                    options.output = os.path.join(directory, title)
+                    self.options.output = os.path.join(directory, title)
                 else:
-                    options.output = title
+                    self.options.output = title
 
-            if self.exclude(options):
+            if self.exclude(self.options):
                 return
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
@@ -90,19 +90,19 @@ class Disney(Service, OpenGraphThumbMixin):
             match = re.search(r"window.kalturaIframePackageData = ({.*});", data)
             jsondata = json.loads(match.group(1))
             ks = jsondata["enviornmentConfig"]["ks"]
-            if options.output_auto:
+            if self.options.output_auto:
                 name = jsondata["entryResult"]["meta"]["name"]
-                directory = os.path.dirname(options.output)
-                options.service = "disney"
-                title = "%s-%s" % (name, options.service)
+                directory = os.path.dirname(self.options.output)
+                self.options.service = "disney"
+                title = "%s-%s" % (name, self.options.service)
                 title = filenamify(title)
                 if len(directory):
-                    options.output = os.path.join(directory, title)
+                    self.options.output = os.path.join(directory, title)
                 else:
-                    options.output = title
+                    self.options.output = title
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(options, self.http.request("get", redirect), redirect)
+            streams = hlsparse(self.options, self.http.request("get", redirect), redirect)
             for n in list(streams.keys()):
                 yield streams[n]
