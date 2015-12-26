@@ -20,7 +20,7 @@ class Service(object):
         self._error = False
         self.subtitle = None
         self.cookies = {}
-        self.http = HTTP()
+        self.http = HTTP(options)
 
     @property
     def url(self):

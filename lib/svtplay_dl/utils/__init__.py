@@ -30,7 +30,8 @@ except ImportError:
 
 
 class HTTP(Session):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, options, *args, **kwargs):
+        self.verify = options.ssl_verify
         Session.__init__(self, *args, **kwargs)
 
     def check_redirect(self, url):
@@ -43,7 +44,7 @@ class HTTP(Session):
         else:
             headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"}
         log.debug("HTTP getting %r", url)
-        res = Session.request(self, method, url, headers=headers, *args, **kwargs)
+        res = Session.request(self, method, url, headers=headers, verify=self.verify, *args, **kwargs)
         return res
 
 

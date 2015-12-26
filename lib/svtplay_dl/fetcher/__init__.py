@@ -7,7 +7,7 @@ class VideoRetriever(object):
         self.url = url
         self.bitrate = int(bitrate)
         self.kwargs = kwargs
-        self.http = HTTP()
+        self.http = HTTP(options)
 
     def name(self):
         pass
