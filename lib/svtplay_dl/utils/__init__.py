@@ -17,7 +17,7 @@ is_py3 = (sys.version_info[0] == 3)
 is_py2_old = (sys.version_info < (2, 7))
 
 # Used for UA spoofing in get_http_data()
-FIREFOX_UA = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
