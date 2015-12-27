@@ -5,7 +5,9 @@ import re
 import os
 import xml.etree.ElementTree as ET
 import copy
-from  svtplay_dl.log import log
+import hashlib
+
+from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify, ensure_unicode
 from svtplay_dl.utils.urllib import urlparse, urljoin
@@ -137,7 +139,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 name = name[:name.find(".")]
             name = name.replace(" - ", ".")
             other = filenamify(data["episodeTitle"])
-            id = data["programVersionId"]
+            id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
 
         season = self.seasoninfo(raw)
         if season:
