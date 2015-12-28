@@ -64,7 +64,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
-                if i["format"] == "wsrt":
+                if i["format"] == "websrt":
                     yield subtitle(copy.copy(self.options), "wrst", i["url"])
         if old and dataj["video"]["subtitleReferences"]:
             try:
