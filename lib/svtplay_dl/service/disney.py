@@ -16,11 +16,11 @@ from svtplay_dl.error import ServiceError
 
 
 class Disney(Service, OpenGraphThumbMixin):
-    supported_domains = ['disney.se', 'video.disney.se']
+    supported_domains = ['disney.se', 'video.disney.se', 'disneyjunior.disney.se']
 
     def get(self):
         parse = urlparse(self.url)
-        if parse.hostname == "video.disney.se":
+        if parse.hostname == "video.disney.se" or parse.hostname == "disneyjunior.disney.se":
             data = self.get_urldata()
 
             if self.exclude(self.options):
