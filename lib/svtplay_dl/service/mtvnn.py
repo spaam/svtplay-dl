@@ -66,17 +66,13 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             log.error("Couldn't program id")
             return
         programid = match.group(1)
-        match = re.findall(r"<li class='(divider playlist-item|playlist-item)'( data-item-id='([^']+)')?", self.get_urldata())
+        match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'", self.get_urldata())
         if not match:
             log.error("Couldn't retrieve episode list")
             return
         episodNr = []
         for i in match:
-            if i[0] == "playlist-item":
-                episodNr.append(i[2])
-            else:
-                break
-
+            episodNr.append(i[3])
         episodes = []
         n = 0
         for i in sorted(episodNr):
