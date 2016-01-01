@@ -202,8 +202,10 @@ def get_one_media(stream, options):
         if options.verbose:
             raise e
         else:
-            print("Script crashed. please run the script again and add --verbose as an argument")
-            print("Make an issue with the url you used and include the stacktrace. please include the version of the script")
+            log.error("svtplay-dl crashed")
+            log.error("Run again and add --verbose as an argument, to get more information")
+            log.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
+            log.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
         sys.exit(3)
 
     if options.require_subtitle and not subs:
