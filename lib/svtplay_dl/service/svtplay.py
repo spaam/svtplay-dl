@@ -82,20 +82,18 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return
 
         for i in data["videoReferences"]:
-            if i["format"] == "hls":
+            if i["format"] == "hls" or i["format"] == "ios":
                 streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
-            if i["format"] == "hds":
+            if i["format"] == "hds" or i["format"] == "flash":
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
-            else:
-                yield HTTP(copy.copy(self.options), i["url"], "0")
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
