@@ -128,22 +128,26 @@ class Svtplay(Service, OpenGraphThumbMixin):
             match = re.search("^arkiv-", name)
             if match:
                 name = name.replace("arkiv-", "")
-            name = name.replace("-", ".")
+            name = filenamify(name.replace("-", "."))
             other = filenamify(data["context"]["title"])
             id = data["videoId"]
         else:
             name = data["programTitle"]
             if name.find(".") > 0:
                 name = name[:name.find(".")]
-            name = name.replace(" - ", ".")
+            name = filenamify(name.replace(" - ", "."))
             other = filenamify(data["episodeTitle"])
             id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
 
+        if name == other:
+            other = None
         season = self.seasoninfo(raw)
+        title = name
         if season:
-            title = "%s.%s.%s-%s-svtplay" % (name, season, other, id)
-        else:
-            title = "%s.%s-%s-svtplay" % (name, other, id)
+            title += ".%s" % season
+        if other:
+            title += ".%s" % other
+        title += "-%s-svtplay" % id
         title = filenamify(title)
         if len(directory):
             output = os.path.join(directory, title)
