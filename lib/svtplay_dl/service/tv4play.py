@@ -115,21 +115,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
                         yield streams[n]
 
     def _get_show_info(self):
-        parse = urlparse(self.url)
-        match = re.search("^/([^/]+)/", parse.path)
-        show = match.group(1)
-        if not re.search("%", show):
-            show = quote_plus(show)
+        show = self._get_showname(self.url)
         data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).text
         jsondata = json.loads(data)
         return jsondata
 
     def _get_clip_info(self, vid):
-        parse = urlparse(self.url)
-        match = re.search("^/([^/]+)/", parse.path)
-        show = match.group(1)
-        if not re.search("%", show):
-            show = quote_plus(show)
+        show = self._get_showname(self.url)
         page = 1
         assets = page * 1000
         run = True
@@ -147,6 +139,17 @@ class Tv4play(Service, OpenGraphThumbMixin):
             page += 1
             assets = page * 1000
         return None
+
+    def _get_showname(self, url):
+        parse = urlparse(self.url)
+        if parse.path.count("/") > 2:
+            match = re.search("^/([^/]+)/", parse.path)
+            show = match.group(1)
+        else:
+            show = parse.path[parse.path.find("/", 1)+1:]
+        if not re.search("%", show):
+            show = quote_plus(show)
+        return show
 
     def _autoname(self, vid):
         jsondata = self._get_show_info()
