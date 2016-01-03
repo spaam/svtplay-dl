@@ -9,5 +9,8 @@ class VideoRetriever(object):
         self.kwargs = kwargs
         self.http = HTTP(options)
 
+    def __repr__(self):
+        return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
+
     def name(self):
         pass
