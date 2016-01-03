@@ -69,6 +69,19 @@ def list_quality(videos):
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
 
+def prio_streams(options, streams, selected):
+    prio = options.stream_prio
+    if prio is None:
+        prio = ["hls","hds", "http", "rtmp"]
+    if isinstance(prio, str):
+        prio = prio.split(",")
+    lstreams = []
+    for i in streams:
+        if int(i.bitrate) == selected:
+            lstreams.append(i)
+    return [x for (y, x) in sorted(zip(prio, lstreams))]
+
+
 def select_quality(options, streams):
     available = sorted(int(x.bitrate) for x in streams)
     try:
@@ -100,10 +113,7 @@ def select_quality(options, streams):
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
 
         sys.exit(4)
-    for i in streams:
-        if int(i.bitrate) == selected:
-            stream = i
-    return stream
+    return prio_streams(options, streams, selected)[0]
 
 
 def ensure_unicode(s):

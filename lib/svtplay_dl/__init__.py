@@ -132,6 +132,7 @@ class Options(object):
         self.get_url = False
         self.ssl_verify = True
         self.http_headers = None
+        self.stream_prio = None
 
 
 def get_media(url, options):
@@ -327,6 +328,8 @@ def main():
                       help="Don't attempt to verify SSL certificates.")
     parser.add_option("--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2",
                       help="A header to add to each HTTP request.")
+    parser.add_option("--stream-priority", dest="stream_prio", default=None, metavar="hls,hds,http,rtmp",
+                      help="If two streams have the same quality, choose the one you prefer")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -378,4 +381,5 @@ def mergeParserOption(options, parser):
     options.get_url = parser.get_url
     options.ssl_verify = parser.ssl_verify
     options.http_headers = parser.http_headers
+    options.stream_prio = parser.stream_prio
     return options
