@@ -9,7 +9,7 @@ from svtplay_dl.log import log
 class OppetArkiv(Svtplay):
     supported_domains = ['oppetarkiv.se']
 
-    def find_all_episodes(self):
+    def find_all_episodes(self, options):
         page = 1
         data = self.get_urldata()
         match = re.search(r'"/etikett/titel/([^"/]+)', data)
