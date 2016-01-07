@@ -9,13 +9,20 @@ srcdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/")
 sys.path.insert(0, srcdir)
 import svtplay_dl
 
+deps = []
+
+if sys.version_info[0] == 2 and sys.version_info[1] <= 7 and sys.version_info[1] < 9:
+    deps.append("requests[security]>=2.0.0")
+else:
+    deps.append(["requests>=2.0.0"])
+
 setup(
     name = "svtplay-dl",
     version = svtplay_dl.__version__,
     packages = find_packages(
         'lib',
         exclude=["tests", "*.tests", "*.tests.*"]),
-    install_requires=["requests>=2.0.0"],
+    install_requires=deps,
     package_dir = {'': 'lib'},
     scripts = ['bin/svtplay-dl'],
 
