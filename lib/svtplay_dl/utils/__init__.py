@@ -1,5 +1,5 @@
-# ex:ts=4:sw=4:sts=4:et
-# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil: coding: utf-8 -*-
+# ex:ts=4:sw=4:sts=4:et:fenc=utf-8
 from __future__ import absolute_import
 import sys
 import logging
@@ -126,8 +126,8 @@ def filenamify(title):
     """
     Convert a string to something suitable as a file name. E.g.
 
-     'Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play'
-       ->  'matlagning.del.1.av.10.-.raksmorgas.svt.play'
+     Matlagning del 1 av 10 - Räksmörgås | SVT Play
+       ->  matlagning.del.1.av.10.-.raksmorgas.svt.play
     """
     # ensure it is unicode
     title = ensure_unicode(title)
