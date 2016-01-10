@@ -30,7 +30,7 @@ setup(
     author_email = "j@i19.se",
     description = "Command-line program to download videos from various video on demand sites",
     license = "MIT",
-    url = "https://github.com/spaam/svtplay-dl",
+    url = "https://svtplay-dl.se",
     classifiers=["Development Status :: 5 - Production/Stable",
                  "Environment :: Console",
                  "Operating System :: POSIX",
