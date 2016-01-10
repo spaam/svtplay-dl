@@ -29,13 +29,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
             if parse.path[:6] != "/video":
                 yield ServiceError("This mode is not supported anymore. need the url with the video")
                 return
-        match = re.search('data-video-id="([^"]+)"', self.get_urldata())
-        if not match:
-            match = re.search("/video/([0-9]+)/", parse.path)
-            if not match:
-                yield ServiceError("Cant find video id for this video")
-                return
-        vid = match.group(1)
+
+        vid = self.find_video_id(self.get_urldata())
+        if vid is None:
+            yield ServiceError("Cant find video id for this video")
+            return
         if re.match("^[0-9]+$", vid):
             old = True
 
@@ -94,6 +92,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
+
+    def find_video_id(self, data):
+        match = re.search('data-video-id="([^"]+)"', self.get_urldata())
+        if match:
+            return match.group(1)
+        parse = urlparse(self.url)
+        match = re.search("/video/([0-9]+)/", parse.path)
+        if match:
+            return match.group(1)
+        return None
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
