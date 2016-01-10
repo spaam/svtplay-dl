@@ -30,7 +30,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 yield ServiceError("This mode is not supported anymore. need the url with the video")
                 return
 
-        vid = self.find_video_id(self.get_urldata())
+        vid = self.find_video_id()
         if vid is None:
             yield ServiceError("Cant find video id for this video")
             return
@@ -93,7 +93,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         for n in list(streams.keys()):
                             yield streams[n]
 
-    def find_video_id(self, data):
+    def find_video_id(self):
         match = re.search('data-video-id="([^"]+)"', self.get_urldata())
         if match:
             return match.group(1)
