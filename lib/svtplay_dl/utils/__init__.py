@@ -1,5 +1,5 @@
-# ex:ts=4:sw=4:sts=4:et
-# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil: coding: utf-8 -*-
+# ex:ts=4:sw=4:sts=4:et:fenc=utf-8
 from __future__ import absolute_import
 import sys
 import logging
@@ -141,26 +141,23 @@ def decode_html_entities(s):
 
 def filenamify(title):
     """
-    Convert a string to something suitable as a file name.
+    Convert a string to something suitable as a file name. E.g.
 
-        >>> print(filenamify(u'Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play'))
-        matlagning.del.1.av.10.-.raksmorgas.svt.play
-
+     Matlagning del 1 av 10 - Räksmörgås | SVT Play
+       ->  matlagning.del.1.av.10.-.raksmorgas.svt.play
     """
     # ensure it is unicode
     title = ensure_unicode(title)
 
-    # NFD decomposes chars into base char and diacritical mark, which means that we will get base char when we strip out non-ascii.
+    # NFD decomposes chars into base char and diacritical mark, which
+    # means that we will get base char when we strip out non-ascii.
     title = unicodedata.normalize('NFD', title)
 
+    # Convert to lowercase
     # Drop any non ascii letters/digits
-    title = re.sub(r'[^a-zA-Z0-9 -.]', '', title)
-    # Remove " and '
-    title = re.sub('[\"\']', '', title)
     # Drop any leading/trailing whitespace that may have appeared
-    title = title.strip()
-    # Lowercase
-    title = title.lower()
+    title = re.sub(r'[^a-z0-9 .-]', '', title.lower().strip())
+
     # Replace whitespace with dot
     title = re.sub(r'\s+', '.', title)
 
