@@ -101,6 +101,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         match = re.search("/video/([0-9]+)/", parse.path)
         if match:
             return match.group(1)
+        match = re.search("/videoEpisod-([^/]+)/", parse.path)
+        if match:
+            self._urldata = None
+            self._url = "http://www.svtplay.se/video/%s/" % match.group(1)
+            return match.group(1)
         return None
 
     def find_all_episodes(self, options):
