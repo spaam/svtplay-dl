@@ -65,10 +65,6 @@ Allow given quality (as above) to differ by an amount.
 
 List the available qualities for a video.
 
-=head3 --hls  -H
-
-Use HTTP Live Streaming when downloading.
-
 =head3 --subtitle  -S
 
 Download subtitle with the media if available.
@@ -113,6 +109,18 @@ Exclude videos with the WORD(s) in the filename. Comma separated.
 =head3 --get-url -g
 
 Do not download any video, but instead print the URL.
+
+=head3 --dont-verify-ssl-cert
+
+Don't attempt to verify SSL certificates.
+
+=head3 --http-header=header1=value;header2=value2
+
+A header to add to each HTTP request.
+
+=head3 --stream-priority=hls,hds,http,rtmp
+
+If two streams have the same quality, choose the one you prefer
 
 =head1 SUPPORTED SERVICES
 
