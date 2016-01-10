@@ -318,7 +318,7 @@ def main():
     parser.add_option("--all-last", dest="all_last", default=-1, type=int,
                       metavar="NN", help="get last NN episodes instead of all episodes")
     parser.add_option("-P", "--preferred", default=None,
-                      metavar="preferred", help="preferred download method (rtmp, hls or hds)")
+                      metavar="preferred", help="preferred download method (hls, hds, http or rtmp")
     parser.add_option("--exclude", dest="exclude", default=None,
                       metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated.")
     parser.add_option("-g", "--get-url",
