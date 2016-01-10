@@ -13,7 +13,6 @@ from svtplay_dl.utils import filenamify, ensure_unicode
 from svtplay_dl.utils.urllib import urlparse, urljoin
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
