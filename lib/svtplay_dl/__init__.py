@@ -113,7 +113,6 @@ class Options(object):
         self.quality = 0
         self.flexibleq = None
         self.list_quality = False
-        self.hls = False
         self.other = None
         self.subtitle = False
         self.username = None
@@ -296,8 +295,6 @@ def main():
                       metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
     parser.add_option("--list-quality", dest="list_quality", action="store_true", default=False,
                       help="list the quality for a video")
-    parser.add_option("-H", "--hls",
-                      action="store_true", dest="hls", default=False, help="obsolete use -P hls")
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
                       help="download subtitle from the site if available")
@@ -366,7 +363,6 @@ def mergeParserOption(options, parser):
     options.quality = parser.quality
     options.flexibleq = parser.flexibleq
     options.list_quality = parser.list_quality
-    options.hls = parser.hls
     options.subtitle = parser.subtitle
     options.username = parser.username
     options.password = parser.password
