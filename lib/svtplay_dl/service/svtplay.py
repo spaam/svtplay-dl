@@ -105,7 +105,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if match:
             self._urldata = None
             self._url = "http://www.svtplay.se/video/%s/" % match.group(1)
-            return match.group(1)
+            self.get_urldata()
+            return self.find_video_id()
         return None
 
     def find_all_episodes(self, options):
