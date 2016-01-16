@@ -69,10 +69,7 @@ def hdsparse(options, res, manifest):
     querystring = parse.query
     manifest = "%s://%s%s" % (parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
-        if len(bootstrap) == 1:
-            bootstrapid = bootstrap["0"]
-        else:
-            bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
+        bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
         streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
                                                 metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring, cookies=res.cookies)
     return streams
