@@ -9,7 +9,7 @@ import copy
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old, filenamify
+from svtplay_dl.utils import is_py2_old, is_py2, filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -148,6 +148,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
         else:
             show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
+            if is_py2:
+                show = show.encode("utf-8")
             show = quote_plus(show)
         return show
 
