@@ -200,7 +200,7 @@ def get_one_media(stream, options):
                 error.append(i)
     except Exception as e:
         if options.verbose:
-            raise e
+            raise
         else:
             log.error("svtplay-dl crashed")
             log.error("Run again and add --verbose as an argument, to get more information")
