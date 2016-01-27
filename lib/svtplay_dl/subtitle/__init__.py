@@ -50,10 +50,11 @@ class subtitle(object):
     def tt(self, subdata):
         i = 1
         data = ""
-        if is_py3:
-            subs = subdata.text
-        else:
+        if is_py2:
             subs = subdata.text.encode("utf8")
+        else:
+            subs = subdata.text
+
         subdata = re.sub(' xmlns="[^"]+"', '', subs, count=1)
         tree = ET.XML(subdata)
         xml = tree.find("body").find("div")
@@ -118,9 +119,10 @@ class subtitle(object):
 
     def smi(self, subdata):
         if requests_version < 0x20300:
-            subdata = subdata.content
-            if is_py3:
-                subdata = subdata.decode("latin")
+            if is_py2:
+                subdata = subdata.content
+            else:
+                subdata = subdata.content.decode("latin")
         else:
             subdata.encoding = "ISO-8859-1"
             subdata = subdata.text

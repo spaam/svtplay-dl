@@ -9,7 +9,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils import is_py2_old, is_py2, is_py3
+from svtplay_dl.utils import is_py2_old, is_py2
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
@@ -25,8 +25,7 @@ if is_py2:
 
     def _chr(temp):
         return temp
-
-if is_py3:
+else:
     def _chr(temp):
         return chr(temp)
 
