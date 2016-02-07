@@ -33,7 +33,7 @@ class Dplay(Service):
         vid = match.group(1)
         data = self.http.request("get", "http://www.dplay.se/api/v2/ajax/videos?video_id=%s" % vid).text
         dataj = json.loads(data)
-        if dataj["data"] == None:
+        if dataj["data"] is None:
             yield ServiceError("Cant find video. wrong url without video?")
             return
         if self.options.username and self.options.password:
