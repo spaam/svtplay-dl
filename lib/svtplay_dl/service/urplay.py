@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils.urllib import urljoin
-from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
