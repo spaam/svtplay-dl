@@ -76,10 +76,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-        if dataj["sami_path"]:
-            yield subtitle(copy.copy(self.options), "sami", dataj["sami_path"])
-        if dataj["subtitles_for_hearing_impaired"]:
-            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"])
+
 
         streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
@@ -100,6 +97,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 self.options.output = os.path.join(directory, title)
             else:
                 self.options.output = title
+
+        if dataj["sami_path"]:
+            yield subtitle(copy.copy(self.options), "sami", dataj["sami_path"])
+        if dataj["subtitles_for_hearing_impaired"]:
+            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"])
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
