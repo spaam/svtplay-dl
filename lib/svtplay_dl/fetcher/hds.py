@@ -44,8 +44,9 @@ class LiveHDSException(HDSException):
 def hdsparse(options, res, manifest):
     streams = {}
     bootstrap = {}
-    if res.status_code == 403:
-        streams[0] = ServiceError("Can't read HDS playlist. permission denied")
+    print res.status_code
+    if res.status_code == 403 or res.status_code == 404:
+        streams[0] = ServiceError("Can't read HDS playlist.")
         return streams
     xml = ET.XML(res.text)
 
