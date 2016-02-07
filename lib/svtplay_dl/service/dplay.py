@@ -162,4 +162,6 @@ class Dplay(Service):
                     episodes.append(i["url"])
         if len(episodes) == 0:
             log.error("Cant find any playable files")
+        if options.all_last > 0:
+            return episodes[:options.all_last]
         return episodes
