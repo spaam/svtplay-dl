@@ -7,7 +7,6 @@
 from __future__ import absolute_import
 import re
 import json
-import copy
 import os
 
 from svtplay_dl.utils.urllib import urlparse, quote_plus

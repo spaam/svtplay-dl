@@ -9,7 +9,7 @@ from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.utils import filenamify
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
