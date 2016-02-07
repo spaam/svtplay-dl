@@ -76,8 +76,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-
-
         streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/%s" % vid)
         if streams.status_code == 403:
             yield ServiceError("Can't play this because the video is geoblocked.")
