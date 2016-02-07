@@ -10,8 +10,6 @@ class Efn(Service, OpenGraphThumbMixin):
     supported_domains_re = ["www.efn.se"]
 
     def get(self):
-        data = self.get_urldata()
-
         match = re.search('data-hls="([^"]+)"', self.get_urldata())
         if not match:
             yield ServiceError("Cant find video info")
