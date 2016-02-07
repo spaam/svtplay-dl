@@ -81,6 +81,9 @@ class Dplay(Service):
         else:
             self.options.cookies = cookie
         data = self.http.request("get", "https://secure.%s/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % (domain, vid), cookies=self.options.cookies)
+        if data.status_code == 403:
+            yield ServiceError("Geoblocked video")
+            return
         dataj = json.loads(data.text)
         if "hds" in dataj:
             streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
