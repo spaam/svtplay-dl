@@ -11,27 +11,29 @@ from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.urllib import quote
+from svtplay_dl.utils.urllib import quote, urlparse
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 
 class Dplay(Service):
-    supported_domains = ['dplay.se', 'dplay.dk', "it.dplay.com"]
+    supported_domains = ['dplay.se', 'dplay.dk', "dplay.no"]
 
     def get(self):
         data = self.get_urldata()
         premium = False
+        parse = urlparse(self.url)
+        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
         if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search("<link rel='shortlink' href='http://www.dplay.se/\?p=(\d+)", data)
+        match = re.search("<link rel='shortlink' href='[^']+/\?p=(\d+)", data)
         if not match:
             yield ServiceError("Can't find video id")
             return
         vid = match.group(1)
-        data = self.http.request("get", "http://www.dplay.se/api/v2/ajax/videos?video_id=%s" % vid).text
+        data = self.http.request("get", "http://%s/api/v2/ajax/videos?video_id=%s" % (parse.netloc, vid)).text
         dataj = json.loads(data)
         if dataj["data"] is None:
             yield ServiceError("Cant find video. wrong url without video?")
@@ -69,7 +71,7 @@ class Dplay(Service):
         if self.options.force_subtitle:
             return
 
-        data = self.http.request("get", "http://geo.dplay.se/geo.js").text
+        data = self.http.request("get", "http://geo.%s/geo.js" % domain).text
         dataj = json.loads(data)
         geo = dataj["countryCode"]
         timestamp = (int(time.time())+3600)*1000
@@ -78,14 +80,14 @@ class Dplay(Service):
             self.options.cookies.update(cookie)
         else:
             self.options.cookies = cookie
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % vid, cookies=self.options.cookies)
+        data = self.http.request("get", "https://secure.%s/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % (domain, vid), cookies=self.options.cookies)
         dataj = json.loads(data.text)
         if "hds" in dataj:
             streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
-        data = self.http.request("get", "https://secure.dplay.se/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % vid, cookies=self.options.cookies)
+        data = self.http.request("get", "https://secure.%s/secure/api/v2/user/authorization/stream/%s?stream_type=hls" % (domain, vid), cookies=self.options.cookies)
         dataj = json.loads(data.text)
         if "hls" in dataj:
             streams = hlsparse(self.options, self.http.request("get", dataj["hls"]), dataj["hls"])
@@ -101,11 +103,13 @@ class Dplay(Service):
         return filenamify("%s.s%se%s.%s" % (show, season, episode, title))
 
     def _login(self, options):
-        data = self.http.request("get", "https://secure.dplay.se/login/", cookies={})
+        parse = urlparse(self.url)
+        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
+        data = self.http.request("get", "https://secure.%s/login/" % domain, cookies={})
         options.cookies = data.cookies
         match = re.search('realm_code" value="([^"]+)"', data.text)
         postdata = {"username" : options.username, "password": options.password, "remember_me": "true", "realm_code": match.group(1)}
-        data = self.http.request("post", "https://secure.dplay.se/secure/api/v1/user/auth/login", data=postdata, cookies=options.cookies)
+        data = self.http.request("post", "https://secure.%s/secure/api/v1/user/auth/login" % domain, data=postdata, cookies=options.cookies)
         if data.status_code == 200:
             options.cookies = data.cookies
             return True
@@ -125,6 +129,8 @@ class Dplay(Service):
 
     def find_all_episodes(self, options):
         data = self.get_urldata()
+        parse = urlparse(self.url)
+        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
         match = re.search('data-show-id="([^"]+)"', data)
         if not match:
             log.error("Cant find show id")
@@ -134,7 +140,7 @@ class Dplay(Service):
         if options.username and options.password:
             premium = self._login(options)
 
-        url = "http://www.dplay.se/api/v2/ajax/shows/%s/seasons/?items=9999999&sort=episode_number_desc&page=" % match.group(1)
+        url = "http://www.%s/api/v2/ajax/shows/%s/seasons/?items=9999999&sort=episode_number_desc&page=" % (domain, match.group(1))
         episodes = []
         page = 0
         data = self.http.request("get", "%s%s" % (url, page)).text
