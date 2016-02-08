@@ -70,7 +70,10 @@ class subtitle(object):
                 if not ("end" in node.attrib):
                     begin2 = begin.split(":")
                     duration2 = duration.split(":")
-                    sec = float(begin2[2]) + float(duration2[2])
+                    try:
+                        sec = float(begin2[2]) + float(duration2[2])
+                    except ValueError:
+                        sec = 0.000
                     end = "%02d:%02d:%06.3f" % (int(begin[0]), int(begin[1]), sec)
                 else:
                     end = node.attrib["end"]
