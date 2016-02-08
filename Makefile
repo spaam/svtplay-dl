@@ -5,7 +5,7 @@ all: svtplay-dl
 
 # These variables describe the latest release:
 VERSION = 0.30
-LATEST_RELEASE_DATE = 2016.01.10
+LATEST_RELEASE_DATE = 2016.02.08
 LATEST_RELEASE = $(VERSION).$(LATEST_RELEASE_DATE)
 
 # If we build a new release, this is what it will be called:
