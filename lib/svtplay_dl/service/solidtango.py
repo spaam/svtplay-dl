@@ -9,7 +9,8 @@ from svtplay_dl.error import ServiceError
 
 
 class Solidtango(Service):
-    supported_domains = ['skkplay.se', 'skkplay.solidtango.com']
+    supported_domains_re = [r'^([^.]+\.)*solidtango.com']
+    supported_domains = ['mm-resource-service.herokuapp.com']
 
     def get(self):
         data = self.get_urldata()
@@ -17,11 +18,19 @@ class Solidtango(Service):
         if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
-
+        match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
+        if match:
+            data = self.http.request("get", match.group(1)).text
+            match = re.search('src="(https://[^"]+solidtango[^"]+)" ', data)
+            if match:
+                data = self.http.request("get", match.group(1)).text
         match = re.search(r'<title>(http[^<]+)</title>', data)
         if match:
             data = self.http.request("get", match.group(1)).text
 
+        match = re.search('is_livestream: true', data)
+        if match:
+            self.options.live = True
         match = re.search('html5_source: "([^"]+)"', data)
         if match:
             streams = hlsparse(self.options, self.http.request("get", match.group(1)), match.group(1))

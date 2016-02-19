@@ -150,6 +150,13 @@ class Generic(Service):
                 if i.handles(url):
                     return url, i(url)
 
+        match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
+        if match:
+            url = match.group(1)
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, self.url)
+
         return self.url, stream
 
 def service_handler(sites, options, url):
