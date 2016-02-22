@@ -47,7 +47,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r'/\w+/(\d+)', parse.path)
         if match:
             return match.group(1)
-        match = re.search('iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
+        match = re.search(r'iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
         if match:
             return match.group(1)
         return None

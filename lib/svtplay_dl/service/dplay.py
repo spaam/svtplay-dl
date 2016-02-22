@@ -23,12 +23,12 @@ class Dplay(Service):
         data = self.get_urldata()
         premium = False
         parse = urlparse(self.url)
-        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
+        domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
         if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search("<link rel='shortlink' href='[^']+/\?p=(\d+)", data)
+        match = re.search(r"<link rel='shortlink' href='[^']+/\?p=(\d+)", data)
         if not match:
             yield ServiceError("Can't find video id")
             return
@@ -107,7 +107,7 @@ class Dplay(Service):
 
     def _login(self, options):
         parse = urlparse(self.url)
-        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
+        domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
         data = self.http.request("get", "https://secure.%s/login/" % domain, cookies={})
         options.cookies = data.cookies
         match = re.search('realm_code" value="([^"]+)"', data.text)
@@ -133,7 +133,7 @@ class Dplay(Service):
     def find_all_episodes(self, options):
         data = self.get_urldata()
         parse = urlparse(self.url)
-        domain = re.search("(dplay\.\w\w)", parse.netloc).group(1)
+        domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
         match = re.search('data-show-id="([^"]+)"', data)
         if not match:
             log.error("Cant find show id")
