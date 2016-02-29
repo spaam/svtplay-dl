@@ -30,8 +30,10 @@ class Dplay(Service):
 
         match = re.search(r"<link rel='shortlink' href='[^']+/\?p=(\d+)", data)
         if not match:
-            yield ServiceError("Can't find video id")
-            return
+            match = re.search(r'data-video-id="([^"]+)"', data)
+            if not match:
+                yield ServiceError("Can't find video id")
+                return
         vid = match.group(1)
         data = self.http.request("get", "http://%s/api/v2/ajax/videos?video_id=%s" % (parse.netloc, vid)).text
         dataj = json.loads(data)
