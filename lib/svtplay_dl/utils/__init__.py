@@ -11,6 +11,11 @@ try:
 except ImportError:
     # pylint: disable-msg=import-error
     import html.parser as HTMLParser
+try:
+    from requests import Session
+except ImportError:
+    print("You need to install python-requests to use this script")
+    sys.exit(3)
 
 is_py2 = (sys.version_info[0] == 2)
 is_py3 = (sys.version_info[0] == 3)
@@ -21,12 +26,6 @@ FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
-
-try:
-    from requests import Session
-except ImportError:
-    print("You need to install python-requests to use this script")
-    sys.exit(3)
 
 
 class HTTP(Session):
@@ -72,7 +71,7 @@ def list_quality(videos):
 def prio_streams(options, streams, selected):
     prio = options.stream_prio
     if prio is None:
-        prio = ["hls","hds", "http", "rtmp"]
+        prio = ["hls", "hds", "http", "rtmp"]
     if isinstance(prio, str):
         prio = prio.split(",")
     lstreams = []
