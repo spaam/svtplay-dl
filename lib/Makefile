@@ -1,4 +1,4 @@
-PYLINT_OPTS = --report=no -d I -d C -d R -d W0511
+PYLINT_OPTS = --reports=no -d I -d C -d R -d W0511
 
 all: svtplay-dl
 
