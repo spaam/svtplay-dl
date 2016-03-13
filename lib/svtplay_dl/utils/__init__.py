@@ -68,12 +68,9 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
-def prio_streams(options, streams, selected):
-    protocol_prio = options.stream_prio
+def prio_streams(streams, selected, protocol_prio=None):
     if protocol_prio is None:
         protocol_prio = ["hls", "hds", "http", "rtmp"]
-    if isinstance(protocol_prio, str):
-        protocol_prio = protocol_prio.split(',')
 
     # Map score's to the reverse of the list's index values
     proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
@@ -117,7 +114,12 @@ def select_quality(options, streams):
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
 
         sys.exit(4)
-    return prio_streams(options, streams, selected)[0]
+
+    # Extract protocol prio, in the form of "hls,hds,http,rtmp",
+    # we want it as a list
+    proto_prio = (options.stream_prio or '').split() or None
+
+    return prio_streams(streams, selected, protocol_prio=proto_prio)[0]
 
 
 def ensure_unicode(s):
