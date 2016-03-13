@@ -68,7 +68,7 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
-def prio_streams(streams, selected, protocol_prio=None):
+def prio_streams(streams, protocol_prio=None):
     if protocol_prio is None:
         protocol_prio = ["hls", "hds", "http", "rtmp"]
 
@@ -80,8 +80,7 @@ def prio_streams(streams, selected, protocol_prio=None):
     prioritized = [(s.bitrate, proto_score[s.name()], s) for
                    s in streams if s.name() in proto_score]
     return [x[2] for
-            x in sorted(prioritized, key=itemgetter(0,1), reverse=True)
-            if x[0] == selected]
+            x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
 
 def select_quality(options, streams):
     available = sorted(int(x.bitrate) for x in streams)
@@ -119,7 +118,9 @@ def select_quality(options, streams):
     # we want it as a list
     proto_prio = (options.stream_prio or '').split() or None
 
-    return prio_streams(streams, selected, protocol_prio=proto_prio)[0]
+    return [x for
+            x in prio_streams(streams, protocol_prio=proto_prio)
+            if x.bitrate == selected][0]
 
 
 def ensure_unicode(s):
