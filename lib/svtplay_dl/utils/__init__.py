@@ -5,6 +5,7 @@ import sys
 import logging
 import re
 import unicodedata
+from operator import itemgetter
 
 try:
     import HTMLParser
@@ -67,19 +68,19 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
+def prio_streams(streams, protocol_prio=None):
+    if protocol_prio is None:
+        protocol_prio = ["hls", "hds", "http", "rtmp"]
 
-def prio_streams(options, streams, selected):
-    prio = options.stream_prio
-    if prio is None:
-        prio = ["hls", "hds", "http", "rtmp"]
-    if isinstance(prio, str):
-        prio = prio.split(",")
-    lstreams = []
-    for i in streams:
-        if int(i.bitrate) == selected:
-            lstreams.append(i)
-    return [x for (y, x) in sorted(zip(prio, lstreams))]
+    # Map score's to the reverse of the list's index values
+    proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
 
+    # Build a tuple (bitrate, proto_score, stream), and use it
+    # for sorting.
+    prioritized = [(s.bitrate, proto_score[s.name()], s) for
+                   s in streams if s.name() in proto_score]
+    return [x[2] for
+            x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
 
 def select_quality(options, streams):
     available = sorted(int(x.bitrate) for x in streams)
@@ -112,7 +113,14 @@ def select_quality(options, streams):
         log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
 
         sys.exit(4)
-    return prio_streams(options, streams, selected)[0]
+
+    # Extract protocol prio, in the form of "hls,hds,http,rtmp",
+    # we want it as a list
+    proto_prio = (options.stream_prio or '').split() or None
+
+    return [x for
+            x in prio_streams(streams, protocol_prio=proto_prio)
+            if x.bitrate == selected][0]
 
 
 def ensure_unicode(s):
