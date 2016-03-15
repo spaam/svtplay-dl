@@ -14,7 +14,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Nrk(Service, OpenGraphThumbMixin):
-    supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no']
+    supported_domains = ['nrk.no', 'tv.nrk.no', 'p3.no', 'tv.nrksuper.no']
 
     def get(self):
         data = self.get_urldata()
