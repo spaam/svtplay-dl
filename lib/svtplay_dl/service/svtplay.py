@@ -101,6 +101,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if match:
             return match.group(1)
         match = re.search("/videoEpisod-([^/]+)/", parse.path)
+        if not match:
+            match = re.search(r'data-id="(\d+)-', self.get_urldata())
         if match:
             self._urldata = None
             self._url = "http://www.svtplay.se/video/%s/" % match.group(1)
@@ -146,10 +148,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
             id = data["videoId"]
         else:
             name = data["programTitle"]
-            if name.find(".") > 0:
-                name = name[:name.find(".")]
-            name = filenamify(name.replace(" - ", "."))
-            other = filenamify(data["episodeTitle"])
+            if not name:
+                match = re.search('data-title="([^"]+)"', raw)
+                if match:
+                    name = filenamify(match.group(1).replace(" - ", "."))
+                other = None
+            else:
+                if name.find(".") > 0:
+                    name = name[:name.find(".")]
+                name = filenamify(name.replace(" - ", "."))
+                other = filenamify(data["episodeTitle"])
             if is_py2:
                 id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
             else:
