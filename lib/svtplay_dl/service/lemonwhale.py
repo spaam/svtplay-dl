@@ -12,7 +12,8 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils import decode_html_entities
 
 class Lemonwhale(Service):
-    supported_domains = ['svd.se', 'vk.se']
+    # lemonwhale.com is just bogus for generic
+    supported_domains = ['svd.se', 'vk.se', 'lemonwhale.com']
 
     def get(self):
         vid = None

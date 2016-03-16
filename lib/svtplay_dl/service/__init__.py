@@ -156,6 +156,12 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.options, self.url)
+        match = re.search('(lemonwhale|lwcdn.com)', data)
+        if match:
+            url = "http://lemonwhale.com"
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, self.url)
 
         return self.url, stream
 
