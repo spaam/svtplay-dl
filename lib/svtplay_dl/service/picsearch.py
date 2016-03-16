@@ -9,33 +9,30 @@ from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.error import ServiceError
+from svtplay_dl.utils.urllib import urlparse
 
 
 class Picsearch(Service, OpenGraphThumbMixin):
-    supported_domains = ['dn.se', 'mobil.dn.se', 'di.se']
+    supported_domains = ['dn.se', 'mobil.dn.se', 'di.se', 'csp.picsearch.com']
 
     def get(self):
-        data = self.get_urldata()
-
         if self.exclude(self.options):
             yield ServiceError("Excluding video")
             return
 
-        ajax_auth = re.search(r"picsearch_ajax_auth = '(\w+)'", data)
+        ajax_auth = self.get_auth()
         if not ajax_auth:
-            ajax_auth = re.search(r'screen9-ajax-auth="([^"]+)"', data)
-            if not ajax_auth:
-                yield ServiceError("Cant find token for video")
-                return
-        mediaid = re.search(r"mediaId = '([^']+)';", self.get_urldata())
+            yield ServiceError("Cant find token for video")
+            return
+
+        mediaid = self.get_mediaid()
         if not mediaid:
-            mediaid = re.search(r'media-id="([^"]+)"', self.get_urldata())
-            if not mediaid:
-                mediaid = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
-                if not mediaid:
-                    yield ServiceError("Cant find media id")
-                    return
-        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid.group(1))).text
+            yield ServiceError("Cant find media id")
+            return
+        if not isinstance(mediaid, str):
+            mediaid = mediaid.group(1)
+
+        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid)).text
         jsondata = json.loads(jsondata)
         if "playerconfig" not in jsondata["media"]:
             yield ServiceError(jsondata["error"])
@@ -59,3 +56,30 @@ class Picsearch(Service, OpenGraphThumbMixin):
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
+
+    def get_auth(self):
+        match = re.search(r"picsearch_ajax_auth[ ]*=[ ]*['\"]([^'\"]+)['\"]", self.get_urldata())
+        if not match:
+            match = re.search(r'screen9-ajax-auth="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
+            if match:
+                data = self.http.request("get", match.group(1))
+                match = re.search(r'ajaxAuth": "([^"]+)"', data.text)
+        return match
+
+    def get_mediaid(self):
+        match = re.search(r"mediaId = '([^']+)';", self.get_urldata())
+        if not match:
+            match = re.search(r'media-id="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
+            if match:
+                data = self.http.request("get", match.group(1))
+                match = re.search(r'mediaid": "([^"]+)"', data.text)
+        if not match:
+            urlp = urlparse(self.url)
+            match = urlp.fragment
+        return match

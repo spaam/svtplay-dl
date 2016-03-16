@@ -162,6 +162,18 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.options, self.url)
+        match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', data)
+        if match:
+            url = match.group(1)
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, self.url)
+        match = re.search('(picsearch_ajax_auth|screen9-ajax-auth)', data)
+        if match:
+            url = "http://csp.picsearch.com"
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, self.url)
 
         return self.url, stream
 
