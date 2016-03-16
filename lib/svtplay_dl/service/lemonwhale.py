@@ -12,7 +12,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils import decode_html_entities
 
 class Lemonwhale(Service):
-    supported_domains = ['svd.se']
+    supported_domains = ['svd.se', 'vk.se']
 
     def get(self):
         vid = None
