@@ -111,44 +111,44 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     url = url.replace("&amp;", "&").replace("&#038;", "&")
-                    return url, i(url)
+                    return url, i(self.options, url)
 
         match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
         if match:
             for i in sites:
                 if i.handles(match.group(1)):
-                    return match.group(1), i(url)
+                    return match.group(1), i(self.options, url)
         match = re.search(r"tv4play.se/iframe/video/(\d+)?", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i(url)
+                    return url, i(self.options, url)
         match = re.search(r"embed.bambuser.com/broadcast/(\d+)", data)
         if match:
             url = "http://bambuser.com/v/%s" % match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i(url)
+                    return url, i(self.options, url)
         match = re.search(r'src="(http://tv.aftonbladet[^"]*)"', data)
         if match:
             url = match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i(url)
+                    return url, i(self.options, url)
         match = re.search(r'a href="(http://tv.aftonbladet[^"]*)" class="abVi', data)
         if match:
             url = match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i(url)
+                    return url, i(self.options, url)
 
         match = re.search(r"iframe src='(http://www.svtplay[^']*)'", data)
         if match:
             url = match.group(1)
             for i in sites:
                 if i.handles(url):
-                    return url, i(url)
+                    return url, i(self.options, url)
 
         match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
         if match:
