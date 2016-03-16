@@ -29,15 +29,9 @@ def _get_full_url(url, srcurl):
     if url[:4] == 'http':
         return url
 
-    urlp = urlparse(srcurl)
-
     # remove everything after last / in the path of the URL
     baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
     returl = "%s/%s" % (baseurl, url)
-
-    # Append optional query parameters
-    if urlp.query:
-        returl += "?%s" % urlp.query
 
     return returl
 
