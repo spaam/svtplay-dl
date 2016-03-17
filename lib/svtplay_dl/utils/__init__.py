@@ -167,7 +167,7 @@ def filenamify(title):
 
     # Replace whitespace with dot
     title = re.sub(r'\s+', '.', title)
-    title = re.sub(r'.-.', '-', title)
+    title = re.sub(r'\.-\.', '-', title)
 
     return title
 
