@@ -47,7 +47,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
             self.options.live = data["live"]
         if old:
             params = {"output": "json"}
-            dataj = self.http.request("get", self.url, params=params).json()
+            try:
+                dataj = self.http.request("get", self.url, params=params).json()
+            except ValueError:
+                dataj = data
+                old = False
         else:
             dataj = data
 
@@ -98,6 +102,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return match.group(1)
         parse = urlparse(self.url)
         match = re.search("/video/([0-9]+)/", parse.path)
+        if match:
+            return match.group(1)
+        match = re.search("data-video-id='([^']+)'", self.get_urldata())
         if match:
             return match.group(1)
         match = re.search("/videoEpisod-([^/]+)/", parse.path)
