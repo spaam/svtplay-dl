@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 import time
 
-from svtplay_dl.output import progress, output # FIXME use progressbar() instead
+from svtplay_dl.output import output, ETA, progressbar
 from svtplay_dl.fetcher import VideoRetriever
 
 
@@ -25,15 +25,13 @@ class HTTP(VideoRetriever):
         if hasattr(file_d, "read") is False:
             return
 
-        lastprogress = 0
+        eta = ETA(total_size)
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
             if self.options.output != "-" and not self.options.silent:
-                now = time.time()
-                if lastprogress + 1 < now:
-                    lastprogress = now
-                    progress(bytes_so_far, total_size)
+                eta.update(bytes_so_far)
+                progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 
         if self.options.output != "-":
             file_d.close()
