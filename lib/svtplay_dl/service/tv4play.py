@@ -148,8 +148,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
         else:
             show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
-            if is_py2:
-                show = show.encode("utf-8")
             show = quote_plus(show)
         return show
 
