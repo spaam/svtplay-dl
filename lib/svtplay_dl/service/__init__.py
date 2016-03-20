@@ -174,6 +174,12 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.options, self.url)
+        match = re.search('iframe src="(//csp.screen9.com[^"]+)"', data)
+        if match:
+            url = "http:%s" % match.group(1)
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, self.url)
 
         return self.url, stream
 

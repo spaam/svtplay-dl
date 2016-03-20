@@ -13,7 +13,7 @@ from svtplay_dl.utils.urllib import urlparse
 
 
 class Picsearch(Service, OpenGraphThumbMixin):
-    supported_domains = ['dn.se', 'mobil.dn.se', 'di.se', 'csp.picsearch.com']
+    supported_domains = ['dn.se', 'mobil.dn.se', 'di.se', 'csp.picsearch.com', 'csp.screen9.com']
 
     def get(self):
         if self.exclude(self.options):
@@ -66,6 +66,13 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if match:
                 data = self.http.request("get", match.group(1))
                 match = re.search(r'ajaxAuth": "([^"]+)"', data.text)
+            if not match:
+                match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
+                if match:
+                    url = "http:%s" % match.group(1)
+                    data = self.http.request("get", url)
+                    match = re.search(r"picsearch_ajax_auth = '([^']+)'", data.text)
+
         return match
 
     def get_mediaid(self):
@@ -79,6 +86,12 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if match:
                 data = self.http.request("get", match.group(1))
                 match = re.search(r'mediaid": "([^"]+)"', data.text)
+            if not match:
+                match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
+                if match:
+                    url = "http:%s" % match.group(1)
+                    data = self.http.request("get", url)
+                    match = re.search(r"mediaid: '([^']+)'", data.text)
         if not match:
             urlp = urlparse(self.url)
             match = urlp.fragment
