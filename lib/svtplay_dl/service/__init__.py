@@ -156,6 +156,12 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.options, self.url)
+        match = re.search(r'src="([^.]+\.solidtango.com[^"+]+)"', data)
+        if match:
+            url = match.group(1)
+            for i in sites:
+                if i.handles(url):
+                    return self.url, i(self.options, url)
         match = re.search('(lemonwhale|lwcdn.com)', data)
         if match:
             url = "http://lemonwhale.com"

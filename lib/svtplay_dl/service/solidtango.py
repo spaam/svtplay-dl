@@ -2,15 +2,17 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
+from svtplay_dl.utils.urllib import urlparse
 
 
 class Solidtango(Service):
     supported_domains_re = [r'^([^.]+\.)*solidtango.com']
-    supported_domains = ['mm-resource-service.herokuapp.com']
+    supported_domains = ['mm-resource-service.herokuapp.com', 'solidtango.com']
 
     def get(self):
         data = self.get_urldata()
@@ -37,5 +39,14 @@ class Solidtango(Service):
             for n in list(streams.keys()):
                 yield streams[n]
         else:
-            yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")
-            return
+            parse = urlparse(self.url)
+            url2 = "https://%s/api/v1/play/%s.xml" % (parse.netloc, parse.path[parse.path.rfind("/")+1:])
+            data = self.http.request("get", url2)
+            if data.status_code != 200:
+                yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")
+                return
+            xml = ET.XML(data.text)
+            elements = xml.findall(".//manifest")
+            streams = hlsparse(self.options, self.http.request("get", elements[0].text), elements[0].text)
+            for n in list(streams.keys()):
+                yield streams[n]
