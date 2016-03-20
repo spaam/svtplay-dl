@@ -199,7 +199,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if not auth_token:
             return ServiceError("Can't find authenticity_token needed for user / password")
         url = "https://www.tv4play.se/session"
-        postdata = {"user_name" : username, "password": password, "authenticity_token":auth_token.group(2), "https": ""}
+        postdata = {"username" : username, "password": password, "authenticity_token":auth_token.group(2), "https": ""}
         data = self.http.request("post", url, data=postdata, cookies=self.cookies)
         self.cookies = data.cookies
         fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
