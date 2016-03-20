@@ -204,7 +204,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
         self.cookies = data.cookies
         fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
         if fail:
-            return ServiceError(fail.group(1))
+            message = fail.group(1)
+            if is_py2:
+                message = message.encode("utf8")
+            return ServiceError(message)
         return True
 
 
