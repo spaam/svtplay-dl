@@ -9,7 +9,12 @@ from svtplay_dl.utils import which
 class postprocess(object):
     def __init__(self, stream):
         self.stream = stream
-        self.detect = which("avconv")
+        self.detect = None
+        for i in ["ffmpeg", "avconv"]:
+            self.detect = which(i)
+            if self.detect:
+                break
+
 
     def mux(self):
         if self.detect is None:
