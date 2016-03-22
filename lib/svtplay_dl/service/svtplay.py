@@ -25,7 +25,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
-            if parse.path[:6] != "/video" and parse[:6] != "/klipp":
+            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp":
                 yield ServiceError("This mode is not supported anymore. need the url with the video")
                 return
 
