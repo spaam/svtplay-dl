@@ -32,7 +32,7 @@ class postprocess(object):
         if ext == "ts":
             arguments += ["-bsf:a", "aac_adtstoasc"]
         arguments += ["-y", tempfile]
-        cmd = ["avconv", "-i", orig_filename]
+        cmd = [self.detect, "-i", orig_filename]
         cmd += arguments
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         stdout, stderr = p.communicate()
