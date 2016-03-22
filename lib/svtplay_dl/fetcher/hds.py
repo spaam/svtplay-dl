@@ -122,6 +122,8 @@ class HDS(VideoRetriever):
         if self.options.output != "-":
             file_d.close()
             progress_stream.write('\n')
+            self.finished = True
+
 
 
 def readbyte(data, pos):

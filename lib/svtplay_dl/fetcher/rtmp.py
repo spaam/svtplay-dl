@@ -44,4 +44,7 @@ class RTMP(VideoRetriever):
             subprocess.call(command)
         except OSError as e:
             log.error("Could not execute rtmpdump: " + e.strerror)
+            return
+        self.finished = True
+
 

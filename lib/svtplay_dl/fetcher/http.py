@@ -35,3 +35,5 @@ class HTTP(VideoRetriever):
 
         if self.options.output != "-":
             file_d.close()
+            self.finished = True
+

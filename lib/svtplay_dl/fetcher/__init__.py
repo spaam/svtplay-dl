@@ -8,6 +8,7 @@ class VideoRetriever(object):
         self.bitrate = int(bitrate)
         self.kwargs = kwargs
         self.http = HTTP(options)
+        self.finished = False
 
     def __repr__(self):
         return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
