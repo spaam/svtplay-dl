@@ -5,6 +5,7 @@ import sys
 import logging
 import re
 import unicodedata
+import platform
 from operator import itemgetter
 
 try:
@@ -182,3 +183,26 @@ def download_thumbnail(options, url):
     fd = open(tbn, "wb")
     fd.write(data)
     fd.close()
+
+
+def which(program):
+    import os
+
+    if platform.system() == "Windows":
+        program = "{0}.exe".format(program)
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
