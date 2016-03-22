@@ -56,6 +56,10 @@ To install it, run
 
 ::
 
+    # as root:
+    python setup.py install
+
+    # or the old method
     make
 
     # as root:
