@@ -14,6 +14,7 @@ from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.output import filename
+from svtplay_dl.postprocess import postprocess
 
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.bambuser import Bambuser
@@ -132,6 +133,7 @@ class Options(object):
         self.ssl_verify = True
         self.http_headers = None
         self.stream_prio = None
+        self.remux = False
 
 
 def get_media(url, options):
@@ -246,6 +248,10 @@ def get_one_media(stream, options):
             else:
                 log.warning("Can not get thumbnail when fetching to stdout")
 
+        if options.remux:
+            post = postprocess(stream)
+            post.mux()
+
 
 def setup_log(silent, verbose=False):
     fmt = logging.Formatter('%(levelname)s: %(message)s')
@@ -327,6 +333,8 @@ def main():
                       help="A header to add to each HTTP request.")
     parser.add_option("--stream-priority", dest="stream_prio", default=None, metavar="hls,hds,http,rtmp",
                       help="If two streams have the same quality, choose the one you prefer")
+    parser.add_option("--remux", dest="remux", default=False, action="store_true",
+                      help="Remux from one container to mp4 using ffmpeg or avconv")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -378,4 +386,5 @@ def mergeParserOption(options, parser):
     options.ssl_verify = parser.ssl_verify
     options.http_headers = parser.http_headers
     options.stream_prio = parser.stream_prio
+    options.remux = parser.remux
     return options
