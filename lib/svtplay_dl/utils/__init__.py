@@ -204,5 +204,8 @@ def which(program):
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
                 return exe_file
-
+        if os.path.isfile(program):
+            exe_file = os.path.join(os.getcwd(), program)
+            if is_exe(exe_file):
+                return exe_file
     return None
