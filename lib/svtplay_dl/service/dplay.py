@@ -83,7 +83,7 @@ class Dplay(Service):
         else:
             self.options.cookies = cookie
         data = self.http.request("get", "https://secure.%s/secure/api/v2/user/authorization/stream/%s?stream_type=hds" % (domain, vid), cookies=self.options.cookies)
-        if data.status_code == 403:
+        if data.status_code == 403 or data.status_code == 401:
             yield ServiceError("Geoblocked video")
             return
         dataj = json.loads(data.text)
