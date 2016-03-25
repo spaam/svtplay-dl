@@ -13,7 +13,8 @@ export PACKAGES = svtplay_dl \
                  svtplay_dl.fetcher \
                  svtplay_dl.utils \
                  svtplay_dl.service \
-                 svtplay_dl.subtitle
+                 svtplay_dl.subtitle \
+                 svtplay_dl.postprocess
 export PYFILES = $(sort $(addsuffix /*.py,$(subst .,/,$(PACKAGES))))
 
 PYTHON ?= /usr/bin/env python
