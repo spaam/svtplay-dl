@@ -152,31 +152,35 @@ def get_media(url, options):
             sys.exit(2)
 
     if options.all_episodes:
-        if options.output and os.path.isfile(options.output):
-            log.error("Output must be a directory if used with --all-episodes")
-            sys.exit(2)
-        elif options.output and not os.path.exists(options.output):
-            try:
-                os.makedirs(options.output)
-            except OSError as e:
-                log.error("%s: %s" % (e.strerror, e.filename))
-                return
-
-        episodes = stream.find_all_episodes(options)
-        if episodes is None:
-            return
-        for idx, o in enumerate(episodes):
-            if o == url:
-                substream = stream
-            else:
-                substream = service_handler(sites, options, o)
-
-            log.info("Episode %d of %d", idx + 1, len(episodes))
-
-            # get_one_media overwrites options.output...
-            get_one_media(substream, copy.copy(options))
+        get_all_episodes(stream, options, url)
     else:
         get_one_media(stream, options)
+
+
+def get_all_episodes(stream, options, url):
+    if options.output and os.path.isfile(options.output):
+        log.error("Output must be a directory if used with --all-episodes")
+        sys.exit(2)
+    elif options.output and not os.path.exists(options.output):
+        try:
+            os.makedirs(options.output)
+        except OSError as e:
+            log.error("%s: %s" % (e.strerror, e.filename))
+            return
+
+    episodes = stream.find_all_episodes(options)
+    if episodes is None:
+        return
+    for idx, o in enumerate(episodes):
+        if o == url:
+            substream = stream
+        else:
+            substream = service_handler(sites, options, o)
+
+        log.info("Episode %d of %d", idx + 1, len(episodes))
+
+        # get_one_media overwrites options.output...
+        get_one_media(substream, copy.copy(options))
 
 
 def get_one_media(stream, options):
