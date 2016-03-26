@@ -13,6 +13,7 @@ from svtplay_dl.utils import filenamify, ensure_unicode, is_py2, decode_html_ent
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
@@ -95,6 +96,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
+            if i["format"] == "dash264":
+                streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                if streams:
+                    for n in list(streams.keys()):
+                        yield streams[n]
+
 
     def find_video_id(self):
         match = re.search('data-video-id="([^"]+)"', self.get_urldata())

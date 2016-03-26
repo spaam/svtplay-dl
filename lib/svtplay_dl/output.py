@@ -192,7 +192,7 @@ def findexpisode(directory, service, name):
                 if extention == "srt":
                     if name.find(service) and match.group(1) == videoid and match.group(2) == extention:
                         return True
-                elif match.group(2) != "srt":
+                elif match.group(2) != "srt" and match.group(2) != "m4a":
                     if name.find(service) and match.group(1) == videoid:
                         return True
 

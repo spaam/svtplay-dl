@@ -251,10 +251,13 @@ def get_one_media(stream, options):
                 stream.get_thumbnail(options)
             else:
                 log.warning("Can not get thumbnail when fetching to stdout")
-
+        post = postprocess(stream)
+        if stream.name() == "dash" and post.detect:
+            post.merge()
+        if stream.name() == "dash" and not post.detect and stream.finished:
+            log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if options.remux:
-            post = postprocess(stream)
-            post.mux()
+            post.remux()
 
 
 def setup_log(silent, verbose=False):

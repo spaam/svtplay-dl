@@ -71,7 +71,7 @@ def list_quality(videos):
 
 def prio_streams(streams, protocol_prio=None):
     if protocol_prio is None:
-        protocol_prio = ["hls", "hds", "http", "rtmp"]
+        protocol_prio = ["dash", "hls", "hds", "http", "rtmp"]
 
     # Map score's to the reverse of the list's index values
     proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
