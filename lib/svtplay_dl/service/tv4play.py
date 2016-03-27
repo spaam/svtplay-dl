@@ -63,6 +63,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if xml.find("drmProtected").text == "true":
             yield ServiceError("We cant download DRM protected content from this site.")
             return
+        if xml.find("playbackStatus").text == "NOT_STARTED":
+            yield ServiceError("Can't download something that is not started")
+            return
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
