@@ -51,6 +51,7 @@ you don’t have them, some features will not be working.
 -  `RTMPDump`_ 2.4 or higher to download RTMP streams.
 -  `PyCrypto`_ to download encrypted HLS streams
 -  `Requests`_
+- `ffmpeg`_ or `avconv`_ for postprocessing and/or for DASH streams
 
 To install it, run
 
@@ -70,8 +71,6 @@ After install
 ::
 
     svtplay-dl [options] URL
-
-You need to install `ffmpeg`_ or `avconv`_  if you want to remux files to .mp4
 
 Support
 -------
