@@ -4,13 +4,11 @@ all: svtplay-dl
         release clean_releasedir $(RELEASE_DIR)
 
 # These variables describe the latest release:
-VERSION = 0.30
-LATEST_RELEASE_DATE = 2016.02.08
-LATEST_RELEASE = $(VERSION).$(LATEST_RELEASE_DATE)
+VERSION = 1.0
+LATEST_RELEASE = $(VERSION)
 
 # If we build a new release, this is what it will be called:
-NEW_RELEASE_DATE = $(shell date +%Y.%m.%d)
-NEW_RELEASE = $(VERSION).$(NEW_RELEASE_DATE)
+NEW_RELEASE = $(VERSION)
 RELEASE_DIR = svtplay-dl-$(NEW_RELEASE)
 
 PREFIX ?= /usr/local
@@ -77,7 +75,6 @@ clean_releasedir:
 
 release: $(RELEASE_DIR) release-test
 	set -e; cd $(RELEASE_DIR) && \
-		sed -i -re 's/^(LATEST_RELEASE_DATE = ).*/\1$(NEW_RELEASE_DATE)/' Makefile;\
 		sed -i -re 's/^(__version__ = ).*/\1"$(NEW_RELEASE)"/' lib/svtplay_dl/__init__.py;\
 		git add Makefile lib/svtplay_dl/__init__.py; \
 		git commit -m "New release $(NEW_RELEASE)";
