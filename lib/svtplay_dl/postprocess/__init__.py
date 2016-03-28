@@ -27,7 +27,7 @@ class postprocess(object):
         log.info("Muxing {0} into {1}".format(orig_filename, new_name))
         tempfile = "{0}.temp".format(self.stream.options.output)
         name, ext = os.path.splitext(orig_filename)
-        arguments = ["-c", "copy", "-f", "mp4"]
+        arguments = ["-c", "copy", "-copyts", "-f", "mp4"]
         if ext == "ts":
             arguments += ["-bsf:a", "aac_adtstoasc"]
         arguments += ["-y", tempfile]
