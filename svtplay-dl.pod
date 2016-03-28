@@ -118,9 +118,13 @@ Don't attempt to verify SSL certificates.
 
 A header to add to each HTTP request.
 
-=head3 --stream-priority=hls,hds,http,rtmp
+=head3 --stream-priority=dash,hls,hds,http,rtmp
 
 If two streams have the same quality, choose the one you prefer
+
+=head3 --remux
+
+Remux from one container to mp4 using ffmpeg or avconv
 
 =head1 SUPPORTED SERVICES
 

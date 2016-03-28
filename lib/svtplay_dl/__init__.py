@@ -338,7 +338,7 @@ def main():
                       help="Don't attempt to verify SSL certificates.")
     parser.add_option("--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2",
                       help="A header to add to each HTTP request.")
-    parser.add_option("--stream-priority", dest="stream_prio", default=None, metavar="hls,hds,http,rtmp",
+    parser.add_option("--stream-priority", dest="stream_prio", default=None, metavar="dash,hls,hds,http,rtmp",
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
