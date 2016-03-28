@@ -53,37 +53,37 @@ class progressbarTest(unittest.TestCase):
     def test_0_100(self):
         svtplay_dl.output.progressbar(100, 0)
         self.assertEqual(
-            self.mockfile.read(), "\r[000/100][...............] "
+            self.mockfile.read(), "\r[000/100][..........] "
         )
 
     def test_progress_1_100(self):
         svtplay_dl.output.progressbar(100, 1)
         self.assertEqual(
-            self.mockfile.read(), "\r[001/100][...............] "
+            self.mockfile.read(), "\r[001/100][..........] "
         )
 
     def test_progress_2_100(self):
         svtplay_dl.output.progressbar(100, 2)
         self.assertEqual(
-            self.mockfile.read(), "\r[002/100][...............] "
+            self.mockfile.read(), "\r[002/100][..........] "
         )
 
     def test_progress_50_100(self):
         svtplay_dl.output.progressbar(100, 50)
         self.assertEqual(
-            self.mockfile.read(), "\r[050/100][=======........] "
+            self.mockfile.read(), "\r[050/100][=====.....] "
         )
 
     def test_progress_100_100(self):
         svtplay_dl.output.progressbar(100, 100)
         self.assertEqual(
-            self.mockfile.read(), "\r[100/100][===============] "
+            self.mockfile.read(), "\r[100/100][==========] "
         )
 
     def test_progress_20_100_msg(self):
         svtplay_dl.output.progressbar(100, 20, "msg")
         self.assertEqual(
-            self.mockfile.read(), "\r[020/100][===............] msg"
+            self.mockfile.read(), "\r[020/100][==........] msg"
         )
 
     def test_progress_20_100_termwidth(self):
@@ -91,7 +91,7 @@ class progressbarTest(unittest.TestCase):
         svtplay_dl.output.progressbar(100, 20)
         self.assertEqual(
             self.mockfile.read(),
-            "\r[020/100][========................................] "
+            "\r[020/100][=======............................] "
         )
 
 

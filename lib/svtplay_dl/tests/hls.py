@@ -47,7 +47,7 @@ class HlsTest(unittest.TestCase):
             {
                 'srcurl': 'http://example.com/bar?baz=qux',
                 'segment': 'foo.ts',
-                'expected': 'http://example.com/foo.ts?baz=qux'
+                'expected': 'http://example.com/foo.ts'
             },
         ]:
             self.assertEqual(
