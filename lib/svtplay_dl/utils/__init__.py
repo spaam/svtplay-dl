@@ -108,14 +108,12 @@ def select_quality(options, streams):
     try:
         optq = int(options.quality)
     except ValueError:
-        log.error("Requested quality need to be a number")
-        sys.exit(4)
+        raise error.UIException("Requested quality needs to be a number")
     if optq:
         try:
             optf = int(options.flexibleq)
         except ValueError:
-            log.error("Flexible-quality need to be a number")
-            sys.exit(4)
+            raise error.UIException("Flexible-quality needs to be a number")
         if not optf:
             wanted = [optq]
         else:
@@ -131,9 +129,8 @@ def select_quality(options, streams):
     if not selected and selected != 0:
         data = sort_quality(streams)
         quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
-        log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
-
-        sys.exit(4)
+        raise error.UIException("Can't find that quality. Try one of: %s (or "
+                                "try --flexible-quality)" % quality)
 
     for s in streams:
         if s.bitrate == selected:
