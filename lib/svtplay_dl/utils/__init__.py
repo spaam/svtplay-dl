@@ -88,6 +88,22 @@ def prio_streams(streams, protocol_prio):
             x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
 
 def select_quality(options, streams):
+    # Extract protocol prio, in the form of "hls,hds,http,rtmp",
+    # we want it as a list
+    proto_prio = DEFAULT_PROTOCOL_PRIO
+    if options.stream_prio:
+        proto_prio = options.stream_prio.split(',')
+
+    # Filter away any unwanted protocols, and prioritize
+    # based on --stream-priority.
+    streams = prio_streams(streams, proto_prio)
+
+    if len(streams) == 0:
+        raise error.NoRequestedProtocols(
+            requested=proto_prio,
+            found=list(set([s.name() for s in streams]))
+        )
+
     available = sorted(int(x.bitrate) for x in streams)
     try:
         optq = int(options.quality)
@@ -119,21 +135,9 @@ def select_quality(options, streams):
 
         sys.exit(4)
 
-    # Extract protocol prio, in the form of "hls,hds,http,rtmp",
-    # we want it as a list
-    proto_prio = DEFAULT_PROTOCOL_PRIO
-    if options.stream_prio:
-        proto_prio = options.stream_prio.split(',')
-
-    try:
-        return [x for
-                x in prio_streams(streams, protocol_prio=proto_prio)
-                if x.bitrate == selected][0]
-    except IndexError:
-        raise error.NoRequestedProtocols(
-            requested=proto_prio,
-            found=list(set([s.name() for s in streams]))
-        )
+    for s in streams:
+        if s.bitrate == selected:
+            return s
 
 
 def ensure_unicode(s):
