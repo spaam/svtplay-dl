@@ -26,6 +26,9 @@ is_py2_old = (sys.version_info < (2, 7))
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
 
+# TODO: should be set as the default option in the argument parsing?
+DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
+
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
@@ -69,12 +72,11 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
-def prio_streams(streams, protocol_prio=None):
-    if protocol_prio is None:
-        protocol_prio = ["dash", "hls", "hds", "http", "rtmp"]
-
+def prio_streams(streams, protocol_prio):
     # Map score's to the reverse of the list's index values
     proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
+    log.debug("Protocol priority scores (higher is better): %s",
+        str(proto_score))
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
@@ -117,7 +119,7 @@ def select_quality(options, streams):
 
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
-    proto_prio = None
+    proto_prio = DEFAULT_PROTOCOL_PRIO
     if options.stream_prio:
         proto_prio = options.stream_prio.split(',')
 
