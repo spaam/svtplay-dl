@@ -19,6 +19,8 @@ except ImportError:
     print("You need to install python-requests to use this script")
     sys.exit(3)
 
+from svtplay_dl import error
+
 is_py2 = (sys.version_info[0] == 2)
 is_py3 = (sys.version_info[0] == 3)
 is_py2_old = (sys.version_info < (2, 7))
@@ -123,9 +125,15 @@ def select_quality(options, streams):
     if options.stream_prio:
         proto_prio = options.stream_prio.split(',')
 
-    return [x for
-            x in prio_streams(streams, protocol_prio=proto_prio)
-            if x.bitrate == selected][0]
+    try:
+        return [x for
+                x in prio_streams(streams, protocol_prio=proto_prio)
+                if x.bitrate == selected][0]
+    except IndexError:
+        raise error.NoRequestedProtocols(
+            requested=proto_prio,
+            found=list(set([s.name() for s in streams]))
+        )
 
 
 def ensure_unicode(s):

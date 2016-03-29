@@ -231,13 +231,13 @@ def get_one_media(stream, options):
         if options.list_quality:
             list_quality(videos)
             return
-        stream = select_quality(options, videos)
-        log.info("Selected to download %s, bitrate: %s",
-                 stream.name(), stream.bitrate)
-        if options.get_url:
-            print(stream.url)
-            return
         try:
+            stream = select_quality(options, videos)
+            log.info("Selected to download %s, bitrate: %s",
+                     stream.name(), stream.bitrate)
+            if options.get_url:
+                print(stream.url)
+                return
             stream.download()
         except UIException as e:
             if options.verbose:
