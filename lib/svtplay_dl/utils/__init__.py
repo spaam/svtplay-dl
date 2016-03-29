@@ -117,7 +117,9 @@ def select_quality(options, streams):
 
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
-    proto_prio = (options.stream_prio or '').split() or None
+    proto_prio = None
+    if options.stream_prio:
+        proto_prio = options.stream_prio.split(',')
 
     return [x for
             x in prio_streams(streams, protocol_prio=proto_prio)
