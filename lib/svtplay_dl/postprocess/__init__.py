@@ -9,14 +9,14 @@ from svtplay_dl.utils import which
 class postprocess(object):
     def __init__(self, stream):
         self.stream = stream
-        self.detect = False
+        self.detect = None
         for i in ["ffmpeg", "avconv"]:
             self.detect = which(i)
             if self.detect:
                 break
 
     def remux(self):
-        if self.detect is False:
+        if self.detect is None:
             log.error("Cant detect ffmpeg or avconv. cant mux files without it")
             return
         if self.stream.finished is False:
@@ -45,7 +45,7 @@ class postprocess(object):
         os.rename(tempfile, new_name)
 
     def merge(self):
-        if self.detect is False:
+        if self.detect is None:
             log.error("Cant detect ffmpeg or avconv. cant mux files without it")
             return
 
