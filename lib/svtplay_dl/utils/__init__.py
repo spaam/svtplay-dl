@@ -74,9 +74,15 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
-def prio_streams(streams, protocol_prio):
+def protocol_prio(streams, priolist):
+    """
+    Given a list of VideoRetriever objects and a prioritized list of
+    accepted protocols (as strings) (highest priority first), return
+    a list of VideoRetriever objects that are accepted, and sorted
+    by bitrate, and then protocol priority.
+    """
     # Map score's to the reverse of the list's index values
-    proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
+    proto_score = dict(zip(priolist, range(len(priolist), 0, -1)))
     log.debug("Protocol priority scores (higher is better): %s",
         str(proto_score))
 
@@ -96,7 +102,7 @@ def select_quality(options, streams):
 
     # Filter away any unwanted protocols, and prioritize
     # based on --stream-priority.
-    streams = prio_streams(streams, proto_prio)
+    streams = protocol_prio(streams, proto_prio)
 
     if len(streams) == 0:
         raise error.NoRequestedProtocols(

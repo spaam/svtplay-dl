@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import
 import unittest
-from svtplay_dl.utils import prio_streams
+from svtplay_dl.utils import protocol_prio
 
 class Stream(object):
     def __init__(self, proto, bitrate):
@@ -24,7 +24,7 @@ class PrioStreamsTest(unittest.TestCase):
             expected = [str(Stream(x, 100)) for x in ordered]
 
         return self.assertEqual(
-            [str(x) for x in prio_streams(streams, ordered, **kwargs)],
+            [str(x) for x in protocol_prio(streams, ordered, **kwargs)],
             expected
         )
 
