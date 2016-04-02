@@ -19,12 +19,17 @@ except ImportError:
     print("You need to install python-requests to use this script")
     sys.exit(3)
 
+from svtplay_dl import error
+
 is_py2 = (sys.version_info[0] == 2)
 is_py3 = (sys.version_info[0] == 3)
 is_py2_old = (sys.version_info < (2, 7))
 
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
+
+# TODO: should be set as the default option in the argument parsing?
+DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -69,12 +74,17 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s" % (i[0], i[1].upper()))
 
-def prio_streams(streams, protocol_prio=None):
-    if protocol_prio is None:
-        protocol_prio = ["dash", "hls", "hds", "http", "rtmp"]
-
+def protocol_prio(streams, priolist):
+    """
+    Given a list of VideoRetriever objects and a prioritized list of
+    accepted protocols (as strings) (highest priority first), return
+    a list of VideoRetriever objects that are accepted, and sorted
+    by bitrate, and then protocol priority.
+    """
     # Map score's to the reverse of the list's index values
-    proto_score = dict(zip(protocol_prio, range(len(protocol_prio), 0, -1)))
+    proto_score = dict(zip(priolist, range(len(priolist), 0, -1)))
+    log.debug("Protocol priority scores (higher is better): %s",
+        str(proto_score))
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
@@ -84,45 +94,60 @@ def prio_streams(streams, protocol_prio=None):
             x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
 
 def select_quality(options, streams):
-    available = sorted(int(x.bitrate) for x in streams)
     try:
         optq = int(options.quality)
     except ValueError:
-        log.error("Requested quality need to be a number")
-        sys.exit(4)
-    if optq:
-        try:
-            optf = int(options.flexibleq)
-        except ValueError:
-            log.error("Flexible-quality need to be a number")
-            sys.exit(4)
-        if not optf:
-            wanted = [optq]
-        else:
-            wanted = range(optq-optf, optq+optf+1)
-    else:
-        wanted = [available[-1]]
+        raise error.UIException("Requested quality needs to be a number")
 
-    selected = None
-    for q in available:
-        if q in wanted:
-            selected = q
-            break
-    if not selected and selected != 0:
-        data = sort_quality(streams)
-        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
-        log.error("Can't find that quality. Try one of: %s (or try --flexible-quality)", quality)
-
-        sys.exit(4)
+    try:
+        optf = int(options.flexibleq)
+    except ValueError:
+        raise error.UIException("Flexible-quality needs to be a number")
 
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
-    proto_prio = (options.stream_prio or '').split() or None
+    proto_prio = DEFAULT_PROTOCOL_PRIO
+    if options.stream_prio:
+        proto_prio = options.stream_prio.split(',')
 
-    return [x for
-            x in prio_streams(streams, protocol_prio=proto_prio)
-            if x.bitrate == selected][0]
+    # Filter away any unwanted protocols, and prioritize
+    # based on --stream-priority.
+    streams = protocol_prio(streams, proto_prio)
 
+    if len(streams) == 0:
+        raise error.NoRequestedProtocols(
+            requested=proto_prio,
+            found=list(set([s.name() for s in streams]))
+        )
+
+    # Build a dict indexed by bitrate, where each value
+    # is the stream with the highest priority protocol.
+    stream_hash = {}
+    for s in streams:
+        if not s.bitrate in stream_hash:
+            stream_hash[s.bitrate] = s
+
+    avail = sorted(stream_hash.keys(), reverse=True)
+
+    # wanted_lim is a two element tuple defines lower/upper bounds
+    # (inclusive). By default, we want only the best for you
+    # (literally!).
+    wanted_lim = (avail[0],)*2
+    if optq:
+        wanted_lim = (optq - optf, optq + optf)
+
+    # wanted is the filtered list of available streams, having
+    # a bandwidth within the wanted_lim range.
+    wanted = [a for a in avail if a >= wanted_lim[0] and a <= wanted_lim[1]]
+
+    # If none remains, the bitrate filtering was too tight.
+    if len(wanted) == 0:
+        data = sort_quality(streams)
+        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
+        raise error.UIException("Can't find that quality. Try one of: %s (or "
+                                "try --flexible-quality)" % quality)
+
+    return stream_hash[wanted[0]]
 
 def ensure_unicode(s):
     """

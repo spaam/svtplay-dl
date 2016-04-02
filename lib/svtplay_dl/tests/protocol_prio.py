@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import
 import unittest
-from svtplay_dl.utils import prio_streams
+from svtplay_dl.utils import protocol_prio
 
 class Stream(object):
     def __init__(self, proto, bitrate):
@@ -16,44 +16,33 @@ class Stream(object):
         return '%s(%d)' % (self.proto.upper(), self.bitrate)
 
 class PrioStreamsTest(unittest.TestCase):
-    def _gen_proto_case(self, ordered, unordered, default=True, expected=None):
+    def _gen_proto_case(self, ordered, unordered, expected=None):
         streams = [Stream(x, 100) for x in unordered]
 
         kwargs = {}
-        if not default:
-            kwargs['protocol_prio'] = ordered
         if expected is None:
             expected = [str(Stream(x, 100)) for x in ordered]
 
         return self.assertEqual(
-            [str(x) for x in prio_streams(streams, **kwargs)],
+            [str(x) for x in protocol_prio(streams, ordered, **kwargs)],
             expected
-        )
-
-    def test_default_order(self):
-        return self._gen_proto_case(
-            ['hls', 'hds', 'http', 'rtmp'],
-            ['rtmp', 'hds', 'hls', 'http']
         )
 
     def test_custom_order(self):
         return self._gen_proto_case(
             ['http', 'rtmp', 'hds', 'hls'],
             ['rtmp', 'hds', 'hls', 'http'],
-            default=False,
         )
 
     def test_custom_order_1(self):
         return self._gen_proto_case(
             ['http'],
             ['rtmp', 'hds', 'hls', 'http'],
-            default=False,
         )
 
     def test_proto_unavail(self):
         return self._gen_proto_case(
             ['http', 'rtmp'],
             ['hds', 'hls', 'https'],
-            default=False,
             expected=[],
         )
