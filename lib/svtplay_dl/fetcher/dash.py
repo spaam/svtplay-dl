@@ -94,5 +94,6 @@ class DASH(VideoRetriever):
 
         if self.options.output != "-":
             file_d.close()
+            progressbar(bytes_so_far, total_size, "ETA: complete")
             progress_stream.write('\n')
             self.finished = True
