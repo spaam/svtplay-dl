@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import copy
 import xml.etree.ElementTree as ET
-import time
 
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar

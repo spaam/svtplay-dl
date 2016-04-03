@@ -24,7 +24,7 @@ class postprocess(object):
         orig_filename = self.stream.options.output
         new_name = "{0}.mp4".format(os.path.splitext(self.stream.options.output)[0])
 
-        log.info("Muxing {0} into {1}".format(orig_filename, new_name))
+        log.info("Muxing %s into %s", orig_filename, new_name)
         tempfile = "{0}.temp".format(self.stream.options.output)
         name, ext = os.path.splitext(orig_filename)
         arguments = ["-c", "copy", "-copyts", "-f", "mp4"]
@@ -38,7 +38,7 @@ class postprocess(object):
         if p.returncode != 0:
             stderr = stderr.decode('utf-8', 'replace')
             msg = stderr.strip().split('\n')[-1]
-            log.error("Something went wrong: {0}".format(msg))
+            log.error("Something went wrong: %s", msg)
             return
         log.info("Muxing done. removing the old file.")
         os.remove(self.stream.options.output)
@@ -52,7 +52,7 @@ class postprocess(object):
         if self.stream.finished is False:
             return
         orig_filename = self.stream.options.output
-        log.info("Merge audio and video into {0}".format(orig_filename))
+        log.info("Merge audio and video into %s", orig_filename)
         tempfile = "{0}.temp".format(self.stream.options.output)
         audio_filename = "{0}.m4a".format(os.path.splitext(self.stream.options.output)[0])
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4", "-y", tempfile]
@@ -63,7 +63,7 @@ class postprocess(object):
         if p.returncode != 0:
             stderr = stderr.decode('utf-8', 'replace')
             msg = stderr.strip().split('\n')[-1]
-            log.error("Something went wrong: {0}".format(msg))
+            log.error("Something went wrong: %s", msg)
             return
         log.info("Merging done, removing old files.")
         os.remove(self.stream.options.output)

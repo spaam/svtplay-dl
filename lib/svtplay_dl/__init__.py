@@ -165,7 +165,7 @@ def get_all_episodes(stream, options, url):
         try:
             os.makedirs(options.output)
         except OSError as e:
-            log.error("%s: %s" % (e.strerror, e.filename))
+            log.error("%s: %s", e.strerror, e.filename)
             return
 
     episodes = stream.find_all_episodes(options)

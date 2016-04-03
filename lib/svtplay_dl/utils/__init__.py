@@ -72,7 +72,7 @@ def list_quality(videos):
     data = sort_quality(videos)
     log.info("Quality\tMethod")
     for i in data:
-        log.info("%s\t%s" % (i[0], i[1].upper()))
+        log.info("%s\t%s", i[0], i[1].upper())
 
 def protocol_prio(streams, priolist):
     """

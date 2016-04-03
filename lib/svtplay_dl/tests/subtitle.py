@@ -11,6 +11,12 @@ import svtplay_dl.subtitle
 
 
 class timestrTest(unittest.TestCase):
+    # pylint seem to think that svtplay_dl.subtitle refers to a
+    # class, not a module. Maybe it's confused, and got it mixed
+    # up with svtplay_dl.subtitle.subtitle? The tests pass, so
+    # i have the truth on my side.
+    #   pylint: disable-msg=no-member
+
     def test_1(self):
         self.assertEqual(svtplay_dl.subtitle.timestr(1), "00:00:00,00")
 

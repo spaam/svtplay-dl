@@ -62,7 +62,7 @@ class Twitch(Service):
         try:
             for i in data:
                 yield i
-        except TwitchUrlException as e:
+        except TwitchUrlException:
             yield ServiceError("This twitch video type is unsupported")
             return
 
