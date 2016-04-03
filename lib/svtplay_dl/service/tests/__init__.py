@@ -13,6 +13,7 @@ class HandlesURLsTestMixin():
     This should only be inherited from classes which also inherit
     a unittest compatible base class.
     """
+    # pylint: disable-msg=no-init
 
     def test_handles_urls(self):
         if len(self.urls['ok']) > 0:

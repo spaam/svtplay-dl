@@ -7,7 +7,6 @@
 
 from __future__ import absolute_import
 import unittest
-import mock
 from svtplay_dl.service import Service
 
 

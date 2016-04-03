@@ -1,11 +1,9 @@
 from __future__ import absolute_import
-import copy
 import os
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.log import log
 
 
 class Raw(Service):
