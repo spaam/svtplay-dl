@@ -101,7 +101,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle(copy.copy(self.options), "smi", i.find("url").text)
 
-        url = "http://premium.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
+        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
         data = self.http.request("get", url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
@@ -199,16 +199,17 @@ class Tv4play(Service, OpenGraphThumbMixin):
         auth_token = re.search('name="authenticity_token" ([a-z]+="[^"]+" )?value="([^"]+)"', data.text)
         if not auth_token:
             return ServiceError("Can't find authenticity_token needed for user / password")
-        url = "https://www.tv4play.se/session"
+        url = "https://account.services.tv4play.se/authenticate"
         postdata = {"username" : username, "password": password, "authenticity_token":auth_token.group(2), "https": ""}
         data = self.http.request("post", url, data=postdata, cookies=self.cookies)
-        self.cookies = data.cookies
-        fail = re.search("<p class='failed-login'>([^<]+)</p>", data.text)
-        if fail:
-            message = fail.group(1)
+        res = data.json()
+        if "errors" in res:
+            message = res["errors"][0]
             if is_py2:
                 message = message.encode("utf8")
             return ServiceError(message)
+        self.cookies={"JSESSIONID": res["vimond_session_token"]}
+
         return True
 
 
