@@ -8,6 +8,7 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils.urllib import urlparse
 
@@ -56,11 +57,18 @@ class Picsearch(Service, OpenGraphThumbMixin):
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
+                if ".m3u8" in playlist["url"]:
+                    streams = hlsparse(self.options, self.http.request("get", playlist["url"]), playlist["url"])
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
 
     def get_auth(self):
         match = re.search(r"picsearch_ajax_auth[ ]*=[ ]*['\"]([^'\"]+)['\"]", self.get_urldata())
         if not match:
             match = re.search(r'screen9-ajax-auth="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search('screen9"[ ]*:[ ]*"([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
             if match:
@@ -81,6 +89,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
             match = re.search(r'media-id="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search(r'data-id="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
             if match:
