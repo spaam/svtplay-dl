@@ -35,7 +35,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield work
                 return
 
-        url = "http://premium.tv4play.se/api/web/asset/%s/play" % vid
+        url = "http://prima.tv4play.se/api/web/asset/%s/play" % vid
         data = self.http.request("get", url, cookies=self.cookies)
         if data.status_code == 401:
             xml = ET.XML(data.content)
@@ -200,7 +200,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if not auth_token:
             return ServiceError("Can't find authenticity_token needed for user / password")
         url = "https://account.services.tv4play.se/authenticate"
-        postdata = {"username" : username, "password": password, "authenticity_token":auth_token.group(2), "https": ""}
+        postdata = {"username" : username, "password": password, "authenticity_token":auth_token.group(2), "https": "", "client": "web"}
         data = self.http.request("post", url, data=postdata, cookies=self.cookies)
         res = data.json()
         if "errors" in res:
