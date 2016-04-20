@@ -199,7 +199,8 @@ class subtitle(object):
                 subnr = True
             else:
                 sub = re.sub('<[^>]*>', '', i)
-                srt += sub.lstrip()
+                srt += sub.strip()
+                srt+="\n"
         srt = decode_html_entities(srt)
         if is_py2:
             return srt.encode("utf-8")
