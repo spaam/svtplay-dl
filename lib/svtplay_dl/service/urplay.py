@@ -59,6 +59,10 @@ class Urplay(Service, OpenGraphThumbMixin):
                                  self.get_urldata()):
             res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
 
+        for relurl in re.findall(r'<a class="card program"\s+href="([^"]*)"',
+                                  self.get_urldata()):
+            res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
+
         if options.all_last != -1:
             res = res[-options.all_last:]
 
