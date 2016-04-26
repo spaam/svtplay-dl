@@ -221,7 +221,7 @@ def get_one_media(stream, options):
     if options.subtitle and options.get_url and options.force_subtitle:
         print(subs[0].url)
         return
-    if options.subtitle and options.output != "-":
+    if options.subtitle and options.output != "-" and not options.get_url:
         if subs:
             subs[0].download()
         if options.force_subtitle:
