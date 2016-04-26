@@ -175,7 +175,7 @@ def get_all_episodes(stream, options, url):
         if o == url:
             substream = stream
         else:
-            substream = service_handler(sites, options, o)
+            substream = service_handler(sites, copy.copy(options), o)
 
         log.info("Episode %d of %d", idx + 1, len(episodes))
 
