@@ -94,8 +94,15 @@ def protocol_prio(streams, priolist):
             x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
 
 def select_quality(options, streams):
+    high = 0
+    if isinstance(options.quality, str):
+        quality = int(options.quality.split(",")[0])
+        if len(options.quality.split(",")) > 1:
+            high = int(options.quality.split(",")[1])
+    else:
+        quality = options.quality
     try:
-        optq = int(options.quality)
+        optq = int(quality)
     except ValueError:
         raise error.UIException("Requested quality needs to be a number")
 
@@ -103,6 +110,10 @@ def select_quality(options, streams):
         optf = int(options.flexibleq)
     except ValueError:
         raise error.UIException("Flexible-quality needs to be a number")
+
+    if optf == 0 and high:
+        optf = (high - quality) / 2
+        optq = quality + (high - quality) / 2
 
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
