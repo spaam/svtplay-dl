@@ -25,6 +25,11 @@ svtplay-dl is available in Debian in Jessie and later and Ubuntu in
 
 … as root.
 
+Windows
+~~~~~~~
+
+You can download windows binaries from `svtplay-dl.se`_
+
 Other systems with python
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -72,12 +77,9 @@ After install
 
     svtplay-dl [options] URL
 
-Support
--------
 
 If you encounter any bugs or problems, don’t hesitate to open an issue
-`on github`_. Or why not join the ``#svtplay-dl`` IRC channel on
-Freenode?
+`on github`_. Or why not join the ``#svtplay-dl`` IRC channel on Freenode?
 
 Supported services
 ------------------
@@ -127,6 +129,7 @@ License
 -------
 
 This project is licensed under `The MIT License (MIT)`_.
+Homepage: `svtplay-dl.se`_
 
 .. _Homebrew: http://brew.sh/
 .. _RTMPDump: http://rtmpdump.mplayerhq.hu/
@@ -135,5 +138,6 @@ This project is licensed under `The MIT License (MIT)`_.
 .. _ffmpeg: https://ffmpeg.org
 .. _avconv: https://libav.org
 .. _on github: https://github.com/spaam/svtplay-dl/issues
+.. _svtplay-dl.se: https://svtplay-dl.se
 .. _The MIT License (MIT): LICENSE
 
