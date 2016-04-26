@@ -218,6 +218,9 @@ def get_one_media(stream, options):
         log.info("No subtitles available")
         return
 
+    if options.subtitle and options.get_url and options.force_subtitle:
+        print(subs[0].url)
+        return
     if options.subtitle and options.output != "-":
         if subs:
             subs[0].download()
