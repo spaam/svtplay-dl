@@ -39,7 +39,7 @@ class subtitle(object):
             else:
                 data = subdata.text
         
-        ifself.subfix:
+        if self.subfix:
             self.options.output = self.options.output + self.subfix
             
         if platform.system() == "Windows" and is_py3:
