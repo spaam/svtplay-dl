@@ -135,6 +135,7 @@ class Options(object):
         self.stream_prio = None
         self.remux = False
         self.get_all_subtitles = False
+        self.get_raw_subtitles = False
 
 
 def get_media(url, options):
@@ -359,6 +360,8 @@ def main():
                       help="Remux from one container to mp4 using ffmpeg or avconv")
     parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
                       help="Download all available subtitles for the video")
+    parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
+                      help="Also download the subtitles in their native format")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -412,4 +415,5 @@ def mergeParserOption(options, parser):
     options.stream_prio = parser.stream_prio
     options.remux = parser.remux
     options.get_all_subtitles = parser.get_all_subtitles
+    options.get_raw_subtitles = parser.get_raw_subtitles
     return options
