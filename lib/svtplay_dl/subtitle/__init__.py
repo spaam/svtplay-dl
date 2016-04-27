@@ -37,7 +37,7 @@ class subtitle(object):
         if self.subtype == "raw":
             data = self.raw(subdata)
         
-        ifself.subfix:
+        if self.subfix:
             self.options.output = self.options.output + self.subfix
             
         if(self.options.get_raw_subtitles):
