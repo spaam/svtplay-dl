@@ -28,7 +28,7 @@ class postprocess(object):
         tempfile = "{0}.temp".format(self.stream.options.output)
         name, ext = os.path.splitext(orig_filename)
         arguments = ["-c", "copy", "-copyts", "-f", "mp4"]
-        if ext == "ts":
+        if ext == ".ts":
             arguments += ["-bsf:a", "aac_adtstoasc"]
         arguments += ["-y", tempfile]
         cmd = [self.detect, "-i", orig_filename]
