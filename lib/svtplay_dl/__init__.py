@@ -222,7 +222,7 @@ def get_one_media(stream, options):
 
     if options.subtitle and options.get_url:
         if options.get_all_subtitles:
-            for sub in subs[:]:
+            for sub in subs:
                 print(sub.url)
         else:
             print(subs[0].url)
@@ -232,7 +232,7 @@ def get_one_media(stream, options):
     if options.subtitle and options.output != "-" and not options.get_url:
         if subs:
             if options.get_all_subtitles:
-                for sub in subs[:]:
+                for sub in subs:
                     sub.download()
             else: 
                 subs[0].download()

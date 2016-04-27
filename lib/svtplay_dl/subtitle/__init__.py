@@ -11,7 +11,7 @@ import platform
 
 
 class subtitle(object):
-    def __init__(self, options, subtype, url, subfix = ""):
+    def __init__(self, options, subtype, url, subfix = None):
         self.url = url
         self.subtitle = None
         self.options = options
@@ -37,7 +37,7 @@ class subtitle(object):
         if self.subtype == "raw":
             data = self.raw(subdata)
         
-        if(self.subfix != ""):
+        ifself.subfix:
             self.options.output = self.options.output + self.subfix
             
         if(self.options.get_raw_subtitles):
