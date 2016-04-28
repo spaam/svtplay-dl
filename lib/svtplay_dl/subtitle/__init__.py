@@ -40,7 +40,7 @@ class subtitle(object):
         if self.subfix:
             self.options.output = self.options.output + self.subfix
             
-        if(self.options.get_raw_subtitles):
+        if self.options.get_raw_subtitles:
             subdata = self.raw(subdata)
             self.save_file(subdata, self.subtype)
         
