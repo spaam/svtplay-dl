@@ -53,7 +53,7 @@ class subtitle(object):
         if platform.system() == "Windows" and is_py3:
             file_d = output(self.options, subtype, mode="wt", encoding="utf-8")
         else:
-            file_d = output(self.options, "srt", mode="wt")
+            file_d = output(self.options, subtype, mode="wt")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
