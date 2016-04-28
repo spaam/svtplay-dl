@@ -179,20 +179,23 @@ def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
 
 
 def findexpisode(directory, service, name):
+    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
     match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)
     if not match:
         return False
+    
     videoid = match.group(1)
     extention = match.group(2)
+
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     for i in files:
         match = re.search(r"-(\w+)-\w+.(\w{2,3})$", i)
         if match:
             if service:
-                if extention == "srt":
+                if extention in subtitlefiles:
                     if name.find(service) and match.group(1) == videoid and match.group(2) == extention:
                         return True
-                elif match.group(2) != "srt" and match.group(2) != "m4a":
+                elif match.group(2) not in subtitlefiles and match.group(2) != "m4a":
                     if name.find(service) and match.group(1) == videoid:
                         return True
 
