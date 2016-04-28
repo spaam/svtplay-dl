@@ -142,6 +142,7 @@ def filename(stream):
 
 
 def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
+    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
     if is_py2:
         file_d = file
     else:
@@ -158,7 +159,7 @@ def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
         log.info("Outfile: %s", options.output)
         if os.path.isfile(options.output) or \
                 findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
-            if extention == "srt":
+            if extention in subtitlefiles:
                 if not options.force_subtitle:
                     log.error("File already exists. Use --force-subtitle to overwrite")
                     return None
