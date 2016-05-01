@@ -121,7 +121,8 @@ class HDS(VideoRetriever):
 
         if self.options.output != "-":
             file_d.close()
-            progress_stream.write('\n')
+            if not self.options.silent:
+                progress_stream.write('\n')
             self.finished = True
 
 
