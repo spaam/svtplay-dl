@@ -151,6 +151,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
         else:
             show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
+            if is_py2 and isinstance(show, unicode):
+                show = show.encode("utf-8")
             show = quote_plus(show)
         return show
 
@@ -160,6 +162,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if vid == i["id"]:
                 return i["title"]
         return self._get_clip_info(vid)
+
+    def _getdays(self, data, text):
+        try:
+            days = int(data["availability"][text])
+        except (ValueError, TypeError):
+            days = 999
+        return days
 
     def find_all_episodes(self, options):
         premium = False
@@ -179,10 +188,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 text = "availability_group_free"
 
-            try:
-                days = int(i["availability"][text])
-            except (ValueError, TypeError):
-                days = 999
+            days = self._getdays(i, text)
+            if premium and days == 0:
+                days = self._getdays(i, "availability_group_free")
+
             if days > 0:
                 video_id = i["id"]
                 url = "http://www.tv4play.se/program/%s?video_id=%s" % (

@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils import filenamify
 
 
 class Urplay(Service, OpenGraphThumbMixin):
@@ -31,16 +32,13 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = match.group(1)
         jsondata = json.loads(data)
         if len(jsondata["subtitles"]) > 0:
-            for sub in jsondata["subtitles"][:-1]:
-                yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "- " + sub["label"])
-        #used if you do not want to auto add subfix when downloading just one sub (should possibly also check if option is set)
-        #Loops through and adds all subtitles and adds label as subfix(last 1 is some tumbnail thingy, so strips it)
-        #if len(jsondata["subtitles"]) > 1:
-        #    for sub in jsondata["subtitles"][:-1]:
-        #        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "- " + sub["label"])
-        #Else only add one sub without subfix label
-        #elif len(jsondata["subtitles"]) > 0:
-        #    yield subtitle(copy.copy(self.options), "tt", jsondata["subtitles"][0]["file"].split(",")[0])
+            for sub in jsondata["subtitles"]:
+                if "label" in sub:
+                    if self.options.get_all_subtitles:
+                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "-" + filenamify(sub["label"]))
+                    else:
+                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0])
+                        
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:

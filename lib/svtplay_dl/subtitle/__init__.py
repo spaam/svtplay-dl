@@ -36,7 +36,7 @@ class subtitle(object):
             data = self.wrst(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
-        
+            
         if self.subfix:
             self.options.output = self.options.output + self.subfix
             
@@ -45,11 +45,8 @@ class subtitle(object):
             self.save_file(subdata, self.subtype)
         
         self.save_file(data, "srt")
-
-
         
     def save_file(self, data, subtype):
-        
         if platform.system() == "Windows" and is_py3:
             file_d = output(self.options, subtype, mode="wt", encoding="utf-8")
         else:

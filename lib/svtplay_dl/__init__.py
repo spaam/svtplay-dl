@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
+
 import sys
 import os
 import logging
@@ -9,7 +10,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import select_quality, list_quality
+from svtplay_dl.utils import select_quality, list_quality, is_py2, ensure_unicode
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -152,6 +153,9 @@ def get_media(url, options):
         if not stream:
             log.error("That site is not supported. Make a ticket or send a message")
             sys.exit(2)
+
+    if is_py2:
+        url = ensure_unicode(url)
 
     if options.all_episodes:
         get_all_episodes(stream, options, url)
@@ -344,7 +348,7 @@ def main():
     parser.add_option("--all-last", dest="all_last", default=-1, type=int,
                       metavar="NN", help="get last NN episodes instead of all episodes")
     parser.add_option("-P", "--preferred", default=None,
-                      metavar="preferred", help="preferred download method (hls, hds, http or rtmp")
+                      metavar="preferred", help="preferred download method (dash, hls, hds, http or rtmp)")
     parser.add_option("--exclude", dest="exclude", default=None,
                       metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated.")
     parser.add_option("-g", "--get-url",
@@ -362,6 +366,7 @@ def main():
                       help="Download all available subtitles for the video")
     parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
                       help="Also download the subtitles in their native format")
+                      
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()

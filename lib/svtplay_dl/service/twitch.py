@@ -126,18 +126,13 @@ class Twitch(Service):
         if method[0] != '/':
             method = '/kraken/%s' % method
 
-        # There are references to a api_token in global.js; it's used
-        # with the "Twitch-Api-Token" HTTP header. But it doesn't seem
-        # to be necessary.
-        payload = self.http.request("get", url, headers={
-            'Accept': 'application/vnd.twitchtv.v2+json'
-        })
+        payload = self.http.request("get", url)
         return json.loads(payload.text)
 
     def _get_hls_url(self, channel):
         access = self._get_access_token(channel, "channels")
 
-        query = "token=%s&sig=%s" % (quote_plus(access['token']), access['sig'])
+        query = "token=%s&sig=%s&allow_source=true&allow_spectre=true" % (quote_plus(access['token']), access['sig'])
         return "%s/%s.m3u8?%s" % (self.hls_base_url, channel, query)
 
     def _get_channel(self, options, urlp):
