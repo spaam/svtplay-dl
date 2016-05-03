@@ -135,6 +135,7 @@ class Options(object):
         self.http_headers = None
         self.stream_prio = None
         self.remux = False
+        self.get_all_subtitles = False
 
 
 def get_media(url, options):
@@ -222,12 +223,23 @@ def get_one_media(stream, options):
         log.info("No subtitles available")
         return
 
-    if options.subtitle and options.get_url and options.force_subtitle:
-        print(subs[0].url)
-        return
+    if options.subtitle and options.get_url:
+        if options.get_all_subtitles:
+            for sub in subs:
+                print(sub.url)
+        else:
+            print(subs[0].url)
+        if options.force_subtitle: 
+            return
+        
     if options.subtitle and options.output != "-" and not options.get_url:
         if subs:
-            subs[0].download()
+            if options.get_all_subtitles:
+                for sub in subs:
+                    sub.download()
+            else: 
+                subs[0].download()
+
         if options.force_subtitle:
             return
 
@@ -349,6 +361,8 @@ def main():
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
+    parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
+                      help="Download all available subtitles for the video")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -401,4 +415,5 @@ def mergeParserOption(options, parser):
     options.http_headers = parser.http_headers
     options.stream_prio = parser.stream_prio
     options.remux = parser.remux
+    options.get_all_subtitles = parser.get_all_subtitles
     return options

@@ -11,12 +11,13 @@ import platform
 
 
 class subtitle(object):
-    def __init__(self, options, subtype, url):
+    def __init__(self, options, subtype, url, subfix = None):
         self.url = url
         self.subtitle = None
         self.options = options
         self.subtype = subtype
         self.http = Session()
+        self.subfix = subfix
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
@@ -37,7 +38,10 @@ class subtitle(object):
                 data = subdata.text.encode("utf-8")
             else:
                 data = subdata.text
-
+        
+        if self.subfix:
+            self.options.output = self.options.output + self.subfix
+            
         if platform.system() == "Windows" and is_py3:
             file_d = output(self.options, "srt", mode="wt", encoding="utf-8")
         else:
