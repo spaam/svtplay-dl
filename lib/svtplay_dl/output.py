@@ -149,7 +149,8 @@ def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
         file_d = io.IOBase
 
     if options.output != "-":
-        ext = re.search(r"(\.\w{2,3})$", options.output)
+        ext = re.search(r"(\.\w{2,4})$", options.output)
+        print(options.output)
         if not ext:
             options.output = "%s.%s" % (options.output, extention)
         if options.output_auto and ext:
