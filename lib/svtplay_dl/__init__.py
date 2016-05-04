@@ -136,12 +136,15 @@ class Options(object):
         self.stream_prio = None
         self.remux = False
         self.get_all_subtitles = False
+        self.silent_semi = False
 
 
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
 
+    if options.silent_semi:
+        options.silent = True
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
@@ -278,13 +281,16 @@ def get_one_media(stream, options):
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if options.remux:
             post.remux()
+        if options.silent_semi and stream.finished:
+            log.log(25, "Download of %s was completed" % stream.options.output)
 
 
 def setup_log(silent, verbose=False):
+    logging.addLevelName(25, "INFO")
     fmt = logging.Formatter('%(levelname)s: %(message)s')
     if silent:
         stream = sys.stderr
-        level = logging.WARNING
+        level = 25
     elif verbose:
         stream = sys.stderr
         level = logging.DEBUG
@@ -318,6 +324,8 @@ def main():
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False,
                       help="be less verbose")
+    parser.add_option("--silent-semi", action="store_true",
+                      dest="silent_semi", default=False, help="only show a message when the file is downloaded")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="explain what is going on")
@@ -377,6 +385,8 @@ def main():
     if options.require_subtitle:
         options.subtitle = True
     options = mergeParserOption(Options(), options)
+    if options.silent_semi:
+        options.silent = True
     setup_log(options.silent, options.verbose)
 
     if options.flexibleq and not options.quality:
@@ -401,6 +411,7 @@ def mergeParserOption(options, parser):
     options.flexibleq = parser.flexibleq
     options.list_quality = parser.list_quality
     options.subtitle = parser.subtitle
+    options.silent_semi = parser.silent_semi
     options.username = parser.username
     options.password = parser.password
     options.thumbnail = parser.thumbnail
