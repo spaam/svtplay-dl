@@ -12,21 +12,29 @@ TMPDIR=$(mktemp -d svtplay-man-test-XXXXXX)
 }
 trap 'rm -rf "$TMPDIR"' EXIT TERM
 
+if echo "" | sed -r "" > /dev/null 2>&1 ; then
+	extended_regexp="-r"
+elif echo "" | sed -E "" > /dev/null 2>&1 ; then
+	extended_regexp="-E"
+else
+	echo "Cant find extented regex"
+fi
+
 # FIXME: *Currently* we don't have any =head3 that doesn't
 # document an option. This is thus fragile to changes.
-sed -nre 's/^=head3 //p' svtplay-dl.pod > $TMPDIR/options.man
+sed $extended_regexp -ne 's/^=head3 //p' svtplay-dl.pod > $TMPDIR/options.man
 
 ./svtplay-dl --help | grep '^ *-' > $TMPDIR/options.help
 
 # --help specific filtering
-sed -i -re 's/   .*//' $TMPDIR/options.help
-sed -i -re 's/  excl.*//' $TMPDIR/options.help
-sed -i -re 's/^ *//' $TMPDIR/options.help
-sed -i -re 's/OUTPUT/filename/g' $TMPDIR/options.help
+sed -i $extended_regexp -e 's/   .*//' $TMPDIR/options.help
+sed -i $extended_regexp -e 's/  excl.*//' $TMPDIR/options.help
+sed -i $extended_regexp -e 's/^ *//' $TMPDIR/options.help
+sed -i $extended_regexp -e 's/OUTPUT/filename/g' $TMPDIR/options.help
 
 for file in $TMPDIR/options.*; do
-	sed -i -re 's/, / /' $file
-	sed -i -re 's/  / /' $file
+	sed -i $extended_regexp -e 's/, / /' $file
+	sed -i $extended_regexp -e 's/  / /' $file
 
 	# Normalize order of --help -h vs -h --help
 	#  "--help -h"   =>  "-h --help"
