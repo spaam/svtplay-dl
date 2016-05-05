@@ -49,7 +49,7 @@ from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
 
-__version__ = "1.0"
+__version__ = "1.1"
 
 sites = [
     Aftonbladet,
@@ -137,12 +137,14 @@ class Options(object):
         self.remux = False
         self.get_all_subtitles = False
         self.get_raw_subtitles = False
-
+        self.silent_semi = False
 
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
 
+    if options.silent_semi:
+        options.silent = True
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
@@ -279,13 +281,16 @@ def get_one_media(stream, options):
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if options.remux:
             post.remux()
+        if options.silent_semi and stream.finished:
+            log.log(25, "Download of %s was completed" % stream.options.output)
 
 
 def setup_log(silent, verbose=False):
+    logging.addLevelName(25, "INFO")
     fmt = logging.Formatter('%(levelname)s: %(message)s')
     if silent:
         stream = sys.stderr
-        level = logging.WARNING
+        level = 25
     elif verbose:
         stream = sys.stderr
         level = logging.DEBUG
@@ -319,6 +324,8 @@ def main():
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False,
                       help="be less verbose")
+    parser.add_option("--silent-semi", action="store_true",
+                      dest="silent_semi", default=False, help="only show a message when the file is downloaded")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="explain what is going on")
@@ -336,6 +343,8 @@ def main():
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
                       action="store_true", help="download only if a subtitle is available")
+    parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
+                      help="Download all available subtitles for the video")
     parser.add_option("-u", "--username", default=None,
                       help="username")
     parser.add_option("-p", "--password", default=None,
@@ -363,10 +372,6 @@ def main():
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
-    parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
-                      help="Download all available subtitles for the video")
-    parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
-                      help="Also download the subtitles in their native format")
                       
     (options, args) = parser.parse_args()
     if not args:
@@ -381,6 +386,8 @@ def main():
     if options.require_subtitle:
         options.subtitle = True
     options = mergeParserOption(Options(), options)
+    if options.silent_semi:
+        options.silent = True
     setup_log(options.silent, options.verbose)
 
     if options.flexibleq and not options.quality:
@@ -405,6 +412,7 @@ def mergeParserOption(options, parser):
     options.flexibleq = parser.flexibleq
     options.list_quality = parser.list_quality
     options.subtitle = parser.subtitle
+    options.silent_semi = parser.silent_semi
     options.username = parser.username
     options.password = parser.password
     options.thumbnail = parser.thumbnail
