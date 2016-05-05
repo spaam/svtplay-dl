@@ -47,6 +47,10 @@ Enable support for live streams. (rtmp based ones)
 
 Be less verbose.
 
+=head3 --silent-semi
+
+only show a message when the file is downloaded
+
 =head3 --verbose  -v
 
 Explain what is going on, including HTTP requests and other useful
@@ -76,6 +80,10 @@ Download only subtitle if its used with -S.
 =head3 --require-subtitle
 
 Download only if a subtitle is available
+
+=head3 --all-subtitles
+
+Download all available subtitles for the video
 
 =head3 --username=USERNAME  -u USERNAME
 
