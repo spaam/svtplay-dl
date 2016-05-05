@@ -224,11 +224,12 @@ def get_one_media(stream, options):
         return
 
     if options.subtitle and options.get_url:
-        if options.get_all_subtitles:
-            for sub in subs:
-                print(sub.url)
-        else:
-            print(subs[0].url)
+        if subs:
+            if options.get_all_subtitles:
+                for sub in subs:
+                    print(sub.url)
+            else:
+                print(subs[0].url)
         if options.force_subtitle: 
             return
         
