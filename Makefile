@@ -75,7 +75,7 @@ clean_releasedir:
 
 release: $(RELEASE_DIR) release-test
 	set -e; cd $(RELEASE_DIR) && \
-		sed -i -re 's/^(__version__ = ).*/\1"$(NEW_RELEASE)"/' lib/svtplay_dl/__init__.py;\
+		sed -i -re 's/^\(__version__ = \).*/\1"$(NEW_RELEASE)"/' lib/svtplay_dl/__init__.py;\
 		git add Makefile lib/svtplay_dl/__init__.py; \
 		git commit -m "New release $(NEW_RELEASE)";
 	(cd $(RELEASE_DIR) && git format-patch --stdout HEAD^) | git am
