@@ -343,6 +343,8 @@ def main():
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
                       action="store_true", help="download only if a subtitle is available")
+    parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
+                      help="Download all available subtitles for the video")
     parser.add_option("-u", "--username", default=None,
                       help="username")
     parser.add_option("-p", "--password", default=None,
@@ -370,8 +372,6 @@ def main():
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
-    parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
-                      help="Download all available subtitles for the video")
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
