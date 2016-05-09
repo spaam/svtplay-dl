@@ -215,7 +215,18 @@ class subtitle(object):
                 srt += "%s\n" % number
                 subnr = True
             else:
-                sub = re.sub('<[^>]*>', '', i)
+                if self.options.convert_subtitle_colors:
+                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
+                    sub = i
+                    for tag, color in colors.items():
+                        regex1 = '<' + tag + '>'
+                        replace = '<font color="' + color + '">'
+                        sub = re.sub(regex1, replace, sub)
+                        
+                    sub = re.sub('</.+>', '</font>',sub)
+                else:
+                    sub = re.sub('<[^>]*>', '', i)
+                                        
                 srt += sub.strip()
                 srt+="\n"
         srt = decode_html_entities(srt)
