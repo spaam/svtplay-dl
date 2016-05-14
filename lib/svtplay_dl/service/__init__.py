@@ -54,12 +54,12 @@ class Service(object):
     def get_subtitle(self, options):
         pass
 
-    def exclude(self, options):
-        if options.exclude:
-            for i in options.exclude:
+    def exclude(self):
+        if self.options.exclude:
+            for i in self.options.exclude:
                 if is_py2:
                     i = i.decode("utf-8")
-                if i in options.output:
+                if i in self.options.output:
                     return True
         return False
 
