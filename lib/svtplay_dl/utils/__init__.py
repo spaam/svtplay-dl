@@ -96,9 +96,12 @@ def protocol_prio(streams, priolist):
 def select_quality(options, streams):
     high = 0
     if isinstance(options.quality, str):
-        quality = int(options.quality.split(",")[0])
-        if len(options.quality.split(",")) > 1:
-            high = int(options.quality.split(",")[1])
+        try:
+            quality = int(options.quality.split("-")[0])
+            if len(options.quality.split("-")) > 1:
+                high = int(options.quality.split("-")[1])
+        except ValueError:
+            raise error.UIException("Requested quality is invalid. use a number or range lowerNumber-higherNumber")
     else:
         quality = options.quality
     try:
