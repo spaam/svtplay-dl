@@ -81,7 +81,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 self.options.output = title
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

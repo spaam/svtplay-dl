@@ -24,7 +24,7 @@ class Hbo(Service):
             log.error("Something wrong with that url")
             return
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

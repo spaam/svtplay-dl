@@ -25,7 +25,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find json info")
             return
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

@@ -16,7 +16,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

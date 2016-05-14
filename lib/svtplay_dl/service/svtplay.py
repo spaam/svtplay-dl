@@ -60,7 +60,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             self.options.service = "svtplay"
             self.options.output = self.outputfilename(dataj, self.options.output, ensure_unicode(self.get_urldata()))
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

@@ -32,7 +32,7 @@ class Mtvservices(Service):
         else:
             sa = list(ss.iter("rendition"))
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

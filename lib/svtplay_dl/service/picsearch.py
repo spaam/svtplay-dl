@@ -17,7 +17,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ['dn.se', 'mobil.dn.se', 'di.se', 'csp.picsearch.com', 'csp.screen9.com']
 
     def get(self):
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

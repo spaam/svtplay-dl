@@ -24,9 +24,6 @@ class Dplay(Service):
         premium = False
         parse = urlparse(self.url)
         domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
-        if self.exclude(self.options):
-            yield ServiceError("Excluding video")
-            return
 
         match = re.search(r"<link rel='shortlink' href='[^']+/\?p=(\d+)", data)
         if not match:
@@ -66,6 +63,11 @@ class Dplay(Service):
                 self.options.output = os.path.join(directory, title)
             else:
                 self.options.output = title
+
+        if self.exclude():
+            yield ServiceError("Excluding video")
+            return
+
         suburl = dataj["data"][0]["subtitles_sv_srt"]
         if len(suburl) > 0:
             yield subtitle(copy.copy(self.options), "raw", suburl)

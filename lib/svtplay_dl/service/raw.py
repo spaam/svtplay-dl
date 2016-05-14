@@ -10,7 +10,7 @@ class Raw(Service):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude(self.options):
+        if self.exclude():
             return
 
         extention = False

@@ -72,7 +72,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if dataj["type"] == "live":
             self.options.live = True
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 

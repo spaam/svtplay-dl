@@ -47,7 +47,7 @@ class Twitch(Service):
     def get(self):
         urlp = urlparse(self.url)
 
-        if self.exclude(self.options):
+        if self.exclude():
             yield ServiceError("Excluding video")
             return
 
