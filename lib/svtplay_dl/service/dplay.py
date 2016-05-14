@@ -70,9 +70,6 @@ class Dplay(Service):
         if len(suburl) > 0:
             yield subtitle(copy.copy(self.options), "raw", suburl)
 
-        if self.options.force_subtitle:
-            return
-
         data = self.http.request("get", "http://geo.%s/geo.js" % domain).text
         dataj = json.loads(data)
         geo = dataj["countryCode"]

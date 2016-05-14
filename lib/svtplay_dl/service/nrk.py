@@ -30,9 +30,6 @@ class Nrk(Service, OpenGraphThumbMixin):
             suburl = "%s://%s%s" % (parse.scheme, parse.netloc, match.group(1))
             yield subtitle(copy.copy(self.options), "tt", suburl)
 
-        if self.options.force_subtitle:
-            return
-
         match = re.search(r'data-media="(.*manifest.f4m)"', self.get_urldata())
         if match:
             manifest_url = match.group(1)
