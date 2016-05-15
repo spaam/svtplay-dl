@@ -23,7 +23,7 @@ class Disney(Service, OpenGraphThumbMixin):
         if parse.hostname == "video.disney.se" or parse.hostname == "disneyjunior.disney.se":
             data = self.get_urldata()
 
-            if self.exclude(self.options):
+            if self.exclude():
                 yield ServiceError("Excluding video")
                 return
 
@@ -78,9 +78,6 @@ class Disney(Service, OpenGraphThumbMixin):
                 else:
                     self.options.output = title
 
-            if self.exclude():
-                return
-
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
             (partnerid, uiconfid, entryid, uniq)
             data = self.http.request("get", url).text
@@ -100,6 +97,9 @@ class Disney(Service, OpenGraphThumbMixin):
                     self.options.output = os.path.join(directory, title)
                 else:
                     self.options.output = title
+
+            if self.exclude():
+                return
 
             url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
