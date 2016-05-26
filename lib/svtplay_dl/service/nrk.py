@@ -38,8 +38,10 @@ class Nrk(Service, OpenGraphThumbMixin):
             if match is None:
                 match = re.search(r'video-id="([^"]+)"', self.get_urldata())
                 if match is None:
-                    yield ServiceError("Can't find video id.")
-                    return
+                    match = re.search("<meta name=\"programid\".*?content=\"([^\"]*)\"", self.get_urldata())
+                    if match is None:
+                        yield ServiceError("Can't find video id.")
+                        return
             vid = match.group(1)
             dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % vid
             data = self.http.request("get", dataurl).text
