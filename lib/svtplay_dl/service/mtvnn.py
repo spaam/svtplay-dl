@@ -14,7 +14,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 
 # This is _very_ similar to mtvservices..
 class Mtvnn(Service, OpenGraphThumbMixin):
-    supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no", "www.comedycentral.se"]
+    supported_domains = ['nickelodeon.se', "nickelodeon.nl", "nickelodeon.no", "www.comedycentral.se", "nickelodeon.dk"]
 
     def get(self):
         data = self.get_urldata()
