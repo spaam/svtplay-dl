@@ -43,11 +43,19 @@ class Nrk(Service, OpenGraphThumbMixin):
                         yield ServiceError("Can't find video id.")
                         return
             vid = match.group(1)
-            dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % vid
+            dataurl = "https://psapi-we.nrk.no/mediaelement/%s" % vid
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
             manifest_url = data["mediaUrl"]
             self.options.live = data["isLive"]
+            if manifest_url is None:
+                if data["messageType"] == "ProgramIsGeoBlocked":
+                    yield ServiceError("Can't fetch the video because of geoblocked")
+                    return
+
+        if manifest_url is None:
+            yield ServiceError("No videos available")
+            return
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         data = self.http.request("get", hlsurl)
