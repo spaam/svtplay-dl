@@ -214,6 +214,7 @@ def get_one_media(stream, options):
                 error.append(i)
     except Exception as e:
         if options.verbose:
+            log.error("version: %s" % __version__)
             raise
         else:
             log.error("svtplay-dl crashed")
