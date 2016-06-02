@@ -234,7 +234,7 @@ def timestr(msec):
     minutes = int(sec / 60)
     sec -= minutes * 60
 
-    output = "%02d:%02d:%05.3f" % (hours, minutes, sec)
+    output = "%02d:%02d:%06.3f" % (hours, minutes, sec)
     return output.replace(".", ",")
 
 

@@ -18,13 +18,13 @@ class timestrTest(unittest.TestCase):
     #   pylint: disable-msg=no-member
 
     def test_1(self):
-        self.assertEqual(svtplay_dl.subtitle.timestr(1), "00:00:00,00")
+        self.assertEqual(svtplay_dl.subtitle.timestr(1), "00:00:00,001")
 
     def test_100(self):
-        self.assertEqual(svtplay_dl.subtitle.timestr(100), "00:00:00,10")
+        self.assertEqual(svtplay_dl.subtitle.timestr(100), "00:00:00,100")
 
     def test_3600(self):
-        self.assertEqual(svtplay_dl.subtitle.timestr(3600), "00:00:03,60")
+        self.assertEqual(svtplay_dl.subtitle.timestr(3600), "00:00:03,600")
 
     def test_3600000(self):
-        self.assertEqual(svtplay_dl.subtitle.timestr(3600000), "01:00:00,00")
+        self.assertEqual(svtplay_dl.subtitle.timestr(3600000), "01:00:00,000")
