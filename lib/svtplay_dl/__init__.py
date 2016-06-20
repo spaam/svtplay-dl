@@ -122,6 +122,7 @@ class Options(object):
         self.thumbnail = False
         self.all_episodes = False
         self.all_last = -1
+        self.merge_subtitle = False
         self.force_subtitle = False
         self.require_subtitle = False
         self.preferred = None
@@ -196,6 +197,13 @@ def get_one_media(stream, options):
     if not filename(stream):
         return
 
+    if options.merge_subtitle:
+        from svtplay_dl.utils import which
+        if not which('ffmpeg'):
+            log.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
+            log.info("https://ffmpeg.org/download.html")
+            sys.exit(2)
+
     videos = []
     subs = []
     error = []
@@ -236,12 +244,15 @@ def get_one_media(stream, options):
                 print(subs[0].url)
         if options.force_subtitle: 
             return
-        
+    
+    subfixes = []
     if options.subtitle and options.output != "-" and not options.get_url:
         if subs:
             if options.get_all_subtitles:
                 for sub in subs:
                     sub.download()
+                    if options.merge_subtitle:
+                        subfixes += [sub.subfix]
             else: 
                 subs[0].download()
 
@@ -250,6 +261,18 @@ def get_one_media(stream, options):
 
     if options.force_subtitle:
         return
+
+    if options.merge_subtitle and not options.subtitle:
+        if subs:
+            if options.get_all_subtitles:
+                for sub in subs:
+                    sub.download()
+                    subfixes += [sub.subfix]
+            else:
+                subs[0].download()
+        else:
+            options.merge_subtitle = False
+
 
     if len(videos) == 0:
         for exc in error:
@@ -278,7 +301,7 @@ def get_one_media(stream, options):
                 stream.get_thumbnail(options)
             else:
                 log.warning("Can not get thumbnail when fetching to stdout")
-        post = postprocess(stream)
+        post = postprocess(stream, options, subfixes)
         if stream.name() == "dash" and post.detect:
             post.merge()
         if stream.name() == "dash" and not post.detect and stream.finished:
@@ -334,7 +357,7 @@ def main():
                       action="store_true", dest="verbose", default=False,
                       help="explain what is going on")
     parser.add_option("-q", "--quality", default=0,
-                      metavar="quality", help="choose what format to download based on bitrate / video resolution."
+                      metavar="quality", help="choose what format to download based on bitrate / video resolution. "
                                               "it will download the best format by default")
     parser.add_option("-Q", "--flexible-quality", default=0,
                       metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount")
@@ -343,6 +366,9 @@ def main():
     parser.add_option("-S", "--subtitle",
                       action="store_true", dest="subtitle", default=False,
                       help="download subtitle from the site if available")
+    parser.add_option("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle",
+                      default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. "
+                                            "use with -S for external also. if not dash method, use with --remux.")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
@@ -387,7 +413,10 @@ def main():
     if options.force_subtitle:
         options.subtitle = True
     if options.require_subtitle:
-        options.subtitle = True
+        if options.merge_subtitle:
+            options.merge_subtitle = True
+        else:
+            options.subtitle = True
     options = mergeParserOption(Options(), options)
     if options.silent_semi:
         options.silent = True
@@ -415,6 +444,7 @@ def mergeParserOption(options, parser):
     options.flexibleq = parser.flexibleq
     options.list_quality = parser.list_quality
     options.subtitle = parser.subtitle
+    options.merge_subtitle = parser.merge_subtitle
     options.silent_semi = parser.silent_semi
     options.username = parser.username
     options.password = parser.password
