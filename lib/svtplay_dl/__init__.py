@@ -206,6 +206,7 @@ def get_one_media(stream, options):
 
     videos = []
     subs = []
+    subfixes = []
     error = []
     streams = stream.get()
     try:
@@ -244,9 +245,8 @@ def get_one_media(stream, options):
                 print(subs[0].url)
         if options.force_subtitle: 
             return
-    
-    subfixes = []
-    if options.subtitle and options.output != "-" and not options.get_url:
+
+    def options_subs_dl(subfixes):
         if subs:
             if options.get_all_subtitles:
                 for sub in subs:
@@ -255,23 +255,16 @@ def get_one_media(stream, options):
                         subfixes += [sub.subfix]
             else: 
                 subs[0].download()
+        elif options.merge_subtitle:
+            options.merge_subtitle = False
 
+    if options.subtitle and options.output != "-" and not options.get_url:
+        options_subs_dl(subfixes)
         if options.force_subtitle:
             return
 
-    if options.force_subtitle:
-        return
-
     if options.merge_subtitle and not options.subtitle:
-        if subs:
-            if options.get_all_subtitles:
-                for sub in subs:
-                    sub.download()
-                    subfixes += [sub.subfix]
-            else:
-                subs[0].download()
-        else:
-            options.merge_subtitle = False
+        options_subs_dl(subfixes)
 
 
     if len(videos) == 0:
@@ -283,11 +276,11 @@ def get_one_media(stream, options):
             return
         try:
             stream = select_quality(options, videos)
-            log.info("Selected to download %s, bitrate: %s",
-                     stream.name(), stream.bitrate)
             if options.get_url:
                 print(stream.url)
                 return
+            log.info("Selected to download %s, bitrate: %s",
+                     stream.name(), stream.bitrate)
             stream.download()
         except UIException as e:
             if options.verbose:
@@ -410,8 +403,6 @@ def main():
         parser.error("Incorrect number of arguments")
     if options.exclude:
         options.exclude = options.exclude.split(",")
-    if options.force_subtitle:
-        options.subtitle = True
     if options.require_subtitle:
         if options.merge_subtitle:
             options.merge_subtitle = True

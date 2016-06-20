@@ -21,9 +21,6 @@ class postprocess(object):
         for i in ["ffmpeg", "avconv"]:
             self.detect = which(i)
             if self.detect:
-                if self.merge_subtitle and not 'ffmpeg' in self.detect:
-                    log.error("error no ffmpeg")
-                    import sys; sys.exit(2)
                 break
 
     def sublanguage(self):
