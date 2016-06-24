@@ -252,7 +252,9 @@ def get_one_media(stream, options):
                 for sub in subs:
                     sub.download()
                     if options.merge_subtitle:
-                        subfixes += [sub.subfix]
+                        if not sub.subfix == None:
+                            subfixes += [sub.subfix]
+                        else: options.get_all_subtitles = False
             else: 
                 subs[0].download()
         elif options.merge_subtitle:
@@ -361,7 +363,7 @@ def main():
                       help="download subtitle from the site if available")
     parser.add_option("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle",
                       default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. "
-                                            "use with -S for external also. if not dash method, use with --remux.")
+                                            "use with -S for external also.")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
@@ -408,6 +410,8 @@ def main():
             options.merge_subtitle = True
         else:
             options.subtitle = True
+    if options.merge_subtitle:
+        options.remux = True
     options = mergeParserOption(Options(), options)
     if options.silent_semi:
         options.silent = True
