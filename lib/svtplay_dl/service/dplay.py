@@ -68,7 +68,8 @@ class Dplay(Service):
             yield ServiceError("Excluding video")
             return
 
-        suburl = dataj["data"][0]["subtitles_sv_srt"]
+        subt = "subtitles_%s_srt" % self._country2lang()
+        suburl = dataj["data"][0][subt]
         if len(suburl) > 0:
             yield subtitle(copy.copy(self.options), "raw", suburl)
 
@@ -119,6 +120,15 @@ class Dplay(Service):
             return True
         else:
             return False
+
+    def _country2lang(self):
+        parse = urlparse(self.url)
+        domain = re.search(r"dplay\.(\w\w)", parse.netloc).group(1)
+        country = {"se": "sv", "no": "no", "dk": "da"}
+        if domain and domain in country:
+            return country[domain]
+        else:
+            return "sv"
 
     def _playable(self, dataj, premium):
         if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium" and not premium:
