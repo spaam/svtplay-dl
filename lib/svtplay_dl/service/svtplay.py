@@ -5,6 +5,7 @@ import re
 import os
 import xml.etree.ElementTree as ET
 import copy
+import json
 import hashlib
 
 from svtplay_dl.log import log
@@ -153,11 +154,19 @@ class Svtplay(Service, OpenGraphThumbMixin):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
                           self.get_urldata())
         if match is None:
-            match = re.findall(r'a class="play[^"]+"\s+href="(/video[^"]+)"', self.get_urldata())
-            if not match:
+            videos = []
+            match = re.search('_svtplay"] = ({.*});', self.get_urldata())
+            if match:
+                dataj = json.loads(match.group(1))
+                items = dataj["context"]["dispatcher"]["stores"]["VideoTitlePageStore"]["data"]["relatedVideoTabs"]
+            else:
                 log.error("Couldn't retrieve episode list")
                 return
-            episodes = [urljoin("http://www.svtplay.se", x) for x in match]
+            for i in items:
+                if "sasong" in i["slug"]:
+                    for n in i["videos"]:
+                        videos.append(n["url"])
+            episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
             data = self.http.request("get", match.group(1)).content
             xml = ET.XML(data)
