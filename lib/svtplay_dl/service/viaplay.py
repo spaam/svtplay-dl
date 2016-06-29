@@ -131,9 +131,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
             log.error("Can't find video info for all episodes")
             return
         data = self.http.request("get", "http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1)).text
+        videos = []
         jsondata = json.loads(data)
-        videos = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"][0]["_embedded"]["episodelist"]["_embedded"]["videos"]
-
+        jsons = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"]
+        for i in jsons:
+            grej = i["_embedded"]["episodelist"]
+            if "_links" in grej and "_embedded" not in grej:
+                data2 = self.http.request("get", grej["_links"]["self"]["href"]).json()
+                for x in data2["_embedded"]["videos"]:
+                    videos.append(x)
+            if "_embedded" in grej:
+                for x in grej["_embedded"]["videos"]:
+                    videos.append(x)
         n = 0
         episodes = []
         for i in videos:
