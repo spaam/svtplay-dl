@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+import base64
 import re
 import json
 import copy
@@ -11,6 +12,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
+from svtplay_dl.utils.urllib import urlparse, urljoin
 
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -68,6 +70,51 @@ class Dr(Service, OpenGraphThumbMixin):
                         self.options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
                         rtmp = "rtmp://vod.dr.dk/cms/"
                         yield RTMP(copy.copy(self.options), rtmp, stream['Bitrate'])
+
+    def find_all_episodes(self, options):
+        episodes = []
+        matches = re.findall(r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"',
+                             self.get_urldata())
+        for encpath, enccomp in matches:
+            newstyle = '_' in encpath
+            if newstyle:
+                encbasepath = encpath.split('_')[0]
+                path = base64.b64decode(encbasepath + '===')
+            else:
+                path = base64.b64decode(encpath + '===')
+
+            if '/view/' in path:
+                continue
+
+            params = 'offset=0&limit=1000'
+            if newstyle:
+                encparams = base64.b64encode(params).rstrip('=')
+                encpath = '%s_%s' % (encbasepath, encparams)
+            else:
+                path = '%s?%s' % (urlparse(path).path, params)
+                encpath = base64.b64encode(path).rstrip('=')
+
+            url = urljoin('https://www.dr.dk/tv/partial/',
+                          '%s/%s' % (enccomp, encpath))
+            data = self.http.request('get', url).content
+
+            matches = re.findall(r'"program-link" href="([^"]+)">', data)
+            episodes = [urljoin('https://www.dr.dk/', url) for url in matches]
+            break
+
+        if not episodes:
+            prefix = '/'.join(urlparse(self.url).path.rstrip('/').split('/')[:-1])
+            matches = re.findall(r'"program-link" href="([^"]+)">', self.get_urldata())
+            episodes = [urljoin('https://www.dr.dk/', url)
+                        for url in matches
+                        if url.startswith(prefix)]
+
+        if options.all_last != -1:
+            episodes = episodes[:options.all_last]
+        else:
+            episodes.reverse()
+
+        return episodes
 
     def find_stream(self, options, resource):
         tempresource = resource['Data'][0]['Assets']
