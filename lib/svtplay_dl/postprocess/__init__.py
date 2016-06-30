@@ -13,9 +13,7 @@ class postprocess(object):
         self.stream = stream
         self.merge_subtitle = options.merge_subtitle
         self.external_subtitle = options.subtitle
-        self.require_subtitle = options.require_subtitle
         self.get_all_subtitles = options.get_all_subtitles
-        self.output = options.output
         self.subfixes = subfixes
         self.detect = None
         for i in ["ffmpeg", "avconv"]:
@@ -157,10 +155,8 @@ class postprocess(object):
 
         if self.merge_subtitle:
             langs = self.sublanguage()
-            stream = -1
-            for language in langs:
-                stream += 1
-                arguments += ["-map", str(stream + 1), "-c:s:" + str(stream), "mov_text", "-metadata:s:s:" + str(stream), "language=" + language]
+            for stream_num, language in enumerate(langs, start = 2):
+                arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text", "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
                     subfile = "{}.srt".format(name + subfix)
@@ -178,7 +174,7 @@ class postprocess(object):
             msg = stderr.strip().split('\n')[-1]
             log.error("Something went wrong: %s", msg)
             return
-        
+
         log.info("Merging done, removing old files.")
         os.remove(orig_filename)
         os.remove(audio_filename)
