@@ -165,7 +165,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
             for i in items:
                 if "sasong" in i["slug"]:
                     for n in i["videos"]:
-                        videos.append(n["url"])
+                        if n["url"] not in videos:
+                            videos.append(n["url"])
+                if "senast" in i["slug"]:
+                    for n in i["videos"]:
+                        if n["url"] not in videos:
+                            videos.append(n["url"])
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
             data = self.http.request("get", match.group(1)).content
