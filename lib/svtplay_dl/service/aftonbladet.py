@@ -27,7 +27,7 @@ class Aftonbladet(Service):
                 yield ServiceError("Can't find video info")
                 return
             janson = json.loads(decode_html_entities(match.group(1)))
-            videoId = janson["videoId"]
+            videoId = janson["aptomaVideoId"]
         else:
             videoId = match.group(1)
             match = re.search(r'data-isLive="(\w+)"', data)
