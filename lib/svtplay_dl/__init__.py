@@ -125,6 +125,9 @@ class Options(object):
         self.merge_subtitle = False
         self.force_subtitle = False
         self.require_subtitle = False
+        self.get_all_subtitles = False
+        self.get_raw_subtitles = False
+        self.convert_subtitle_colors = False
         self.preferred = None
         self.verbose = False
         self.output_auto = False
@@ -136,9 +139,7 @@ class Options(object):
         self.http_headers = None
         self.stream_prio = None
         self.remux = False
-        self.get_all_subtitles = False
         self.silent_semi = False
-
 
 def get_media(url, options):
     if "http" not in url[:4]:
@@ -370,6 +371,10 @@ def main():
                       action="store_true", help="download only if a subtitle is available")
     parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
                       help="Download all available subtitles for the video")
+    parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
+                      help="lso download the subtitles in their native format")
+    parser.add_option("--convert-subtitle-colors", dest="convert_subtitle_colors", default=False, action="store_true",
+                        help="converts the color information in subtitles, to <font color=""> tags")
     parser.add_option("-u", "--username", default=None,
                       help="username")
     parser.add_option("-p", "--password", default=None,
@@ -397,6 +402,7 @@ def main():
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
+                      
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -457,4 +463,6 @@ def mergeParserOption(options, parser):
     options.stream_prio = parser.stream_prio
     options.remux = parser.remux
     options.get_all_subtitles = parser.get_all_subtitles
+    options.get_raw_subtitles = parser.get_raw_subtitles
+    options.convert_subtitle_colors = parser.convert_subtitle_colors
     return options

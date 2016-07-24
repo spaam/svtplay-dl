@@ -21,8 +21,9 @@ class subtitle(object):
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
-
+        
         data = None
+       
         if self.subtype == "tt":
             data = self.tt(subdata)
         if self.subtype == "json":
@@ -34,23 +35,35 @@ class subtitle(object):
         if self.subtype == "wrst":
             data = self.wrst(subdata)
         if self.subtype == "raw":
-            if is_py2:
-                data = subdata.text.encode("utf-8")
-            else:
-                data = subdata.text
-        
+            data = self.raw(subdata)
+            
         if self.subfix:
             self.options.output = self.options.output + self.subfix
             
+        if self.options.get_raw_subtitles:
+            subdata = self.raw(subdata)
+            self.save_file(subdata, self.subtype)
+        
+        self.save_file(data, "srt")
+        
+    def save_file(self, data, subtype):
         if platform.system() == "Windows" and is_py3:
-            file_d = output(self.options, "srt", mode="wt", encoding="utf-8")
+            file_d = output(self.options, subtype, mode="wt", encoding="utf-8")
         else:
-            file_d = output(self.options, "srt", mode="wt")
+            file_d = output(self.options, subtype, mode="wt")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
         file_d.close()
-
+        
+        
+    def raw(self, subdata): 
+        if is_py2:
+            data = subdata.text.encode("utf-8")
+        else:
+            data = subdata.text
+        return data
+        
     def tt(self, subdata):
         i = 1
         data = ""
@@ -207,7 +220,18 @@ class subtitle(object):
                 srt += "%s\n" % number
                 subnr = True
             else:
-                sub = re.sub('<[^>]*>', '', i)
+                if self.options.convert_subtitle_colors:
+                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
+                    sub = i
+                    for tag, color in colors.items():
+                        regex1 = '<' + tag + '>'
+                        replace = '<font color="' + color + '">'
+                        sub = re.sub(regex1, replace, sub)
+                        
+                    sub = re.sub('</.+>', '</font>',sub)
+                else:
+                    sub = re.sub('<[^>]*>', '', i)
+                                        
                 srt += sub.strip()
                 srt+="\n"
         srt = decode_html_entities(srt)
