@@ -253,9 +253,10 @@ def get_one_media(stream, options):
                 for sub in subs:
                     sub.download()
                     if options.merge_subtitle:
-                        if not sub.subfix == None:
+                        if sub.subfix:
                             subfixes += [sub.subfix]
-                        else: options.get_all_subtitles = False
+                        else:
+                            options.get_all_subtitles = False
             else: 
                 subs[0].download()
         elif options.merge_subtitle:
