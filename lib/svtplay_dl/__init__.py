@@ -334,7 +334,7 @@ def main():
     usage = "Usage: %prog [options] url"
     parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--output",
-                      metavar="OUTPUT", help="outputs to the given filename")
+                      metavar="OUTPUT", help="outputs to the given filename or folder")
     parser.add_option("-f", "--force",
                       action="store_true", dest="force", default=False,
                       help="overwrite if file exists already")
