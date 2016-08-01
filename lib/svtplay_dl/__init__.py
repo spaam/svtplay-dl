@@ -364,7 +364,7 @@ def main():
                       help="download subtitle from the site if available")
     parser.add_option("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle",
                       default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. "
-                                            "use with -S for external also.")
+                                           "use with -S for external also.")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
@@ -372,7 +372,7 @@ def main():
     parser.add_option("--all-subtitles", dest="get_all_subtitles", default=False, action="store_true",
                       help="Download all available subtitles for the video")
     parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
-                      help="lso download the subtitles in their native format")
+                      help="also download the subtitles in their native format")
     parser.add_option("--convert-subtitle-colors", dest="convert_subtitle_colors", default=False, action="store_true",
                         help="converts the color information in subtitles, to <font color=""> tags")
     parser.add_option("-u", "--username", default=None,
