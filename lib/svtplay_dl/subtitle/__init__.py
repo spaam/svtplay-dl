@@ -135,7 +135,7 @@ class subtitle(object):
                     subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], timecolon(i.attrib["TimeIn"]), timecolon(i.attrib["TimeOut"]))
             else:
                 if int(n) > 0:
-                    subs += "%s\n" % i.text
+                    subs += "%s\n" % decode_html_entities(i.text)
 
         if is_py2:
             subs = subs.encode('utf8')
