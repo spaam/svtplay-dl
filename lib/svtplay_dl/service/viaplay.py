@@ -26,7 +26,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
-        'juicyplay.se']
+        'juicyplay.se', 'viafree.se']
 
     def _get_video_id(self):
         """
@@ -40,6 +40,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if match:
             return match.group(1)
         match = re.search(r'data-videoid="([0-9]+)', html_data)
+        if match:
+            return match.group(1)
+
+        match = re.search(r'mtgx-play.(\d+)"', html_data)
         if match:
             return match.group(1)
 
