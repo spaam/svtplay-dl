@@ -26,7 +26,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
-        'juicyplay.se', 'viafree.se']
+        'juicyplay.se', 'viafree.se', 'viafree.dk', 'viafree.no']
 
     def _get_video_id(self):
         """
@@ -130,29 +130,23 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     yield streams[n]
 
     def find_all_episodes(self, options):
-        format_id = re.search(r'data-format-id="(\d+)"', self.get_urldata())
-        if not format_id:
-            log.error("Can't find video info for all episodes")
-            return
-        data = self.http.request("get", "http://playapi.mtgx.tv/v1/sections?sections=videos.one,seasons.videolist&format=%s" % format_id.group(1)).text
         videos = []
-        jsondata = json.loads(data)
-        jsons = jsondata["_embedded"]["sections"][1]["_embedded"]["seasons"]
-        for i in jsons:
-            grej = i["_embedded"]["episodelist"]
-            if "_links" in grej and "_embedded" not in grej:
-                data2 = self.http.request("get", grej["_links"]["self"]["href"]).json()
-                for x in data2["_embedded"]["videos"]:
-                    videos.append(x)
-            if "_embedded" in grej:
-                for x in grej["_embedded"]["videos"]:
-                    videos.append(x)
+        match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
+        if match:
+            janson = json.loads(match.group(1))
+            seasons = []
+            for i in janson["format"]["seasons"]:
+                seasons.append(i["seasonNumber"])
+            for i in seasons:
+                for n in janson["format"]["videos"][str(i)]["program"]:
+                    videos.append(n["sharingUrl"])
+
         n = 0
         episodes = []
         for i in videos:
             if n == options.all_last:
                 break
-            episodes.append(i["sharing"]["url"])
+            episodes.append(i)
             n += 1
         return episodes
 
