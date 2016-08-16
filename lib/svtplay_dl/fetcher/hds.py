@@ -47,7 +47,11 @@ def hdsparse(options, res, manifest):
     if res.status_code == 403 or res.status_code == 404:
         streams[0] = ServiceError("Can't read HDS playlist.")
         return streams
-    xml = ET.XML(res.text)
+    data = res.text
+    if is_py2 and isinstance(data, unicode):
+        data = data.encode("utf-8")
+
+    xml = ET.XML(data)
 
     if is_py2_old:
         bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
