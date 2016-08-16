@@ -43,9 +43,33 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if match:
             return match.group(1)
 
-        match = re.search(r'mtgx-play.(\d+)"', html_data)
+        clips = False
+        match = re.search('params":({.*}),"query', self.get_urldata())
         if match:
-            return match.group(1)
+            jansson = json.loads(match.group(1))
+            snr = 0
+            season = jansson["seasonNumberOrVideoId"]
+            match = re.search('(sesong|sasong)-(\d+)', season)
+            if match:
+                snr = match.group(2)
+
+            videp = jansson["videoIdOrEpisodeNumber"]
+            match = re.search('(episode|avsnitt)-(\d+)', videp)
+            if match:
+                episodenr = match.group(2)
+            else:
+                episodenr = videp
+                clips = True
+
+            if clips:
+                return episodenr
+            else:
+                match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
+                if match:
+                    janson = json.loads(match.group(1))
+                    for n in janson["format"]["videos"][snr]["program"]:
+                        if int(episodenr) == n["episodeNumber"]:
+                            return n["id"]
 
         parse = urlparse(self.url)
         match = re.search(r'/\w+/(\d+)', parse.path)
