@@ -27,6 +27,7 @@ from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.efn import Efn
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.facebook import Facebook
+from svtplay_dl.service.filmarkivet import Filmarkivet
 from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.lemonwhale import Lemonwhale
@@ -62,6 +63,7 @@ sites = [
     Efn,
     Expressen,
     Facebook,
+    Filmarkivet,
     Hbo,
     Twitch,
     Lemonwhale,
