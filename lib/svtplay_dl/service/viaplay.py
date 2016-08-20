@@ -70,8 +70,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 if match:
                     janson = json.loads(match.group(1))
                     for n in janson["format"]["videos"][snr]["program"]:
-                        if int(episodenr) == n["episodeNumber"]:
+                        if len(n["episodeNumber"]) > 0 and int(episodenr) == n["episodeNumber"]:
                             return n["id"]
+                        elif n["id"] == episodenr:
+                            return episodenr
+
 
         parse = urlparse(self.url)
         match = re.search(r'/\w+/(\d+)', parse.path)
