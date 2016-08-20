@@ -8,12 +8,14 @@ from __future__ import absolute_import
 import re
 import json
 import os
+import copy
 
 from svtplay_dl.utils.urllib import urlparse, quote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
 
@@ -38,7 +40,7 @@ class Twitch(Service):
     # are usually two characters, but may have a country suffix as well (e.g.
     # zh-tw, zh-cn and pt-br.
     supported_domains_re = [
-        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.)?twitch\.tv$',
+        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.|clips\.)?twitch\.tv$',
     ]
 
     api_base_url = 'https://api.twitch.tv'
@@ -53,7 +55,10 @@ class Twitch(Service):
 
         match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)
         if not match:
-            data = self._get_channel(self.options, urlp)
+            if re.search("clips.twitch.tv", urlp.netloc):
+                data = self._get_clips(self.options)
+            else:
+                data = self._get_channel(self.options, urlp)
         else:
             if match.group(2) in ["b", "c"]:
                 yield ServiceError("This twitch video type is unsupported")
@@ -158,3 +163,21 @@ class Twitch(Service):
         streams = hlsparse(options, data, hls_url)
         for n in list(streams.keys()):
             yield streams[n]
+
+    def _get_clips(self, options):
+        match = re.search("quality_options: (\[[^\]]+\])", self.get_urldata())
+        if not match:
+            yield ServiceError("Can't find the video clip")
+            return
+        if options.output_auto:
+            name = re.search('slug: "([^"]+)"', self.get_urldata()).group(1)
+            brodcaster = re.search('broadcaster_login: "([^"]+)"', self.get_urldata()).group(1)
+            name = "twitch-%s-%s" % (brodcaster, name)
+            directory = os.path.dirname(options.output)
+            if os.path.isdir(directory):
+                name = os.path.join(directory, name)
+            options.output = name
+
+        dataj = json.loads(match.group(1))
+        for i in dataj:
+            yield HTTP(copy.copy(options), i["source"], i["quality"])
