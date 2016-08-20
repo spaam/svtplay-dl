@@ -168,6 +168,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         self._last_chance(videos, page, pages)
         return videos
 
+    def _genre(self, jansson):
+        videos = []
+        for i in jansson["context"]["dispatcher"]["stores"]["ClusterStore"]["clips"]:
+            videos.append(i["contentUrl"])
+        return videos
 
     def find_all_episodes(self, options):
         match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
@@ -183,6 +188,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 return
             if re.search("sista-chansen", parse.path):
                 videos = self._last_chance(videos, 1)
+            elif re.search("/genre", parse.path):
+                videos = self._genre(dataj)
             else:
                 items = dataj["context"]["dispatcher"]["stores"]["VideoTitlePageStore"]["data"]["relatedVideoTabs"]
                 for i in items:
