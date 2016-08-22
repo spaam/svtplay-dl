@@ -187,6 +187,12 @@ class Generic(Service):
                 if i.handles(url):
                     return self.url, i(self.options, self.url)
 
+        match = re.search('source src="([^"]+)" type="application/x-mpegURL"', data)
+        if match:
+            for i in sites:
+                if i.__name__ == "Raw":
+                    return self.url, i(self.options, match.group(1))
+
         return self.url, stream
 
 def service_handler(sites, options, url):
