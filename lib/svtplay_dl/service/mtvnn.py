@@ -18,7 +18,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
     def get(self):
         data = self.get_urldata()
-        match = re.search(r'data-mrss=[\'"](http://api.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
+        match = re.search(r'data-mrss=[\'"](http://gakusei-cluster.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
         if not match:
             yield ServiceError("Can't find id for the video")
             return
