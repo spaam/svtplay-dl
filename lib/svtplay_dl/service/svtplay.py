@@ -160,9 +160,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return videos
 
         dataj = json.loads(match.group(1))
-        pages = dataj["context"]["dispatcher"]["stores"]["GridStore"]["totalPages"]
+        pages = dataj["context"]["dispatcher"]["stores"]["GridPageStore"]["totalPages"]
 
-        for i  in dataj["context"]["dispatcher"]["stores"]["GridStore"]["content"]:
+        for i  in dataj["context"]["dispatcher"]["stores"]["GridPageStore"]["content"]:
             videos.append(i["contentUrl"])
         page += 1
         self._last_chance(videos, page, pages)
