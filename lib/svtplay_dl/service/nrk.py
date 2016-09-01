@@ -28,8 +28,7 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
 
         # Get media element details
-        parse = urlparse(self.url)
-        dataurl = "%s://v8.psapi.nrk.no/mediaelement/%s" % (parse.scheme, video_id)
+        dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % (video_id)
         data = self.http.request("get", dataurl).text
         data = json.loads(data)
         manifest_url = data["mediaUrl"]
