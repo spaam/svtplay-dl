@@ -39,6 +39,7 @@ from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.picsearch import Picsearch
 from svtplay_dl.service.qbrick import Qbrick
 from svtplay_dl.service.radioplay import Radioplay
+from svtplay_dl.service.riksdagen import Riksdagen
 from svtplay_dl.service.ruv import Ruv
 from svtplay_dl.service.raw import Raw
 from svtplay_dl.service.solidtango import Solidtango
@@ -88,6 +89,7 @@ sites = [
     Vimeo,
     Vg,
     Youplay,
+    Riksdagen,
     Raw]
 
 
