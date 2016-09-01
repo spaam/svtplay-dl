@@ -175,9 +175,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
         return videos
 
     def find_all_episodes(self, options):
-        match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata())
         parse = urlparse(self._url)
+        
+        if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":
+            match = self.url
+        else:
+            match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
+                          self.get_urldata())
+            if match:
+                match = match.group(1)
+            
         if match is None:
             videos = []
             match = re.search('_svtplay"] = ({.*});', self.get_urldata())
@@ -204,7 +211,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
-            data = self.http.request("get", match.group(1)).content
+            data = self.http.request("get", match).content
             xml = ET.XML(data)
 
             episodes = [x.text for x in xml.findall(".//item/link")]
