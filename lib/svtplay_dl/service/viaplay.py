@@ -47,11 +47,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search('params":({.*}),"query', self.get_urldata())
         if match:
             jansson = json.loads(match.group(1))
-            snr = "0"
             season = jansson["seasonNumberOrVideoId"]
-            match = re.search('(sesong|sasong)-(\d+)', season)
-            if match:
-                snr = match.group(2)
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
                 match = re.search('(episode|avsnitt)-(\d+)', videp)
@@ -69,11 +65,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
                 if match:
                     janson = json.loads(match.group(1))
-                    for n in janson["format"]["videos"][snr]["program"]:
-                        if str(n["episodeNumber"]) and int(episodenr) == n["episodeNumber"]:
-                            return n["id"]
-                        elif n["id"] == episodenr:
-                            return episodenr
+                    for i in janson["format"]["videos"].keys():
+                        for n in janson["format"]["videos"][i]["program"]:
+                            if str(n["episodeNumber"]) and int(episodenr) == n["episodeNumber"]:
+                                return n["id"]
+                            elif n["id"] == episodenr:
+                                return episodenr
 
         parse = urlparse(self.url)
         match = re.search(r'/\w+/(\d+)', parse.path)
