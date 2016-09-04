@@ -37,6 +37,7 @@ from svtplay_dl.service.mtvservices import Mtvservices
 from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.picsearch import Picsearch
+from svtplay_dl.service.pokemon import Pokemon
 from svtplay_dl.service.qbrick import Qbrick
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.riksdagen import Riksdagen
@@ -76,6 +77,7 @@ sites = [
     Nrk,
     Qbrick,
     Picsearch,
+    Pokemon,
     Ruv,
     Radioplay,
     Solidtango,
