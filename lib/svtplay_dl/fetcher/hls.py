@@ -27,6 +27,9 @@ class LiveHLSException(HLSException):
 def _get_full_url(url, srcurl):
     if url[:4] == 'http':
         return url
+    if url[0] == '/':
+        baseurl = re.search(r'^(http[s]{0,1}://[^/]+)/', srcurl)
+        return "%s%s" % (baseurl.group(1), url)
 
     # remove everything after last / in the path of the URL
     baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
