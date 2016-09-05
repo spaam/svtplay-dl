@@ -73,6 +73,8 @@ List the available qualities for a video.
 
 Download subtitle with the media if available.
 
+=head3 --merge-subtitle merge subtitle with video/audio file with -M
+
 =head3 --force-subtitle
 
 Download only subtitle if its used with -S.
@@ -84,6 +86,14 @@ Download only if a subtitle is available
 =head3 --all-subtitles
 
 Download all available subtitles for the video
+
+=head3 --raw-subtitles
+
+also download the subtitles in their native format
+
+=head3 --convert-subtitle-colors
+
+converts the color information in subtitles, to <font color=""> tags
 
 =head3 --username=USERNAME  -u USERNAME
 
