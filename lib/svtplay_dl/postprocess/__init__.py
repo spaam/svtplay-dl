@@ -29,8 +29,8 @@ class postprocess(object):
                 lines   = block.strip('-').split('\n')
                 txt     = '\r\n'.join(lines[2:])
                 return txt
-            return map(parse_block,
-                       open(self).read().strip().replace('\r', '').split('\n\n'))
+            return list(map(parse_block,
+                        open(self).read().strip().replace('\r', '').split('\n\n')))
         
         def query(self):
             random_sentences = ' '.join(sample(parse(self),8)).replace('\r\n', '')
