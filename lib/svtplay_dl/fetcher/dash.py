@@ -26,7 +26,7 @@ class LiveDASHException(DASHException):
 def dashparse(options, res, url):
     streams = {}
 
-    if res.status_code == 403 or res.status_code == 404:
+    if res.status_code >= 400:
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams
     xml = ET.XML(res.text)

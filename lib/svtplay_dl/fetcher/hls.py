@@ -41,8 +41,8 @@ def _get_full_url(url, srcurl):
 def hlsparse(options, res, url):
     streams = {}
 
-    if res.status_code == 403 or res.status_code == 404:
-        streams[0] = ServiceError("Can't read HLS playlist.")
+    if res.status_code > 400:
+        streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
         return streams
     files = (parsem3u(res.text))[1]
 
