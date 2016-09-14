@@ -176,7 +176,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return videos
 
         res = self.http.get("http://www.svtplay.se/sista-chansen?sida=%s" % page)
-        match = re.search('_svtplay"] = ({.*});', res.text)
+        match = re.search("_svtplay'] = ({.*});", res.text)
         if not match:
             return videos
 
@@ -208,7 +208,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             
         if match is None:
             videos = []
-            match = re.search('_svtplay"] = ({.*});', self.get_urldata())
+            match = re.search("_svtplay'] = ({.*});", self.get_urldata())
             if match:
                 dataj = json.loads(match.group(1))
             else:
