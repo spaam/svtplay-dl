@@ -176,14 +176,14 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return videos
 
         res = self.http.get("http://www.svtplay.se/sista-chansen?sida=%s" % page)
-        match = re.search("_svtplay'] = ({.*});", res.text)
+        match = re.search("__reduxStore'] = ({.*});", res.text)
         if not match:
             return videos
 
         dataj = json.loads(match.group(1))
-        pages = dataj["context"]["dispatcher"]["stores"]["GridPageStore"]["totalPages"]
+        pages = dataj["gridPage"]["pagination"]["totalPages"]
 
-        for i  in dataj["context"]["dispatcher"]["stores"]["GridPageStore"]["content"]:
+        for i  in dataj["gridPage"]["content"]:
             videos.append(i["contentUrl"])
         page += 1
         self._last_chance(videos, page, pages)
