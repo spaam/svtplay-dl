@@ -30,7 +30,11 @@ def dashparse(options, res, url):
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams
     xml = ET.XML(res.text)
-    baseurl = urljoin(url, xml.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
+    try:
+        baseurl = urljoin(url, xml.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
+    except AttributeError:
+        streams[0] = ServiceError("Can't parse DASH playlist");
+        return
     videofiles = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='video']/{urn:mpeg:dash:schema:mpd:2011}Representation")
 
     audiofiles = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='audio']/{urn:mpeg:dash:schema:mpd:2011}Representation")
