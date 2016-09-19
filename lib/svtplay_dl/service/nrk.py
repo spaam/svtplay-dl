@@ -33,7 +33,9 @@ class Nrk(Service, OpenGraphThumbMixin):
         data = json.loads(data)
         manifest_url = data["mediaUrl"]
         self.options.live = data["isLive"]
-
+        if manifest_url is None:
+            yield ServiceError(data["messageType"])
+            return
         # Check if subtitles are available
         if data["subtitlesUrlPath"]:
             yield subtitle(copy.copy(self.options), "tt", data["subtitlesUrlPath"])
