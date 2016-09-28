@@ -49,11 +49,14 @@ class Viaplay(Service, OpenGraphThumbMixin):
             jansson = json.loads(match.group(1))
             if "seasonNumberOrVideoId" in jansson:
                 season = jansson["seasonNumberOrVideoId"]
+                match = re.search("\w-(\d+)$", season)
+                if match:
+                    season = match.group(1)
             else:
                 return False
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
-                match = re.search('(episode|avsnitt)-(\d+)', videp)
+                match = re.search('(\w+)-(\d+)', videp)
                 if match:
                     episodenr = match.group(2)
                 else:
