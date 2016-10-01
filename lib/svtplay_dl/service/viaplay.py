@@ -66,7 +66,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 if match:
                     season = match.group(2)
             else:
-                episodenr = season
+                # sometimes videoIdOrEpisodeNumber does not work.. this is a workaround
+                match = re.search('(episode|avsnitt)-(\d+)', self.url)
+                if match:
+                    episodenr = match.group(2)
+                else:
+                    episodenr = season
 
             if clips:
                 return episodenr
