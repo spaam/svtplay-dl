@@ -73,7 +73,9 @@ List the available qualities for a video.
 
 Download subtitle with the media if available.
 
-=head3 --merge-subtitle merge subtitle with video/audio file with -M
+=head3 --merge-subtitle
+
+Merge subtitle with video/audio file with -M
 
 =head3 --force-subtitle
 
@@ -103,11 +105,11 @@ Username, if the service requires authentication.
 
 Password, if the serivce requires authentication.
 
-=head3 -t, --thumbnail
+=head3 --thumbnail, -t
 
 Download thumbnail from the site if available.
 
-=head3 -A, --all-episodes
+=head3 --all-episodes, -A
 
 Try to download all episodes.
 
@@ -116,7 +118,7 @@ Try to download all episodes.
 Get last NN episodes instead of all episodes, when used with
 --all-episodes.
 
-=head3 -P preferred, --preferred=preferred
+=head3 --preferred=preferred, -P preferred
 
 Preferred download method.
 
