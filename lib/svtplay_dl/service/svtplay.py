@@ -204,7 +204,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def _genre(self, jansson):
         videos = []
-        for i in jansson["context"]["dispatcher"]["stores"]["ClusterStore"]["clips"]:
+        for i in jansson["clusterPage"]["content"]["clips"]:
             videos.append(i["contentUrl"])
         return videos
 
@@ -221,7 +221,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             
         if match is None:
             videos = []
-            match = re.search("_svtplay'] = ({.*});", self.get_urldata())
+            match = re.search("__reduxStore'] = ({.*});", self.get_urldata())
             if match:
                 dataj = json.loads(match.group(1))
             else:
@@ -232,7 +232,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             elif re.search("/genre", parse.path):
                 videos = self._genre(dataj)
             else:
-                items = dataj["context"]["dispatcher"]["stores"]["VideoTitlePageStore"]["data"]["relatedVideoTabs"]
+                items = dataj["videoTitlePage"]["realatedVideoTabs"]
                 for i in items:
                     if "sasong" in i["slug"]:
                         for n in i["videos"]:
