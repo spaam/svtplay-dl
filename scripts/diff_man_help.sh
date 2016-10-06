@@ -34,7 +34,7 @@ sed -i $extended_regexp -e 's/^ *//' $TMPDIR/options.help
 sed -i $extended_regexp -e 's/OUTPUT/filename/g' $TMPDIR/options.help
 
 # pod specific filtering
-sed -n -i $extended_regexp -e 's/^ *(--[^,= ]+).*/\1/p' $TMPDIR/options.man
+sed -n -i $extended_regexp -e 's/\(^ *(--[^,= ]+).*\)/\1/p' $TMPDIR/options.man
 
 for file in $TMPDIR/options.*; do
 	sed -i $extended_regexp -e 's/, / /' $file
