@@ -22,8 +22,10 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
 
         # First, fint the video ID from the html document
-        video_id = re.search("<meta name=\"programid\".*?content=\"([^\"]*)\"", self.get_urldata()).group(1)
-        if video_id is None:
+        match = re.search("<meta name=\"programid\".*?content=\"([^\"]*)\"", self.get_urldata())
+        if match:
+            video_id = match.group(1)
+        else:
             yield ServiceError("Can't find video id.")
             return
 
