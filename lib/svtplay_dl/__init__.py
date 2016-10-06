@@ -54,7 +54,7 @@ from svtplay_dl.service.viasatsport import Viasatsport
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
 
-__version__ = "1.5"
+__version__ = "1.6"
 
 sites = [
     Aftonbladet,
