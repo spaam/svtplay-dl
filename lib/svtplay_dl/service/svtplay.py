@@ -38,7 +38,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if re.match("^[0-9]+$", vid):
             old = True
 
-        url = "http://www.svt.se/videoplayer-api/video/%s" % vid
+        url = "http://api.svt.se/videoplayer-api/video/%s" % vid
         data = self.http.request("get", url)
         if data.status_code == 404:
             yield ServiceError("Can't get the json file for %s" % url)
