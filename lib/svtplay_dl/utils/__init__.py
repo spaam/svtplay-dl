@@ -53,7 +53,10 @@ class HTTP(Session):
                 self.headers[i] = headers[i]
 
         log.debug("HTTP getting %r", url)
-        res = Session.request(self, method, url, verify=self.verify, *args, **kwargs)
+        try:
+            res = Session.request(self, method, url, verify=self.verify, *args, **kwargs)
+        except:
+            return None
         return res
 
     def split_header(self, headers):

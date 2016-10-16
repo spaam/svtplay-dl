@@ -27,6 +27,10 @@ class LiveDASHException(DASHException):
 
 def dashparse(options, res, url):
     streams = {}
+
+    if not res:
+        return None
+
     if res.status_code >= 400:
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams

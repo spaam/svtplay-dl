@@ -44,6 +44,10 @@ class LiveHDSException(HDSException):
 def hdsparse(options, res, manifest):
     streams = {}
     bootstrap = {}
+
+    if not res:
+        return None
+
     if res.status_code >= 400:
         streams[0] = ServiceError("Can't read HDS playlist. {0}".format(res.status_code))
         return streams

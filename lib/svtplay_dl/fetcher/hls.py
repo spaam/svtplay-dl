@@ -41,6 +41,9 @@ def _get_full_url(url, srcurl):
 def hlsparse(options, res, url):
     streams = {}
 
+    if not res:
+        return None
+
     if res.status_code > 400:
         streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
         return streams
