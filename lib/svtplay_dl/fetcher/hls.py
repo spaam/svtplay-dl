@@ -50,7 +50,11 @@ def hlsparse(options, res, url):
     files = (parsem3u(res.text))[1]
 
     for i in files:
-        bitrate = float(i[1]["BANDWIDTH"])/1000
+        try:
+            bitrate = float(i[1]["BANDWIDTH"])/1000
+        except KeyError:
+            streams[0] = ServiceError("Can't read HLS playlist")
+            return streams
         streams[int(bitrate)] = HLS(copy.copy(options), _get_full_url(i[0], url), bitrate, cookies=res.cookies)
     return streams
 
