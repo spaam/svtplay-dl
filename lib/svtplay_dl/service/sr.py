@@ -9,7 +9,7 @@ import json
 import re
 import copy
 
-from svtplay_dl.utils.urllib import quote_plus
+from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
@@ -25,18 +25,33 @@ class Sr(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search(r'href="(/sida/[\.\/=a-z0-9&;\?]+play(?:audio|episode)=\d+)"', data)
-        if not match:
-            yield ServiceError("Can't find audio info")
+        match = re.search('data-audio-type="publication" data-audio-id="(\d+)">', data)  # Nyheter
+        if match:
+            dataurl = "https://sverigesradio.se/sida/playerajax/getaudiourl?id={}&type={}&quality=high&format=iis".format(match.group(1), "publication")
+            data = self.http.request("get", dataurl).text
+            playerinfo = json.loads(data)
+            yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
             return
-        path = quote_plus(match.group(1))
-        dataurl = "http://sverigesradio.se/sida/ajax/getplayerinfo?url=%s&isios=false&playertype=html5" % path
+        match = re.search(r'href="(/topsy/ljudfil/\d+-mp3)"', data)  # Ladda ner
+        if match:
+            yield HTTP(copy.copy(self.options), urljoin("https://sverigesradio.se", match.group(1)), 128)
+            return
+        else:
+            match = re.search('data-audio-type="secondary" data-audio-id="(\d+)"', data) # Ladda ner utan musik
+            match2 = re.search('data-audio-type="episode" data-audio-id="(\d+)"', data) # Ladda ner med musik
+            if match:
+                aid = match.group(1)
+                type = "secondary"
+            elif match2:
+                aid = match2.group(1)
+                type = "episode"
+            else:
+                yield ServiceError("Can't find audio info")
+                return
+
+        dataurl = "https://sverigesradio.se/sida/playerajax/getaudiourl?id={}&type={}&quality=high&format=iis".format(aid, type)
         data = self.http.request("get", dataurl).text
-        playerinfo = json.loads(data)["playerInfo"]
-        for i in playerinfo["AudioSources"]:
-            url = i["Url"]
-            if not url.startswith('http'):
-                url = 'http:%s' % url
-            yield HTTP(copy.copy(self.options), url, i["Quality"]/1000)
+        playerinfo = json.loads(data)
+        yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
 
 
