@@ -235,7 +235,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             elif re.search("/genre", parse.path):
                 videos = self._genre(dataj)
             else:
-                items = dataj["videoTitlePage"]["realatedVideoTabs"]
+                items = dataj["videoTitlePage"]["realatedVideosTabs"]
                 for i in items:
                     if "sasong" in i["slug"]:
                         for n in i["videos"]:
