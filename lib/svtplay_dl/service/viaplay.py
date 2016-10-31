@@ -27,7 +27,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
         'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
         'juicyplay.se', 'viafree.se', 'viafree.dk', 'viafree.no',
-        'play.tv3.lt'
+        'play.tv3.lt', 'tv3play.tv3.ee', 'tvplay.skaties.lv'
     ]
 
     def _get_video_id(self):
