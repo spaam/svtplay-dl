@@ -209,7 +209,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
         postdata = {"username" : username, "password": password, "https": "", "client": "web"}
 
         data = self.http.request("post", url, data=postdata, cookies=self.cookies)
-        res = data.json()
+        try:
+            res = data.json()
+        except ValueError:
+            return ServiceError("Cant decode output from tv4play")
         if "errors" in res:
             message = res["errors"][0]
             if is_py2:
