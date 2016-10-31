@@ -205,7 +205,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
     def _login(self, username, password):
         data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
-        url = "https://account.services.tv4play.se/authenticate"
+        url = "https://account.services.tv4play.se/session/authenticate"
         postdata = {"username" : username, "password": password, "https": "", "client": "web"}
 
         data = self.http.request("post", url, data=postdata, cookies=self.cookies)
