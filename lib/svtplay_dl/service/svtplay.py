@@ -192,7 +192,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return videos
 
         res = self.http.get("http://www.svtplay.se/sista-chansen?sida=%s" % page)
-        match = re.search("__reduxStore'] = ({.*});", res.text)
+        match = re.search("__svtplay'] = ({.*});", res.text)
         if not match:
             return videos
 
@@ -224,27 +224,27 @@ class Svtplay(Service, OpenGraphThumbMixin):
             
         if match is None:
             videos = []
-            match = re.search("__reduxStore'] = ({.*});", self.get_urldata())
-            if match:
-                dataj = json.loads(match.group(1))
-            else:
-                log.error("Couldn't retrieve episode list")
-                return
+            match = re.search("__svtplay'] = ({.*});", self.get_urldata())
             if re.search("sista-chansen", parse.path):
                 videos = self._last_chance(videos, 1)
-            elif re.search("/genre", parse.path):
-                videos = self._genre(dataj)
+            elif not match:
+                log.error("Couldn't retrieve episode list")
+                return
             else:
-                items = dataj["videoTitlePage"]["realatedVideosTabs"]
-                for i in items:
-                    if "sasong" in i["slug"]:
-                        for n in i["videos"]:
-                            if n["url"] not in videos:
-                                videos.append(n["url"])
-                    if "senast" in i["slug"]:
-                        for n in i["videos"]:
-                            if n["url"] not in videos:
-                                videos.append(n["url"])
+                dataj = json.loads(match.group(1))
+                if re.search("/genre", parse.path):
+                    videos = self._genre(dataj)
+                else:
+                    items = dataj["videoTitlePage"]["realatedVideosTabs"]
+                    for i in items:
+                        if "sasong" in i["slug"]:
+                            for n in i["videos"]:
+                                if n["url"] not in videos:
+                                    videos.append(n["url"])
+                        if "senast" in i["slug"]:
+                            for n in i["videos"]:
+                                if n["url"] not in videos:
+                                    videos.append(n["url"])
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
