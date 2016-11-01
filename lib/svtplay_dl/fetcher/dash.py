@@ -68,8 +68,12 @@ def dashparse(options, res, url):
     return streams
 
 def parsesegments(content, url):
-    scheme = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["media"]
-
+    media = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
+    if media:
+        scheme = media.attrib["media"]
+    vinit = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
+    if vinit:
+        init = vinit.attrib["initialization"]
     nrofvideos = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
     selemtns = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
     if nrofvideos:
@@ -86,17 +90,29 @@ def parsesegments(content, url):
         id = i.attrib["id"]
         segments = []
         bitrate = int(i.attrib["bandwidth"])
-        vinit = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["initialization"].replace(
-            "$RepresentationID$", id)
+        if not vinit:
+            init = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["initialization"]
+        init = init.replace("$RepresentationID$", id)
+        if not media:
+            scheme = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["media"]
+        if "startNumber" in content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib:
+            start = int(content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib["startNumber"])
+        else:
+            start = 1
         dirname = os.path.dirname(url) + "/"
-        segments.append(urljoin(dirname, vinit))
+        segments.append(urljoin(dirname, init))
         name = scheme.replace("$RepresentationID$", id)
         if "$Number" in name:
             match = re.search("\$Number(\%\d+)d\$", name)
             if match:
                 name = name.replace("$Number", "").replace("$", "")
-                for n in range(1, total):
+                for n in range(start, start+total):
                     segments.append(urljoin(dirname, name % n))
+            else:
+                #not format string
+                for n in range(start, start + total):
+                    newname = name.replace("$Number$", str(n))
+                    segments.append(urljoin(dirname, newname))
         if "$Time$" in name:
             match = re.search("\$Time\$", name)
             if match:
