@@ -69,10 +69,10 @@ def dashparse(options, res, url):
 
 def parsesegments(content, url):
     media = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    if media:
+    if media is not None:
         scheme = media.attrib["media"]
     vinit = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    if vinit:
+    if vinit is not None:
         init = vinit.attrib["initialization"]
     nrofvideos = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
     selemtns = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
@@ -90,24 +90,24 @@ def parsesegments(content, url):
         id = i.attrib["id"]
         segments = []
         bitrate = int(i.attrib["bandwidth"])
-        if not vinit:
+        if vinit is None:
             init = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["initialization"]
-        init = init.replace("$RepresentationID$", id)
-        if not media:
+        vinit = init.replace("$RepresentationID$", id)
+        if media is None:
             scheme = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["media"]
         if "startNumber" in content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib:
             start = int(content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib["startNumber"])
         else:
             start = 1
         dirname = os.path.dirname(url) + "/"
-        segments.append(urljoin(dirname, init))
+        segments.append(urljoin(dirname, vinit))
         name = scheme.replace("$RepresentationID$", id)
         if "$Number" in name:
             match = re.search("\$Number(\%\d+)d\$", name)
             if match:
-                name = name.replace("$Number", "").replace("$", "")
+                vname = name.replace("$Number", "").replace("$", "")
                 for n in range(start, start+total):
-                    segments.append(urljoin(dirname, name % n))
+                    segments.append(urljoin(dirname, vname % n))
             else:
                 #not format string
                 for n in range(start, start + total):
