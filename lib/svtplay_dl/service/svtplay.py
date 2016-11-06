@@ -23,8 +23,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 
     def get(self):
-        old = False
-
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
             if parse.path[:6] != "/video" and parse.path[:6] != "/klipp":
@@ -99,55 +97,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
-
-    def find_video_id(self):
-        match = re.search('data-video-id="([^"]+)"', self.get_urldata())
-        if match:
-            return match.group(1)
-        parse = urlparse(self.url)
-        query = parse_qs(parse.query)
-        match = re.search("/video/([0-9]+)/", parse.path)
-        if match:
-            return match.group(1)
-        match = re.search("/klipp/([0-9]+)/", parse.path)
-        if match:
-            return match.group(1)
-        match = re.search("data-video-id='([^']+)'", self.get_urldata())
-        if match:
-            return match.group(1)
-        match = re.search("/videoEpisod-([^/]+)/", parse.path)
-        if not match:
-            match = re.search(r'data-id="(\d+)-', self.get_urldata())
-        vid = None
-        if match:
-            vid = match.group(1)
-        if not vid:
-            for i in query.keys():
-                if i == "articleId":
-                    vid = query["articleId"][0]
-                    break
-        if vid:
-            vtype = None
-            for i in ["video", "klipp"]:
-                url = "http://www.svtplay.se/%s/%s/" % (i, vid)
-                data = self.http.request("get", url)
-                if data.status_code == 200:
-                    vtype = i
-                    break
-            if vtype:
-                self._url = "http://www.svtplay.se/%s/%s/" % (vtype, vid)
-                self._urldata = None
-                self.get_urldata()
-                return self.find_video_id()
-        if not match:
-            match = re.search(r'src="(//www.svt.se/wd?[^"]+)"', self.get_urldata())
-            if match:
-                self._urldata = None
-                self._url = "http:%s" % decode_html_entities(match.group(1))
-                self.get_urldata()
-                return self.find_video_id()
-
-        return None
 
     def _last_chance(self, videos, page, maxpage=2):
         if page > maxpage:
