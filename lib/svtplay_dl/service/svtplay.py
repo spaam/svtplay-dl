@@ -51,52 +51,53 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 if i["format"] == "WebSRT":
                     yield subtitle(copy.copy(self.options), "wrst", i["url"])
 
-        if len(janson["video"]["videoReferences"]) == 0:
-            yield ServiceError("Media doesn't have any associated videos (yet?)")
-            return
+        if "videoReferences" in janson["video"]:
+            if len(janson["video"]["videoReferences"]) == 0:
+                yield ServiceError("Media doesn't have any associated videos (yet?)")
+                return
 
-        for i in janson["video"]["videoReferences"]:
-            parse = urlparse(i["url"])
-            query = parse_qs(parse.query)
-            if i["playerType"] == "hls" or i["playerType"] == "ios":
-                streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
-                if "alt" in query and len(query["alt"]) > 0:
-                    alt = self.http.get(query["alt"][0])
-                    if alt:
-                        streams = hlsparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
-                        if streams:
-                            for n in list(streams.keys()):
-                                yield streams[n]
-            if i["playerType"] == "playerType" or i["playerType"] == "flash":
-                match = re.search(r"\/se\/secure\/", i["url"])
-                if not match:
-                    streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
+            for i in janson["video"]["videoReferences"]:
+                parse = urlparse(i["url"])
+                query = parse_qs(parse.query)
+                if i["playerType"] == "hls" or i["playerType"] == "ios":
+                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
                     if "alt" in query and len(query["alt"]) > 0:
                         alt = self.http.get(query["alt"][0])
                         if alt:
-                            streams = hdsparse(self.options, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}), alt.request.url)
+                            streams = hlsparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
                             if streams:
                                 for n in list(streams.keys()):
                                     yield streams[n]
-            if i["playerType"] == "dash264" or i["playerType"] == "dashhbbtv":
-                streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
-
-                if "alt" in query and len(query["alt"]) > 0:
-                    alt = self.http.get(query["alt"][0])
-                    if alt:
-                        streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                if i["playerType"] == "playerType" or i["playerType"] == "flash":
+                    match = re.search(r"\/se\/secure\/", i["url"])
+                    if not match:
+                        streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
+                        if "alt" in query and len(query["alt"]) > 0:
+                            alt = self.http.get(query["alt"][0])
+                            if alt:
+                                streams = hdsparse(self.options, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}), alt.request.url)
+                                if streams:
+                                    for n in list(streams.keys()):
+                                        yield streams[n]
+                if i["playerType"] == "dash264" or i["playerType"] == "dashhbbtv":
+                    streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
+
+                    if "alt" in query and len(query["alt"]) > 0:
+                        alt = self.http.get(query["alt"][0])
+                        if alt:
+                            streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                            if streams:
+                                for n in list(streams.keys()):
+                                    yield streams[n]
 
     def _last_chance(self, videos, page, maxpage=2):
         if page > maxpage:
