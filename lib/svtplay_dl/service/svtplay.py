@@ -34,6 +34,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         match = re.search("__svtplay'] = ({.*});", self.get_urldata())
         if not match:
             yield ServiceError("Cant find video info.")
+            return
         janson = json.loads(match.group(1))["videoTitlePage"]
 
         if "live" in janson["video"]:
