@@ -110,20 +110,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                             if streams:
                                 for n in list(streams.keys()):
                                     yield streams[n]
-            if i["format"] == "dash264":
-                streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
-
-                if "alt" in query and len(query["alt"]) > 0:
-                    alt = self.http.get(query["alt"][0])
-                    streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
-
-            if i["format"] == "dashhbbtv":
+            if i["format"] == "dash264" or i["format"] == "dashhbbtv":
                 streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
