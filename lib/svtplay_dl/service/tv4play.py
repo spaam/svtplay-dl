@@ -114,8 +114,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
                     streams = hlsparse(self.options, self.http.request("get", i.find("url").text), i.find("url").text)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
 
     def _get_show_info(self):
         show = self._get_showname(self.url)
