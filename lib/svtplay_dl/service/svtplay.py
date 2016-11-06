@@ -10,7 +10,7 @@ import hashlib
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify, ensure_unicode, is_py2, decode_html_entities
+from svtplay_dl.utils import filenamify, is_py2
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
