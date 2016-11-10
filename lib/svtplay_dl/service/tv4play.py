@@ -101,7 +101,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle(copy.copy(self.options), "smi", i.find("url").text)
 
-        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
+        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls3" % vid
         data = self.http.request("get", url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
