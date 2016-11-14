@@ -21,7 +21,10 @@ class subtitle(object):
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
-        
+        if subdata.status_code != 200:
+            log.warning("Can't download subtitle file")
+            return
+
         data = None
        
         if self.subtype == "tt":
