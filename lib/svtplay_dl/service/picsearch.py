@@ -33,32 +33,14 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not isinstance(mediaid, str):
             mediaid = mediaid.group(1)
 
-        jsondata = self.http.request("get", "http://csp.picsearch.com/rest?jsonp=&eventParam=1&auth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid)).text
+        jsondata = self.http.request("get", "http://csp.screen9.com/player?eventParam=1&ajaxauth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid)).text
         jsondata = json.loads(jsondata)
-        if "playerconfig" not in jsondata["media"]:
-            yield ServiceError(jsondata["error"])
-            return
-        if "live" in jsondata["media"]["playerconfig"]["clip"]:
-            self.options.live = jsondata["media"]["playerconfig"]["clip"]
-        playlist = jsondata["media"]["playerconfig"]["playlist"][1]
-        if "bitrates" in playlist:
-            files = playlist["bitrates"]
-            server = jsondata["media"]["playerconfig"]["plugins"]["bwcheck"]["netConnectionUrl"]
-
-            for i in files:
-                self.options.other = "-y '%s'" % i["url"]
-                yield RTMP(copy.copy(self.options), server, i["height"])
-        if "provider" in playlist:
-            if playlist["provider"] != "rtmp":
-                if "live" in playlist:
-                    self.options.live = playlist["live"]
-                if playlist["url"].endswith(".f4m"):
-                    streams = hdsparse(self.options, self.http.request("get", playlist["url"], params={"hdcore": "3.7.0"}), playlist["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
-                if ".m3u8" in playlist["url"]:
-                    streams = hlsparse(self.options, self.http.request("get", playlist["url"]), playlist["url"])
+        if "live" in jsondata["data"]["publishing_status"]:
+            self.options.live = jsondata["data"]["publishing_status"]["live"]
+        playlist = jsondata["data"]["streams"]
+        for i in playlist:
+                if "application/x-mpegurl" in i:
+                    streams = hlsparse(self.options, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -69,6 +51,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
             match = re.search(r'screen9-ajax-auth="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('screen9"[ ]*:[ ]*"([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search('data-auth="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
             if match:
@@ -91,6 +75,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
             match = re.search(r'screen9-mid="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search(r'data-id="([^"]+)"', self.get_urldata())
+        if not match:
+            match = re.search(r'data-videoid="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
             if match:
