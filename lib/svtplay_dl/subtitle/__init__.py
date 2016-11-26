@@ -26,20 +26,23 @@ class subtitle(object):
             return
 
         data = None
-       
+        
         if self.subtype == "tt":
             data = self.tt(subdata)
-        if self.subtype == "json":
+        elif self.subtype == "json":
             data = self.json(subdata)
-        if self.subtype == "sami":
+        elif self.subtype == "sami":
             data = self.sami(subdata)
-        if self.subtype == "smi":
+        elif self.subtype == "smi":
             data = self.smi(subdata)
-        if self.subtype == "wrst":
+        elif self.subtype == "wrst":
             data = self.wrst(subdata)
-        if self.subtype == "raw":
+        elif self.subtype == "vtt":
+            data = self.webVTT(subdata)
+        elif self.subtype == "raw":
             data = self.raw(subdata)
-            
+        else:
+            data = self.raw(subdata)
         if self.subfix:
             self.options.output = self.options.output + self.subfix
             
@@ -241,7 +244,58 @@ class subtitle(object):
         if is_py2:
             return srt.encode("utf-8")
         return srt
-
+        
+    def webVTT(self, subdata):
+        ssubdata = StringIO(subdata.text)
+        srt = ""
+        subtract = False
+        number_b = 1
+        number = 0
+        block = 0
+        subnr = False
+        for i in ssubdata.readlines():
+            match = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
+            
+            if i[:6] == "WEBVTT":
+                pass
+            elif i[:11] == "X-TIMESTAMP":
+                pass
+            elif match:
+                if not subnr:
+                    srt += "%s\n" % number_b
+                matchx = re.search(r'(\d+):(\d+)[.:]([\d\.]+) --> (\d+):(\d+)[.:]([\d\.]+)', i)
+                hour1 = int(matchx.group(1))
+                hour2 = int(matchx.group(4))
+                if int(number) == 1:
+                    if hour1 > 9:
+                        subtract = True
+                if subtract:
+                    hour1 -= 10
+                    hour2 -= 10
+                time = "%s:%s:%s --> %s:%s:%s\n" % (hour1, matchx.group(2), matchx.group(3).replace(".", ","), hour2, matchx.group(5), matchx.group(6).replace(".", ","))
+                srt += time
+                block = 1
+                subnr = False
+                number_b += 1
+            else:
+                if self.options.convert_subtitle_colors:
+                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
+                    sub = i
+                    for tag, color in colors.items():
+                        regex1 = '<' + tag + '>'
+                        replace = '<font color="' + color + '">'
+                        sub = re.sub(regex1, replace, sub)
+                        
+                    sub = re.sub('</.+>', '</font>',sub)
+                else:
+                    sub = re.sub('<[^>]*>', '', i)
+                                        
+                srt += sub.strip()
+                srt+="\n"
+        srt = decode_html_entities(srt)
+        if is_py2:
+            return srt.encode("utf-8")
+        return srt
 
 def timestr(msec):
     """
