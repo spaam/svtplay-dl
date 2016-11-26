@@ -34,10 +34,19 @@ class Urplay(Service, OpenGraphThumbMixin):
         if len(jsondata["subtitles"]) > 0:
             for sub in jsondata["subtitles"]:
                 if "label" in sub:
-                    if self.options.get_all_subtitles:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "-" + filenamify(sub["label"]))
+                    #extract extension from url to be able to use TT subtitles also
+                    #Do not know if UR still uses TT subtitles but better safe then sorry
+                    #Should proably add a check here for correct subtype
+                    extension = sub["file"].rsplit('.', 1)[1]
+                    #Adds http before url if extension is vvt, can probably be done a better way
+                    if(extension == "vtt"):
+                        url = "http:"+sub["file"].split(",")[0]
                     else:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0])
+                        url = sub["file"].split(",")[0]
+                    if self.options.get_all_subtitles:
+                        yield subtitle(copy.copy(self.options), extension, url, "-" + filenamify(sub["label"]))
+                    else:
+                        yield subtitle(copy.copy(self.options), extension, url)
                         
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]

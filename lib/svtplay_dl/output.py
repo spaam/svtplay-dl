@@ -142,7 +142,7 @@ def filename(stream):
 
 
 def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
-    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
+    subtitlefiles = ["srt", "smi", "tt","sami", "wrst","vvt"]
     if is_py2:
         file_d = file
     else:
@@ -180,7 +180,7 @@ def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
 
 
 def findexpisode(directory, service, name):
-    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
+    subtitlefiles = ["srt", "smi", "tt","sami", "wrst","vtt"]
     match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)
     if not match:
         return False

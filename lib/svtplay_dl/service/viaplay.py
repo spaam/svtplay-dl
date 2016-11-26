@@ -102,7 +102,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if vid is None:
             yield ServiceError("Can't find video file for: %s" % self.url)
             return
-
+            
         url = "http://playapi.mtgx.tv/v3/videos/%s" % vid
         self.options.other = ""
         data = self.http.request("get", url)
@@ -140,12 +140,19 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 self.options.output = os.path.join(directory, title)
             else:
                 self.options.output = title
-
+                
         if dataj["sami_path"]:
             yield subtitle(copy.copy(self.options), "sami", dataj["sami_path"])
-        if dataj["subtitles_for_hearing_impaired"]:
-            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"])
-
+        if dataj["subtitles_webvtt"]:
+            yield subtitle(copy.copy(self.options), "vtt", dataj["subtitles_webvtt"])
+          
+        #For new subtitle type
+        if dataj["subtitles_for_hearing_impaired"] and dataj["subtitles_for_hearing_impaired"][-4:] == ".vtt":
+            yield subtitle(copy.copy(self.options), "vtt", dataj["subtitles_for_hearing_impaired"],"-SDH")
+        #For old subtitle type
+        if dataj["subtitles_for_hearing_impaired"] and dataj["subtitles_for_hearing_impaired"][-4:] == ".xml":
+            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"],"-SDH")
+        
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
