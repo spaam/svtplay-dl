@@ -34,11 +34,16 @@ class Urplay(Service, OpenGraphThumbMixin):
         if len(jsondata["subtitles"]) > 0:
             for sub in jsondata["subtitles"]:
                 if "label" in sub:
-                    if self.options.get_all_subtitles:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "-" + filenamify(sub["label"]))
+                    absurl = urljoin(self.url, sub["file"].split(",")[0])
+                    if absurl.endswith("vtt"):
+                        subtype = "wrst"
                     else:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0])
-                        
+                        subtype = "tt"
+                    if self.options.get_all_subtitles:
+                        yield subtitle(copy.copy(self.options), subtype, absurl, "-" + filenamify(sub["label"]))
+                    else:
+                        yield subtitle(copy.copy(self.options), subtype, absurl)
+
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:
