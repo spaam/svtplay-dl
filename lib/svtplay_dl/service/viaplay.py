@@ -147,6 +147,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
             else:
                 subtype = "sami"
             yield subtitle(copy.copy(self.options), subtype, dataj["sami_path"])
+        if dataj["subtitles_webvtt"]:
+            yield subtitle(copy.copy(self.options), "wrst", dataj["subtitles_webvtt"])
         if dataj["subtitles_for_hearing_impaired"]:
             if dataj["subtitles_for_hearing_impaired"].endswith("vtt"):
                 subtype = "wrst"
