@@ -142,9 +142,17 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 self.options.output = title
 
         if dataj["sami_path"]:
-            yield subtitle(copy.copy(self.options), "sami", dataj["sami_path"])
+            if dataj["sami_path"].endswith("vtt"):
+                subtype = "wrst"
+            else:
+                subtype = "sami"
+            yield subtitle(copy.copy(self.options), subtype, dataj["sami_path"])
         if dataj["subtitles_for_hearing_impaired"]:
-            yield subtitle(copy.copy(self.options), "sami", dataj["subtitles_for_hearing_impaired"])
+            if dataj["subtitles_for_hearing_impaired"].endswith("vtt"):
+                subtype = "wrst"
+            else:
+                subtype = "sami"
+            yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"])
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
