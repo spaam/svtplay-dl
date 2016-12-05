@@ -203,11 +203,8 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                 season = 1
             else:
                 season = int(match.group(2))
-            if season < 10:
-                season = "0%s" % season
-            episode = int(match.group(3))
-            if episode < 10:
-                episode = "0%s" % episode
+            season = "{:02d}".format(season)
+            episode = "{:02d}".format(int(match.group(3)))
             return "S%sE%s" % (season, episode)
         else:
             return None

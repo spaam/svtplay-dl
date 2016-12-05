@@ -205,13 +205,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def seasoninfo(self, data):
         if "season" in data["video"]:
-            season = data["video"]["season"]
-            if season < 10:
-                season = "0%s" % season
-            episode = data["video"]["episodeNumber"]
-
-            if episode < 10:
-                episode = "0%s" % episode
+            season = "{:02d}".format(data["video"]["season"])
+            episode = "{:02d}".format(data["video"]["episodeNumber"])
             if int(season) == 0 and int(episode) == 0:
                 return None
             return "S%sE%s" % (season, episode)

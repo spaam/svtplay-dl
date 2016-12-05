@@ -210,7 +210,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 episode = dataj["format_position"]["episode"]
         name = filenamify(program)
         if season:
-            name = "%s.s%s" % (name, season)
+            name = "{}.s{:02d}".format(name, int(season))
         if episode:
-            name = "%se%s" % (name, episode)
+            name = "{}e{:02d}".format(name, int(episode))
         return name
