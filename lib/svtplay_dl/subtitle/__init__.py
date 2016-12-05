@@ -17,6 +17,7 @@ class subtitle(object):
         self.subtype = subtype
         self.http = HTTP(options)
         self.subfix = subfix
+        self.bom = False
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
@@ -25,7 +26,10 @@ class subtitle(object):
             return
 
         data = None
-       
+        if "mtgx" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
+            subdata.encoding = "utf-8"
+            self.bom = True
+
         if self.subtype == "tt":
             data = self.tt(subdata)
         if self.subtype == "json":
@@ -190,12 +194,18 @@ class subtitle(object):
         number = 0
         block = 0
         subnr = False
+        if self.bom:
+            ssubdata.read(1)
         for i in ssubdata.readlines():
             match = re.search(r"^[\r\n]+", i)
             match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
             match3 = re.search(r"^(\d+)\s", i)
             if i[:6] == "WEBVTT":
-                pass
+                continue
+            elif "X-TIMESTAMP" in i:
+                continue
+            elif match and number_b == 1 and self.bom:
+                continue
             elif match and number_b > 1:
                 block = 0
                 srt += "\n"
