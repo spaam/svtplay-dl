@@ -2,10 +2,9 @@ import xml.etree.ElementTree as ET
 import json
 import re
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, is_py3, decode_html_entities
+from svtplay_dl.utils import is_py2, is_py3, decode_html_entities, HTTP
 from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
-from requests import Session
 from requests import __build__ as requests_version
 import platform
 
@@ -16,7 +15,7 @@ class subtitle(object):
         self.subtitle = None
         self.options = options
         self.subtype = subtype
-        self.http = Session()
+        self.http = HTTP(options)
         self.subfix = subfix
 
     def download(self):
