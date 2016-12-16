@@ -343,7 +343,7 @@ def setup_log(silent, verbose=False):
 
 def main():
     """ Main program """
-    usage = "Usage: %prog [options] url"
+    usage = "Usage: %prog [options] [urls]"
     parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--output",
                       metavar="OUTPUT", help="outputs to the given filename or folder")
@@ -418,7 +418,7 @@ def main():
     if not args:
         parser.print_help()
         sys.exit(0)
-    if len(args) != 1:
+    if len(args) < 1:
         parser.error("Incorrect number of arguments")
     if options.exclude:
         options.exclude = options.exclude.split(",")
@@ -438,10 +438,11 @@ def main():
         log.error("flexible-quality requires a quality")
         sys.exit(4)
 
-    url = args[0]
+    urls = args
 
     try:
-        get_media(url, options)
+        for url in urls:
+            get_media(url, options)
     except KeyboardInterrupt:
         print("")
 
