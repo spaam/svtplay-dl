@@ -40,8 +40,11 @@ class postprocess(object):
             try:
                 r = post(url, data=dumps(payload), headers=headers, timeout=30) # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume, and it is heroku after all (fast enough)
                 if r.status_code == codes.ok:
-                    response = r.json()
-                    return response['language']
+                    try:
+                        response = r.json()
+                        return response['language']
+                    except TypeError:
+                        return 'und'
                 else:
                     log.error("Server error appeared. Setting language as undetermined.")
                     return 'und'

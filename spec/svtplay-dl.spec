@@ -14,5 +14,5 @@ exe = EXE(pyz,
           name='svtplay-dl',
           debug=False,
           strip=None,
-          upx=True,
+          upx=False,
           console=True)

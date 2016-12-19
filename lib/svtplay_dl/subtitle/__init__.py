@@ -2,10 +2,9 @@ import xml.etree.ElementTree as ET
 import json
 import re
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2, is_py3, decode_html_entities
+from svtplay_dl.utils import is_py2, is_py3, decode_html_entities, HTTP
 from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
-from requests import Session
 from requests import __build__ as requests_version
 import platform
 
@@ -16,14 +15,21 @@ class subtitle(object):
         self.subtitle = None
         self.options = options
         self.subtype = subtype
-        self.http = Session()
+        self.http = HTTP(options)
         self.subfix = subfix
+        self.bom = False
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
-        
+        if subdata.status_code != 200:
+            log.warning("Can't download subtitle file")
+            return
+
         data = None
-       
+        if "mtgx" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
+            subdata.encoding = "utf-8"
+            self.bom = True
+
         if self.subtype == "tt":
             data = self.tt(subdata)
         if self.subtype == "json":
@@ -91,7 +97,7 @@ class subtitle(object):
                         sec = float(begin2[2]) + float(duration2[2])
                     except ValueError:
                         sec = 0.000
-                    end = "%02d:%02d:%06.3f" % (int(begin[0]), int(begin[1]), sec)
+                    end = "%02d:%02d:%06.3f" % (int(begin2[0]), int(begin2[1]), sec)
                 else:
                     end = node.attrib["end"]
                 data += '%s\n%s --> %s\n' % (i, begin.replace(".", ","), end.replace(".", ","))
@@ -188,12 +194,18 @@ class subtitle(object):
         number = 0
         block = 0
         subnr = False
+        if self.bom:
+            ssubdata.read(1)
         for i in ssubdata.readlines():
             match = re.search(r"^[\r\n]+", i)
             match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
             match3 = re.search(r"^(\d+)\s", i)
             if i[:6] == "WEBVTT":
-                pass
+                continue
+            elif "X-TIMESTAMP" in i:
+                continue
+            elif match and number_b == 1 and self.bom:
+                continue
             elif match and number_b > 1:
                 block = 0
                 srt += "\n"

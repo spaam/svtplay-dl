@@ -4,10 +4,9 @@ from __future__ import absolute_import
 import re
 import json
 import copy
-import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import urljoin
+from svtplay_dl.utils.urllib import urljoin, urlparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
@@ -34,11 +33,16 @@ class Urplay(Service, OpenGraphThumbMixin):
         if len(jsondata["subtitles"]) > 0:
             for sub in jsondata["subtitles"]:
                 if "label" in sub:
-                    if self.options.get_all_subtitles:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0], "-" + filenamify(sub["label"]))
+                    absurl = urljoin(self.url, sub["file"].split(",")[0])
+                    if absurl.endswith("vtt"):
+                        subtype = "wrst"
                     else:
-                        yield subtitle(copy.copy(self.options), "tt", sub["file"].split(",")[0])
-                        
+                        subtype = "tt"
+                    if self.options.get_all_subtitles:
+                        yield subtitle(copy.copy(self.options), subtype, absurl, "-" + filenamify(sub["label"]))
+                    else:
+                        yield subtitle(copy.copy(self.options), subtype, absurl)
+
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:
@@ -60,32 +64,20 @@ class Urplay(Service, OpenGraphThumbMixin):
             for n in list(streams.keys()):
                 yield streams[n]
 
-    def scrape_episodes(self, options):
-        res = []
-        for relurl in re.findall(r'<a class="puff tv video"\s+title="[^"]*"\s+href="([^"]*)"',
-                                 self.get_urldata()):
-            res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
-
-        for relurl in re.findall(r'<a class="card program"\s+href="([^"]*)"',
-                                  self.get_urldata()):
-            res.append(urljoin(self.url, relurl.replace("&amp;", "&")))
-
-        if options.all_last != -1:
-            res = res[-options.all_last:]
-
-        return res
-
     def find_all_episodes(self, options):
-        match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata())
-        if match is None:
-            log.info("Couldn't retrieve episode list as rss, trying to scrape")
-            return self.scrape_episodes(options)
+        parse = urlparse(self.url)
+        match = re.search("/program/\d+-(\w+)-", parse.path)
+        if not match:
+            log.error("Can't find any videos")
+            return None
+        keyword = match.group(1)
+        episodes = []
+        all_links = re.findall('card-link" href="([^"]+)"', self.get_urldata())
+        for i in all_links:
+            match = re.search("/program/\d+-(\w+)-", i)
+            if match and match.group(1) == keyword:
+                episodes.append(urljoin("http://urplay.se/", i))
 
-        url = "http://urplay.se%s" % match.group(1).replace("&amp;", "&")
-        xml = ET.XML(self.http.request("get", url).content)
-
-        episodes = [x.text for x in xml.findall(".//item/link")]
         episodes_new = []
         n = 0
         for i in episodes:

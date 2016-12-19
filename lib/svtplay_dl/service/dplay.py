@@ -13,7 +13,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import quote, urlparse
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils import filenamify, is_py2
 from svtplay_dl.log import log
 
 class Dplay(Service):
@@ -105,7 +105,10 @@ class Dplay(Service):
         season = jsondata["data"][0]["season"]
         episode = jsondata["data"][0]["episode"]
         title = jsondata["data"][0]["title"]
-        return filenamify("%s.s%se%s.%s" % (show, season, episode, title))
+        if is_py2:
+            show = show.encode("latin1")
+            title = title.encode("latin1")
+        return filenamify("{}.s{:02d}e{:02d}.{}".format(show, int(season), int(episode), title))
 
     def _login(self, options):
         parse = urlparse(self.url)

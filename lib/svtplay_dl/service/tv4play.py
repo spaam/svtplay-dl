@@ -101,7 +101,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             elif i.find("mediaFormat").text == "smi":
                 yield subtitle(copy.copy(self.options), "smi", i.find("url").text)
 
-        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls" % vid
+        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls3" % vid
         data = self.http.request("get", url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
@@ -114,12 +114,17 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
                     streams = hlsparse(self.options, self.http.request("get", i.find("url").text), i.find("url").text)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
 
     def _get_show_info(self):
         show = self._get_showname(self.url)
-        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=false&platform=web&node_nids=%s&per_page=99999" % show).text
+        if self.options.live:
+            live = "true"
+        else:
+            live = "false"
+        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=%s&platform=web&node_nids=%s&per_page=99999" % (live, show)).text
         jsondata = json.loads(data)
         return jsondata
 
@@ -128,8 +133,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
         page = 1
         assets = page * 1000
         run = True
+        if self.options.live:
+            live = "true"
+        else:
+            live = "false"
         while run:
-            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live=false&platform=web&node_nids=%s&per_page=1000&page=%s" % (show, page)).text
+            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live=%s&platform=web&node_nids=%s&per_page=1000&page=%s" % (live, show, page)).text
             jsondata = json.loads(data)
             for i in jsondata["results"]:
                 if vid == i["id"]:
