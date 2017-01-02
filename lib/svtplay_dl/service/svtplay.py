@@ -48,7 +48,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if "subtitles" in janson["video"]:
             for i in janson["video"]["subtitles"]:
-                if i["format"] == "WebSRT":
+                if i["format"] == "WebSRT" and "url" in i:
                     yield subtitle(copy.copy(self.options), "wrst", i["url"])
 
         if "videoReferences" in janson["video"]:
