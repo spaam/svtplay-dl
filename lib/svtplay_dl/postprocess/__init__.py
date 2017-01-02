@@ -91,14 +91,14 @@ class postprocess(object):
         if self.stream.options.output.endswith('.mp4') is False:
             orig_filename = self.stream.options.output
             name, ext = os.path.splitext(orig_filename)
-            new_name = "{}.mp4".format(name)
+            new_name = u"{}.mp4".format(name)
 
             if self.merge_subtitle:
-                log.info("Muxing %s and merging its subtitle into %s", orig_filename, new_name)
+                log.info(u"Muxing %s and merging its subtitle into %s", orig_filename, new_name)
             else:
-                log.info("Muxing %s into %s", orig_filename, new_name)
-            
-            tempfile = "{}.temp".format(orig_filename)
+                log.info(u"Muxing %s into %s".format(orig_filename, new_name))
+
+            tempfile = u"{}.temp".format(orig_filename)
             arguments = ["-map", "0:v", "-map", "0:a", "-c", "copy", "-copyts", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -149,10 +149,10 @@ class postprocess(object):
             log.info("Merge audio, video and subtitle into %s", orig_filename)
         else:
             log.info("Merge audio and video into %s", orig_filename)
-        
-        tempfile = "{}.temp".format(orig_filename)
+
+        tempfile = u"{}.temp".format(orig_filename)
         name = os.path.splitext(orig_filename)[0]
-        audio_filename = "{}.m4a".format(name)
+        audio_filename = u"{}.m4a".format(name)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
