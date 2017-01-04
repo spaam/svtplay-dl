@@ -152,6 +152,20 @@ class Options(object):
         self.remux = False
         self.silent_semi = False
 
+def get_multiple_media(urls, options):
+    if options.output and os.path.isfile(options.output):
+        log.error("Output must be a directory if used with multiple URLs")
+        sys.exit(2)
+    elif options.output and not os.path.exists(options.output):
+        try:
+            os.makedirs(options.output)
+        except OSError as e:
+            log.error("%s: %s", e.strerror, e.filename)
+            return
+
+    for url in urls:
+        get_media(url, options)
+
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
@@ -441,8 +455,10 @@ def main():
     urls = args
 
     try:
-        for url in urls:
-            get_media(url, options)
+        if len(urls) == 1:
+            get_media(urls[0], options)
+        else:
+            get_multiple_media(urls, options)
     except KeyboardInterrupt:
         print("")
 
