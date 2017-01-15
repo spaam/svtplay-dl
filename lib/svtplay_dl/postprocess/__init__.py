@@ -3,9 +3,10 @@ from json import dumps
 from random import sample
 import subprocess
 import os
+import platform
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import which
+from svtplay_dl.utils import which, is_py3
 
 
 class postprocess(object):
@@ -29,8 +30,13 @@ class postprocess(object):
                 lines   = block.strip('-').split('\n')
                 txt     = '\r\n'.join(lines[2:])
                 return txt
+
+            if platform.system() == "Windows" and is_py3:
+                fd = open(self, encoding="utf8")
+            else:
+                fd = open(self)
             return list(map(parse_block,
-                        open(self).read().strip().replace('\r', '').split('\n\n')))
+                        fd.read().strip().replace('\r', '').split('\n\n')))
         
         def query(self):
             random_sentences = ' '.join(sample(parse(self),8)).replace('\r\n', '')
