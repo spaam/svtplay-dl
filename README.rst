@@ -114,7 +114,7 @@ This script works for:
 -  svtplay.se
 -  viafree.se (former tv3play.se, tv6play.se, tv8play.se, tv10play.se)
 -  viafree.dk (former tv3play.dk)
--  viafree.se (former tv3play.no, viasat4play.no 
+-  viafree.se (former tv3play.no, viasat4play.no)
 -  tv3play.ee
 -  tv3play.lt
 -  tv3play.lv
