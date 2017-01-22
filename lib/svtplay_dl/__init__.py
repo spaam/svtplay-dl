@@ -164,7 +164,7 @@ def get_multiple_media(urls, options):
             return
 
     for url in urls:
-        get_media(url, options)
+        get_media(url, copy.copy(options))
 
 def get_media(url, options):
     if "http" not in url[:4]:
@@ -187,9 +187,9 @@ def get_media(url, options):
         url = ensure_unicode(url)
 
     if options.all_episodes:
-        get_all_episodes(stream, options, url)
+        get_all_episodes(stream, copy.copy(options), url)
     else:
-        get_one_media(stream, options)
+        get_one_media(stream, copy.copy(options))
 
 
 def get_all_episodes(stream, options, url):
