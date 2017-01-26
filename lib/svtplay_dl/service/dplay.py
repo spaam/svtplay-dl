@@ -106,8 +106,11 @@ class Dplay(Service):
         episode = jsondata["data"][0]["episode"]
         title = jsondata["data"][0]["title"]
         if is_py2:
-            show = show.encode("latin1")
-            title = title.encode("latin1")
+            show = filenamify(show).encode("latin1")
+            title = filenamify(title).encode("latin1")
+        else:
+            show = filenamify(show)
+            title = filenamify(title)
         return filenamify("{}.s{:02d}e{:02d}.{}".format(show, int(season), int(episode), title))
 
     def _login(self, options):
