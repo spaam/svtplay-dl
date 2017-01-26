@@ -50,16 +50,22 @@ class Svtplay(Service, OpenGraphThumbMixin):
             for i in janson["video"]["subtitles"]:
                 if i["format"] == "WebSRT" and "url" in i:
                     yield subtitle(copy.copy(self.options), "wrst", i["url"])
+        if "programVersionId" in janson["video"]:
+            vid = janson["video"]["programVersionId"]
+        else:
+            vid = janson["video"]["id"]
+        res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(vid))
+        janson = res.json()
 
-        if "videoReferences" in janson["video"]:
-            if len(janson["video"]["videoReferences"]) == 0:
+        if "videoReferences" in janson:
+            if len(janson["videoReferences"]) == 0:
                 yield ServiceError("Media doesn't have any associated videos (yet?)")
                 return
 
-            for i in janson["video"]["videoReferences"]:
+            for i in janson["videoReferences"]:
                 parse = urlparse(i["url"])
                 query = parse_qs(parse.query)
-                if i["playerType"] == "hls" or i["playerType"] == "ios":
+                if i["format"] == "hls":
                     streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
@@ -71,7 +77,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                             if streams:
                                 for n in list(streams.keys()):
                                     yield streams[n]
-                if i["playerType"] == "playerType" or i["playerType"] == "flash":
+                if i["format"] == "hds":
                     match = re.search(r"\/se\/secure\/", i["url"])
                     if not match:
                         streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
@@ -85,7 +91,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                                 if streams:
                                     for n in list(streams.keys()):
                                         yield streams[n]
-                if i["playerType"] == "dash264" or i["playerType"] == "dashhbbtv":
+                if i["format"] == "dash264" or i["format"] == "dashhbbtv":
                     streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
@@ -119,7 +125,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def _genre(self, jansson):
         videos = []
-        for i in jansson["clusterPage"]["content"]["clips"]:
+        for i in jansson["clusterPage"]["clips"]:
             videos.append(i["contentUrl"])
         return videos
 
@@ -147,16 +153,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 if re.search("/genre", parse.path):
                     videos = self._genre(dataj)
                 else:
-                    items = dataj["videoTitlePage"]["realatedVideosTabs"]
+                    items = dataj["videoTitlePage"]["relatedVideosTabs"]
                     for i in items:
                         if "sasong" in i["slug"]:
                             for n in i["videos"]:
-                                if n["url"] not in videos:
-                                    videos.append(n["url"])
+                                if n["contentUrl"] not in videos:
+                                    videos.append(n["contentUrl"])
                         if "senast" in i["slug"]:
                             for n in i["videos"]:
-                                if n["url"] not in videos:
-                                    videos.append(n["url"])
+                                if n["contentUrl"] not in videos:
+                                    videos.append(n["contentUrl"])
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
@@ -175,8 +181,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def outputfilename(self, data, filename):
         directory = os.path.dirname(filename)
-        name = data["video"]["titlePagePath"]
+        name = filenamify(data["video"]["programTitle"])
         other = filenamify(data["video"]["title"])
+
         if "programVersionId" in data["video"]:
             vid = str(data["video"]["programVersionId"])
         else:
@@ -187,6 +194,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
+            other = None
+        elif name == None:
+            name = other
             other = None
         season = self.seasoninfo(data)
         title = name
@@ -202,9 +212,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
             output = title
         return output
 
-
     def seasoninfo(self, data):
-        if "season" in data["video"]:
+        if "season" in data["video"] and data["video"]["season"]:
             season = "{:02d}".format(data["video"]["season"])
             episode = "{:02d}".format(data["video"]["episodeNumber"])
             if int(season) == 0 and int(episode) == 0:
