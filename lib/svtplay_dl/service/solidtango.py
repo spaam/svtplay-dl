@@ -33,9 +33,17 @@ class Solidtango(Service):
         match = re.search('is_livestream: true', data)
         if match:
             self.options.live = True
+        match = re.search('isLivestream: true', data)
+        if match:
+            self.options.live = True
         match = re.search('html5_source: "([^"]+)"', data)
+        match2 = re.search('hlsURI: "([^"]+)"', data)
         if match:
             streams = hlsparse(self.options, self.http.request("get", match.group(1)), match.group(1))
+            for n in list(streams.keys()):
+                yield streams[n]
+        elif match2:
+            streams = hlsparse(self.options, self.http.request("get", match2.group(1)), match2.group(1))
             for n in list(streams.keys()):
                 yield streams[n]
         else:
