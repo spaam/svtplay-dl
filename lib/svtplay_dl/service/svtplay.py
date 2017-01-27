@@ -46,16 +46,17 @@ class Svtplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-        if "subtitles" in janson["video"]:
-            for i in janson["video"]["subtitles"]:
-                if i["format"] == "WebSRT" and "url" in i:
-                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
         if "programVersionId" in janson["video"]:
             vid = janson["video"]["programVersionId"]
         else:
             vid = janson["video"]["id"]
         res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(vid))
         janson = res.json()
+
+        if "subtitleReferences" in janson:
+            for i in janson["subtitleReferences"]:
+                if i["format"] == "websrt" and "url" in i:
+                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:
