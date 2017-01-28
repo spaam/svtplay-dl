@@ -124,7 +124,7 @@ class Options(object):
         self.silent = False
         self.force = False
         self.quality = 0
-        self.flexibleq = None
+        self.flexibleq = 0
         self.list_quality = False
         self.other = None
         self.subtitle = False
