@@ -156,14 +156,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 else:
                     items = dataj["videoTitlePage"]["relatedVideosTabs"]
                     for i in items:
-                        if "sasong" in i["slug"]:
+                        if "sasong" in i["slug"] or "senast" in i["slug"]:
                             for n in i["videos"]:
-                                if n["contentUrl"] not in videos:
-                                    videos.append(n["contentUrl"])
-                        if "senast" in i["slug"]:
-                            for n in i["videos"]:
-                                if n["contentUrl"] not in videos:
-                                    videos.append(n["contentUrl"])
+                                parse = urlparse(n["contentUrl"])
+                                if parse.path not in videos:
+                                    videos.append(parse.path)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
