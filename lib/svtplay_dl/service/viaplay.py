@@ -192,8 +192,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
             for i in janson["format"]["seasons"]:
                 seasons.append(i["seasonNumber"])
             for i in seasons:
-                for n in janson["format"]["videos"][str(i)]["program"]:
-                    videos.append(n["sharingUrl"])
+                if "program" in janson["format"]["videos"][str(i)]:
+                    for n in janson["format"]["videos"][str(i)]["program"]:
+                        videos.append(n["sharingUrl"])
 
         n = 0
         episodes = []
