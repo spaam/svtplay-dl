@@ -179,7 +179,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def outputfilename(self, data, filename):
         directory = os.path.dirname(filename)
-        name = filenamify(data["video"]["programTitle"])
+        name = None
+        if data["video"]["programTitle"]:
+            name = filenamify(data["video"]["programTitle"])
         other = filenamify(data["video"]["title"])
 
         if "programVersionId" in data["video"]:
