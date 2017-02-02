@@ -143,6 +143,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             
         if match is None:
             videos = []
+            tab = None
             match = re.search("__svtplay'] = ({.*});", self.get_urldata())
             if re.search("sista-chansen", parse.path):
                 videos = self._last_chance(videos, 1)
@@ -154,13 +155,33 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 if re.search("/genre", parse.path):
                     videos = self._genre(dataj)
                 else:
+                    if parse.query: 
+                        match = re.search("tab=(.+)",parse.query)
+                        if(match):
+                            tab = match.group(1)
+                            
                     items = dataj["videoTitlePage"]["relatedVideosTabs"]
                     for i in items:
-                        if "sasong" in i["slug"] or "senast" in i["slug"]:
-                            for n in i["videos"]:
-                                parse = urlparse(n["contentUrl"])
-                                if parse.path not in videos:
-                                    videos.append(parse.path)
+                        if tab:
+                            if i["slug"] == tab:
+                                for n in i["videos"]:
+                                    parse = urlparse(n["contentUrl"])
+                                    if parse.path not in videos:
+                                        videos.append(parse.path)
+                            
+                        else:
+                            if "sasong" in i["slug"] or "senast" in i["slug"]:
+                                for n in i["videos"]:
+                                    parse = urlparse(n["contentUrl"])
+                                    if parse.path not in videos:
+                                        videos.append(parse.path)
+                                        
+                        if self.options.include_clips: 
+                             if i["slug"] == "klipp":
+                                for n in i["videos"]:
+                                    parse = urlparse(n["contentUrl"])
+                                    if parse.path not in videos:
+                                        videos.append(parse.path)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
