@@ -427,6 +427,8 @@ def main():
                       help="If two streams have the same quality, choose the one you prefer")
     parser.add_option("--remux", dest="remux", default=False, action="store_true",
                       help="Remux from one container to mp4 using ffmpeg or avconv")
+    parser.add_option("--include-clips", dest="include_clips", default=False, action="store_true",
+                      help="include clips from websites when using -A")
                       
     (options, args) = parser.parse_args()
     if not args:
@@ -493,4 +495,5 @@ def mergeParserOption(options, parser):
     options.get_all_subtitles = parser.get_all_subtitles
     options.get_raw_subtitles = parser.get_raw_subtitles
     options.convert_subtitle_colors = parser.convert_subtitle_colors
+    options.include_clips = parser.include_clips
     return options
