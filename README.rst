@@ -30,10 +30,14 @@ Windows
 
 You can download windows binaries from `svtplay-dl.se`_
 
-If you want to build your own windows binaries 
-Install pyinstaller 3.1.1 (https://pypi.python.org/pypi/PyInstaller/3.1.1)
-Follow the steps listed under From source below 
-Run scripts\pyinstaller.exe --noupx --onefile c:\path\to\svtplay-dl-clone\spec\svtplay-dl.spec (where you replace the path with the correct one)
+If you want to build your own windows binaries:
+
+1. Install pyinstaller 3.1.1 (https://pypi.python.org/pypi/PyInstaller/3.1.1)
+2. Follow the steps listed under **From source**
+3. Run 
+::
+    pyinstaller.exe --noupx --onefile c:\path\to\svtplay-dl-clone\spec\svtplay-dl.spec  (where you replace the path with the correct one)
+4. Find binary in dist folder. 
 
 Other systems with python
 ~~~~~~~~~~~~~~~~~~~~~~~~~
