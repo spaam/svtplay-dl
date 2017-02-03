@@ -134,7 +134,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
-            self.options.service = "tv3play"
             self.options.service = "viafree"
             basename = self._autoname(dataj)
             title = "%s-%s-%s" % (basename, vid, self.options.service)
