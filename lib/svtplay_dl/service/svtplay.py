@@ -225,6 +225,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
             title += ".%s" % season
         if other:
             title += ".%s" % other
+        if data["video"]["accessServices"]["audioDescription"]:
+                title+="-syntolkat"
+        if data["video"]["accessServices"]["signInterpretation"]:
+                title+="-teckentolkat" 
         title += "-%s-svtplay" % id
         title = filenamify(title)
         if len(directory):
