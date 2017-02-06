@@ -126,8 +126,22 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def _genre(self, jansson):
         videos = []
-        for i in jansson["clusterPage"]["clips"]:
-            videos.append(i["contentUrl"])
+        parse = urlparse(self._url)
+        dataj= jansson["clusterPage"]
+        tab = re.search("tab=(.+)",parse.query)
+        if(tab):
+            tab = tab.group(1)
+            for i in dataj["tabs"]:
+                if i["slug"] == tab:
+                    for n in i["content"]:
+                        parse = urlparse(n["contentUrl"])
+                        if parse.path not in videos:
+                            videos.append(parse.path)
+        else:                
+            for i in dataj["clips"]:
+                parse = urlparse(i["contentUrl"])
+                if parse.path not in videos:
+                    videos.append(parse.path)
         return videos
 
     def find_all_episodes(self, options):
