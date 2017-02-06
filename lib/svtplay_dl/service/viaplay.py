@@ -189,9 +189,17 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
         if match:
             janson = json.loads(match.group(1))
+            season = re.search("sasong-(\d+)",urlparse(self.url).path)
+            if season:
+                season = season.group(1)
             seasons = []
             for i in janson["format"]["seasons"]:
-                seasons.append(i["seasonNumber"])
+                if season:
+                    if int(season) == i["seasonNumber"]:
+                        seasons.append(i["seasonNumber"])
+                else:
+                    seasons.append(i["seasonNumber"])
+
             for i in seasons:
                 if "program" in janson["format"]["videos"][str(i)]:
                     for n in janson["format"]["videos"][str(i)]["program"]:
