@@ -201,16 +201,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             data = self.http.request("get", match).content
             xml = ET.XML(data)
-
             episodes = [x.text for x in xml.findall(".//item/link")]
-        episodes_new = []
-        n = 1
-        for i in episodes:
-            episodes_new.append(i)
-            if n == options.all_last:
-                break
-            n += 1
-        return sorted(episodes_new)
+            
+        if options.all_last > 0:
+            return sorted(episodes[-options.all_last:])
+        return sorted(episodes)
 
     def outputfilename(self, data, filename):
         directory = os.path.dirname(filename)
