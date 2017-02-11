@@ -230,8 +230,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if season:
             if len(dataj["format_position"]["episode"]) > 0:
                 episode = dataj["format_position"]["episode"]
-            
-            
+
         if dataj["type"] == "clip":
             #Removes the show name from the end of the filename
             #e.g. Showname.S0X.title instead of Showname.S07.title-showname
@@ -240,15 +239,16 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 title = filenamify(match.group(1))
             else: 
                 title = filenamify(dataj["title"])
-            if dataj["derived_from_id"] > 0:
-                parent_id = dataj["derived_from_id"]
-                parent_episode = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/%s" % parent_id)
-                if  parentepisode.status_code != 403: #if not geoblocked
-                    datajparent = json.loads(parent_episode.text)
-                    if not season and datajparent["format_position"]["season"] > 0:
-                        season = datajparent["format_position"]["season"]
-                    if len(datajparent["format_position"]["episode"]) > 0:
-                        episode = datajparent["format_position"]["episode"]
+            if "derived_from_id" in dataj:
+                if dataj["derived_from_id"]:
+                    parent_id = dataj["derived_from_id"]
+                    parent_episode = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/%s" % parent_id)
+                    if  parent_episode.status_code != 403: #if not geoblocked
+                        datajparent = json.loads(parent_episode.text)
+                        if not season and datajparent["format_position"]["season"] > 0:
+                            season = datajparent["format_position"]["season"]
+                        if len(datajparent["format_position"]["episode"]) > 0:
+                            episode = datajparent["format_position"]["episode"]
                 
         name = filenamify(program)
         if season:
