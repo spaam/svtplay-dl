@@ -76,6 +76,7 @@ def parsesegments(content, url):
         init = vinit.attrib["initialization"]
     nrofvideos = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
     selemtns = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
+    total = 0
     if nrofvideos:
         total = int(nrofvideos[0].attrib["r"]) + len(selemtns) + 1
         time = False
