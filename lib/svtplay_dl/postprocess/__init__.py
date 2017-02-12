@@ -77,10 +77,10 @@ class postprocess(object):
                         subfix = subfix.strip('-')
                     langs += [exceptions[subfix]]
                     continue
-                subfile = "{}.srt".format(os.path.splitext(self.stream.options.output)[0] + subfix)
+                subfile = "{0}.srt".format(os.path.splitext(self.stream.options.output)[0] + subfix)
                 langs += [query(subfile)]
         else:
-            subfile = "{}.srt".format(os.path.splitext(self.stream.options.output)[0])
+            subfile = "{0}.srt".format(os.path.splitext(self.stream.options.output)[0])
             langs += [query(subfile)]
         if len(langs) >= 2:
             log.info("Language codes: " + ', '.join(langs))
@@ -97,14 +97,14 @@ class postprocess(object):
         if self.stream.options.output.endswith('.mp4') is False:
             orig_filename = self.stream.options.output
             name, ext = os.path.splitext(orig_filename)
-            new_name = u"{}.mp4".format(name)
+            new_name = u"{0}.mp4".format(name)
 
             if self.merge_subtitle:
                 log.info(u"Muxing %s and merging its subtitle into %s", orig_filename, new_name)
             else:
                 log.info(u"Muxing %s into %s".format(orig_filename, new_name))
 
-            tempfile = u"{}.temp".format(orig_filename)
+            tempfile = u"{0}.temp".format(orig_filename)
             arguments = ["-map", "0:v", "-map", "0:a", "-c", "copy", "-copyts", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -116,10 +116,10 @@ class postprocess(object):
                     arguments += ["-map", str(stream_num + 1), "-c:s:" + str(stream_num), "mov_text", "-metadata:s:s:" + str(stream_num), "language=" + language]
                 if len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{}.srt".format(name + subfix)
+                        subfile = "{0}.srt".format(name + subfix)
                         cmd += ["-i", subfile]
                 else:
-                    subfile = "{}.srt".format(name)
+                    subfile = "{0}.srt".format(name)
                     cmd += ["-i", subfile]
                 
             arguments += ["-y", tempfile]
@@ -136,7 +136,7 @@ class postprocess(object):
                 log.info("Muxing done, removing the old files.")
                 if len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{}.srt".format(name + subfix)
+                        subfile = "{0}.srt".format(name + subfix)
                         os.remove(subfile)
                 else: os.remove(subfile)
             else: log.info("Muxing done, removing the old file.")
@@ -156,9 +156,9 @@ class postprocess(object):
         else:
             log.info("Merge audio and video into %s", orig_filename)
 
-        tempfile = u"{}.temp".format(orig_filename)
+        tempfile = u"{0}.temp".format(orig_filename)
         name = os.path.splitext(orig_filename)[0]
-        audio_filename = u"{}.m4a".format(name)
+        audio_filename = u"{0}.m4a".format(name)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
@@ -168,10 +168,10 @@ class postprocess(object):
                 arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text", "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{}.srt".format(name + subfix)
+                    subfile = "{0}.srt".format(name + subfix)
                     cmd += ["-i", subfile]
             else:
-                subfile = "{}.srt".format(name)
+                subfile = "{0}.srt".format(name)
                 cmd += ["-i", subfile]
             
         arguments += ["-y", tempfile]
@@ -190,7 +190,7 @@ class postprocess(object):
         if self.merge_subtitle and not self.external_subtitle:
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{}.srt".format(name + subfix)
+                    subfile = "{0}.srt".format(name + subfix)
                     os.remove(subfile)
             else: os.remove(subfile)
         os.rename(tempfile, orig_filename)

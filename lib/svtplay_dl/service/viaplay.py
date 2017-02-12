@@ -252,10 +252,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 
         name = filenamify(program)
         if season:
-            name = "{}.s{:02d}".format(name, int(season))
+            name = "{0}.s{1:02d}".format(name, int(season))
         if episode:
-            name = "{}e{:02d}".format(name, int(episode))
+            name = "{0}e{1:02d}".format(name, int(episode))
         if title:
-            name = "{}.{}".format(name, title)
+            name = "{0}.{1}".format(name, title)
         
         return name

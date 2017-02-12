@@ -111,7 +111,7 @@ class Dplay(Service):
         else:
             show = filenamify(show)
             title = filenamify(title)
-        return filenamify("{}.s{:02d}e{:02d}.{}".format(show, int(season), int(episode), title))
+        return filenamify("{0}.s{1:02d}e{2:02d}.{3}".format(show, int(season), int(episode), title))
 
     def _login(self, options):
         parse = urlparse(self.url)

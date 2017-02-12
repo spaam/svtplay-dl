@@ -32,7 +32,7 @@ class Aftonbladet(Service):
         vendor = janson["playerOptions"]["vendor"]
         self.options.live = janson["live"]
         if not self.options.live:
-            dataurl = "{}{}/assets/{}?appName=svp-player".format(apiurl, vendor, videoId)
+            dataurl = "{0}{1}/assets/{2}?appName=svp-player".format(apiurl, vendor, videoId)
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
 

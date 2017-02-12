@@ -50,7 +50,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             vid = janson["video"]["programVersionId"]
         else:
             vid = janson["video"]["id"]
-        res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(vid))
+        res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(vid))
         janson = res.json()
 
         if "subtitleReferences" in janson:
