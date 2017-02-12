@@ -145,7 +145,11 @@ def parsem3u(data):
                 line[0].append("None")
             globdata.update(dict(line))
         elif l.startswith("#EXTINF:"):
-            dur, title = l[8:].strip().split(",", 1)
+            try:
+                dur, title = l[8:].strip().split(",", 1)
+            except:
+                dur = l[8:].strip()
+                title = None
             streaminfo['duration'] = dur
             streaminfo['title'] = title
         elif l[0] == '#':
