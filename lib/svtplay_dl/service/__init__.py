@@ -63,6 +63,15 @@ class Service(object):
                     return True
         return False
 
+    def exclude2(self, filename):
+        if self.options.exclude:
+            for i in self.options.exclude:
+                if is_py2:
+                    i = i.decode("utf-8")
+                if i in filename:
+                    return True
+        return False
+
     # the options parameter is unused, but is part of the
     # interface, so we don't want to remove it. Thus, the
     # pylint ignore.
