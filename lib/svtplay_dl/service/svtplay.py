@@ -40,7 +40,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if self.options.output_auto:
             self.options.service = "svtplay"
-            self.options.output = self.outputfilename(janson, self.options.output)
+            self.options.output = self.outputfilename(janson["video"], self.options.output)
 
         if self.exclude():
             yield ServiceError("Excluding video")
@@ -178,24 +178,15 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     for i in items:
                         if tab:
                             if i["slug"] == tab:
-                                for n in i["videos"]:
-                                    parse = urlparse(n["contentUrl"])
-                                    if parse.path not in videos:
-                                        videos.append(parse.path)
-                            
+                                videos = self.videos_to_list(i["videos"], videos)
+
                         else:
                             if "sasong" in i["slug"] or "senast" in i["slug"]:
-                                for n in i["videos"]:
-                                    parse = urlparse(n["contentUrl"])
-                                    if parse.path not in videos:
-                                        videos.append(parse.path)
+                                videos = self.videos_to_list(i["videos"], videos)
                                         
                         if self.options.include_clips: 
                              if i["slug"] == "klipp":
-                                for n in i["videos"]:
-                                    parse = urlparse(n["contentUrl"])
-                                    if parse.path not in videos:
-                                        videos.append(parse.path)
+                                videos = self.videos_to_list(i["videos"], videos)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
         else:
@@ -207,17 +198,29 @@ class Svtplay(Service, OpenGraphThumbMixin):
             return sorted(episodes[-options.all_last:])
         return sorted(episodes)
 
-    def outputfilename(self, data, filename):
-        directory = os.path.dirname(filename)
-        name = None
-        if data["video"]["programTitle"]:
-            name = filenamify(data["video"]["programTitle"])
-        other = filenamify(data["video"]["title"])
+    def videos_to_list(self, lvideos, videos):
+        for n in lvideos:
+            parse = urlparse(n["contentUrl"])
+            if parse.path not in videos:
+                filename = self.outputfilename(n, self.options.output)
+                if not self.exclude2(filename):
+                    videos.append(parse.path)
+        return videos
 
-        if "programVersionId" in data["video"]:
-            vid = str(data["video"]["programVersionId"])
+    def outputfilename(self, data, filename):
+        if filename:
+            directory = os.path.dirname(filename)
         else:
-            vid = str(data["video"]["id"])
+            directory = ""
+        name = None
+        if data["programTitle"]:
+            name = filenamify(data["programTitle"])
+        other = filenamify(data["title"])
+
+        if "programVersionId" in data:
+            vid = str(data["programVersionId"])
+        else:
+            vid = str(data["id"])
         if is_py2:
             id = hashlib.sha256(vid).hexdigest()[:7]
         else:
@@ -234,9 +237,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
             title += ".%s" % season
         if other:
             title += ".%s" % other
-        if data["video"]["accessServices"]["audioDescription"]:
+        if data["accessServices"]["audioDescription"]:
                 title+="-syntolkat"
-        if data["video"]["accessServices"]["signInterpretation"]:
+        if data["accessServices"]["signInterpretation"]:
                 title+="-teckentolkat" 
         title += "-%s-svtplay" % id
         title = filenamify(title)
@@ -247,9 +250,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
         return output
 
     def seasoninfo(self, data):
-        if "season" in data["video"] and data["video"]["season"]:
-            season = "{:02d}".format(data["video"]["season"])
-            episode = "{:02d}".format(data["video"]["episodeNumber"])
+        if "season" in data and data["season"]:
+            season = "{:02d}".format(data["season"])
+            episode = "{:02d}".format(data["episodeNumber"])
             if int(season) == 0 and int(episode) == 0:
                 return None
             return "S%sE%s" % (season, episode)
