@@ -1,9 +1,9 @@
-from requests import post, codes, Timeout
 from json import dumps
 from random import sample
 import subprocess
 import os
 import platform
+from requests import post, codes, Timeout
 
 from svtplay_dl.log import log
 from svtplay_dl.utils import which, is_py3
@@ -27,8 +27,8 @@ class postprocess(object):
         # https://github.com/riobard/srt.py/blob/master/srt.py
         def parse(self):
             def parse_block(block):
-                lines   = block.strip('-').split('\n')
-                txt     = '\r\n'.join(lines[2:])
+                lines = block.strip('-').split('\n')
+                txt = '\r\n'.join(lines[2:])
                 return txt
 
             if platform.system() == "Windows" and is_py3:
@@ -36,12 +36,12 @@ class postprocess(object):
             else:
                 fd = open(self)
             return list(map(parse_block,
-                        fd.read().strip().replace('\r', '').split('\n\n')))
-        
+                            fd.read().strip().replace('\r', '').split('\n\n')))
+
         def query(self):
-            random_sentences = ' '.join(sample(parse(self),8)).replace('\r\n', '')
+            random_sentences = ' '.join(sample(parse(self), 8)).replace('\r\n', '')
             url = 'https://whatlanguage.herokuapp.com'
-            payload = { "query": random_sentences }
+            payload = {"query": random_sentences}
             headers = {'content-type': 'application/json'} # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
             try:
                 r = post(url, data=dumps(payload), headers=headers, timeout=30) # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume, and it is heroku after all (fast enough)
@@ -109,7 +109,7 @@ class postprocess(object):
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
             cmd = [self.detect, "-i", orig_filename]
-            
+
             if self.merge_subtitle:
                 langs = self.sublanguage()
                 for stream_num, language in enumerate(langs):
@@ -121,7 +121,7 @@ class postprocess(object):
                 else:
                     subfile = "{0}.srt".format(name)
                     cmd += ["-i", subfile]
-                
+
             arguments += ["-y", tempfile]
             cmd += arguments
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -131,7 +131,7 @@ class postprocess(object):
                 msg = stderr.strip().split('\n')[-1]
                 log.error("Something went wrong: %s", msg)
                 return
-            
+
             if self.merge_subtitle and not self.external_subtitle:
                 log.info("Muxing done, removing the old files.")
                 if len(self.subfixes) >= 2:
@@ -164,7 +164,7 @@ class postprocess(object):
 
         if self.merge_subtitle:
             langs = self.sublanguage()
-            for stream_num, language in enumerate(langs, start = 2):
+            for stream_num, language in enumerate(langs, start=2):
                 arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text", "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
@@ -173,7 +173,7 @@ class postprocess(object):
             else:
                 subfile = "{0}.srt".format(name)
                 cmd += ["-i", subfile]
-            
+
         arguments += ["-y", tempfile]
         cmd += arguments
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)

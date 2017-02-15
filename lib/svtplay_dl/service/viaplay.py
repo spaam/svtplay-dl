@@ -156,7 +156,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             else:
                 subtype = "sami"
             if self.options.get_all_subtitles:
-                yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"],"-SDH")
+                yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"], "-SDH")
             else: 
                 yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"])
 
@@ -189,7 +189,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
         if match:
             janson = json.loads(match.group(1))
-            season = re.search("sasong-(\d+)",urlparse(self.url).path)
+            season = re.search("sasong-(\d+)", urlparse(self.url).path)
             if season:
                 season = season.group(1)
             seasons = []
@@ -223,7 +223,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         season = None
         episode = None
         title = None
-        
+
         if "season" in dataj["format_position"]:
             if dataj["format_position"]["season"] > 0:
                 season = dataj["format_position"]["season"]
@@ -237,7 +237,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             match = re.search(r'(.+)-', dataj["title"])
             if match:
                 title = filenamify(match.group(1))
-            else: 
+            else:
                 title = filenamify(dataj["title"])
             if "derived_from_id" in dataj:
                 if dataj["derived_from_id"]:
@@ -249,7 +249,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                             season = datajparent["format_position"]["season"]
                         if len(datajparent["format_position"]["episode"]) > 0:
                             episode = datajparent["format_position"]["episode"]
-                
+
         name = filenamify(program)
         if season:
             name = "{0}.s{1:02d}".format(name, int(season))
@@ -257,5 +257,5 @@ class Viaplay(Service, OpenGraphThumbMixin):
             name = "{0}e{1:02d}".format(name, int(episode))
         if title:
             name = "{0}.{1}".format(name, title)
-        
+
         return name

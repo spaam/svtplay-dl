@@ -36,7 +36,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         janson = json.loads(match.group(1))["videoTitlePage"]
 
         if "live" in janson["video"]:
-            self.optionslive = janson["video"]["live"]
+            self.options.live = janson["video"]["live"]
 
         if self.options.output_auto:
             self.options.service = "svtplay"
@@ -127,8 +127,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
     def _genre(self, jansson):
         videos = []
         parse = urlparse(self._url)
-        dataj= jansson["clusterPage"]
-        tab = re.search("tab=(.+)",parse.query)
+        dataj = jansson["clusterPage"]
+        tab = re.search("tab=(.+)", parse.query)
         if tab:
             tab = tab.group(1)
             for i in dataj["tabs"]:
@@ -146,7 +146,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             match = self.url
         else:
             match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata())
+                              self.get_urldata())
             if match:
                 match = match.group(1)
             
@@ -165,10 +165,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     videos = self._genre(dataj)
                 else:
                     if parse.query: 
-                        match = re.search("tab=(.+)",parse.query)
-                        if(match):
+                        match = re.search("tab=(.+)", parse.query)
+                        if match:
                             tab = match.group(1)
-                            
+
                     items = dataj["videoTitlePage"]["relatedVideosTabs"]
                     for i in items:
                         if tab:
@@ -178,9 +178,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         else:
                             if "sasong" in i["slug"] or "senast" in i["slug"]:
                                 videos = self.videos_to_list(i["videos"], videos)
-                                        
+
                         if self.options.include_clips: 
-                             if i["slug"] == "klipp":
+                            if i["slug"] == "klipp":
                                 videos = self.videos_to_list(i["videos"], videos)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
@@ -223,7 +223,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if name == other:
             other = None
-        elif name == None:
+        elif name is None:
             name = other
             other = None
         season = self.seasoninfo(data)
@@ -233,9 +233,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if other:
             title += ".%s" % other
         if data["accessServices"]["audioDescription"]:
-                title+="-syntolkat"
+            title += "-syntolkat"
         if data["accessServices"]["signInterpretation"]:
-                title+="-teckentolkat" 
+            title += "-teckentolkat"
         title += "-%s-svtplay" % id
         title = filenamify(title)
         if len(directory):
