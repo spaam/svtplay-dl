@@ -38,6 +38,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if "live" in janson["video"]:
             self.options.live = janson["video"]["live"]
 
+        if not "programTitle" in janson["video"]:
+            yield ServiceError("Can't find any video on that page")
+            return
+
         if self.options.output_auto:
             self.options.service = "svtplay"
             self.options.output = self.outputfilename(janson["video"], self.options.output)
