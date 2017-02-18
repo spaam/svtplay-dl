@@ -10,6 +10,7 @@ from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils import HTTP
 
 
 class HLSException(UIException):
@@ -48,14 +49,17 @@ def hlsparse(options, res, url):
         streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
         return streams
     files = (parsem3u(res.text))[1]
-
+    http = HTTP(options)
     for i in files:
         try:
             bitrate = float(i[1]["BANDWIDTH"])/1000
         except KeyError:
             streams[0] = ServiceError("Can't read HLS playlist")
             return streams
-        streams[int(bitrate)] = HLS(copy.copy(options), _get_full_url(i[0], url), bitrate, cookies=res.cookies)
+        urls = _get_full_url(i[0], url)
+        res2 = http.get(urls)
+        if res2.status_code < 400:
+            streams[int(bitrate)] = HLS(copy.copy(options), urls, bitrate, cookies=res.cookies)
     return streams
 
 
