@@ -56,7 +56,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
             vid = janson["video"]["id"]
         res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(vid))
         janson = res.json()
-
+        if "live" in janson:
+            self.options.live = janson["live"]
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "websrt" and "url" in i:
