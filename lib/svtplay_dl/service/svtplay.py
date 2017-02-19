@@ -38,7 +38,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if "live" in janson["video"]:
             self.options.live = janson["video"]["live"]
 
-        if not "programTitle" in janson["video"]:
+        if "programTitle" not in janson["video"]:
             yield ServiceError("Can't find any video on that page")
             return
 
