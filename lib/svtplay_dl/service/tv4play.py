@@ -165,10 +165,24 @@ class Tv4play(Service, OpenGraphThumbMixin):
             show = quote_plus(show)
         return show
 
+    def _seasoninfo(self, data):
+        if "season" in data and data["season"]:
+            season = "{:02d}".format(data["season"])
+            episode = "{:02d}".format(data["episode"])
+            if int(season) == 0 and int(episode) == 0:
+                return None
+            return "s%se%s" % (season, episode)
+        else:
+            return None
+
     def _autoname(self, vid):
         jsondata = self._get_show_info()
         for i in jsondata["results"]:
             if vid == i["id"]:
+                season = self._seasoninfo(i)
+                if season:
+                   index = len(i["program"]["name"])
+                   return i["title"][:index] + ".%s%s" % (season, i["title"][index:])
                 return i["title"]
         return self._get_clip_info(vid)
 
