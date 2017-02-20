@@ -29,18 +29,34 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 yield ServiceError("This mode is not supported anymore. need the url with the video")
                 return
 
+        query = parse_qs(parse.query)
+        self.access = None
+        if "accessService" in query:
+            self.access = query["accessService"]
+
         match = re.search("__svtplay'] = ({.*});", self.get_urldata())
         if not match:
             yield ServiceError("Cant find video info.")
             return
         janson = json.loads(match.group(1))["videoTitlePage"]
 
-        if "live" in janson["video"]:
-            self.options.live = janson["video"]["live"]
-
         if "programTitle" not in janson["video"]:
             yield ServiceError("Can't find any video on that page")
             return
+
+        if self.access:
+            for i in janson["video"]["versions"]:
+                if i["accessService"] == self.access:
+                    url = urljoin("http://www.svtplay.se", i["contentUrl"])
+                    res = self.http.get(url)
+                    match = re.search("__svtplay'] = ({.*});", res.text)
+                    if not match:
+                        yield ServiceError("Cant find video info.")
+                        return
+                    janson = json.loads(match.group(1))["videoTitlePage"]
+
+        if "live" in janson["video"]:
+            self.options.live = janson["video"]["live"]
 
         if self.options.output_auto:
             self.options.service = "svtplay"
@@ -205,6 +221,18 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 filename = self.outputfilename(n, self.options.output)
                 if not self.exclude2(filename):
                     videos.append(parse.path)
+            if "versions" in n:
+                for i in n["versions"]:
+                    parse = urlparse(i["contentUrl"])
+                    filename = "" # output is None here.
+                    if "accessService" in i:
+                        if i["accessService"] == "audioDescription":
+                            filename += "-syntolkat"
+                        if i["accessService"] == "signInterpretation":
+                            filename += "-teckentolkat"
+                    if not self.exclude2(filename) and parse.path not in videos:
+                        videos.append(parse.path)
+
         return videos
 
     def outputfilename(self, data, filename):
@@ -237,10 +265,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
             title += ".%s" % season
         if other:
             title += ".%s" % other
-        if data["accessServices"]["audioDescription"]:
-            title += "-syntolkat"
-        if data["accessServices"]["signInterpretation"]:
-            title += "-teckentolkat"
+        if "accessService" in data:
+            if data["accessService"] == "audioDescription":
+                title += "-syntolkat"
+            if data["accessService"] == "signInterpretation":
+                title += "-teckentolkat"
         title += "-%s-svtplay" % id
         title = filenamify(title)
         if len(directory):
