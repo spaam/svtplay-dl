@@ -7,6 +7,8 @@ from svtplay_dl.utils import which
 from svtplay_dl import log
 
 def is_old():
+    if not which('ffmpeg'):
+        return None
     version_check = check_output([which('ffmpeg'),'-version']).split('\n')[0].split(' ')[:3]
     version_check = [v for v in version_check if findall('\d+', v)][0]
     if 'N' in version_check[0]:
@@ -27,6 +29,7 @@ def is_old():
 
 def get_ffmpeg():
     from platform import system
+    ffmpeg = '' if which('ffmpeg') is None else os.path.dirname(which('ffmpeg'))
     system = system().lower()
     text = '(recommended) '
     n = 0
@@ -40,7 +43,7 @@ def get_ffmpeg():
     n += 1
     log.info('\t{0}. {1}Follow the instructions under "Quick run!" at: https://github.com/iwconfig/dlffmpeg#quick-run'.format(n, text))
     n += 1
-    log.info("\t{0}. Run this in your terminal: sudo pip install -U dlffmpeg; sudo dlffmpeg {1}".format(n, os.path.dirname(which('ffmpeg'))))
+    log.info("\t{0}. Run this in your terminal: sudo pip install -U dlffmpeg; sudo dlffmpeg {1}".format(n, ffmpeg))
 
     r = get('http://ffmpeg.org/releases/')
     latest = []
@@ -53,7 +56,7 @@ def get_ffmpeg():
     if 'windows' in system:
         text = 'and read up on how to compile ffmpeg for windows at: https://trac.ffmpeg.org/wiki/CompilationGuide#Windows'
     else:
-        text = "Usage:{0}Download{0}unpack{0}go into the folder with a terminal{0}run: ./configure; make; sudo make install; mv ffmpeg {1}".format('\n\t\t   - ', os.path.dirname(which('ffmpeg')))
+        text = "Usage:{0}Download{0}unpack{0}go into the folder with a terminal{0}run: ./configure; make; sudo make install; mv ffmpeg {1}".format('\n\t\t   - ', ffmpeg)
 
     n += 1
     log.info("\t{0}. Download and install the latest ({1}) tar ball here: http://ffmpeg.org/releases/ffmpeg-{1}.tar.gz\n\t   {2}\n".format(n, curr_version, text))

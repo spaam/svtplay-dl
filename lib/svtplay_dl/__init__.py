@@ -227,7 +227,7 @@ def get_one_media(stream, options):
 
     if options.merge_subtitle:
         from svtplay_dl.utils import check_ffmpeg
-        if check_ffmpeg.is_old():
+        if check_ffmpeg.is_old() in (True, None):
             log.error("--merge-subtitle requires ffmpeg >= 1.0 to function properly.")
             check_ffmpeg.get_ffmpeg()
             exit(1)
