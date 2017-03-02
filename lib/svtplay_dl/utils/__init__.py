@@ -1,6 +1,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil: coding: utf-8 -*-
 # ex:ts=4:sw=4:sts=4:et:fenc=utf-8
 from __future__ import absolute_import
+import os
 import sys
 import logging
 import re
@@ -228,8 +229,6 @@ def download_thumbnail(options, url):
 
 
 def which(program):
-    import os
-
     if platform.system() == "Windows":
         program = "{0}.exe".format(program)
 

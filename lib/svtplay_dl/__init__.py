@@ -10,7 +10,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import select_quality, list_quality, is_py2, ensure_unicode
+from svtplay_dl.utils import select_quality, list_quality, is_py2, ensure_unicode, check_ffmpeg
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -226,7 +226,6 @@ def get_one_media(stream, options):
         return
 
     if options.merge_subtitle:
-        from svtplay_dl.utils import check_ffmpeg
         if check_ffmpeg.is_old() in (True, None):
             log.error("--merge-subtitle requires ffmpeg >= 1.0 to function properly.")
             check_ffmpeg.get_ffmpeg()
