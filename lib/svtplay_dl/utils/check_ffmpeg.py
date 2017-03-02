@@ -1,4 +1,5 @@
 import os, sys
+from platform import system
 from subprocess import check_output
 from pkg_resources import parse_version
 from re import findall, sub, split
@@ -16,7 +17,6 @@ def is_old():
         version_check = version_check.split('-')[::-1][k][1:]
 
         r = get('https://api.github.com/repos/FFmpeg/FFmpeg/commits/' + version_check)
-        print ' '.join(split('T|Z', r.json()['commit']['committer']['date'])[:2])
         if ' '.join(split('T|Z', r.json()['commit']['committer']['date'])[:2]) < "2012-09-28 01:02:28":
             return True
     else:
@@ -28,7 +28,6 @@ def is_old():
             return True
 
 def get_ffmpeg():
-    from platform import system
     ffmpeg = '' if which('ffmpeg') is None else os.path.dirname(which('ffmpeg'))
     system = system().lower()
     text = '(recommended) '
@@ -38,7 +37,7 @@ def get_ffmpeg():
 
     if 'darwin' in system:
         n += 1
-        log.info('\t{0}. {1}Run this in your terminal: sudo brew update && sudo brew upgrade ffmpeg'.format(n, text))
+        log.info('\t{0}. {1}Run this in your terminal: brew update && brew upgrade ffmpeg'.format(n, text))
         text = ''
     n += 1
     log.info('\t{0}. {1}Follow the instructions under "Quick run!" at: https://github.com/iwconfig/dlffmpeg#quick-run'.format(n, text))
