@@ -176,7 +176,7 @@ Remux from one container to mp4 using ffmpeg or avconv
 
 =item * Dagens Nyheter: L<http://dn.se/>
 
-=item * Dplay: L[<http://www.dplay.se/>
+=item * Dplay: L<http://www.dplay.se/>
 
 =item * DR: L<http://dr.dk/>
 
