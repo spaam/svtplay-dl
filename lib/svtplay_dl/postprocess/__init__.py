@@ -108,7 +108,7 @@ class postprocess(object):
             arguments = ["-map", "0:v", "-map", "0:a", "-c", "copy", "-copyts", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
-            cmd = [self.detect, "-i", orig_filename]
+            cmd = [self.detect, "-i", "file:{0}".format(orig_filename)]
 
             if self.merge_subtitle:
                 langs = self.sublanguage()
@@ -117,12 +117,12 @@ class postprocess(object):
                 if len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
                         subfile = "{0}.srt".format(name + subfix)
-                        cmd += ["-i", subfile]
+                        cmd += ["-i", "file:{0}".format(subfile)]
                 else:
                     subfile = "{0}.srt".format(name)
-                    cmd += ["-i", subfile]
+                    cmd += ["-i", "file:{0}".format(subfile)]
 
-            arguments += ["-y", tempfile]
+            arguments += ["-y", "file:{0}".format(tempfile)]
             cmd += arguments
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
             stdout, stderr = p.communicate()
@@ -160,7 +160,7 @@ class postprocess(object):
         name = os.path.splitext(orig_filename)[0]
         audio_filename = u"{0}.m4a".format(name)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
-        cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
+        cmd = [self.detect, "-i", "file:{0}".format(orig_filename), "-i", "file:{0}".format(audio_filename)]
 
         if self.merge_subtitle:
             langs = self.sublanguage()
@@ -169,12 +169,12 @@ class postprocess(object):
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
                     subfile = "{0}.srt".format(name + subfix)
-                    cmd += ["-i", subfile]
+                    cmd += ["-i", "file:{0}".format(subfile)]
             else:
                 subfile = "{0}.srt".format(name)
-                cmd += ["-i", subfile]
+                cmd += ["-i", "file:{0}".format(subfile)]
 
-        arguments += ["-y", tempfile]
+        arguments += ["-y", "file:{0}".format(tempfile)]
         cmd += arguments
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         stdout, stderr = p.communicate()
