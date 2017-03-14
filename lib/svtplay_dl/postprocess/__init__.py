@@ -100,9 +100,9 @@ class postprocess(object):
             new_name = u"{0}.mp4".format(name)
 
             if self.merge_subtitle:
-                log.info(u"Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
+                log.info(u"Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
             else:
-                log.info(u"Muxing {} into {}".format(orig_filename, new_name))
+                log.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
 
             tempfile = u"{0}.temp".format(orig_filename)
             arguments = ["-map", "0:v", "-map", "0:a", "-c", "copy", "-copyts", "-f", "mp4"]
@@ -129,7 +129,7 @@ class postprocess(object):
             if p.returncode != 0:
                 stderr = stderr.decode('utf-8', 'replace')
                 msg = stderr.strip().split('\n')[-1]
-                log.error("Something went wrong: {}".format(msg))
+                log.error("Something went wrong: {0}".format(msg))
                 return
 
             if self.merge_subtitle and not self.external_subtitle:
@@ -152,9 +152,9 @@ class postprocess(object):
 
         orig_filename = self.stream.options.output
         if self.merge_subtitle:
-            log.info("Merge audio, video and subtitle into {}".format(orig_filename))
+            log.info("Merge audio, video and subtitle into {0}".format(orig_filename))
         else:
-            log.info("Merge audio and video into {}".format(orig_filename))
+            log.info("Merge audio and video into {0}".format(orig_filename))
 
         tempfile = u"{0}.temp".format(orig_filename)
         name = os.path.splitext(orig_filename)[0]
@@ -181,7 +181,7 @@ class postprocess(object):
         if p.returncode != 0:
             stderr = stderr.decode('utf-8', 'replace')
             msg = stderr.strip().split('\n')[-1]
-            log.error("Something went wrong: {}".format(msg))
+            log.error("Something went wrong: {0}".format(msg))
             return
 
         log.info("Merging done, removing old files.")
