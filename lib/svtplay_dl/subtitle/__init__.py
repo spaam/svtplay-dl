@@ -162,7 +162,7 @@ class subtitle(object):
         number = 1
         data = None
         subs = ""
-        TAG_RE = re.compile(r'<[^(i|>)]+>')
+        TAG_RE = re.compile(r'<(?!\/?i).*?>')
         bad_char = re.compile(r'\x96')
         for i in ssubdata.readlines():
             i = i.rstrip()
