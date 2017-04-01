@@ -392,7 +392,7 @@ def main():
                       action="store_true", dest="subtitle", default=False,
                       help="download subtitle from the site if available")
     parser.add_option("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle",
-                      default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. use with -S for external also.")
+                      default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. this invokes --remux automatically. use with -S for external also.")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
