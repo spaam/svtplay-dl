@@ -164,14 +164,37 @@ class Svtplay(Service, OpenGraphThumbMixin):
         parse = urlparse(self._url)
         
         if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":
-            match = self.url
+            rss_url = self.url
         else:
-            match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                              self.get_urldata())
+            rss_url = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"', self.get_urldata())
+            if rss_url: 
+                rss_url = rss_url.group(1)
+        valid_rss = False
+        tab = None
+        if parse.query: 
+            match = re.search("tab=(.+)", parse.query)
             if match:
-                match = match.group(1)
+                tab = match.group(1)
+
+        #Clips and tab can not be used with RSS-feed
+        if rss_url and not self.options.include_clips and not tab:
             
-        if match is None:
+            rss_data = self.http.request("get", rss_url).content
+
+            try:
+                xml = ET.XML(rss_data)
+                episodes = [x.text for x in xml.findall(".//item/link")]
+                #TODO add better checks for valid RSS-feed here
+                valid_rss = True
+            except ET.ParseError:
+                log.info("Error parsing RSS-feed at %s, make sure it is a valid RSS-feed, will use other method to find episodes" % rss_url)
+        else:
+            #if either tab or include_clips is set remove rss.xml from url if set manually. 
+            if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":                
+                self._url = self.url.replace("rss.xml","")
+                
+            
+        if not valid_rss:
             videos = []
             tab = None
             match = re.search("__svtplay'] = ({.*});", self.get_urldata())
@@ -189,7 +212,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         match = re.search("tab=(.+)", parse.query)
                         if match:
                             tab = match.group(1)
-
+                            
                     items = dataj["videoTitlePage"]["relatedVideosTabs"]
                     for i in items:
                         if tab:
@@ -205,10 +228,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
                                 videos = self.videos_to_list(i["videos"], videos)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
-        else:
-            data = self.http.request("get", match).content
-            xml = ET.XML(data)
-            episodes = [x.text for x in xml.findall(".//item/link")]
             
         if options.all_last > 0:
             return sorted(episodes[-options.all_last:])
