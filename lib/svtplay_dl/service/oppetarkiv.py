@@ -11,7 +11,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.utils import ensure_unicode, filenamify, is_py2
+from svtplay_dl.utils import ensure_unicode, filenamify, is_py2, decode_html_entities
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import urlparse, parse_qs
 
@@ -141,42 +141,23 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
     def outputfilename(self, data, filename, raw):
         directory = os.path.dirname(filename)
-        if "statistics" in data:
-            name = data["statistics"]["folderStructure"]
-            if name.find(".") > 0:
-                name = name[:name.find(".")]
-            match = re.search("^arkiv-", name)
-            if match:
-                name = name.replace("arkiv-", "")
-            name = filenamify(name.replace("-", "."))
-            other = filenamify(data["context"]["title"])
-            id = data["videoId"]
+        if is_py2:
+            id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
         else:
-            name = data["programTitle"]
-            if not name:
-                match = re.search('data-title="([^"]+)"', raw)
-                if match:
-                    name = filenamify(match.group(1).replace(" - ", "."))
-                other = None
-            else:
-                if name.find(".") > 0:
-                    name = name[:name.find(".")]
-                name = filenamify(name.replace(" - ", "."))
-                other = filenamify(data["episodeTitle"])
-            if is_py2:
-                id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
-            else:
-                id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
+            id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
 
-        if name == other:
-            other = None
-        season = self.seasoninfo(raw)
-        title = name
-        if season:
-            title += ".%s" % season
-        if other:
-            title += ".%s" % other
-        title += "-%s-svtplay" % id
+        datatitle = re.search('data-title="([^"]+)"', self.get_urldata())
+        if not datatitle:
+            return None
+        datat = decode_html_entities(datatitle.group(1))
+        name = self.name(datat)
+        episode = self.seasoninfo(datat)
+        if is_py2:
+            name = name.encode("utf8")
+        if episode:
+            title = "{0}.{1}-{2}-svtplay".format(name, episode, id)
+        else:
+            title = "{0}-{1}-svtplay".format(name, id)
         title = filenamify(title)
         if len(directory):
             output = os.path.join(directory, title)
@@ -184,27 +165,23 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             output = title
         return output
 
-
     def seasoninfo(self, data):
-        match = re.search(r'play_video-area-aside__sub-title">([^<]+)<span', data)
+        episode = None
+        match = re.search("S.song (\d+) - Avsnitt (\d+)", data)
         if match:
-            line = match.group(1)
+            episode = "s{0:02d}e{1:02d}".format(int(match.group(1)), int(match.group(2)))
         else:
-            match = re.search(r'data-title="([^"]+)"', data)
+            match = re.search("Avsnitt (\d+)", data)
             if match:
-                line = match.group(1)
-            else:
-                return None
+                episode = "e{0:02d}".format(int(match.group(1)))
+        return episode
 
-        line = re.sub(" +", "", match.group(1)).replace('\n', '')
-        match = re.search(r"(song(\d+)-)?Avsnitt(\d+)", line)
-        if match:
-            if match.group(2) is None:
-                season = 1
-            else:
-                season = int(match.group(2))
-            season = "{:02d}".format(season)
-            episode = "{:02d}".format(int(match.group(3)))
-            return "S%sE%s" % (season, episode)
+    def name(selfs, data):
+        if data.find(" - S.song") > 0:
+            title = data[:data.find(" - S.song")]
         else:
-            return None
+            if data.find(" - Avsnitt") > 0:
+                title = data[:data.find(" - Avsnitt")]
+            else:
+                title = data
+        return title
