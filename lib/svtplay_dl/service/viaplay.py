@@ -209,14 +209,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
                         for n in janson["format"]["videos"][str(i)]["clip"]:
                             videos.append(n["sharingUrl"])
 
-        n = 0
         episodes = []
-        for i in videos:
-            if n == options.all_last:
-                break
-            episodes.append(i)        
-            n += 1
-        return episodes
+        if options.all_last > 0:
+            return sorted(episodes[-options.all_last:])
+        return sorted(episodes)
 
     def _autoname(self, dataj):
         program = dataj["format_slug"]
