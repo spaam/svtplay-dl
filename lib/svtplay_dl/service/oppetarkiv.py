@@ -152,7 +152,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             other = filenamify(data["context"]["title"])
             id = data["videoId"]
         else:
-            name = data["programTitle"]
+            name = data["episodeTitle"]
             if not name:
                 match = re.search('data-title="([^"]+)"', raw)
                 if match:
