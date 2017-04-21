@@ -141,7 +141,7 @@ def filename(stream):
     return True
 
 
-def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
+def output(options, extension="mp4", openfd=True, mode="wb", **kwargs):
     subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
     if is_py2:
         file_d = file
@@ -151,17 +151,17 @@ def output(options, extention="mp4", openfd=True, mode="wb", **kwargs):
     if options.output != "-":
         ext = re.search(r"(\.\w{2,4})$", options.output)
         if not ext:
-            options.output = "%s.%s" % (options.output, extention)
+            options.output = "%s.%s" % (options.output, extension)
         if options.output_auto and ext:
-            options.output = "%s.%s" % (options.output, extention)
-        elif extention == "srt" and ext:
+            options.output = "%s.%s" % (options.output, extension)
+        elif extension == "srt" and ext:
             options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
-        if ext and extention == "srt" and ext.group(1).split(".")[-1] in subtitlefiles:
+        if ext and extension == "srt" and ext.group(1).split(".")[-1] in subtitlefiles:
             options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
         log.info("Outfile: %s", options.output)
         if os.path.isfile(options.output) or \
                 findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
-            if extention in subtitlefiles:
+            if extension in subtitlefiles:
                 if not options.force_subtitle:
                     log.error("File (%s) already exists. Use --force-subtitle to overwrite" % options.output)
                     return None
@@ -188,15 +188,15 @@ def findexpisode(directory, service, name):
         return False
     
     videoid = match.group(1)
-    extention = match.group(2)
+    extension = match.group(2)
 
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     for i in files:
         match = re.search(r"-(\w+)-\w+.(\w{2,3})$", i)
         if match:
             if service:
-                if extention in subtitlefiles:
-                    if name.find(service) and match.group(1) == videoid and match.group(2) == extention:
+                if extension in subtitlefiles:
+                    if name.find(service) and match.group(1) == videoid and match.group(2) == extension:
                         return True
                 elif match.group(2) not in subtitlefiles and match.group(2) != "m4a":
                     if name.find(service) and match.group(1) == videoid:
