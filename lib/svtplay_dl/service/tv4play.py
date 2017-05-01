@@ -168,10 +168,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def _seasoninfo(self, data):
         if "season" in data and data["season"]:
             season = "{:02d}".format(data["season"])
-            episode = "{:02d}".format(data["episode"])
-            if int(season) == 0 and int(episode) == 0:
-                return None
-            return "s%se%s" % (season, episode)
+            if "episode" in data:
+                episode = "{:02d}".format(data["episode"])
+                if int(season) == 0 and int(episode) == 0:
+                    return None
+                return "s%se%s" % (season, episode)
+            else:
+                return "s%s" % season
         else:
             return None
 
