@@ -38,7 +38,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant find video info.")
             return
-        janson = json.loads(match.group(1))["videoTitlePage"]
+        janson = json.loads(match.group(1))["videoPage"]
 
         if "programTitle" not in janson["video"]:
             yield ServiceError("Can't find any video on that page")
@@ -53,7 +53,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     if not match:
                         yield ServiceError("Cant find video info.")
                         return
-                    janson = json.loads(match.group(1))["videoTitlePage"]
+                    janson = json.loads(match.group(1))["videoPage"]
 
         if "live" in janson["video"]:
             self.options.live = janson["video"]["live"]
@@ -213,7 +213,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         if match:
                             tab = match.group(1)
                             
-                    items = dataj["videoTitlePage"]["relatedVideosTabs"]
+                    items = dataj["videoPage"]["relatedVideosTabs"]
                     for i in items:
                         if tab:
                             if i["slug"] == tab:
