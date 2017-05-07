@@ -172,7 +172,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         valid_rss = False
         tab = None
-        if parse.query: 
+        if parse.query:
             match = re.search("tab=(.+)", parse.query)
             if match:
                 tab = match.group(1)
@@ -207,17 +207,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 if re.search("/genre", parse.path):
                     videos = self._genre(dataj)
                 else:
-                    if parse.query: 
+                    if parse.query:
                         match = re.search("tab=(.+)", parse.query)
                         if match:
                             tab = match.group(1)
                             
-                    items = dataj["videoPage"]["relatedVideosTabs"]
+                    items = dataj["relatedVideoContent"]["relatedVideosTabs"]
                     for i in items:
                         if tab:
                             if i["slug"] == tab:
                                 videos = self.videos_to_list(i["videos"], videos)
-
                         else:
                             if "sasong" in i["slug"] or "senast" in i["slug"]:
                                 videos = self.videos_to_list(i["videos"], videos)
@@ -227,7 +226,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                                 videos = self.videos_to_list(i["videos"], videos)
 
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
-            
+
         if options.all_last > 0:
             return sorted(episodes[-options.all_last:])
         return sorted(episodes)
