@@ -22,7 +22,7 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
 
         # First, fint the video ID from the html document
-        match = re.search("<meta name=\"programid\".*?content=\"([^\"]*)\"", self.get_urldata())
+        match = re.search("programId: \"([^\"]+)\"", self.get_urldata())
         if match:
             video_id = match.group(1)
         else:
@@ -30,7 +30,11 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
 
         # Get media element details
-        dataurl = "http://v8.psapi.nrk.no/mediaelement/%s" % (video_id)
+        match = re.search("apiBaseUrl: '([^']+)'", self.get_urldata())
+        if not match:
+            yield ServiceError("Cant find apiurl.")
+            return
+        dataurl = "{0}/mediaelement/{1}".format(match.group(1), video_id)
         data = self.http.request("get", dataurl).text
         data = json.loads(data)
         manifest_url = data["mediaUrl"]
