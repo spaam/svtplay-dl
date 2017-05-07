@@ -169,6 +169,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             rss_url = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"', self.get_urldata())
             if rss_url: 
                 rss_url = rss_url.group(1)
+
         valid_rss = False
         tab = None
         if parse.query: 
@@ -178,7 +179,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         #Clips and tab can not be used with RSS-feed
         if rss_url and not self.options.include_clips and not tab:
-            
             rss_data = self.http.request("get", rss_url).content
 
             try:
@@ -192,8 +192,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             #if either tab or include_clips is set remove rss.xml from url if set manually. 
             if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":                
                 self._url = self.url.replace("rss.xml","")
-                
-            
+
         if not valid_rss:
             videos = []
             tab = None
