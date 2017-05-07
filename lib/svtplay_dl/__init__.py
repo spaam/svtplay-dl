@@ -46,6 +46,7 @@ from svtplay_dl.service.ruv import Ruv
 from svtplay_dl.service.raw import Raw
 from svtplay_dl.service.solidtango import Solidtango
 from svtplay_dl.service.sr import Sr
+from svtplay_dl.service.svt import Svt
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.urplay import Urplay
@@ -84,6 +85,7 @@ sites = [
     Radioplay,
     Solidtango,
     Sr,
+    Svt,
     Svtplay,
     OppetArkiv,
     Tv4play,
