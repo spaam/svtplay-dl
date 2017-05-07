@@ -241,6 +241,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         else:
             output = title
         return output
+
     def _autoname(self, dataj):
         program = dataj["format_slug"]
         season = None
@@ -253,6 +254,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if season:
             if len(dataj["format_position"]["episode"]) > 0:
                 episode = dataj["format_position"]["episode"]
+            try:
+                episode = int(episode)
+            except ValueError:
+                title = filenamify(episode)
+                episode = None
 
         if dataj["type"] == "clip":
             #Removes the show name from the end of the filename
