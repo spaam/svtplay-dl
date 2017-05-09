@@ -12,6 +12,7 @@ If you have OS X and `Homebrew`_ you can install with:
 ::
 
     brew install svtplay-dl
+    Make sure you notice that you need to run `brew install ffmpeg` or `brew install libav` afterwards, if you don't already have one of these packages.
 
 Debian and Ubuntu
 ~~~~~~~~~~~~~~~~~
