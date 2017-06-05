@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import re
 import json
 
-from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
@@ -12,40 +11,56 @@ from svtplay_dl.utils import decode_html_entities
 
 class Lemonwhale(Service):
     # lemonwhale.com is just bogus for generic
-    supported_domains = ['svd.se', 'vk.se', 'lemonwhale.com']
+    supported_domains = ['vk.se', 'lemonwhale.com']
 
     def get(self):
-        vid = None
-        data = self.get_urldata()
-
         if self.exclude():
             yield ServiceError("Excluding video")
             return
 
-        match = re.search(r'video url-([^"]+)', data)
-        if not match:
-            match = re.search(r'embed.jsp\?([^"]+)"', self.get_urldata())
-            if not match:
-                yield ServiceError("Can't find video id")
-                return
-            vid = match.group(1)
+        vid = self.get_vid()
         if not vid:
-            path = unquote_plus(match.group(1))
-            data = self.http.request("get", "http://www.svd.se%s" % path).content
-            match = re.search(r'embed.jsp\?([^"]+)', data)
-            if not match:
-                yield ServiceError("Can't find video id")
-                return
-            vid = match.group(1)
+            yield ServiceError("Can't find video id")
+            return
 
         url = "http://ljsp.lwcdn.com/web/public/item.json?type=video&%s" % decode_html_entities(vid)
         data = self.http.request("get", url).text
         jdata = json.loads(data)
-        videos = jdata["videos"][0]["media"]["streams"]
+        if "videos" in jdata:
+            streams = self.get_video(jdata)
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
+
+        url = "http://ljsp.lwcdn.com/web/public/video.json?id={0}&delivery=hls".format(decode_html_entities(vid))
+        data = self.http.request("get", url).text
+        jdata = json.loads(data)
+        if "videos" in jdata:
+            streams = self.get_video(jdata)
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
+
+    def get_vid(self):
+        match = re.search(r'video url-([^"]+)', self.get_urldata())
+        if match:
+            return match.group(1)
+
+        match = re.search(r'__INITIAL_STATE__ = ({.*})</script>', self.get_urldata())
+        if match:
+            janson = json.loads(match.group(1))
+            vid = janson["content"]["current"]["data"]["templateData"]["pageData"]["video"]["id"]
+            return vid
+
+        match = re.search(r'embed.jsp\?([^"]+)"', self.get_urldata())
+        if match:
+            return match.group(1)
+        return None
+
+    def get_video(self, janson):
+        videos = janson["videos"][0]["media"]["streams"]
         for i in videos:
             if i["name"] == "auto":
-                hls = "%s%s" % (jdata["videos"][0]["media"]["base"], i["url"])
+                hls = "%s%s" % (janson["videos"][0]["media"]["base"], i["url"])
         streams = hlsparse(self.options, self.http.request("get", hls), hls)
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        return streams
