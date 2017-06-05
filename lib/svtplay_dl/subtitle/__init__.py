@@ -213,16 +213,21 @@ class subtitle(object):
             elif match2:
                 if not subnr:
                     srt += "%s\n" % number_b
-                matchx = re.search(r'(\d+):(\d+)[.:]([\d\.]+) --> (\d+):(\d+)[.:]([\d\.]+)', i)
-                hour1 = int(matchx.group(1))
-                hour2 = int(matchx.group(4))
-                if int(number) == 1:
-                    if hour1 > 9:
-                        subtract = True
-                if subtract:
-                    hour1 -= 10
-                    hour2 -= 10
-                time = "%s:%s:%s --> %s:%s:%s\n" % (hour1, matchx.group(2), matchx.group(3).replace(".", ","), hour2, matchx.group(5), matchx.group(6).replace(".", ","))
+                matchx = re.search(r'(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)', i)
+                if matchx:
+                    hour1 = int(matchx.group("h1"))
+                    hour2 = int(matchx.group("h2"))
+                    if int(number) == 1:
+                        if hour1 > 9:
+                            subtract = True
+                    if subtract:
+                        hour1 -= 10
+                        hour2 -= 10
+                else:
+                    matchx = re.search(r'(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)', i)
+                    hour1 = 0
+                    hour2 = 0
+                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ","))
                 srt += time
                 block = 1
                 subnr = False
