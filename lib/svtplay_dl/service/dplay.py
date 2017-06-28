@@ -43,7 +43,7 @@ class Dplay(Service):
                 yield ServiceError("Wrong username or password")
                 return
 
-        what = self._playable(dataj, premium)
+        what = self._playable(dataj["data"][0], premium)
         if what == 1:
             yield ServiceError("Premium content")
             return
@@ -137,13 +137,13 @@ class Dplay(Service):
             return "sv"
 
     def _playable(self, dataj, premium):
-        if dataj["data"][0]["content_info"]["package_label"]["value"] == "Premium" and not premium:
+        if dataj["content_info"]["package_label"]["value"] == "Premium" and not premium:
             return 1
 
-        if dataj["data"][0]["video_metadata_drmid_playready"] != "none":
+        if dataj["video_metadata_drmid_playready"] != "none":
             return 2
 
-        if dataj["data"][0]["video_metadata_drmid_flashaccess"] != "none":
+        if dataj["video_metadata_drmid_flashaccess"] != "none":
             return 2
         return 0
 
@@ -166,7 +166,7 @@ class Dplay(Service):
         data = self.http.request("get", "%s%s" % (url, page)).text
         dataj = json.loads(data)
         for i in dataj["data"]:
-            what = self._playable(dataj, premium)
+            what = self._playable(i, premium)
             if what == 0:
                 episodes.append(i["url"])
         pages = dataj["total_pages"]
@@ -174,7 +174,7 @@ class Dplay(Service):
             data = self.http.request("get", "%s%s" % (url, n)).text
             dataj = json.loads(data)
             for i in dataj["data"]:
-                what = self._playable(dataj, premium)
+                what = self._playable(i, premium)
                 if what == 0:
                     episodes.append(i["url"])
         if len(episodes) == 0:
