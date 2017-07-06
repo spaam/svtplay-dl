@@ -190,7 +190,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 season = self._seasoninfo(i)
                 if season:
                    index = len(i["program"]["name"])
-                   return i["title"][:index] + ".%s%s" % (season, i["title"][index:])
+                   return i["program"]["name"][:index] + ".%s%s" % (season, i["program"]["name"][index:])
                 return i["title"]
         return self._get_clip_info(vid)
 
