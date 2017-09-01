@@ -11,7 +11,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 
 
-class Aftonbladet(Service):
+class Aftonbladettv(Service):
     supported_domains = ['tv.aftonbladet.se', "svd.se"]
 
     def get(self):
@@ -43,3 +43,32 @@ class Aftonbladet(Service):
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]
+
+class Aftonbladet(Service):
+    supported_domains = ["aftonbladet.se"]
+
+
+    def get(self):
+        data = self.get_urldata()
+
+        if self.exclude():
+            yield ServiceError("Excluding video")
+            return
+
+        match = re.search('window.FLUX_STATE = ({.*})</script>', data)
+        if not match:
+            yield ServiceError("Can't find video info")
+            return
+
+        janson = json.loads(match.group(1))
+        articleid = janson["article"]["currentArticleId"]
+        components = janson["articles"][articleid]["article"]["components"]
+        for i in components:
+            if "components" in i:
+                for n in i["components"]:
+                    if "type" in n and n["type"] == "video":
+                            streams = hlsparse(self.options, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
+                                               n["videoAsset"]["streamUrls"]["hls"])
+                            if streams:
+                                for n in list(streams.keys()):
+                                    yield streams[n]

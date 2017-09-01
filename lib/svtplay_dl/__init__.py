@@ -17,7 +17,7 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.output import filename
 from svtplay_dl.postprocess import postprocess
 
-from svtplay_dl.service.aftonbladet import Aftonbladet
+from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
 from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.dbtv import Dbtv
@@ -60,6 +60,7 @@ __version__ = "1.9.4"
 
 sites = [
     Aftonbladet,
+    Aftonbladettv,
     Bambuser,
     Bigbrother,
     Dbtv,
