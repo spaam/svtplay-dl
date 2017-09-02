@@ -67,8 +67,8 @@ class Aftonbladet(Service):
             if "components" in i:
                 for n in i["components"]:
                     if "type" in n and n["type"] == "video":
-                            streams = hlsparse(self.options, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
+                        streams = hlsparse(self.options, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
                                                n["videoAsset"]["streamUrls"]["hls"])
-                            if streams:
-                                for n in list(streams.keys()):
-                                    yield streams[n]
+                        if streams:
+                            for n in list(streams.keys()):
+                                yield streams[n]
