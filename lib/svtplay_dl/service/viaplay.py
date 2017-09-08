@@ -182,36 +182,54 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     yield streams[n]
 
     def find_all_episodes(self, options):
-        episodes = []
-        match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
+        seasons = []
+        match = re.search("(sasong|sesong)-(\d+)", urlparse(self.url).path)
         if match:
-            janson = json.loads(match.group(1))
-            season = re.search("sasong-(\d+)", urlparse(self.url).path)
-            if season:
-                season = season.group(1)
-            seasons = []
-            for i in janson["format"]["seasons"]:
-                if season:
-                    if int(season) == i["seasonNumber"]:
-                        seasons.append(i["seasonNumber"])
-                else:
+            seasons.append(match.group(2))
+        else:
+            match = self._conentpage(self.get_urldata())
+            if match:
+                janson = json.loads(match.group(1))
+                for i in janson["format"]["seasons"]:
                     seasons.append(i["seasonNumber"])
 
-            for i in seasons:
-                if "program" in janson["format"]["videos"][str(i)]:
-                    for n in janson["format"]["videos"][str(i)]["program"]:
-                        episodes = self._videos_to_list(n["sharingUrl"],n["id"],episodes)
-                if self.options.include_clips:
-                    if "clip" in janson["format"]["videos"][str(i)]:
-                        for n in janson["format"]["videos"][str(i)]["clip"]:
-                            episodes = self._videos_to_list(n["sharingUrl"],n["id"],episodes)
-
+        episodes = self._grab_episodes(options, seasons)
         if options.all_last > 0:
             return sorted(episodes[-options.all_last:])
         return sorted(episodes)
-        
- 
-            
+
+    def _grab_episodes(self, options, seasons):
+        episodes = []
+        baseurl = self.url
+        match = re.search("(sasong|sesong)-\d+", urlparse(self.url).path)
+        if match:
+            baseurl = self.url[:self.url.rfind("/")]
+
+        for i in seasons:
+            url = "{0}/{1}-{2}".format(baseurl, self._isswe(self.url), i)
+            res = self.http.get(url)
+            if res:
+                match = self._conentpage(res.text)
+                if match:
+                    janson = json.loads(match.group(1))
+                    if "program" in janson["format"]["videos"][str(i)]:
+                        for n in janson["format"]["videos"][str(i)]["program"]:
+                            episodes = self._videos_to_list(n["sharingUrl"],n["id"],episodes)
+                    if options.include_clips:
+                        if "clip" in janson["format"]["videos"][str(i)]:
+                            for n in janson["format"]["videos"][str(i)]["clip"]:
+                                episodes = self._videos_to_list(n["sharingUrl"],n["id"],episodes)
+        return episodes
+
+    def _isswe(self, url):
+        if re.search(".se$", urlparse(url).netloc):
+            return "sasong"
+        else:
+            return "sesong"
+
+    def _conentpage(self, data):
+        return re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', data)
+
     def _videos_to_list(self, url,vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
         if not "msg" in dataj:
