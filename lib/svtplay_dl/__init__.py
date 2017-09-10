@@ -132,6 +132,7 @@ class Options(object):
         self.output = None
         self.resume = False
         self.live = False
+        self.capture_time = -1
         self.silent = False
         self.force = False
         self.quality = 0
@@ -383,6 +384,8 @@ def main():
     parser.add_option("-l", "--live",
                       action="store_true", dest="live", default=False,
                       help="enable for live streams (RTMP based ones)")
+    parser.add_option("-c", "--capture_time", default=-1, type=int, metavar = "capture_time",
+                      help = "define capture time in minutes of a live stream (only for svt-play)")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False,
                       help="be less verbose")
@@ -499,6 +502,7 @@ def mergeParserOption(options, parser):
     options.output = parser.output
     options.resume = parser.resume
     options.live = parser.live
+    options.capture_time = parser.capture_time
     options.silent = parser.silent
     options.force = parser.force
     options.quality = parser.quality
