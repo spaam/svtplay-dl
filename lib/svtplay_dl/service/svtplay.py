@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 import copy
 import json
 import hashlib
+import time
+import datetime
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -25,7 +27,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
     def get(self):
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
-            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp":
+            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp" and parse.path[:8] != "/kanaler":
                 yield ServiceError("This mode is not supported anymore. need the url with the video")
                 return
 
@@ -33,6 +35,16 @@ class Svtplay(Service, OpenGraphThumbMixin):
         self.access = None
         if "accessService" in query:
             self.access = query["accessService"]
+
+        if parse.path[:8] == "/kanaler":
+            if self.options.capture_time <= 0:
+                yield ServiceError("Need to select 'capture time'(-c) when using svt kanaler. \n'capture time' is counted in minutes.")
+                return
+            res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format("ch-{}".format(parse.path[9:])))
+            videos = self._get_channel_stream(res.json())
+            for i in videos:
+                yield i
+            return
 
         match = re.search("__svtplay'] = ({.*});", self.get_urldata())
         if not match:
@@ -164,6 +176,47 @@ class Svtplay(Service, OpenGraphThumbMixin):
             videos = self.videos_to_list(dataj["clips"], videos)
 
         return videos
+
+    def _get_channel_stream(self, janson):
+        delay_one_clip = 6.0
+        delay = delay_one_clip * 4
+        nr_clips = 2 + self.options.capture_time * 10
+        all_videos = []
+        videos = self._get_video(janson)
+        for v in videos:
+            all_videos.append(v)
+
+        current_clips = len(all_videos[0].audio)
+        log.info("Append live video:[Video:{}, Audio:{}] \tTime left: {}"
+                 .format(len(all_videos[0].files), len(all_videos[0].audio),
+                         str(datetime.timedelta(seconds=int(delay_one_clip * (nr_clips - current_clips))))))
+
+        # NOTE: this solution only works with dash streams, hls needs a separate solution
+        while current_clips < nr_clips:
+
+            if (nr_clips - current_clips) < 4:
+                delay = delay_one_clip * (nr_clips - current_clips)
+            time.sleep(delay)
+            videos = self._get_video(janson)
+
+            for v in videos:
+                for av in all_videos:
+                    if (av.bitrate == v.bitrate) and (av.url.rsplit('.', 1)[1] == v.url.rsplit('.', 1)[1]):
+                        if (v.files is None) or (v.audio is None) or (av.files is None) or (av.audio is None):
+                            continue
+                        for t_audio in v.audio:
+                            if ("_init" not in t_audio) and (t_audio not in av.audio) and (len(av.audio) < nr_clips):
+                                av.audio.append(t_audio)
+                        for t_file in v.files:
+                            if ("_init" not in t_file) and (t_file not in av.files) and \
+                                    (len(av.files) < len(av.audio)) and (len(av.files) < nr_clips):
+                                av.files.append(t_file)
+
+            current_clips = len(all_videos[0].audio)
+            log.info("Append live video:[Video:{}, Audio:{}] \tTime left: {}"
+                     .format(len(all_videos[0].files), len(all_videos[0].audio),
+                             str(datetime.timedelta(seconds=int(delay_one_clip * (nr_clips - current_clips))))))
+        return all_videos
 
     def find_all_episodes(self, options):
         parse = urlparse(self._url)
