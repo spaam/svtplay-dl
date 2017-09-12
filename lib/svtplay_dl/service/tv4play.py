@@ -252,27 +252,21 @@ class Tv4play(Service, OpenGraphThumbMixin):
 def findvid(url, data):
     parse = urlparse(url)
     if "tv4play.se" in url:
-        try:
-            vid = parse_qs(parse.query)["video_id"][0]
-        except KeyError:
-            return None
+        if "video_id" in parse_qs(parse.query):
+            return parse_qs(parse.query)["video_id"][0]
+        match = re.search(r'burtVmanId: "(\d+)"', data)
+        if match:
+            return match.group(1)
     else:
         match = re.search(r"\"vid\":\"(\d+)\",", data)
         if match:
-            vid = match.group(1)
-        else:
-            match = re.search(r"-(\d+)$", url)
+            return match.group(1)
+        match = re.search(r"-(\d+)$", url)
+        if match:
+            return match.group(1)
+        match = re.search(r"meta content='([^']+)' property='og:video'", data)
+        if match:
+            match = re.search(r"vid=(\d+)&", match.group(1))
             if match:
-                vid = match.group(1)
-            else:
-                match = re.search(r"meta content='([^']+)' property='og:video'", data)
-                if match:
-                    match = re.search(r"vid=(\d+)&", match.group(1))
-                    if match:
-                        vid = match.group(1)
-                    else:
-                        log.error("Can't find video id for %s", url)
-                        return
-                else:
-                    return None
-    return vid
+                return match.group(1)
+    return None
