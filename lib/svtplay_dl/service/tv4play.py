@@ -156,7 +156,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         if parse.path.count("/") > 2:
             match = re.search("^/([^/]+)/", parse.path)
-            show = match.group(1)
+            if "program" == match.group(1):
+                match = re.search("^/program/([^/]+)/", parse.path)
+                if match:
+                    show = match.group(1)
+            else:
+                show = match.group(1)
         else:
             show = parse.path[parse.path.find("/", 1)+1:]
         if not re.search("%", show):
