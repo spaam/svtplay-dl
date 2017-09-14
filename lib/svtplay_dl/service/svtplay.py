@@ -217,7 +217,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         if match:
                             tab = match.group(1)
                             
-                    items = dataj["relatedVideoContent"]["relatedVideosTabs"]
+                    items = dataj["relatedVideoContent"]["relatedVideosAccordion"]
                     for i in items:
                         if tab:
                             if i["slug"] == tab:
