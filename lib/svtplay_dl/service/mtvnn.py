@@ -23,7 +23,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find id for the video")
             return
 
-        data = self.http.request("get", match.group(1)).content
+        mrssxmlurl = match.group(1)
+        data = self.http.request("get", mrssxmlurl).content
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
@@ -42,9 +43,6 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         self.options.other = "-W %s" % self.http.check_redirect(swfurl)
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
-        filename = os.path.basename(contenturl)
-        data = self.http.request("get", "http://videos.mtvnn.com/api/v2/%s.js?video_format=hls" % filename).text
-        dataj = json.loads(data)
         content = self.http.request("get", contenturl).content
         xml = ET.XML(content)
         ss = xml.find("video").find("item")
@@ -55,10 +53,23 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
         for i in sa:
             yield RTMP(self.options, i.find("src").text, i.attrib["bitrate"])
-        streams = hlsparse(self.options, self.http.request("get", dataj["src"]), dataj["src"])
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+
+        match = re.search("gon.viacom_config=([^;]+);", self.get_urldata())
+        if match:
+            countrycode = json.loads(match.group(1))["country_code"].replace("_", "/")
+
+            match = re.search("mtvnn.com:([^&]+)", mrssxmlurl)
+            if match:
+                urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists") # it use playlists dunno from where it gets it
+                hlsapi = "http://api.mtvnn.com/v2/{0}/{1}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
+                data = self.http.request("get", hlsapi).text
+
+                dataj = json.loads(data)
+                for i in dataj["local_playlist_videos"]:
+                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    if streams:
+                        for n in list(streams.keys()):
+                            yield streams[n]
 
     def find_all_episodes(self, options):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
