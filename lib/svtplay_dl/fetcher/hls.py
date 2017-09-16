@@ -57,7 +57,7 @@ def hlsparse(options, res, url):
             streams[0] = ServiceError("Can't read HLS playlist")
             return streams
         urls = _get_full_url(i[0], url)
-        res2 = http.get(urls)
+        res2 = http.get(urls, cookies=res.cookies)
         if res2.status_code < 400:
             streams[int(bitrate)] = HLS(copy.copy(options), urls, bitrate, cookies=res.cookies)
     return streams
