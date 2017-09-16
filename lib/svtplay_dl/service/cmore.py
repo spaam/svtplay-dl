@@ -14,6 +14,9 @@ class Cmore(Service):
     supported_domains = ['www.cmore.se']
 
     def get(self):
+        if not self.options.username or not self.options.password:
+            yield ServiceError("You need username and password to download things from this site.")
+            return
         token = self._login()
         if not token:
             yield ServiceError("Can't find authenticity_token needed to login")
