@@ -66,17 +66,30 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         parse = urlparse(self.url)
-        match = re.search("/program/\d+-(\w+)-", parse.path)
-        if not match:
-            log.error("Can't find any videos")
-            return None
-        keyword = match.group(1)
         episodes = []
-        all_links = re.findall('card-link" href="([^"]+)"', self.get_urldata())
-        for i in all_links:
-            match = re.search("/program/\d+-(\w+)-", i)
-            if match and match.group(1) == keyword:
-                episodes.append(urljoin("http://urplay.se/", i))
+
+        if parse.netloc == "urskola.se":
+            data = self.get_urldata()
+            match = re.search('data-limit="[^"]+" href="([^"]+)"', data)
+            if match:
+                res = self.http.get(urljoin("http://urskola.se", match.group(1)))
+                data = res.text
+            tags = re.findall('<a class="puff tv video" title="[^"]+" href="([^"]+)"', data)
+            for i in tags:
+                url = urljoin("http://urskola.se/", i)
+                if url not in episodes:
+                    episodes.append(url)
+        else:
+            match = re.search("/program/\d+-(\w+)-", parse.path)
+            if not match:
+                log.error("Can't find any videos")
+                return None
+            keyword = match.group(1)
+            all_links = re.findall('card-link" href="([^"]+)"', self.get_urldata())
+            for i in all_links:
+                match = re.search("/program/\d+-(\w+)-", i)
+                if match and match.group(1) == keyword:
+                    episodes.append(urljoin("http://urplay.se/", i))
 
         episodes_new = []
         n = 0
