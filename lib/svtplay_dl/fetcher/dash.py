@@ -25,6 +25,88 @@ class LiveDASHException(DASHException):
             url, "This is a live DASH stream, and they are not supported.")
 
 
+def templateelemt(element, filename, idnumber):
+    files = []
+
+    init = element.attrib["initialization"]
+    media = element.attrib["media"]
+    if "startNumber" in element.attrib:
+        start = int(element.attrib["startNumber"])
+    else:
+        start = 0
+    timeline = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline")
+    rvalue = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
+    selements = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
+    selements.pop()
+    if rvalue:
+        total = int(rvalue[0].attrib["r"]) + len(selements) + 1
+
+    name = media.replace("$RepresentationID$", idnumber)
+    files.append(urljoin(filename, init.replace("$RepresentationID$", idnumber)))
+
+    if "$Time$" in media:
+        time = []
+        time.append(0)
+        for n in selements:
+            time.append(int(n.attrib["d"]))
+        match = re.search("\$Time\$", name)
+        if match:
+            number = 0
+            if len(selements) < 3:
+                for n in range(start, start + total):
+                    new = name.replace("$Time$", str(n * int(rvalue[0].attrib["d"])))
+                    files.append(urljoin(filename, new))
+            else:
+                for n in time:
+                    number += int(n)
+                    new = name.replace("$Time$", str(number))
+                    files.append(urljoin(filename, new))
+    if "$Number" in name:
+        if re.search("\$Number(\%\d+)d\$", name):
+            vname = name.replace("$Number", "").replace("$", "")
+            for n in range(start, start + total):
+                files.append(urljoin(filename, vname % n))
+        else:
+            for n in range(start, start + total):
+                newname = name.replace("$Number$", str(n))
+                files.append(urljoin(filename, newname))
+    return files
+
+
+def adaptionset(element, url, baseurl=None):
+    streams = {}
+
+    dirname = os.path.dirname(url) + "/"
+    if baseurl:
+        dirname = urljoin(dirname, baseurl)
+
+    template = element[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
+    represtation = element[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
+
+    for i in represtation:
+        files = []
+        segments = False
+        filename = dirname
+        bitrate = int(int(i.attrib["bandwidth"]) / 1000)
+        idnumber = i.attrib["id"]
+
+        if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
+            filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
+
+        if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
+            files.append(filename)
+        if template:
+            segments = True
+            files = templateelemt(template, filename, idnumber)
+        elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"):
+            segments = True
+            files = templateelemt(i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
+
+        streams[bitrate] = {"segments": segments, "files": files}
+
+    return streams
+
+
 def dashparse(options, res, url):
     streams = {}
 
@@ -35,95 +117,19 @@ def dashparse(options, res, url):
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams
     xml = ET.XML(res.text)
-    if "isoff-on-demand" in xml.attrib["profiles"]:
-        try:
-            baseurl = urljoin(url, xml.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
-        except AttributeError:
-            streams[0] = ServiceError("Can't parse DASH playlist")
-            return
-        videofiles = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='video']/{urn:mpeg:dash:schema:mpd:2011}Representation")
-        audiofiles = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='audio']/{urn:mpeg:dash:schema:mpd:2011}Representation")
-        for i in audiofiles:
-            audiourl = urljoin(baseurl, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
-            audiobitrate = float(i.attrib["bandwidth"]) / 1000
-            for n in videofiles:
-                bitrate = float(n.attrib["bandwidth"])/1000 + audiobitrate
-                videourl = urljoin(baseurl, n.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
-                options.other = "mp4"
-                streams[int(bitrate)] = DASH(copy.copy(options), videourl, bitrate, cookies=res.cookies, audio=audiourl)
-    if "isoff-live" in xml.attrib["profiles"]:
-        video = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='video']")
-        if len(video) == 0:
-            video = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType='video/mp4']")
-        audio = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType='audio']")
-        if len(audio) == 0:
-            audio = xml.findall(".//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType='audio/mp4']")
-        videofiles = parsesegments(video, url)
-        audiofiles = parsesegments(audio, url)
-        for i in videofiles.keys():
-            bitrate = (int(i) + int(list(audiofiles.keys())[0])) /1000
-            options.other = "mp4"
-            streams[int(bitrate)] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies, audio=audiofiles[list(audiofiles.keys())[0]], files=videofiles[i])
+
+    temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
+    audiofiles = adaptionset(temp, url)
+    temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
+    videofiles = adaptionset(temp, url)
+
+    for i in videofiles.keys():
+        bitrate = (int(i) + int(list(audiofiles.keys())[0])) / 1000
+        options.other = "mp4"
+        options.segments = videofiles[i]["segments"]
+        streams[int(bitrate)] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies, audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
 
     return streams
-
-def parsesegments(content, url):
-    media = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    if media is not None:
-        scheme = media.attrib["media"]
-    vinit = content[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    if vinit is not None:
-        init = vinit.attrib["initialization"]
-    nrofvideos = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
-    selemtns = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
-    total = 0
-    if nrofvideos:
-        total = int(nrofvideos[0].attrib["r"]) + len(selemtns) + 1
-        time = False
-    else:
-        time = []
-        time.append(0)
-        for i in selemtns:
-            time.append(int(i.attrib["d"]))
-    elements = content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
-    files = {}
-    for i in elements:
-        id = i.attrib["id"]
-        segments = []
-        bitrate = int(i.attrib["bandwidth"])
-        if vinit is None:
-            init = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["initialization"]
-        vidinit = init.replace("$RepresentationID$", id)
-        if media is None:
-            scheme = i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate").attrib["media"]
-        if "startNumber" in content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib:
-            start = int(content[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")[0].attrib["startNumber"])
-        else:
-            start = 1
-        dirname = os.path.dirname(url) + "/"
-        segments.append(urljoin(dirname, vidinit))
-        name = scheme.replace("$RepresentationID$", id)
-        if "$Number" in name:
-            match = re.search("\$Number(\%\d+)d\$", name)
-            if match:
-                vname = name.replace("$Number", "").replace("$", "")
-                for n in range(start, start+total):
-                    segments.append(urljoin(dirname, vname % n))
-            else:
-                #not format string
-                for n in range(start, start + total):
-                    newname = name.replace("$Number$", str(n))
-                    segments.append(urljoin(dirname, newname))
-        if "$Time$" in name:
-            match = re.search("\$Time\$", name)
-            if match:
-                number = 0
-                for n in time:
-                    number += int(n)
-                    new = name.replace("$Time$", str(number))
-                    segments.append(urljoin(dirname, new))
-        files[bitrate] = segments
-    return files
 
 
 class DASH(VideoRetriever):
@@ -134,7 +140,7 @@ class DASH(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveDASHException(self.url)
 
-        if self.files:
+        if self.options.segments:
             if self.audio:
                 self._download2(self.audio, audio=True)
             self._download2(self.files)
