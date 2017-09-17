@@ -39,6 +39,9 @@ class subtitle(object):
         if self.subtype == "smi":
             data = self.smi(subdata)
         if self.subtype == "wrst":
+            if "tv4play" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
+                subdata.encoding = "utf-8"
+                self.bom = True
             data = self.wrst(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
