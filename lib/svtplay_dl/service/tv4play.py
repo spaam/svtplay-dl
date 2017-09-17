@@ -98,8 +98,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
-            elif i.find("mediaFormat").text == "smi":
-                yield subtitle(copy.copy(self.options), "smi", i.find("url").text)
+            elif i.find("mediaFormat").text == "webvtt":
+                yield subtitle(copy.copy(self.options), "wrst", i.find("url").text)
 
         url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls3" % vid
         data = self.http.request("get", url, cookies=self.cookies).content
