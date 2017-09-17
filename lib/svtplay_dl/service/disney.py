@@ -38,7 +38,10 @@ class Disney(Service, OpenGraphThumbMixin):
                         if "flavors" in x:
                             for i in x["flavors"]:
                                 if i["format"] == "mp4":
-                                    yield HTTP(copy.copy(self.options), i["url"], i["bitrate"])
+                                    res = self.http.get(i["url"])
+                                    match = re.search('button primary" href="([^"]+)"', res.text)
+                                    if match:
+                                        yield HTTP(copy.copy(self.options), match.group(1), i["bitrate"])
         else:
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
