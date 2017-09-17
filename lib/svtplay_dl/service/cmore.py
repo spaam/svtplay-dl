@@ -7,6 +7,7 @@ from svtplay_dl.service import Service
 
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.error import ServiceError
 
