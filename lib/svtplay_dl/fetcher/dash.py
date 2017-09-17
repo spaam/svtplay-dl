@@ -95,7 +95,7 @@ def adaptionset(element, url, baseurl=None):
 
         if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
             files.append(filename)
-        if template:
+        if template is not None:
             segments = True
             files = templateelemt(template, filename, idnumber)
         elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"):
