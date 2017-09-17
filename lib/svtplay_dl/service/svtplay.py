@@ -225,7 +225,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         else:
                             if "sasong" in i["slug"] or "senast" in i["slug"]:
                                 videos = self.videos_to_list(i["videos"], videos)
-
+                            elif re.search('^\d+', i["slug"]):
+                                videos = self.videos_to_list(i["videos"], videos)
                         if self.options.include_clips: 
                             if i["slug"] == "klipp":
                                 videos = self.videos_to_list(i["videos"], videos)
