@@ -124,7 +124,7 @@ def dashparse(options, res, url):
     videofiles = adaptionset(temp, url)
 
     for i in videofiles.keys():
-        bitrate = (int(i) + int(list(audiofiles.keys())[0])) / 1000
+        bitrate = (int(i) + int(list(audiofiles.keys())[0]))
         options.other = "mp4"
         options.segments = videofiles[i]["segments"]
         streams[int(bitrate)] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies, audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
