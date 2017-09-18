@@ -4,7 +4,7 @@ import copy
 import os
 
 from svtplay_dl.service import Service
-
+from svtplay_dl.log import log
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils import filenamify
@@ -18,9 +18,9 @@ class Cmore(Service):
         if not self.options.username or not self.options.password:
             yield ServiceError("You need username and password to download things from this site.")
             return
-        token = self._login()
+        token, message = self._login()
         if not token:
-            yield ServiceError("Can't find authenticity_token needed to login")
+            yield ServiceError(message)
             return
         res = self.http.get(self.url)
         match = re.search('data-asset-splash-section data-asset-id="([^"]+)"', res.text)
@@ -85,7 +85,10 @@ class Cmore(Service):
     def find_all_episodes(self, options):
         episodes = []
 
-        self._login()
+        token, message = self._login()
+        if not token:
+            log.error(message)
+            return
         res = self.http.get(self.url)
         tags = re.findall('<a class="card__link" href="([^"]+)"', res.text)
         for i in tags:
@@ -102,10 +105,12 @@ class Cmore(Service):
         res = self.http.get(url, cookies=self.cookies)
         match = re.search('authenticity_token" value="([^"]+)"', res.text)
         if not match:
-            return None
+            return None, "Can't find authenticity_token needed to login"
         post = {"username": self.options.username, "password": self.options.password, "authenticity_token": match.group(1),
                 "redirect": "true"}
         res = self.http.post("https://account.cmore.se/session?client=web", json=post, cookies=self.cookies)
+        if res.status_code == 401:
+            return None, "Wrong username or password"
         janson = res.json()
         token = janson["data"]["vimond_token"]
-        return token
+        return token, None
