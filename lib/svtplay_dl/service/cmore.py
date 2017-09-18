@@ -75,7 +75,12 @@ class Cmore(Service):
         url = "https://restapi.cmore.se/api/tve_web/asset/{0}.json?expand=metadata".format(vid)
         res = self.http.get(url)
         janson = res.json()["asset"]["metadata"]
-        name = janson["title"]["$"]
+        if isinstance(janson["title"], list):
+            for i in janson["title"]:
+                if i["@xml:lang"] == "sv_SE": # if we add other .tld, we might need to change this.
+                    name = i["$"]
+        else:
+            name = janson["title"]["$"]
 
         if "season" in janson:
             season = "{0:02d}".format(int(janson["season"]["$"]))
