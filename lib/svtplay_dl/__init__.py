@@ -437,6 +437,9 @@ def main():
                       help="Remux from one container to mp4 using ffmpeg or avconv")
     parser.add_option("--include-clips", dest="include_clips", default=False, action="store_true",
                       help="include clips from websites when using -A")
+    parser.add_option("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true",
+                      help="show operatorlist for cmore")
+    parser.add_option("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
                       
     (options, args) = parser.parse_args()
     if not args:
@@ -457,6 +460,11 @@ def main():
     if options.silent_semi:
         options.silent = True
     setup_log(options.silent, options.verbose)
+
+    if options.cmoreoperatorlist:
+        c = Cmore(options, args)
+        c.operatorlist()
+        sys.exit(0)
 
     if options.flexibleq and not options.quality:
         log.error("flexible-quality requires a quality")
@@ -504,4 +512,6 @@ def mergeParserOption(options, parser):
     options.get_raw_subtitles = parser.get_raw_subtitles
     options.convert_subtitle_colors = parser.convert_subtitle_colors
     options.include_clips = parser.include_clips
+    options.cmoreoperatorlist = parser.cmoreoperatorlist
+    options.cmoreoperator = parser.cmoreoperator
     return options
