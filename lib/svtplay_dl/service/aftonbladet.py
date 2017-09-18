@@ -29,15 +29,14 @@ class Aftonbladettv(Service):
                 yield ServiceError("Can't find video info")
                 return
         data = json.loads(decode_html_entities(match.group(1)))
-        if urlparse(self.url).netloc == "tv.aftonbadet.se":
-            videoId = data["playerOptions"]["id"]
-            apiurl = data["playerOptions"]["api"]
-            vendor = data["playerOptions"]["vendor"]
-            self.options.live = data["live"]
-            if not self.options.live:
-                dataurl = "{0}{1}/assets/{2}?appName=svp-player".format(apiurl, vendor, videoId)
-                data = self.http.request("get", dataurl).text
-                data = json.loads(data)
+        videoId = data["playerOptions"]["id"]
+        apiurl = data["playerOptions"]["api"]
+        vendor = data["playerOptions"]["vendor"]
+        self.options.live = data["live"]
+        if not self.options.live:
+            dataurl = "{0}{1}/assets/{2}?appName=svp-player".format(apiurl, vendor, videoId)
+            data = self.http.request("get", dataurl).text
+            data = json.loads(data)
 
         streams = hlsparse(self.options, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"])
         if streams:
