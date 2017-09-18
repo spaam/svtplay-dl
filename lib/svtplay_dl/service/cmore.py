@@ -129,5 +129,5 @@ class Cmore(Service):
         res.encoding = "utf-8"
         match = re.findall('<option value="([^"]+)">([^"]+)</option>', res.text)
         for i in match:
-            message = "operator: '{0}' value: '{1}'".format(i[1], i[0])
+            message = "operator: '{0}' value: '{1}'".format(i[1], i[0].replace("-", ""))
             print(message)
