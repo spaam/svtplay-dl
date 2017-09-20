@@ -351,12 +351,18 @@ def get_one_media(stream, options):
             else:
                 log.warning("Can not get thumbnail when fetching to stdout")
         post = postprocess(stream, options, subfixes)
+
         if stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments) and post.detect:
             post.merge()
-        if stream.name() == "dash" and not post.detect and stream.finished:
+        if stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments) and not post.detect and stream.finished:
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-        if options.remux:
-            post.remux()
+
+        if stream.name() == "hls" or options.remux:
+            if post.detect:
+                post.remux()
+            else:
+                log.warning("Cant find ffmpeg/avconv. File may be unplayable.")
+
         if options.silent_semi and stream.finished:
             log.log(25, "Download of %s was completed" % stream.options.output)
 
