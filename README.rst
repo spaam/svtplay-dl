@@ -76,6 +76,7 @@ svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
+-  `Python`_ 2.7 or higher
 -  `RTMPDump`_ 2.4 or higher to download RTMP streams.
 -  `PyCrypto`_ to download encrypted HLS streams
 -  `Requests`_
@@ -150,6 +151,7 @@ License
 This project is licensed under `The MIT License (MIT)`_.
 Homepage: `svtplay-dl.se`_
 
+.. _Python: https://www.python.org/
 .. _Homebrew: http://brew.sh/
 .. _RTMPDump: http://rtmpdump.mplayerhq.hu/
 .. _PyCrypto: https://www.dlitz.net/software/pycrypto/
