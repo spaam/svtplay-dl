@@ -43,7 +43,7 @@ install: svtplay-dl $(MANFILE)
 
 svtplay-dl: $(PYFILES)
 	$(MAKE) -C lib
-	mv lib/svtplay-dl .
+	mv -f lib/svtplay-dl .
 
 svtplay-dl.1: svtplay-dl.pod
 	rm -f $@
