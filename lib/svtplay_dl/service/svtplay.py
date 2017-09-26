@@ -26,7 +26,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
             if parse.path[:6] != "/video" and parse.path[:6] != "/klipp":
-                yield ServiceError("This mode is not supported anymore. need the url with the video")
+                yield ServiceError("This mode is not supported anymore. Need the url with the video.")
                 return
 
         query = parse_qs(parse.query)
@@ -36,12 +36,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         match = re.search("__svtplay'] = ({.*});", self.get_urldata())
         if not match:
-            yield ServiceError("Cant find video info.")
+            yield ServiceError("Can't find video info.")
             return
         janson = json.loads(match.group(1))["videoPage"]
 
         if "programTitle" not in janson["video"]:
-            yield ServiceError("Can't find any video on that page")
+            yield ServiceError("Can't find any video on that page.")
             return
 
         if self.access:
@@ -51,7 +51,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     res = self.http.get(url)
                     match = re.search("__svtplay'] = ({.*});", res.text)
                     if not match:
-                        yield ServiceError("Cant find video info.")
+                        yield ServiceError("Can't find video info.")
                         return
                     janson = json.loads(match.group(1))["videoPage"]
 
@@ -63,7 +63,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             self.options.output = self.outputfilename(janson["video"], self.options.output)
 
         if self.exclude():
-            yield ServiceError("Excluding video")
+            yield ServiceError("Excluding video.")
             return
 
         if "programVersionId" in janson["video"]:
@@ -86,7 +86,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:
-                yield ServiceError("Media doesn't have any associated videos (yet?)")
+                yield ServiceError("Media doesn't have any associated videos.")
                 return
 
             for i in janson["videoReferences"]:
@@ -144,7 +144,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         dataj = json.loads(match.group(1))
         pages = dataj["gridPage"]["pagination"]["totalPages"]
 
-        for i  in dataj["gridPage"]["content"]:
+        for i in dataj["gridPage"]["content"]:
             videos.append(i["contentUrl"])
         page += 1
         self._last_chance(videos, page, pages)
@@ -192,7 +192,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 #TODO add better checks for valid RSS-feed here
                 valid_rss = True
             except ET.ParseError:
-                log.info("Error parsing RSS-feed at %s, make sure it is a valid RSS-feed, will use other method to find episodes" % rss_url)
+                log.info("Error parsing RSS-feed at %s, make sure it is a valid RSS-feed, will use other method to find episodes." % rss_url)
         else:
             #if either tab or include_clips is set remove rss.xml from url if set manually. 
             if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":                
@@ -205,7 +205,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             if re.search("sista-chansen", parse.path):
                 videos = self._last_chance(videos, 1)
             elif not match:
-                log.error("Couldn't retrieve episode list")
+                log.error("Couldn't retrieve episode list.")
                 return
             else:
                 dataj = json.loads(match.group(1))
