@@ -136,7 +136,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if page > maxpage:
             return videos
 
-        res = self.http.get("http://www.svtplay.se/sista-chansen?sida=%s" % page)
+        res = self.http.get("http://www.svtplay.se/sista-chansen?sida={}".format(page))
         match = re.search("__svtplay'] = ({.*});", res.text)
         if not match:
             return videos
@@ -283,15 +283,15 @@ class Svtplay(Service, OpenGraphThumbMixin):
         season = self.seasoninfo(data)
         title = name
         if season:
-            title += ".%s" % season
+            title += ".{}".format(season)
         if other:
-            title += ".%s" % other
+            title += ".{}".format(other)
         if "accessService" in data:
             if data["accessService"] == "audioDescription":
                 title += "-syntolkat"
             if data["accessService"] == "signInterpretation":
                 title += "-teckentolkat"
-        title += "-%s-svtplay" % id
+        title += "-{}-svtplay".format(id)
         title = filenamify(title)
         if len(directory):
             output = os.path.join(directory, title)
@@ -305,6 +305,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
             episode = "{:02d}".format(data["episodeNumber"])
             if int(season) == 0 and int(episode) == 0:
                 return None
-            return "S%sE%s" % (season, episode)
+            return "S{}E{}".format(season, episode)
         else:
             return None
