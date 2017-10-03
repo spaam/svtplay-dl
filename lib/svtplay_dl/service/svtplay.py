@@ -71,7 +71,11 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             vid = janson["video"]["id"]
         res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(vid))
-        janson = res.json()
+        try:
+            janson = res.json()
+        except json.decoder.JSONDecodeError:
+            yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+            return
         videos = self._get_video(janson)
         for i in videos:
             yield i
