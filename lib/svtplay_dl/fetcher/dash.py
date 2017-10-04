@@ -116,6 +116,9 @@ def dashparse(options, res, url):
     if res.status_code >= 400:
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams
+    if len(res.text) < 1:
+        streams[0] = ServiceError("Can't read DASH playlist. {0}, size: {1}".format(res.status_code, len(res.text)))
+        return
     xml = ET.XML(res.text)
 
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
