@@ -15,7 +15,6 @@ class Vidme(Service, OpenGraphThumbMixin):
     def get(self):
         parse = urlparse(self.url)
         if parse.netloc is not "vid.me":
-            print parse
             yield ServiceError("Need the url with the video")
         vid = parse.path[1:]
         res = self.http.get("https://api.vid.me/videoByUrl/{0}".format(vid))
@@ -35,7 +34,6 @@ class Vidme(Service, OpenGraphThumbMixin):
             if len(janson_v["formats"]) == 0:
                 yield ServiceError("Media doesn't have any associated videos.")
                 return
-            print janson_v["formats"]
 
             for i in janson_v["formats"]:
                 streams = None

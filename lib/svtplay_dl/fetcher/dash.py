@@ -94,6 +94,7 @@ def adaptionset(element, url, baseurl=None):
             filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
 
         if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
+            segments = True
             files.append(filename)
         if template is not None:
             segments = True
@@ -109,6 +110,7 @@ def adaptionset(element, url, baseurl=None):
 
 def dashparse(options, res, url):
     streams = {}
+    baseurl = None
 
     if not res:
         return None
@@ -118,10 +120,13 @@ def dashparse(options, res, url):
         return streams
     xml = ET.XML(res.text)
 
+    if xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
+        baseurl = xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL").text
+
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
-    audiofiles = adaptionset(temp, url)
+    audiofiles = adaptionset(temp, url, baseurl)
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
-    videofiles = adaptionset(temp, url)
+    videofiles = adaptionset(temp, url, baseurl)
 
     for i in videofiles.keys():
         bitrate = (int(i) + int(list(audiofiles.keys())[0]))
