@@ -141,7 +141,11 @@ def parsem3u(data):
                     streaminfo.update({info[i][0]: info[i][1]})
                 if info[i][0] == "RESOLUTION":
                     streaminfo.update({info[i][0]: info[i][1]})
-        elif l.startswith("#EXT-X-ENDLIST"):
+        elif l.startswith("#EXT-X-MAP:"):
+            line = l[11:]
+            if line.startswith("URI"):
+                files.append((line[5:].split("\"")[0], streaminfo))
+        elif l.startswith("#EXT-X-ENDLIST") or l.startswith("#EXT-X-BYTERANGE:"):
             break
         elif l.startswith("#EXT-X-"):
             line = [l[7:].strip().split(":", 1)]
