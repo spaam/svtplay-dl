@@ -224,7 +224,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
         if options.all_last > 0:
-            return sorted(episodes[-options.all_last:])
+            return sorted(episodes)[-options.all_last:]
         return sorted(episodes)
 
     def videos_to_list(self, lvideos, videos):
