@@ -26,7 +26,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         vid = findvid(self.url, data)
         if vid is None:
-            yield ServiceError("Can't find video id for %s" % self.url)
+            yield ServiceError("Can't find video id for {0}.".format(self.url))
             return
 
         # if self.options.username and self.options.password:
@@ -35,7 +35,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 # yield work
                 # return
 
-        url = "http://prima.tv4play.se/api/web/asset/%s/play" % vid
+        url = "http://prima.tv4play.se/api/web/asset/{0}/play".format(vid)
         data = self.http.request("get", url, cookies=self.cookies)
         if data.status_code == 401:
             xml = ET.XML(data.content)
@@ -74,7 +74,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if basename is None:
                 yield ServiceError("Cant find vid id for autonaming")
                 return
-            title = "%s-%s-%s" % (basename, vid, self.options.service)
+            title = "{0}-{1}-{2}".format(basename, vid, self.options.service)
             title = filenamify(title)
             if len(directory):
                 self.options.output = os.path.join(directory, title)
@@ -91,7 +91,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 parse = urlparse(i.find("url").text)
                 if "rtmp" in base.scheme:
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-                    self.options.other = "-W %s -y %s" % (swf, i.find("url").text)
+                    self.options.other = "-W {0} -y {1}".format(swf, i.find("url").text)
                     yield RTMP(copy.copy(self.options), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
                     streams = hdsparse(self.options, self.http.request("get", i.find("url").text, params={"hdcore": "3.7.0"}), i.find("url").text)
@@ -101,7 +101,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             elif i.find("mediaFormat").text == "webvtt":
                 yield subtitle(copy.copy(self.options), "wrst", i.find("url").text)
 
-        url = "https://prima.tv4play.se/api/web/asset/%s/play?protocol=hls3" % vid
+        url = "https://prima.tv4play.se/api/web/asset/{0}/play?protocol=hls3".format(vid)
         data = self.http.request("get", url, cookies=self.cookies).content
         xml = ET.XML(data)
         ss = xml.find("items")
@@ -124,7 +124,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             live = "true"
         else:
             live = "false"
-        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live=%s&platform=web&node_nids=%s&per_page=99999" % (live, show)).text
+        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&platform=web&node_nids={1}&per_page=99999".format(live, show)).text
         jsondata = json.loads(data)
         return jsondata
 
@@ -138,7 +138,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         else:
             live = "false"
         while run:
-            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live=%s&platform=web&node_nids=%s&per_page=1000&page=%s" % (live, show, page)).text
+            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
             jsondata = json.loads(data)
             for i in jsondata["results"]:
                 if vid == i["id"]:
@@ -177,9 +177,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 episode = "{:02d}".format(data["episode"])
                 if int(season) == 0 and int(episode) == 0:
                     return None
-                return "s%se%s" % (season, episode)
+                return "s{0}e{1}".format(season, episode)
             else:
-                return "s%s" % season
+                return "s{0}".format(season)
         else:
             return None
 
@@ -190,7 +190,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 season = self._seasoninfo(i)
                 if season:
                    index = len(i["program"]["name"])
-                   return i["title"][:index] + ".%s%s" % (season, i["title"][index:])
+                   return i["title"][:index] + ".{0}{1}".format(season, i["title"][index:])
                 return i["title"]
         return self._get_clip_info(vid)
 
@@ -225,8 +225,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             if days > 0:
                 video_id = i["id"]
-                url = "http://www.tv4play.se/program/%s?video_id=%s" % (
-                    i["program"]["nid"], video_id)
+                url = "http://www.tv4play.se/program/{0}?video_id={1}"\
+                    .format(i["program"]["nid"], video_id)
                 episodes.append(url)
                 if n == options.all_last:
                     break
