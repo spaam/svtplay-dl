@@ -45,10 +45,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             elif code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
                 yield ServiceError("Can't download this video because of geoblock.")
             else:
-                yield ServiceError("Can't find any info for that video")
+                yield ServiceError("Can't find any info for that video.")
             return
         if data.status_code == 404:
-            yield ServiceError("Can't find the video api")
+            yield ServiceError("Can't find the video api.")
             return
         xml = ET.XML(data.content)
         ss = xml.find("items")
@@ -61,10 +61,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if xml.find("live").text != "false":
                 self.options.live = True
         if xml.find("drmProtected").text == "true":
-            yield ServiceError("We cant download DRM protected content from this site.")
+            yield ServiceError("We can't download DRM protected content from this site.")
             return
         if xml.find("playbackStatus").text == "NOT_STARTED":
-            yield ServiceError("Can't download something that is not started")
+            yield ServiceError("Can't download something that is not started.")
             return
 
         if self.options.output_auto:
@@ -72,7 +72,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             self.options.service = "tv4play"
             basename = self._autoname(vid)
             if basename is None:
-                yield ServiceError("Cant find vid id for autonaming")
+                yield ServiceError("Cant find vid id for autonaming.")
                 return
             title = "{0}-{1}-{2}".format(basename, vid, self.options.service)
             title = filenamify(title)
@@ -82,7 +82,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 self.options.output = title
 
         if self.exclude():
-            yield ServiceError("Excluding video")
+            yield ServiceError("Excluding video.")
             return
 
         for i in sa:
