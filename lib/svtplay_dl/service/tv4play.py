@@ -24,7 +24,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
 
         vid = findvid(self.url, data)
-        if vid is None:
+        if not vid:
             yield ServiceError("Can't find video id for {0}.".format(self.url))
             return
 
@@ -57,8 +57,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             sa = list(ss.iter("item"))
 
         if xml.find("live").text:
-            if xml.find("live").text != "false":
-                self.options.live = True
+            self.options.live = (xml.find("live").text != "false")
         if xml.find("drmProtected").text == "true":
             yield ServiceError("We can't download DRM protected content from this site.")
             return
@@ -70,7 +69,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             directory = os.path.dirname(self.options.output)
             self.options.service = "tv4play"
             basename = self._autoname(vid)
-            if basename is None:
+            if not basename:
                 yield ServiceError("Cant find vid id for autonaming.")
                 return
             title = "{0}-{1}-{2}".format(basename, vid, self.options.service)
@@ -119,10 +118,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
     def _get_show_info(self):
         show = self._get_showname()
-        if self.options.live:
-            live = "true"
-        else:
-            live = "false"
+        live = str(self.options.live).lower()
         data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&platform=web&node_nids={1}&per_page=99999".format(live, show)).text
         jsondata = json.loads(data)
         return jsondata
@@ -132,10 +128,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         page = 1
         assets = page * 1000
         run = True
-        if self.options.live:
-            live = "true"
-        else:
-            live = "false"
+        live = str(self.options.live).lower()
         while run:
             data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
             jsondata = json.loads(data)
