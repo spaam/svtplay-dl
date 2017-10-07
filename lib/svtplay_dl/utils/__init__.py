@@ -15,6 +15,8 @@ except ImportError:
     import html.parser as HTMLParser
 try:
     from requests import Session
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
 except ImportError:
     print("You need to install python-requests to use this script")
     sys.exit(3)
@@ -34,10 +36,20 @@ DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
+retry = Retry(
+            total=5,
+            read=5,
+            connect=5,
+            backoff_factor=0.3,
+            status_forcelist=(500, 502, 504),
+        )
 
 class HTTP(Session):
     def __init__(self, options, *args, **kwargs):
         Session.__init__(self, *args, **kwargs)
+        adapter = HTTPAdapter(max_retries=retry)
+        self.mount('http://', adapter)
+        self.mount('https://', adapter)
         self.verify = options.ssl_verify
         if options.http_headers:
             self.headers.update(self.split_header(options.http_headers))
