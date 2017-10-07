@@ -10,7 +10,6 @@ import copy
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import is_py2_old, is_py2, filenamify
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
@@ -119,7 +118,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                             yield streams[n]
 
     def _get_show_info(self):
-        show = self._get_showname(self.url)
+        show = self._get_showname()
         if self.options.live:
             live = "true"
         else:
@@ -129,7 +128,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         return jsondata
 
     def _get_clip_info(self, vid):
-        show = self._get_showname(self.url)
+        show = self._get_showname()
         page = 1
         assets = page * 1000
         run = True
@@ -152,8 +151,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             assets = page * 1000
         return None
 
-    def _get_showname(self, url):
+    def _get_showname(self):
         parse = urlparse(self.url)
+        show = None
         if parse.path.count("/") > 2:
             match = re.search("^/([^/]+)/", parse.path)
             if "program" == match.group(1):
@@ -164,7 +164,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 show = match.group(1)
         else:
             show = parse.path[parse.path.find("/", 1)+1:]
-        if not re.search("%", show):
+        if show and not re.search("%", show):
             if is_py2 and isinstance(show, unicode):
                 show = show.encode("utf-8")
             show = quote_plus(show)
@@ -189,8 +189,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if vid == i["id"]:
                 season = self._seasoninfo(i)
                 if season:
-                   index = len(i["program"]["name"])
-                   return i["title"][:index] + ".{0}{1}".format(season, i["title"][index:])
+                    index = len(i["program"]["name"])
+                    return "{0}.{1}{2}".format(i["title"][:index], season, i["title"][index:])
                 return i["title"]
         return self._get_clip_info(vid)
 
