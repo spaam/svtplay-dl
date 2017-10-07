@@ -107,7 +107,7 @@ class HLS(VideoRetriever):
                 n += 1
 
             data = self.http.request("get", item, cookies=cookies)
-            if data.status_code == 404:
+            if not data or (data.status_code == 404):
                 break
             data = data.content
             if encrypted:

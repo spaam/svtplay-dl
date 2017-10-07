@@ -119,7 +119,7 @@ class HDS(VideoRetriever):
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
             data = self.http.request("get", url, cookies=cookies)
-            if data.status_code == 404:
+            if not data or (data.status_code == 404):
                 break
             data = data.content
             number = decode_f4f(i, data)
