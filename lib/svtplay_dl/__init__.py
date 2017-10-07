@@ -305,8 +305,8 @@ def get_one_media(stream, options):
     if options.merge_subtitle and not options.subtitle:
         options_subs_dl(subfixes)
 
-
-    if len(videos) == 0:
+    if not videos:
+        log.error("No videos found.")
         for exc in error:
             log.error(str(exc))
     else:
