@@ -195,7 +195,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         episodes = self._grab_episodes(options, seasons)
         if options.all_last > 0:
-            return sorted(episodes[-options.all_last:])
+            return sorted(episodes)[-options.all_last:]
         return sorted(episodes)
 
     def _grab_episodes(self, options, seasons):
