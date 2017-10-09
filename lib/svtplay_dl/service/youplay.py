@@ -23,10 +23,10 @@ class Youplay(Service, OpenGraphThumbMixin):
 
         match = re.search(r'script async defer src="(//content.youplay.se[^"]+)"', data)
         if not match:
-            yield ServiceError("Cant find video info for %s" % self.url)
+            yield ServiceError("Cant find video info for {0}".format(self.url))
             return
 
-        data = self.http.request("get", "http:%s" % match.group(1)).content
+        data = self.http.request("get", "http:{0}".format(match.group(1)).content)
         match = re.search(r'decodeURIComponent\("([^"]+)"\)\)', data)
         if not match:
             yield ServiceError("Can't decode video info")
@@ -34,7 +34,7 @@ class Youplay(Service, OpenGraphThumbMixin):
         data = unquote_plus(match.group(1))
         match = re.search(r"videoData = ({[^;]+});", data)
         if not match:
-            yield ServiceError("Cant find video info for %s" % self.url)
+            yield ServiceError("Cant find video info for {0}".format(self.url))
             return
         # fix broken json.
         regex = re.compile(r"\s(\w+):")

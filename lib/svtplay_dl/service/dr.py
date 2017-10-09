@@ -39,7 +39,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 yield ServiceError("Cant find resource info for this video")
                 return
             if match.group(1)[:4] != "http":
-                resource_url = "http:%s" % match.group(1)
+                resource_url = "http:{0}".format(match.group(1))
             else:
                 resource_url = match.group(1)
             resource_data = self.http.request("get", resource_url).text
@@ -67,7 +67,7 @@ class Dr(Service, OpenGraphThumbMixin):
                         for n in list(streams.keys()):
                             yield streams[n]
                     if stream["Target"] == "Streaming":
-                        self.options.other = "-v -y '%s'" % stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")
+                        self.options.other = "-v -y '{0}'".format(stream['Uri'].replace("rtmp://vod.dr.dk/cms/", ""))
                         rtmp = "rtmp://vod.dr.dk/cms/"
                         yield RTMP(copy.copy(self.options), rtmp, stream['Bitrate'])
 
@@ -92,14 +92,14 @@ class Dr(Service, OpenGraphThumbMixin):
             if newstyle:
                 encparams = base64.b64encode(params.encode('latin1')).decode('latin1').rstrip('=') if is_py3 else \
                             base64.b64encode(params).rstrip('=')
-                encpath = '%s_%s' % (encbasepath, encparams)
+                encpath = '{0}_{1}'.format(encbasepath, encparams)
             else:
-                path = '%s?%s' % (urlparse(path).path, params)
+                path = '{0}?{1}'.format(urlparse(path).path, params)
                 encpath = base64.b64encode(path.encode('latin1')).decode('latin1').rstrip('=') if is_py3 else\
                           base64.b64encode(path).rstrip('=')
 
             url = urljoin('https://www.dr.dk/tv/partial/',
-                          '%s/%s' % (enccomp, encpath))
+                          '{0}/{1}'.format(enccomp, encpath))
             data = self.http.request('get', url).content.decode('latin1') if is_py3 else\
                    self.http.request('get', url).content
 
@@ -135,6 +135,6 @@ class Dr(Service, OpenGraphThumbMixin):
                     yield streams[n]
             else:
                 if i["Target"] == "Streaming":
-                    options.other = "-y '%s'" % i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")
+                    options.other = "-y '{0}'".format(i["Uri"].replace("rtmp://vod.dr.dk/cms/", ""))
                     rtmp = "rtmp://vod.dr.dk/cms/"
                     yield RTMP(copy.copy(options), rtmp, i["Bitrate"])

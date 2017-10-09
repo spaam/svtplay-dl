@@ -23,15 +23,15 @@ class Vg(Service, OpenGraphThumbMixin):
             parse = urlparse(self.url)
             match = re.search(r'video/(\d+)/', parse.fragment)
             if not match:
-                yield ServiceError("Can't find video file for: %s" % self.url)
+                yield ServiceError("Can't find video file for: {0}".format(self.url))
                 return
         videoid = match.group(1)
-        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/%s?appName=vgtv-website" % videoid).text
+        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/{0}?appName=vgtv-website".format(videoid)).text
         jsondata = json.loads(data)
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
-            title = "%s" % jsondata["title"]
+            title = jsondata["title"]
             title = filenamify(title)
             if len(directory):
                 self.options.output = os.path.join(directory, title)

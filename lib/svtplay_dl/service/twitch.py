@@ -31,7 +31,7 @@ class TwitchUrlException(TwitchException):
     """
     def __init__(self, media_type, url):
         super(TwitchUrlException, self).__init__(
-            "'%s' is not recognized as a %s URL" % (url, media_type)
+            "'{0}' is not recognized as a {1} URL".format(url, media_type)
         )
 
 
@@ -75,12 +75,12 @@ class Twitch(Service):
         access = self._get_access_token(videoid)
 
         if options.output_auto:
-            data = self.http.request("get", "https://api.twitch.tv/kraken/videos/v%s" % videoid)
+            data = self.http.request("get", "https://api.twitch.tv/kraken/videos/v{0}".format(videoid))
             if data.status_code == 404:
                 yield ServiceError("Can't find the video")
                 return
             info = json.loads(data.text)
-            name = "twitch-%s-%s" % (info["channel"]["name"], filenamify(info["title"]))
+            name = "twitch-{0}-{1}".format(info["channel"]["name"], filenamify(info["title"]))
             directory = os.path.dirname(options.output)
             if os.path.isdir(directory):
                 name = os.path.join(directory, name)
@@ -91,8 +91,7 @@ class Twitch(Service):
         nauth = quote_plus(str(access["token"]))
         authsig = access["sig"]
 
-        url = "http://usher.twitch.tv/vod/%s?nauth=%s&nauthsig=%s" % (
-            videoid, nauth, authsig)
+        url = "http://usher.twitch.tv/vod/{0}?nauth={1}&nauthsig={2}".format(videoid, nauth, authsig)
 
         streams = hlsparse(options, self.http.request("get", url), url)
         if streams:
@@ -121,15 +120,15 @@ class Twitch(Service):
         Both `sig` and `token` should be added to the HLS URI, and the
         token should, of course, be URI encoded.
         """
-        return self._ajax_get('/api/%s/%s/access_token' % (vtype, channel))
+        return self._ajax_get('/api/{0}/{1}/access_token'.format(vtype, channel))
 
     def _ajax_get(self, method):
-        url = "%s/%s" % (self.api_base_url, method)
+        url = "{0}/{1}".format(self.api_base_url, method)
 
         # Logic found in Twitch's global.js. Prepend /kraken/ to url
         # path unless the API method already is absolute.
         if method[0] != '/':
-            method = '/kraken/%s' % method
+            method = '/kraken/{0}'.format(method)
 
         payload = self.http.request("get", url)
         return json.loads(payload.text)
@@ -137,8 +136,8 @@ class Twitch(Service):
     def _get_hls_url(self, channel):
         access = self._get_access_token(channel, "channels")
 
-        query = "token=%s&sig=%s&allow_source=true&allow_spectre=true" % (quote_plus(access['token']), access['sig'])
-        return "%s/%s.m3u8?%s" % (self.hls_base_url, channel, query)
+        query = "token={0}&sig={1}&allow_source=true&allow_spectre=true".format(quote_plus(access['token']), access['sig'])
+        return "{0}/{1}.m3u8?{2}".format(self.hls_base_url, channel, query)
 
     def _get_channel(self, options, urlp):
         match = re.match(r'/(\w+)', urlp.path)
@@ -148,7 +147,7 @@ class Twitch(Service):
 
         channel = match.group(1)
         if options.output_auto:
-            options.output = "twitch-%s" % channel
+            options.output = "twitch-{0}".format(channel)
 
         hls_url = self._get_hls_url(channel)
         urlp = urlparse(hls_url)
@@ -172,7 +171,7 @@ class Twitch(Service):
         if options.output_auto:
             name = re.search('slug: "([^"]+)"', self.get_urldata()).group(1)
             brodcaster = re.search('broadcaster_login: "([^"]+)"', self.get_urldata()).group(1)
-            name = "twitch-%s-%s" % (brodcaster, name)
+            name = "twitch-{0}-{1}".format(brodcaster, name)
             directory = os.path.dirname(options.output)
             if os.path.isdir(directory):
                 name = os.path.join(directory, name)

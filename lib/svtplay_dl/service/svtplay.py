@@ -184,7 +184,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 #TODO add better checks for valid RSS-feed here
                 valid_rss = True
             except ET.ParseError:
-                log.info("Error parsing RSS-feed at %s, make sure it is a valid RSS-feed, will use other method to find episodes." % rss_url)
+                log.info("Error parsing RSS-feed at {0}, make sure it is a valid RSS-feed, will use other method to find episodes.".format(rss_url))
         else:
             #if either tab or include_clips is set remove rss.xml from url if set manually. 
             if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":                

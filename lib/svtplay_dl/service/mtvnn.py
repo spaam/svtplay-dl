@@ -40,7 +40,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             return
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
-        self.options.other = "-W %s" % self.http.check_redirect(swfurl)
+        self.options.other = "-W {0}".format(self.http.check_redirect(swfurl))
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         content = self.http.request("get", contenturl).content
@@ -89,6 +89,6 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         for i in sorted(episodNr):
             if n == options.all_last:
                 break
-            episodes.append("http://www.nickelodeon.se/serier/%s-something/videos/%s-something" % (programid, i))
+            episodes.append("http://www.nickelodeon.se/serier/{0}-something/videos/{1}-something".format(programid, i))
             n += 1
         return episodes

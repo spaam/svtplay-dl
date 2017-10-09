@@ -21,7 +21,7 @@ class Pokemon(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant county code")
             return
 
-        res = self.http.get("http://www.pokemon.com/api/pokemontv/channels?region=%s" % match.group(1))
+        res = self.http.get("http://www.pokemon.com/api/pokemontv/channels?region={0}".format(match.group(1)))
         janson = res.json()
         match = re.search('data-video-season="([0-9]+)"', data)
         season = match.group(1)
@@ -36,7 +36,7 @@ class Pokemon(Service, OpenGraphThumbMixin):
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
             basename = os.path.basename(self.options.output)
-            title = "pokemon.s%se%s-%s" % (season, episode, basename)
+            title = "pokemon.s{0}e{1}-{2}".format(season, episode, basename)
             title = filenamify(title)
             if len(directory):
                 self.options.output = os.path.join(directory, title)

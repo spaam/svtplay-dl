@@ -38,7 +38,7 @@ class Cmore(Service):
             if basename is None:
                 yield ServiceError("Cant find vid id for autonaming")
                 return
-            title = "%s-%s-%s" % (basename, match.group(1), self.options.service)
+            title = "{0}-{1}-{2}".format(basename, match.group(1), self.options.service)
             title = filenamify(title)
             if len(directory):
                 self.options.output = os.path.join(directory, title)

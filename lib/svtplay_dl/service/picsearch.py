@@ -34,7 +34,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not isinstance(mediaid, str):
             mediaid = mediaid.group(1)
 
-        jsondata = self.http.request("get", "http://csp.screen9.com/player?eventParam=1&ajaxauth=%s&method=embed&mediaid=%s" % (ajax_auth.group(1), mediaid)).text
+        jsondata = self.http.request("get", "http://csp.screen9.com/player?eventParam=1&ajaxauth={0}&method=embed&mediaid={1}".format(ajax_auth.group(1), mediaid)).text
         jsondata = json.loads(jsondata)
 
         if "data" in jsondata:
@@ -79,7 +79,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not match:
                 match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
                 if match:
-                    url = "http:%s" % match.group(1)
+                    url = "http:{0}".format(match.group(1))
                     data = self.http.request("get", url)
                     self.backupapi = url
                     match = re.search(r"picsearch_ajax_auth = '([^']+)'", data.text)
@@ -106,7 +106,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not match:
                 match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
                 if match:
-                    url = "http:%s" % match.group(1)
+                    url = "http:{0}".format(match.group(1))
                     data = self.http.request("get", url)
                     match = re.search(r"mediaid: '([^']+)'", data.text)
         if not match:

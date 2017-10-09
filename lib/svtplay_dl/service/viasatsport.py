@@ -19,7 +19,7 @@ class Viasatsport(Service, OpenGraphThumbMixin):
         dataj = json.loads(match.group(1))
         vid = dataj["dataSources"]["article"][0]["videos"][0]["data"]["mediaGuid"]
 
-        url = "https://viasport.mtg-api.com/stream-links/viasport/web/se/clear-media-guids/%s/streams" % vid
+        url = "https://viasport.mtg-api.com/stream-links/viasport/web/se/clear-media-guids/{0}/streams".format(vid)
         data = self.http.get(url)
         dataj = data.json()
         hls = dataj["embedded"]["prioritizedStreams"][0]["links"]["stream"]["href"]

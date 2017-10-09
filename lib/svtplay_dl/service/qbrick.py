@@ -24,16 +24,16 @@ class Qbrick(Service, OpenGraphThumbMixin):
         if re.findall(r"di.se", self.url):
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
-                yield ServiceError("Can't find video info for: %s" % self.url)
+                yield ServiceError("Can't find video info for: {0}".format(self.url))
                 return
             data = self.http.request("get", match.group(1)).content
             match = re.search(r"data-qbrick-ccid=\"([0-9A-Z]+)\"", data)
             if not match:
-                yield ServiceError("Can't find video file for: %s" % self.url)
+                yield ServiceError("Can't find video file for: {0}".format(self.url))
                 return
-            host = "http://vms.api.qbrick.com/rest/v3/getplayer/%s" % match.group(1)
+            host = "http://vms.api.qbrick.com/rest/v3/getplayer/{0}".format(match.group(1))
         else:
-            yield ServiceError("Can't find any info for %s" % self.url)
+            yield ServiceError("Can't find any info for {0}".format(self.url))
             return
 
         data = self.http.request("get", host).content
@@ -56,5 +56,5 @@ class Qbrick(Service, OpenGraphThumbMixin):
             sa = list(streams.iter("video"))
 
         for i in sa:
-            self.options.other = "-y '%s'" % i.attrib["src"]
+            self.options.other = "-y '{0}'".format(i.attrib["src"])
             yield RTMP(copy.copy(self.options), server, i.attrib["system-bitrate"])

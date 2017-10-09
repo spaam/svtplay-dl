@@ -61,6 +61,6 @@ class Lemonwhale(Service):
         videos = janson["videos"][0]["media"]["streams"]
         for i in videos:
             if i["name"] == "auto":
-                hls = "%s%s" % (janson["videos"][0]["media"]["base"], i["url"])
+                hls = "{0}{1}".format(janson["videos"][0]["media"]["base"], i["url"])
         streams = hlsparse(self.options, self.http.request("get", hls), hls)
         return streams

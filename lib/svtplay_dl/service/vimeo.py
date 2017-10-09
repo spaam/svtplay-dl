@@ -22,7 +22,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
 
         match = re.search('data-config-url="([^"]+)" data-fallback-url', data)
         if not match:
-            yield ServiceError("Can't find video file for: %s" % self.url)
+            yield ServiceError("Can't find video file for: {0}".format(self.url))
             return
         player_url = match.group(1).replace("&amp;", "&")
         player_data = self.http.request("get", player_url).text

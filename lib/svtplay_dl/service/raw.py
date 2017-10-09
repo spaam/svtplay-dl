@@ -19,7 +19,7 @@ class Raw(Service):
             self.options.output = os.path.join(os.path.dirname(self.options.output), filename)
             extention = True
         elif self.options.output is None:
-            self.options.output = "%s" % filename
+            self.options.output = filename
             extention = True
 
         if self.url.find(".f4m") > 0:

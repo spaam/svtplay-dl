@@ -25,10 +25,10 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for this video")
             return
 
-        url = "http://api.svt.se/videoplayer-api/video/%s" % vid
+        url = "http://api.svt.se/videoplayer-api/video/{0}".format(vid)
         data = self.http.request("get", url)
         if data.status_code == 404:
-            yield ServiceError("Can't get the json file for %s" % url)
+            yield ServiceError("Can't get the json file for {0}".format(url))
             return
 
         data = data.json()
@@ -122,7 +122,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             sort = "tid_stigande"
 
         while True:
-            url = "http://www.oppetarkiv.se/etikett/titel/%s/?sida=%s&sort=%s&embed=true" % (program, page, sort)
+            url = "http://www.oppetarkiv.se/etikett/titel/{0}/?sida={1}&sort={2}&embed=true".format(program, page, sort)
             data = self.http.request("get", url)
             if data.status_code == 404:
                 break
@@ -132,7 +132,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             for match in regex.finditer(data):
                 if n == self.options.all_last:
                     break
-                episodes.append("http://www.oppetarkiv.se%s" % match.group(1))
+                episodes.append("http://www.oppetarkiv.se{0}".format(match.group(1)))
                 n += 1
             page += 1
 

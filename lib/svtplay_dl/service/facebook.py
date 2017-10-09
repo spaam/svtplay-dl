@@ -19,7 +19,7 @@ class Facebook(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant find params info. video need to be public.")
             return
-        data2 = json.loads('["%s"]' % match.group(1))
+        data2 = json.loads('["{0}"]'.format(match.group(1)))
         data2 = json.loads(unquote_plus(data2[0]))
         if "sd_src_no_ratelimit" in data2["video_data"]["progressive"][0]:
             yield HTTP(copy.copy(self.options), data2["video_data"]["progressive"][0]["sd_src_no_ratelimit"], "240")

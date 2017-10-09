@@ -74,15 +74,14 @@ class Disney(Service, OpenGraphThumbMixin):
 
                 directory = os.path.dirname(self.options.output)
                 self.options.service = "disney"
-                title = "%s-%s" % (title, self.options.service)
+                title = "{0}-{1}".format(title, self.options.service)
                 title = filenamify(title)
                 if len(directory):
                     self.options.output = os.path.join(directory, title)
                 else:
                     self.options.output = title
 
-            url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
-            (partnerid, uiconfid, entryid, uniq)
+            url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid={0}&uiconf_id={1}&entry_id={2}&playerId={3}&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi".format(partnerid, uiconfid, entryid, uniq)
             data = self.http.request("get", url).text
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
@@ -94,7 +93,7 @@ class Disney(Service, OpenGraphThumbMixin):
                 name = jsondata["entryResult"]["meta"]["name"]
                 directory = os.path.dirname(self.options.output)
                 self.options.service = "disney"
-                title = "%s-%s" % (name, self.options.service)
+                title = "{0}-{1}".format(name, self.options.service)
                 title = filenamify(title)
                 if len(directory):
                     self.options.output = os.path.join(directory, title)
@@ -104,7 +103,7 @@ class Disney(Service, OpenGraphThumbMixin):
             if self.exclude():
                 return
 
-            url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
+            url = "http://cdnapi.kaltura.com/p/{0}/sp/{1}00/playManifest/entryId/{2}/format/applehttp/protocol/http/a.m3u8?ks={3}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
             streams = hlsparse(self.options, self.http.request("get", redirect), redirect)
             for n in list(streams.keys()):
