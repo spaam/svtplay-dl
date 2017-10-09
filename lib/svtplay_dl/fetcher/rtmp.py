@@ -39,11 +39,11 @@ class RTMP(VideoRetriever):
             args.append("-V")
 
         command = ["rtmpdump", "-r", self.url] + args
-        log.debug("Running: %s", " ".join(command))
+        log.debug("Running: {0}".format(" ".join(command)))
         try:
             subprocess.call(command)
         except OSError as e:
-            log.error("Could not execute rtmpdump: " + e.strerror)
+            log.error("Could not execute rtmpdump: {0}".format(e.strerror))
             return
         self.finished = True
 

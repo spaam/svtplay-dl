@@ -74,7 +74,7 @@ def hdsparse(options, res, manifest):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
-    manifest = "%s://%s%s" % (parse.scheme, parse.netloc, parse.path)
+    manifest = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
         streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
@@ -114,7 +114,7 @@ class HDS(VideoRetriever):
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "%s/%sSeg1-Frag%s?%s" % (baseurl, self.url, start, querystring)
+            url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.url, start, querystring)
             if self.options.output != "-" and not self.options.silent:
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))

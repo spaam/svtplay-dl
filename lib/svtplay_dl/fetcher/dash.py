@@ -181,7 +181,7 @@ class DASH(VideoRetriever):
             if bytes_so_far > total_size:
                 bytes_so_far = total_size
 
-            bytes_range = "bytes=%s-%s" % (old, bytes_so_far)
+            bytes_range = "bytes={0}-{1}".format(old, bytes_so_far)
 
             data = self.http.request("get", url, cookies=cookies, headers={'Range': bytes_range})
             file_d.write(data.content)

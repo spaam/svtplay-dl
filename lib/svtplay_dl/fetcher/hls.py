@@ -30,11 +30,11 @@ def _get_full_url(url, srcurl):
         return url
     if url[0] == '/':
         baseurl = re.search(r'^(http[s]{0,1}://[^/]+)/', srcurl)
-        return "%s%s" % (baseurl.group(1), url)
+        return "{0}{1}".format(baseurl.group(1), url)
 
     # remove everything after last / in the path of the URL
     baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
-    returl = "%s/%s" % (baseurl, url)
+    returl = "{0}/{1}".format(baseurl, url)
 
     return returl
 
