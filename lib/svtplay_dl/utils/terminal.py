@@ -51,8 +51,8 @@ def _get_terminal_size_tput():
     # get terminal width
     # src: http://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
     try:
-        cols = int(subprocess.check_call(shlex.split('tput cols')))
-        rows = int(subprocess.check_call(shlex.split('tput lines')))
+        cols = int(subprocess.check_output(shlex.split('tput cols')))
+        rows = int(subprocess.check_output(shlex.split('tput lines')))
         return (cols, rows)
     except:
         pass
