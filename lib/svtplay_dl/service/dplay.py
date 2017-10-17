@@ -171,7 +171,7 @@ class Dplay(Service):
                 episodes.append(i["url"])
         pages = dataj["total_pages"]
         for n in range(1, pages):
-            data = self.http.request("get", "{0}{1]".format(url, n)).text
+            data = self.http.request("get", "{0}{1}".format(url, n)).text
             dataj = json.loads(data)
             for i in dataj["data"]:
                 what = self._playable(i, premium)
