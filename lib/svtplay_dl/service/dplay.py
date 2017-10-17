@@ -77,7 +77,7 @@ class Dplay(Service):
         dataj = json.loads(data)
         geo = dataj["countryCode"]
         timestamp = (int(time.time())+3600)*1000
-        cookie = {"dsc-geo": quote(str({"countryCode": geo, "expiry": timestamp}))}
+        cookie = {"dsc-geo": quote('{{"countryCode":"{0}","expiry":{1}}}'.format(geo, timestamp))}
         if self.options.cookies:
             self.options.cookies.update(cookie)
         else:
