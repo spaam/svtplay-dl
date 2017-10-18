@@ -48,7 +48,9 @@ def hlsparse(options, res, url, **kwargs):
     if res.status_code > 400:
         streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
         return streams
-    files = (parsem3u(res.text))[1]
+    m3u8 = M3U8()
+    files = (m3u8.parse_m3u(res.text))[1]
+    print(m3u8) # TODO: rm
     http = HTTP(options)
     keycookie = kwargs.pop("keycookie", None)
     
@@ -74,8 +76,9 @@ class HLS(VideoRetriever):
             raise LiveHLSException(self.url)
 
         cookies = self.kwargs["cookies"]
-        m3u8 = self.http.request("get", self.url, cookies=cookies).text
-        globaldata, files = parsem3u(m3u8)
+        m3u8 = M3U8()
+        data_m3u = self.http.request("get", self.url, cookies=cookies).text
+        globaldata, files = m3u8.parse_m3u(data_m3u)
         encrypted = False
         key = None
         if "KEY" in globaldata:
@@ -128,51 +131,60 @@ class HLS(VideoRetriever):
             progress_stream.write('\n')
         self.finished = True
 
+class M3U8():
 
-def parsem3u(data):
-    if not data.startswith("#EXTM3U"):
-        raise ValueError("Does not apprear to be a ext m3u file")
+    def __init__(self):
 
-    files = []
-    streaminfo = {}
-    globdata = {}
+        self.files = []
+        self.glob_data = {}
+        self.version = None
+        self.target_duration = None
 
-    data = data.replace("\r", "\n")
-    for l in data.split("\n")[1:]:
-        if not l:
-            continue
-        if l.startswith("#EXT-X-STREAM-INF:"):
-            # not a proper parser
-            info = [x.strip().split("=", 1) for x in l[18:].split(",")]
-            for i in range(0, len(info)):
-                if info[i][0] == "BANDWIDTH":
-                    streaminfo.update({info[i][0]: info[i][1]})
-                if info[i][0] == "RESOLUTION":
-                    streaminfo.update({info[i][0]: info[i][1]})
-        elif l.startswith("#EXT-X-MAP:"):
-            line = l[11:]
-            if line.startswith("URI"):
-                files.append((line[5:].split("\"")[0], streaminfo))
-        elif l.startswith("#EXT-X-ENDLIST") or l.startswith("#EXT-X-BYTERANGE:"):
-            break
-        elif l.startswith("#EXT-X-"):
-            line = [l[7:].strip().split(":", 1)]
-            if len(line[0]) == 1:
-                line[0].append("None")
-            globdata.update(dict(line))
-        elif l.startswith("#EXTINF:"):
-            try:
-                dur, title = l[8:].strip().split(",", 1)
-            except:
-                dur = l[8:].strip()
-                title = None
-            streaminfo['duration'] = dur
-            streaminfo['title'] = title
-        elif l[0] == '#':
-            pass
-        else:
-            files.append((l, streaminfo))
-            streaminfo = {}
+    def __str__(self):
+        return "Files: {0}\nGlobData: {1}\nVersion: {2}\nTargetDuration: {3}"\
+            .format(self.files, self.glob_data, self.version, self.target_duration)
 
-    return globdata, files
+    def parse_m3u(self, data):
+        if not re.search("^#EXTM3U", data):
+            raise ValueError("Does not appear to be an 'EXTM3U' file.")
 
+        lines = []
+        data = data.replace("\r\n", "\n")
+        lines = data.split("\n")[1:]
+        self.steam_info = ""
+
+        for index, l in enumerate(lines):
+            if l and l.startswith("#EXT"):
+                stream_info = {}
+                if l.startswith("#EXT-X-VERSION:"):
+                    self.version = int(re.search("^#EXT-X-VERSION:(.*)", l).group(1))
+                elif l.startswith("#EXT-X-TARGETDURATION:"):
+                    self.target_duration = float(re.search("^#EXT-X-TARGETDURATION:(.*)", l).group(1))
+                elif l.startswith("#EXT-X-STREAM-INF:"):
+                    attribute = re.search("^#EXT-X-STREAM-INF:(.*)", l).group(1)
+
+                    for art_l in re.split(''',(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', attribute):
+                        if art_l:
+                            art_l_s = art_l.split("=")
+                            stream_info[art_l_s[0]] = art_l_s[1]
+
+                    self.files.append((lines[index + 1], stream_info))
+
+                elif l.startswith("#EXT-X-MAP:"):
+                    line = l[11:]
+                    if line.startswith("URI"):
+                        self.files.append((line[5:].split("\"")[0], stream_info))
+                        self.files.append((lines[index + 1], stream_info))
+                elif l.startswith("#EXTINF:"):
+                    try:
+                        dur, title = l[8:].strip().split(",", 1)
+                    except:
+                        dur = l[8:].strip()
+                        title = None
+                    stream_info['duration'] = dur
+                    stream_info['title'] = title
+                    self.files.append((lines[index + 1], stream_info))
+                elif l.startswith("#EXT-X-ENDLIST") or l.startswith("#EXT-X-BYTERANGE:"):
+                    break
+
+        return self.glob_data, self.files
