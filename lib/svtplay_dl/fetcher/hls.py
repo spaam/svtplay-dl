@@ -95,6 +95,7 @@ class HLS(VideoRetriever):
         else:
             dl_urls = m3u8.media_segment
 
+        decryptor = None
         eta = ETA(len(dl_urls))
         for index, i in enumerate(dl_urls):
             item = _get_full_url(i[0], self.url)
@@ -108,16 +109,21 @@ class HLS(VideoRetriever):
                 break
             data = data.content
             if m3u8.encrypted:
-
                 if self.keycookie:
                     keycookies = self.keycookie
                 else:
                     keycookies = cookies
 
-                key = self.http.request("get", i["EXT-X-KEY"]["URI"], cookies=keycookies).content
-                rand = os.urandom(16)
-                decryptor = AES.new(key, AES.MODE_CBC, rand)
-                data = decryptor.decrypt(data)
+                # Update key/decryptor
+                if "EXT-X-KEY" in i[1]:
+                    keyurl = _get_full_url(i[1]["EXT-X-KEY"]["URI"], self.url)
+                    key = self.http.request("get", keyurl, cookies=keycookies).content
+                    decryptor = AES.new(key, AES.MODE_CBC, os.urandom(16))
+                if decryptor:
+                    data = decryptor.decrypt(data)
+                else:
+                    raise ValueError("No decryptor found for encrypted hls steam.")
+
             file_d.write(data)
 
         file_d.close()
