@@ -88,7 +88,11 @@ class HLS(VideoRetriever):
                 sys.exit(2)
 
             match = re.search(r'URI="(https?://.*?)"', keydata)
-            key = self.http.request("get", match.group(1)).content
+            if not match:
+                match = re.search(r'URI="([^"]+)"', keydata)
+            keyurl = _get_full_url(match.group(1), self.url)
+            key = self.http.request("get", keyurl, cookies=cookies).content
+
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
