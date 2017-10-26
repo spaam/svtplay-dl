@@ -52,15 +52,29 @@ def hlsparse(options, res, url, **kwargs):
     http = HTTP(options)
     keycookie = kwargs.pop("keycookie", None)
 
+    media = {}
     for i in m3u8.master_playlist:
-        if i[1]["TAG"] == "EXT-X-STREAM-INF":
+        audio_url = None
+        if i[1]["TAG"] == "EXT-X-MEDIA":
+            if "DEFAULT" in i[1] and (i[1]["DEFAULT"].upper() == "YES"):
+                if i[1]["TYPE"] and ("URI" in i[1]):
+                    if i[1]["GROUP-ID"] not in media:
+                        media[i[1]["GROUP-ID"]] = []
+                    media[i[1]["GROUP-ID"]].append(i[1]["URI"])
+            continue
+        elif i[1]["TAG"] == "EXT-X-STREAM-INF":
             bit_rate = float(i[1]["BANDWIDTH"]) / 1000
+
+            if "AUDIO" in i[1] and (i[1]["AUDIO"] in media):
+                audio_url = media[i[1]["AUDIO"]][0]
+
             urls = _get_full_url(i[0], url)
         else:
             continue # Needs to be changed to utilise other tags.
         res2 = http.get(urls, cookies=res.cookies)
         if res2.status_code < 400:
-            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie)
+
+            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
     return streams
 
 
@@ -74,6 +88,23 @@ class HLS(VideoRetriever):
 
         cookies = self.kwargs["cookies"]
         data_m3u = self.http.request("get", self.url, cookies=cookies).text
+        m3u8 = M3U8(data_m3u)
+
+        print m3u8.media_segment[0]
+        if ("avc1" in m3u8.media_segment[0][0].lower()) and self.audio:
+            audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
+            audio_m3u8 = M3U8(audio_data_m3u)
+            total_size = audio_m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["n"] + audio_m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["o"]
+            self._download_url(audio_m3u8.media_segment[0][0], audio=True, total_size=total_size)
+
+            total_size = m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["n"] + m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["o"]
+            self._download_url(m3u8.media_segment[0][0], total_size=total_size)
+        else:
+            self._download(self.url)
+
+    def _download(self, url):
+        cookies = self.kwargs["cookies"]
+        data_m3u = self.http.request("get", url, cookies=cookies).text
         m3u8 = M3U8(data_m3u)
         key = None
 
@@ -98,7 +129,7 @@ class HLS(VideoRetriever):
         decryptor = None
         eta = ETA(len(dl_urls))
         for index, i in enumerate(dl_urls):
-            item = _get_full_url(i[0], self.url)
+            item = _get_full_url(i[0], url)
 
             if not self.options.silent:
                 eta.increment()
@@ -333,12 +364,15 @@ def _get_tuple_attribute(attribute):
     attr_tuple = {}
     for art_l in re.split(''',(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', attribute):
         if art_l:
-            art_l_s = art_l.split("=", 1)
+            name, value = art_l.split("=", 1)
 
-            tag = art_l_s[0]
-            content = art_l_s[1]
+            # Checks for attribute name
+            if not re.match("^[A-Z0-9\-]*$", name):
+                raise ValueError("Not a valid attribute name.")
 
-            if content.startswith('"') and content.endswith('"'):
-                content = content[1:-1]
-            attr_tuple[tag] = content
+            # Remove extra quotes of string
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1]
+            attr_tuple[name] = value
+
     return attr_tuple
