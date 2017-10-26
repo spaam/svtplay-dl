@@ -154,46 +154,8 @@ class DASH(VideoRetriever):
             self._download2(self.files)
         else:
             if self.audio:
-                self._download(self.audio, audio=True)
-            self._download(self.url)
-
-    def _download(self, url, audio=False):
-        cookies = self.kwargs["cookies"]
-        data = self.http.request("get", url, cookies=cookies, headers={'Range': 'bytes=0-8192'})
-        try:
-            total_size = data.headers['Content-Range']
-            total_size = total_size[total_size.find("/")+1:]
-        except KeyError:
-            total_size = 0
-        total_size = int(total_size)
-        bytes_so_far = 8192
-        if audio:
-            file_d = output(copy.copy(self.options), "m4a")
-        else:
-            file_d = output(self.options, self.options.other)
-        if file_d is None:
-            return
-        file_d.write(data.content)
-        eta = ETA(total_size)
-        while bytes_so_far < total_size:
-            old = bytes_so_far + 1
-            bytes_so_far = old + 1000000
-            if bytes_so_far > total_size:
-                bytes_so_far = total_size
-
-            bytes_range = "bytes={0}-{1}".format(old, bytes_so_far)
-
-            data = self.http.request("get", url, cookies=cookies, headers={'Range': bytes_range})
-            file_d.write(data.content)
-            if not self.options.silent:
-                eta.update(old)
-                progressbar(total_size, old, ''.join(["ETA: ", str(eta)]))
-
-        file_d.close()
-        if not self.options.silent:
-            progressbar(bytes_so_far, total_size, "ETA: complete")
-            progress_stream.write('\n')
-        self.finished = True
+                self._download_url(self.audio, audio=True)
+            self._download_url(self.url)
 
     def _download2(self, files, audio=False):
         cookies = self.kwargs["cookies"]
