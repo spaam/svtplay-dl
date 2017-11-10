@@ -21,7 +21,7 @@ class Expressen(Service):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search('="(http://www.expressen.se/tvspelare[^"]+)"', data)
+        match = re.search('="(https://www.expressen.se/tvspelare[^"]+)"', data)
         if not match:
             log.error("Can't find video id")
             return
