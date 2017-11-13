@@ -23,7 +23,7 @@ class Cmore(Service):
             yield ServiceError(message)
             return
         res = self.http.get(self.url)
-        match = re.search('data-asset-splash-section data-asset-id="([^"]+)"', res.text)
+        match = re.search('data-asset-id="([^"]+)"', res.text)
         if not match:
             yield ServiceError("Can't find video id")
             return
