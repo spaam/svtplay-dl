@@ -51,6 +51,7 @@ class HTTP(Session):
         self.mount('http://', adapter)
         self.mount('https://', adapter)
         self.verify = options.ssl_verify
+        self.proxy = options.proxy
         if options.http_headers:
             self.headers.update(self.split_header(options.http_headers))
         self.headers.update({"User-Agent": FIREFOX_UA})
@@ -63,9 +64,8 @@ class HTTP(Session):
         if headers:
             for i in headers.keys():
                 self.headers[i] = headers[i]
-
         log.debug("HTTP getting %r", url)
-        res = Session.request(self, method, url, verify=self.verify, *args, **kwargs)
+        res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, *args, **kwargs)
         return res
 
     def split_header(self, headers):
