@@ -80,6 +80,7 @@ you don’t have them, some features will not be working.
 -  `RTMPDump`_ 2.4 or higher to download RTMP streams.
 -  `PyCrypto`_ to download encrypted HLS streams
 -  `Requests`_
+-  `PySocks`_ to enable proxy support
 - `ffmpeg`_ or `avconv`_ for postprocessing and/or for DASH streams
 
 To install it, run
@@ -156,6 +157,7 @@ Homepage: `svtplay-dl.se`_
 .. _RTMPDump: http://rtmpdump.mplayerhq.hu/
 .. _PyCrypto: https://www.dlitz.net/software/pycrypto/
 .. _Requests: http://www.python-requests.org/
+.. _PySocks: https://github.com/Anorov/PySocks
 .. _ffmpeg: https://ffmpeg.org
 .. _avconv: https://libav.org
 .. _on github: https://github.com/spaam/svtplay-dl/issues

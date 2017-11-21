@@ -13,11 +13,13 @@ deps = []
 
 if sys.version_info[0] == 2 and sys.version_info[1] <= 7 and sys.version_info[2] < 9:
     deps.append("requests>=2.0.0")
+    deps.append("PySocks")
     deps.append("pyOpenSSL")
     deps.append("ndg-httpsclient")
     deps.append("pyasn1")
 else:
     deps.append(["requests>=2.0.0"])
+    deps.append("PySocks")
 
 setup(
     name = "svtplay-dl",

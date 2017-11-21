@@ -442,7 +442,11 @@ def main():
     parser.add_option("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true",
                       help="show operatorlist for cmore")
     parser.add_option("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
-                      
+    parser.add_option("--proxy", dest="proxy", default=None,
+                      metavar="proxy", help='Use the specified HTTP/HTTPS/SOCKS proxy. To enable experimental '
+                                            'SOCKS proxy, specify a proper scheme. For example '
+                                            'socks5://127.0.0.1:1080/.')
+
     (options, args) = parser.parse_args()
     if not args:
         parser.print_help()
@@ -467,6 +471,11 @@ def main():
         c = Cmore(options, args)
         c.operatorlist()
         sys.exit(0)
+
+    if options.proxy:
+        options.proxy = options.proxy.replace("socks5", "socks5h", 1)
+        options.proxy = dict(http=options.proxy,
+                             https=options.proxy)
 
     if options.flexibleq and not options.quality:
         log.error("flexible-quality requires a quality")
@@ -516,4 +525,5 @@ def mergeParserOption(options, parser):
     options.include_clips = parser.include_clips
     options.cmoreoperatorlist = parser.cmoreoperatorlist
     options.cmoreoperator = parser.cmoreoperator
+    options.proxy = parser.proxy
     return options
