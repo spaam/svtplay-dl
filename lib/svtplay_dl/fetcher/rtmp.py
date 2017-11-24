@@ -27,7 +27,7 @@ class RTMP(VideoRetriever):
         if file_d is None:
             return
         args += ["-o", self.options.output]
-        if self.options.silent or self.options.output == "-":
+        if self.options.silent:
             args.append("-q")
         if self.options.other:
             if is_py2:

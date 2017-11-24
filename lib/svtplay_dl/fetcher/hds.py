@@ -100,7 +100,7 @@ class HDS(VideoRetriever):
         baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
 
         file_d = output(self.options, "flv")
-        if hasattr(file_d, "read") is False:
+        if file_d is None:
             return
 
         metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
@@ -115,7 +115,7 @@ class HDS(VideoRetriever):
         eta = ETA(total)
         while i <= total:
             url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.url, start, querystring)
-            if self.options.output != "-" and not self.options.silent:
+            if not self.options.silent:
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
             data = self.http.request("get", url, cookies=cookies)
@@ -127,11 +127,10 @@ class HDS(VideoRetriever):
             i += 1
             start += 1
 
-        if self.options.output != "-":
-            file_d.close()
-            if not self.options.silent:
-                progress_stream.write('\n')
-            self.finished = True
+        file_d.close()
+        if not self.options.silent:
+            progress_stream.write('\n')
+        self.finished = True
 
 
 

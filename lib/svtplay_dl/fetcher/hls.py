@@ -97,7 +97,7 @@ class HLS(VideoRetriever):
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
         file_d = output(self.options, "ts")
-        if hasattr(file_d, "read") is False:
+        if file_d is None:
             return
 
         n = 1
@@ -105,7 +105,7 @@ class HLS(VideoRetriever):
         for i in files:
             item = _get_full_url(i[0], self.url)
 
-            if self.options.output != "-" and not self.options.silent:
+            if not self.options.silent:
                 eta.increment()
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
@@ -118,11 +118,10 @@ class HLS(VideoRetriever):
                 data = decryptor.decrypt(data)
             file_d.write(data)
 
-        if self.options.output != "-":
-            file_d.close()
-            if not self.options.silent:
-                progress_stream.write('\n')
-            self.finished = True
+        file_d.close()
+        if not self.options.silent:
+            progress_stream.write('\n')
+        self.finished = True
 
 
 def parsem3u(data):

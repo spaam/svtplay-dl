@@ -171,7 +171,7 @@ class DASH(VideoRetriever):
             file_d = output(copy.copy(self.options), "m4a")
         else:
             file_d = output(self.options, self.options.other)
-        if hasattr(file_d, "read") is False:
+        if file_d is None:
             return
         file_d.write(data.content)
         eta = ETA(total_size)
@@ -185,15 +185,15 @@ class DASH(VideoRetriever):
 
             data = self.http.request("get", url, cookies=cookies, headers={'Range': bytes_range})
             file_d.write(data.content)
-            if self.options.output != "-" and not self.options.silent:
+            if not self.options.silent:
                 eta.update(old)
                 progressbar(total_size, old, ''.join(["ETA: ", str(eta)]))
 
-        if self.options.output != "-":
-            file_d.close()
+        file_d.close()
+        if not self.options.silent:
             progressbar(bytes_so_far, total_size, "ETA: complete")
             progress_stream.write('\n')
-            self.finished = True
+        self.finished = True
 
     def _download2(self, files, audio=False):
         cookies = self.kwargs["cookies"]
@@ -202,12 +202,12 @@ class DASH(VideoRetriever):
             file_d = output(copy.copy(self.options), "m4a")
         else:
             file_d = output(self.options, self.options.other)
-        if hasattr(file_d, "read") is False:
+        if file_d is None:
             return
         eta = ETA(len(files))
         n = 1
         for i in files:
-            if self.options.output != "-" and not self.options.silent:
+            if not self.options.silent:
                 eta.increment()
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
@@ -218,8 +218,7 @@ class DASH(VideoRetriever):
             data = data.content
             file_d.write(data)
 
-        if self.options.output != "-":
-            file_d.close()
-            if not self.options.silent:
-                progress_stream.write('\n')
-            self.finished = True
+        file_d.close()
+        if not self.options.silent:
+            progress_stream.write('\n')
+        self.finished = True

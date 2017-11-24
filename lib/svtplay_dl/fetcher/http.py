@@ -21,18 +21,17 @@ class HTTP(VideoRetriever):
         bytes_so_far = 0
 
         file_d = output(self.options, "mp4")
-        if hasattr(file_d, "read") is False:
+        if file_d is None:
             return
 
         eta = ETA(total_size)
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
-            if self.options.output != "-" and not self.options.silent:
+            if not self.options.silent:
                 eta.update(bytes_so_far)
                 progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 
-        if self.options.output != "-":
-            file_d.close()
-            self.finished = True
+        file_d.close()
+        self.finished = True
 

@@ -143,42 +143,31 @@ def filename(stream):
 
 def output(options, extension="mp4", openfd=True, mode="wb", **kwargs):
     subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
-    if is_py2:
-        file_d = file
-    else:
-        file_d = io.IOBase
 
-    if options.output != "-":
-        ext = re.search(r"(\.\w{2,4})$", options.output)
-        if not ext:
-            options.output = "%s.%s" % (options.output, extension)
-        if options.output_auto and ext:
-            options.output = "%s.%s" % (options.output, extension)
-        elif extension == "srt" and ext:
-            options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
-        if ext and extension == "srt" and ext.group(1).split(".")[-1] in subtitlefiles:
-            options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
-        log.info("Outfile: %s", options.output)
-        if os.path.isfile(options.output) or \
-                findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
-            if extension in subtitlefiles:
-                if not options.force_subtitle:
-                    log.error("File (%s) already exists. Use --force-subtitle to overwrite" % options.output)
-                    return None
-            else:
-                if not options.force:
-                    log.error("File (%s) already exists. Use --force to overwrite" % options.output)
-                    return None
-        if openfd:
-            file_d = open(options.output, mode, **kwargs)
-    else:
-        if openfd:
-            if is_py2:
-                file_d = sys.stdout
-            else:
-                file_d = sys.stdout.buffer
-
-    return file_d
+    ext = re.search(r"(\.\w{2,4})$", options.output)
+    if not ext:
+        options.output = "%s.%s" % (options.output, extension)
+    if options.output_auto and ext:
+        options.output = "%s.%s" % (options.output, extension)
+    elif extension == "srt" and ext:
+        options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
+    if ext and extension == "srt" and ext.group(1).split(".")[-1] in subtitlefiles:
+        options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
+    log.info("Outfile: %s", options.output)
+    if os.path.isfile(options.output) or \
+            findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
+        if extension in subtitlefiles:
+            if not options.force_subtitle:
+                log.error("File (%s) already exists. Use --force-subtitle to overwrite" % options.output)
+                return None
+        else:
+            if not options.force:
+                log.error("File (%s) already exists. Use --force to overwrite" % options.output)
+                return None
+    if openfd:
+        file_d = open(options.output, mode, **kwargs)
+        return file_d
+    return True
 
 
 def findexpisode(directory, service, name):
