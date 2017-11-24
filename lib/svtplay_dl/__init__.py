@@ -181,6 +181,8 @@ def get_media(url, options):
 
     if options.silent_semi:
         options.silent = True
+    if options.verbose:
+        log.error("version: {0}".format( __version__))
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
@@ -259,7 +261,6 @@ def get_one_media(stream, options):
                 error.append(i)
     except Exception as e:
         if options.verbose:
-            log.error("version: %s" % __version__)
             raise
         else:
             log.error("svtplay-dl crashed")
