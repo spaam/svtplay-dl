@@ -182,7 +182,7 @@ def get_media(url, options):
     if options.silent_semi:
         options.silent = True
     if options.verbose:
-        log.error("version: {0}".format( __version__))
+        log.debug("version: {0}".format( __version__))
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
