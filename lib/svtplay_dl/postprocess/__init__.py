@@ -39,7 +39,8 @@ class postprocess(object):
                             fd.read().strip().replace('\r', '').split('\n\n')))
 
         def query(self):
-            random_sentences = ' '.join(sample(parse(self), 8)).replace('\r\n', '')
+            _ = parse(self)
+            random_sentences = ' '.join(sample(_, len(_) if len(_) < 8 else 8)).replace('\r\n', '')
             url = 'https://whatlanguage.herokuapp.com'
             payload = {"query": random_sentences}
             # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
