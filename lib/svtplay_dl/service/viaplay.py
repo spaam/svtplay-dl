@@ -82,7 +82,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if clips:
                 return episodenr
             else:
-                match = re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', self.get_urldata())
+                match = re.search('"ContentPageProgramStore":({.*}),"StartPageStore', self.get_urldata())
                 if match:
                     janson = json.loads(match.group(1))
                     for i in janson["format"]["videos"].keys():
