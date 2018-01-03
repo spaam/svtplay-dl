@@ -39,7 +39,7 @@ def _get_full_url(url, srcurl):
     return returl
 
 
-def hlsparse(options, res, url):
+def hlsparse(options, res, url, **kwargs):
     streams = {}
 
     if not res:
@@ -50,6 +50,8 @@ def hlsparse(options, res, url):
         return streams
     files = (parsem3u(res.text))[1]
     http = HTTP(options)
+    keycookie = kwargs.pop("keycookie", None)
+    
     for i in files:
         try:
             bitrate = float(i[1]["BANDWIDTH"])/1000
@@ -59,7 +61,7 @@ def hlsparse(options, res, url):
         urls = _get_full_url(i[0], url)
         res2 = http.get(urls, cookies=res.cookies)
         if res2.status_code < 400:
-            streams[int(bitrate)] = HLS(copy.copy(options), urls, bitrate, cookies=res.cookies)
+            streams[int(bitrate)] = HLS(copy.copy(options), urls, bitrate, cookies=res.cookies, keycookie=keycookie)
     return streams
 
 
@@ -91,8 +93,11 @@ class HLS(VideoRetriever):
             if not match:
                 match = re.search(r'URI="([^"]+)"', keydata)
             keyurl = _get_full_url(match.group(1), self.url)
-            key = self.http.request("get", keyurl, cookies=cookies).content
-
+            if self.keycookie:
+                keycookies = self.keycookie
+            else:
+                keycookies = cookies
+            key = self.http.request("get", keyurl, cookies=keycookies).content
             rand = os.urandom(16)
             decryptor = AES.new(key, AES.MODE_CBC, rand)
 
