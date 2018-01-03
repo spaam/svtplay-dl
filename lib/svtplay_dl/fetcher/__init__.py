@@ -11,6 +11,7 @@ class VideoRetriever(object):
         self.finished = False
         self.audio = kwargs.pop("audio", None)
         self.files = kwargs.pop("files", None)
+        self.keycookie = kwargs.pop("keycookie", None)
 
     def __repr__(self):
         return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
