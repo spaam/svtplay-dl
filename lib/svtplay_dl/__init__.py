@@ -46,6 +46,7 @@ from svtplay_dl.service.riksdagen import Riksdagen
 from svtplay_dl.service.ruv import Ruv
 from svtplay_dl.service.raw import Raw
 from svtplay_dl.service.solidtango import Solidtango
+from svtplay_dl.service.sportlib import Sportlib
 from svtplay_dl.service.sr import Sr
 from svtplay_dl.service.svt import Svt
 from svtplay_dl.service.svtplay import Svtplay
@@ -88,6 +89,7 @@ sites = [
     Ruv,
     Radioplay,
     Solidtango,
+    Sportlib,
     Sr,
     Svt,
     Svtplay,
