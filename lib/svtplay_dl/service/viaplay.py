@@ -228,7 +228,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return "sesong"
 
     def _conentpage(self, data):
-        return re.search('"ContentPageProgramStore":({.*}),"ApplicationStore', data)
+        return re.search('"ContentPageProgramStore":({.*}),"StartPageStore', data)
 
     def _videos_to_list(self, url,vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
