@@ -72,11 +72,12 @@ class Urplay(Service, OpenGraphThumbMixin):
             data = self.get_urldata()
             match = re.search('data-limit="[^"]+" href="([^"]+)"', data)
             if match:
-                res = self.http.get(urljoin("http://urskola.se", match.group(1)))
+                res = self.http.get(urljoin("https://urskola.se", match.group(1)))
                 data = res.text
-            tags = re.findall('<a class="puff tv video" title="[^"]+" href="([^"]+)"', data)
+            tags = re.findall('<a class="puff program tv video" title="[^"]+" href="([^"]+)"', data)
+            print(tags)
             for i in tags:
-                url = urljoin("http://urskola.se/", i)
+                url = urljoin("https://urskola.se/", i)
                 if url not in episodes:
                     episodes.append(url)
         else:
