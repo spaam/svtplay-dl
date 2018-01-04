@@ -46,7 +46,10 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:
-            lbjson = self.http.request("get", "https:{}".format(jsondata["streaming_config"]["loadbalancer"])).text
+            url = jsondata["streaming_config"]["loadbalancer"]
+            if url[:1] == "/":
+                url = "https:{}".format(url)
+            lbjson = self.http.request("get", url).text
             lbjson = json.loads(lbjson)
             basedomain = lbjson["redirect"]
         http = "https://{0}/{1}".format(basedomain, jsondata["file_http"])
