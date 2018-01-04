@@ -46,13 +46,13 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
         else:
-            lbjson = self.http.request("get", jsondata["streaming_config"]["loadbalancer"]).text
+            lbjson = self.http.request("get", "https:{}".format(jsondata["streaming_config"]["loadbalancer"])).text
             lbjson = json.loads(lbjson)
             basedomain = lbjson["redirect"]
-        http = "http://{0}/{1}".format(basedomain, jsondata["file_http"])
+        http = "https://{0}/{1}".format(basedomain, jsondata["file_http"])
         hd = None
         if len(jsondata["file_http_hd"]) > 0:
-            http_hd = "http://{0}/{1}".format(basedomain, jsondata["file_http_hd"])
+            http_hd = "https://{0}/{1}".format(basedomain, jsondata["file_http_hd"])
             hls_hd = "{0}{1}".format(http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
             hd = True
         hls = "{0}{1}".format(http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
@@ -89,7 +89,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             for i in all_links:
                 match = re.search("/program/\d+-(\w+)-", i)
                 if match and match.group(1) == keyword:
-                    episodes.append(urljoin("http://urplay.se/", i))
+                    episodes.append(urljoin("https://urplay.se/", i))
 
         episodes_new = []
         n = 0
