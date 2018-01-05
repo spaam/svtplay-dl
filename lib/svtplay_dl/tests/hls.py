@@ -11,6 +11,10 @@
 from __future__ import absolute_import
 import unittest
 import svtplay_dl.fetcher.hls as hls
+from svtplay_dl.fetcher.hls import M3U8
+from svtplay_dl.utils import HTTP
+from svtplay_dl import Options
+import json
 
 
 class HlsTest(unittest.TestCase):
@@ -55,4 +59,19 @@ class HlsTest(unittest.TestCase):
         ]:
             self.assertEqual(
                 hls._get_full_url(test['segment'], test['srcurl']),
+                test['expected'])
+
+    def test_parse_m3u8(self):
+        for test in [
+            # full http:// url as media segment in playlist
+            {
+                'srcurl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8',
+                'expected': '[["gear1/prog_index.m3u8", {"PROGRAM-ID": "1", "BANDWIDTH": "232370", "TAG": "EXT-X-STREAM-INF", "CODECS": "mp4a.40.2, avc1.4d4015"}], ["gear2/prog_index.m3u8", {"PROGRAM-ID": "1", "BANDWIDTH": "649879", "TAG": "EXT-X-STREAM-INF", "CODECS": "mp4a.40.2, avc1.4d401e"}], ["gear3/prog_index.m3u8", {"PROGRAM-ID": "1", "BANDWIDTH": "991714", "TAG": "EXT-X-STREAM-INF", "CODECS": "mp4a.40.2, avc1.4d401e"}], ["gear4/prog_index.m3u8", {"PROGRAM-ID": "1", "BANDWIDTH": "1927833", "TAG": "EXT-X-STREAM-INF", "CODECS": "mp4a.40.2, avc1.4d401f"}], ["gear0/prog_index.m3u8", {"PROGRAM-ID": "1", "BANDWIDTH": "41457", "TAG": "EXT-X-STREAM-INF", "CODECS": "mp4a.40.2"}]]'
+            }
+            # More examples can be found on "https://developer.apple.com/streaming/examples/"
+        ]:
+            http = HTTP(Options())
+            data = http.request("get", test['srcurl']).text
+            self.assertEqual(
+                json.dumps(M3U8(data).master_playlist),
                 test['expected'])

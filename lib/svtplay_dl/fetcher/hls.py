@@ -90,7 +90,6 @@ class HLS(VideoRetriever):
         data_m3u = self.http.request("get", self.url, cookies=cookies).text
         m3u8 = M3U8(data_m3u)
 
-        print m3u8.media_segment[0]
         if ("avc1" in m3u8.media_segment[0][0].lower()) and self.audio:
             audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
             audio_m3u8 = M3U8(audio_data_m3u)
@@ -220,7 +219,11 @@ class M3U8():
                     tag_type = M3U8.TAG_TYPES["MEDIA_SEGMENT"]
                     # 4.3.2.1.  EXTINF
                     if tag == "EXTINF":
-                        dur, title = attr.split(",", 1)
+                        if "," in attr:
+                            dur, title = attr.split(",", 1)
+                        else:
+                            dur = attr
+                            title = None
                         info["duration"] = float(dur)
                         info["title"] = title
 
