@@ -86,19 +86,17 @@ class HLS(VideoRetriever):
         if self.options.live and not self.options.force:
             raise LiveHLSException(self.url)
 
-        cookies = self.kwargs["cookies"]
-        data_m3u = self.http.request("get", self.url, cookies=cookies).text
-        m3u8 = M3U8(data_m3u)
-
-        # TODO: fix me
-        if ("avc1" in m3u8.media_segment[0][0].lower()) and self.audio:
+        if self.audio:
+            cookies = self.kwargs["cookies"]
             audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
             audio_m3u8 = M3U8(audio_data_m3u)
-            total_size = audio_m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["n"] + audio_m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["o"]
-            self._download_url(audio_m3u8.media_segment[0][0], audio=True, total_size=total_size)
+            total_size = audio_m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["n"] + audio_m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["o"]
+            self._download_url(audio_m3u8.media_segment[0]["URI"], audio=True, total_size=total_size)
 
-            total_size = m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["n"] + m3u8.media_segment[-1][1]["EXT-X-BYTERANGE"]["o"]
-            self._download_url(m3u8.media_segment[0][0], total_size=total_size)
+            data_m3u = self.http.request("get", self.url, cookies=cookies).text
+            m3u8 = M3U8(data_m3u)
+            total_size = m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["n"] + m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["o"]
+            self._download_url(m3u8.media_segment[0]["URI"], total_size=total_size)
         else:
             self._download(self.url)
 
@@ -119,21 +117,14 @@ class HLS(VideoRetriever):
         if file_d is None:
             return
 
-        all_urls = [x[0] for x in m3u8.media_segment]
-        # duplicate_urls
-        if all_urls[1:][::][0] == all_urls[:-1][::][0]:
-            dl_urls = [m3u8.media_segment[0]]
-        else:
-            dl_urls = m3u8.media_segment
-
         decryptor = None
-        eta = ETA(len(dl_urls))
-        for index, i in enumerate(dl_urls):
-            item = _get_full_url(i[0], url)
+        eta = ETA(len(m3u8.media_segment))
+        for index, i in enumerate(m3u8.media_segment):
+            item = _get_full_url(i["URI"], url)
 
             if not self.options.silent:
                 eta.increment()
-                progressbar(len(dl_urls), index+1, ''.join(['ETA: ', str(eta)]))
+                progressbar(len(m3u8.media_segment), index+1, ''.join(['ETA: ', str(eta)]))
 
             data = self.http.request("get", item, cookies=cookies)
             if data.status_code == 404:
@@ -146,10 +137,11 @@ class HLS(VideoRetriever):
                     keycookies = cookies
 
                 # Update key/decryptor
-                if "EXT-X-KEY" in i[1]:
-                    keyurl = _get_full_url(i[1]["EXT-X-KEY"]["URI"], self.url)
+                if "EXT-X-KEY" in i:
+                    keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], self.url)
                     key = self.http.request("get", keyurl, cookies=keycookies).content
                     decryptor = AES.new(key, AES.MODE_CBC, os.urandom(16))
+
                 if decryptor:
                     data = decryptor.decrypt(data)
                 else:
@@ -235,6 +227,7 @@ class M3U8():
                             info["n"], info["o"] = (int(n), int(o))
                         else:
                             info["n"] = int(attr)
+                            info["o"] = 0
 
                     # 4.3.2.3.  EXT-X-DISCONTINUITY
                     elif tag == "EXT-X-DISCONTINUITY":
@@ -345,7 +338,8 @@ class M3U8():
                 tag_type = None
 
                 if last_tag_type is M3U8.TAG_TYPES["MEDIA_SEGMENT"]:
-                    self.media_segment.append((l, media_segment_info))
+                    media_segment_info["URI"] = l
+                    self.media_segment.append(media_segment_info)
                     media_segment_info = {}
 
             last_tag_type = tag_type
