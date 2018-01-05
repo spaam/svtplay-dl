@@ -55,20 +55,20 @@ def hlsparse(options, res, url, **kwargs):
     media = {}
     for i in m3u8.master_playlist:
         audio_url = None
-        if i[1]["TAG"] == "EXT-X-MEDIA":
-            if "DEFAULT" in i[1] and (i[1]["DEFAULT"].upper() == "YES"):
-                if i[1]["TYPE"] and ("URI" in i[1]):
-                    if i[1]["GROUP-ID"] not in media:
-                        media[i[1]["GROUP-ID"]] = []
-                    media[i[1]["GROUP-ID"]].append(i[1]["URI"])
+        if i["TAG"] == "EXT-X-MEDIA":
+            if "DEFAULT" in i and (i["DEFAULT"].upper() == "YES"):
+                if i["TYPE"] and ("URI" in i):
+                    if i["GROUP-ID"] not in media:
+                        media[i["GROUP-ID"]] = []
+                    media[i["GROUP-ID"]].append(i["URI"])
             continue
-        elif i[1]["TAG"] == "EXT-X-STREAM-INF":
-            bit_rate = float(i[1]["BANDWIDTH"]) / 1000
+        elif i["TAG"] == "EXT-X-STREAM-INF":
+            bit_rate = float(i["BANDWIDTH"]) / 1000
 
-            if "AUDIO" in i[1] and (i[1]["AUDIO"] in media):
-                audio_url = media[i[1]["AUDIO"]][0]
+            if "AUDIO" in i and (i["AUDIO"] in media):
+                audio_url = media[i["AUDIO"]][0]
 
-            urls = _get_full_url(i[0], url)
+            urls = _get_full_url(i["URI"], url)
         else:
             continue # Needs to be changed to utilise other tags.
         res2 = http.get(urls, cookies=res.cookies)
@@ -90,6 +90,7 @@ class HLS(VideoRetriever):
         data_m3u = self.http.request("get", self.url, cookies=cookies).text
         m3u8 = M3U8(data_m3u)
 
+        # TODO: fix me
         if ("avc1" in m3u8.media_segment[0][0].lower()) and self.audio:
             audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
             audio_m3u8 = M3U8(audio_data_m3u)
@@ -291,7 +292,6 @@ class M3U8():
                 # 4.3.4. Master Playlist Tags
                 elif tag in M3U8.MASTER_PLAYLIST_TAGS:
 
-                    uri = None
                     tag_type = M3U8.TAG_TYPES["MASTER_PLAYLIST"]
                     # 4.3.4.1.  EXT-X-MEDIA
                     if tag == "EXT-X-MEDIA":
@@ -302,7 +302,7 @@ class M3U8():
                         info = _get_tuple_attribute(attr)
                         if "BANDWIDTH" not in info:
                             raise ValueError("Can't find 'BANDWIDTH' in 'EXT-X-STREAM-INF'")
-                        uri = lines[index+1]
+                        info["URI"] = lines[index+1]
 
                     # 4.3.4.3.  EXT-X-I-FRAME-STREAM-INF
                     elif tag == "EXT-X-I-FRAME-STREAM-INF":
@@ -318,7 +318,7 @@ class M3U8():
                         info = _get_tuple_attribute(attr)
                     info["TAG"] = tag
 
-                    self.master_playlist.append((uri, info))
+                    self.master_playlist.append(info)
 
                 # 4.3.5. Media or Master Playlist Tags
                 elif tag in M3U8.MEDIA_OR_MASTER_PLAYLIST_TAGS:
