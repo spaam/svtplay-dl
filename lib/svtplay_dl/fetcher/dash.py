@@ -35,6 +35,9 @@ def templateelemt(element, filename, idnumber):
     else:
         start = 0
     timeline = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline")
+    if timeline is None:
+        return
+
     rvalue = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
     selements = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
     selements.pop()

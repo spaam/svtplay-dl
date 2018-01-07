@@ -5,6 +5,8 @@ import sys
 import os
 import re
 import copy
+import time
+import datetime
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
@@ -83,10 +85,11 @@ class HLS(VideoRetriever):
         return "hls"
 
     def download(self):
-        if self.options.live and not self.options.force:
-            raise LiveHLSException(self.url)
 
         if self.audio:
+            if self.options.live:
+                raise LiveHLSException(self.url)
+
             cookies = self.kwargs["cookies"]
             audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
             audio_m3u8 = M3U8(audio_data_m3u)
@@ -98,12 +101,12 @@ class HLS(VideoRetriever):
             total_size = m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["n"] + m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["o"]
             self._download_url(m3u8.media_segment[0]["URI"], total_size=total_size)
         else:
-            self._download(self.url)
+            self._download()
 
-    def _download(self, url):
+    def _download(self):
         cookies = self.kwargs["cookies"]
-        data_m3u = self.http.request("get", url, cookies=cookies).text
-        m3u8 = M3U8(data_m3u)
+        start_time = time.time()
+        m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
         key = None
 
         if m3u8.encrypted:
@@ -118,13 +121,20 @@ class HLS(VideoRetriever):
             return
 
         decryptor = None
-        eta = ETA(len(m3u8.media_segment))
+        size_media = len(m3u8.media_segment)
+        eta = ETA(size_media)
+        duration = 0
         for index, i in enumerate(m3u8.media_segment):
-            item = _get_full_url(i["URI"], url)
+            if "duration" in i["EXTINF"]:
+                duration += i["EXTINF"]["duration"]
+            item = _get_full_url(i["URI"], self.url)
 
             if not self.options.silent:
-                eta.increment()
-                progressbar(len(m3u8.media_segment), index+1, ''.join(['ETA: ', str(eta)]))
+                if self.options.live:
+                    progressbar(size_media, index + 1, ''.join(['DU: ', str(datetime.timedelta(seconds=int(duration)))]))
+                else:
+                    eta.increment()
+                    progressbar(size_media, index + 1, ''.join(['ETA: ', str(eta)]))
 
             data = self.http.request("get", item, cookies=cookies)
             if data.status_code == 404:
@@ -148,6 +158,18 @@ class HLS(VideoRetriever):
                     raise ValueError("No decryptor found for encrypted hls steam.")
 
             file_d.write(data)
+
+            if (size_media == (index + 1)) and self.options.live:
+                while (start_time + i["EXTINF"]["duration"] * 2) >= time.time():
+                    time.sleep(1.0)
+
+                start_time = time.time()
+                new_m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
+                for n_m3u in new_m3u8.media_segment:
+                    if n_m3u not in m3u8.media_segment:
+                        m3u8.media_segment.append(n_m3u)
+
+                size_media = len(m3u8.media_segment)
 
         file_d.close()
         if not self.options.silent:
