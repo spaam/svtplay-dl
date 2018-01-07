@@ -18,6 +18,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+URL_VIDEO_API = "http://api.svt.se/videoplayer-api/video/"
 
 class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
@@ -25,7 +26,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
     def get(self):
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
-            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp":
+            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp" and parse.path[:8] != "/kanaler":
                 yield ServiceError("This mode is not supported anymore. Need the url with the video.")
                 return
 
@@ -33,6 +34,19 @@ class Svtplay(Service, OpenGraphThumbMixin):
         self.access = None
         if "accessService" in query:
             self.access = query["accessService"]
+
+        if parse.path[:8] == "/kanaler":
+            res = self.http.get(URL_VIDEO_API + "ch-{0}".format(parse.path[9:]))
+            try:
+                janson = res.json()
+            except json.decoder.JSONDecodeError:
+                yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+                return
+            videos = self._get_video(janson)
+            self.options.live = True
+            for i in videos:
+                yield i
+            return
 
         match = re.search("__svtplay'] = ({.*});", self.get_urldata())
         if not match:
@@ -55,9 +69,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         return
                     janson = json.loads(match.group(1))["videoPage"]
 
-        if "live" in janson["video"]:
-            self.options.live = janson["video"]["live"]
-
         if self.options.output_auto:
             self.options.service = "svtplay"
             self.options.output = self.outputfilename(janson["video"], self.options.output)
@@ -70,7 +81,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             vid = janson["video"]["programVersionId"]
         else:
             vid = janson["video"]["id"]
-        res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(vid))
+        res = self.http.get(URL_VIDEO_API + vid)
         try:
             janson = res.json()
         except json.decoder.JSONDecodeError:
@@ -81,8 +92,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
             yield i
 
     def _get_video(self, janson):
-        if "live" in janson:
-            self.options.live = janson["live"]
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "websrt" and "url" in i:
