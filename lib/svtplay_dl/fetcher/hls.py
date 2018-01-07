@@ -159,6 +159,9 @@ class HLS(VideoRetriever):
 
             file_d.write(data)
 
+            if (self.options.capture_time > 0) and duration >= (self.options.capture_time * 60):
+                break
+
             if (size_media == (index + 1)) and self.options.live:
                 while (start_time + i["EXTINF"]["duration"] * 2) >= time.time():
                     time.sleep(1.0)
