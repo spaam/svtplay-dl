@@ -254,8 +254,10 @@ class Svtplay(Service, OpenGraphThumbMixin):
         else:
             directory = ""
         name = None
-        if data["programTitle"]:
+        if "programTitle" in data and data["programTitle"]:
             name = filenamify(data["programTitle"])
+        elif "titleSlug" in data and data["titleSlug"]:
+            name = filenamify(data["titleSlug"])
         other = filenamify(data["title"])
 
         if "programVersionId" in data:
@@ -283,7 +285,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 title += "-syntolkat"
             if data["accessService"] == "signInterpretation":
                 title += "-teckentolkat"
-        title += "-{}-svtplay".format(id)
+        title += "-{}-{}".format(id, self.__class__.__name__.lower())
         title = filenamify(title)
         if len(directory):
             output = os.path.join(directory, title)

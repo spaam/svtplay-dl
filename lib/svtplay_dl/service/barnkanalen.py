@@ -10,6 +10,7 @@ import hashlib
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
+from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.utils import filenamify, is_py2
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
@@ -19,7 +20,7 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
 
-class Barnkanalen(Service, OpenGraphThumbMixin):
+class Barnkanalen(Svtplay):
     supported_domains = ['svt.se']
     supported_path = "/barnkanalen"
 
@@ -82,63 +83,6 @@ class Barnkanalen(Service, OpenGraphThumbMixin):
         for i in videos:
             yield i
 
-    def _get_video(self, janson):
-        if "subtitleReferences" in janson:
-            for i in janson["subtitleReferences"]:
-                if i["format"] == "websrt" and "url" in i:
-                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
-
-        if "videoReferences" in janson:
-            if len(janson["videoReferences"]) == 0:
-                yield ServiceError("Media doesn't have any associated videos.")
-                return
-
-            for i in janson["videoReferences"]:
-                streams = None
-                alt_streams = None
-                alt = None
-                query = parse_qs(urlparse(i["url"]).query)
-                if "alt" in query and len(query["alt"]) > 0:
-                    alt = self.http.get(query["alt"][0])
-
-                if i["format"] == "hls":
-                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
-                    if alt:
-                        alt_streams = hlsparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
-
-                elif i["format"] == "hds":
-                    match = re.search(r"\/se\/secure\/", i["url"])
-                    if not match:
-                        streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
-                        if alt:
-                            alt_streams = hdsparse(self.options, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}), alt.request.url)
-                elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                    streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
-                    if alt:
-                        alt_streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
-
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
-                if alt_streams:
-                    for n in list(alt_streams.keys()):
-                        yield alt_streams[n]
-
-    def _genre(self, jansson):
-        videos = []
-        parse = urlparse(self._url)
-        dataj = jansson["clusterPage"]
-        tab = re.search("tab=(.+)", parse.query)
-        if tab:
-            tab = tab.group(1)
-            for i in dataj["tabs"]:
-                if i["slug"] == tab:
-                    videos = self.videos_to_list(i["content"], videos)
-        else:
-            videos = self.videos_to_list(dataj["clips"], videos)
-
-        return videos
-
     def find_all_episodes(self, options):
         parse = urlparse(self._url)
 
@@ -181,55 +125,3 @@ class Barnkanalen(Service, OpenGraphThumbMixin):
 
         return videos
 
-    def outputfilename(self, data, filename):
-        if filename:
-            directory = os.path.dirname(filename)
-        else:
-            directory = ""
-        name = None
-        if data["title"]:
-            name = filenamify(data["title"])
-        other = filenamify(data["title"])
-
-        if "programVersionId" in data:
-            vid = str(data["programVersionId"])
-        else:
-            vid = str(data["id"])
-        if is_py2:
-            id = hashlib.sha256(vid).hexdigest()[:7]
-        else:
-            id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
-
-        if name == other:
-            other = None
-        elif name is None:
-            name = other
-            other = None
-        season = self.seasoninfo(data)
-        title = name
-        if season:
-            title += ".{}".format(season)
-        if other:
-            title += ".{}".format(other)
-        if "accessService" in data:
-            if data["accessService"] == "audioDescription":
-                title += "-syntolkat"
-            if data["accessService"] == "signInterpretation":
-                title += "-teckentolkat"
-        title += "-{}-barnkanalen".format(id)
-        title = filenamify(title)
-        if len(directory):
-            output = os.path.join(directory, title)
-        else:
-            output = title
-        return output
-
-    def seasoninfo(self, data):
-        if "season" in data and data["season"]:
-            season = "{:02d}".format(data["season"])
-            episode = "{:02d}".format(data["episodeNumber"])
-            if int(season) == 0 and int(episode) == 0:
-                return None
-            return "S{}E{}".format(season, episode)
-        else:
-            return None
