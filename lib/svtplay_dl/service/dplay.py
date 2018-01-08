@@ -22,6 +22,7 @@ class Dplay(Service):
     def get(self):
         data = self.get_urldata()
         premium = False
+        channel = False
         parse = urlparse(self.url)
         domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
 
@@ -29,12 +30,16 @@ class Dplay(Service):
         if not match:
             match = re.search(r'data-video-id="([^"]+)"', data)
             if not match:
-                yield ServiceError("Can't find video id")
-                return
+                match = re.search(r'page-id-(\d+) ', data)
+                if not match:
+                    yield ServiceError("Can't find video id")
+                    return
+                channel = True
+                self.options.live = True
         vid = match.group(1)
         data = self.http.request("get", "http://{0}/api/v2/ajax/videos?video_id={1}".format(parse.netloc, vid)).text
         dataj = json.loads(data)
-        if dataj["data"] is None:
+        if not channel and dataj["data"] is None:
             yield ServiceError("Cant find video. wrong url without video?")
             return
         if self.options.username and self.options.password:
@@ -43,35 +48,37 @@ class Dplay(Service):
                 yield ServiceError("Wrong username or password")
                 return
 
-        what = self._playable(dataj["data"][0], premium)
-        if what == 1:
-            yield ServiceError("Premium content")
-            return
-        if what == 2:
-            yield ServiceError("DRM protected. Can't do anything")
-            return
-
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            self.options.service = "dplay"
-            name = self._autoname(dataj)
-            if name is None:
-                yield ServiceError("Cant find vid id for autonaming")
+        if not channel:
+            what = self._playable(dataj["data"][0], premium)
+            if what == 1:
+                yield ServiceError("Premium content")
                 return
-            title = "{0}-{1}-{2}".format(name, vid, self.options.service)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
+            if what == 2:
+                yield ServiceError("DRM protected. Can't do anything")
+                return
+
+            if self.options.output_auto:
+                directory = os.path.dirname(self.options.output)
+                self.options.service = "dplay"
+                name = self._autoname(dataj)
+                if name is None:
+                    yield ServiceError("Cant find vid id for autonaming")
+                    return
+                title = "{0}-{1}-{2}".format(name, vid, self.options.service)
+                if len(directory):
+                    self.options.output = os.path.join(directory, title)
+                else:
+                    self.options.output = title
 
         if self.exclude():
             yield ServiceError("Excluding video")
             return
 
-        subt = "subtitles_{0}_srt".format(self._country2lang())
-        suburl = dataj["data"][0][subt]
-        if len(suburl) > 0:
-            yield subtitle(copy.copy(self.options), "raw", suburl)
+        if not channel:
+            subt = "subtitles_{0}_srt".format(self._country2lang())
+            suburl = dataj["data"][0][subt]
+            if len(suburl) > 0:
+                yield subtitle(copy.copy(self.options), "raw", suburl)
 
         data = self.http.request("get", "http://geo.{0}/geo.js".format(domain)).text
         dataj = json.loads(data)
@@ -87,7 +94,7 @@ class Dplay(Service):
             yield ServiceError("Geoblocked video")
             return
         dataj = json.loads(data.text)
-        if "hds" in dataj:
+        if not channel and "hds" in dataj:
             streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
             if streams:
                 for n in list(streams.keys()):
