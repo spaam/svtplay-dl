@@ -49,6 +49,7 @@ from svtplay_dl.service.solidtango import Solidtango
 from svtplay_dl.service.sportlib import Sportlib
 from svtplay_dl.service.sr import Sr
 from svtplay_dl.service.svt import Svt
+from svtplay_dl.service.barnkanalen import Barnkanalen
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.urplay import Urplay
@@ -65,6 +66,7 @@ sites = [
     Aftonbladet,
     Aftonbladettv,
     Bambuser,
+    Barnkanalen,
     Bigbrother,
     Cmore,
     Dbtv,
