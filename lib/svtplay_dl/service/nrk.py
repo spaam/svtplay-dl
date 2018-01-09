@@ -52,8 +52,9 @@ class Nrk(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't fetch the video because of geoblocking")
             return
         streams = hlsparse(self.options, data, hlsurl)
-        for n in list(streams.keys()):
-            yield streams[n]
+        if streams:
+            for n in list(streams.keys()):
+                yield streams[n]
 
         streams = hdsparse(copy.copy(self.options), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}),
                            manifest_url)
