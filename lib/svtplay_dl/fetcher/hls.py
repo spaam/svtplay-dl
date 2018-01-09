@@ -387,7 +387,7 @@ def _get_tuple_attribute(attribute):
     for art_l in re.split(''',(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', attribute):
         if art_l:
             name, value = art_l.split("=", 1)
-
+            name = name.strip()
             # Checks for attribute name
             if not re.match("^[A-Z0-9\-]*$", name):
                 raise ValueError("Not a valid attribute name.")
