@@ -168,69 +168,38 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         parse = urlparse(self._url)
-        
-        if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":
-            rss_url = self.url
-        else:
-            rss_url = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"', self.get_urldata())
-            if rss_url: 
-                rss_url = rss_url.group(1)
 
-        valid_rss = False
+        videos = []
         tab = None
-        if parse.query:
-            match = re.search("tab=(.+)", parse.query)
-            if match:
-                tab = match.group(1)
-
-        #Clips and tab can not be used with RSS-feed
-        if rss_url and not self.options.include_clips and not tab:
-            rss_data = self.http.request("get", rss_url).content
-
-            try:
-                xml = ET.XML(rss_data)
-                episodes = [x.text for x in xml.findall(".//item/link")]
-                #TODO add better checks for valid RSS-feed here
-                valid_rss = True
-            except ET.ParseError:
-                log.info("Error parsing RSS-feed at {0}, make sure it is a valid RSS-feed, will use other method to find episodes.".format(rss_url))
+        match = re.search("__svtplay'] = ({.*});", self.get_urldata())
+        if re.search("sista-chansen", parse.path):
+            videos = self._last_chance(videos, 1)
+        elif not match:
+            log.error("Couldn't retrieve episode list.")
+            return
         else:
-            #if either tab or include_clips is set remove rss.xml from url if set manually. 
-            if len(parse.path) > 7 and parse.path[-7:] == "rss.xml":                
-                self._url = self.url.replace("rss.xml","")
-
-        if not valid_rss:
-            videos = []
-            tab = None
-            match = re.search("__svtplay'] = ({.*});", self.get_urldata())
-            if re.search("sista-chansen", parse.path):
-                videos = self._last_chance(videos, 1)
-            elif not match:
-                log.error("Couldn't retrieve episode list.")
-                return
+            dataj = json.loads(match.group(1))
+            if re.search("/genre", parse.path):
+                videos = self._genre(dataj)
             else:
-                dataj = json.loads(match.group(1))
-                if re.search("/genre", parse.path):
-                    videos = self._genre(dataj)
-                else:
-                    if parse.query:
-                        match = re.search("tab=(.+)", parse.query)
-                        if match:
-                            tab = match.group(1)
-                            
-                    items = dataj["relatedVideoContent"]["relatedVideosAccordion"]
-                    for i in items:
-                        if tab:
-                            if i["slug"] == tab:
-                                videos = self.videos_to_list(i["videos"], videos)
-                        else:
-                            if "klipp" not in i["slug"] and "kommande" not in i["slug"]:
-                                videos = self.videos_to_list(i["videos"], videos)
-                        if self.options.include_clips: 
-                            if i["slug"] == "klipp":
-                                videos = self.videos_to_list(i["videos"], videos)
+                if parse.query:
+                    match = re.search("tab=(.+)", parse.query)
+                    if match:
+                        tab = match.group(1)
 
-            episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
+                items = dataj["relatedVideoContent"]["relatedVideosAccordion"]
+                for i in items:
+                    if tab:
+                        if i["slug"] == tab:
+                            videos = self.videos_to_list(i["videos"], videos)
+                    else:
+                        if "klipp" not in i["slug"] and "kommande" not in i["slug"]:
+                            videos = self.videos_to_list(i["videos"], videos)
+                    if self.options.include_clips:
+                        if i["slug"] == "klipp":
+                            videos = self.videos_to_list(i["videos"], videos)
+
+        episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
         if options.all_last > 0:
             return episodes[-options.all_last:]
