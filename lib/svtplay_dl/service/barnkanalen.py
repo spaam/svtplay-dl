@@ -84,36 +84,26 @@ class Barnkanalen(Svtplay):
             yield i
 
     def find_all_episodes(self, options):
-        parse = urlparse(self._url)
-
         videos = []
-        tab = None
         match = re.search("__barnplay'] = ({.*});", self.get_urldata())
         if not match:
             log.error("Couldn't retrieve episode list.")
             return
         else:
             dataj = json.loads(match.group(1))
-            if re.search("/genre", parse.path):
-                videos = self._genre(dataj)
-            else:
-                if parse.query:
-                    match = re.search("tab=(.+)", parse.query)
-                    if match:
-                        tab = match.group(1)
-
-                dataj = dataj["context"]["dispatcher"]["stores"]["EpisodesStore"]
-                showId = dataj["data"].keys()[0]
-                items = dataj["data"][showId]["episodes"]
-                for i in items:
-                    program = i
-                    videos = self.videos_to_list(program, videos)
+            dataj = dataj["context"]["dispatcher"]["stores"]["EpisodesStore"]
+            showId = list(dataj["data"].keys())[0]
+            items = dataj["data"][showId]["episodes"]
+            for i in items:
+                program = i
+                videos = self.videos_to_list(program, videos)
+            videos.reverse()
 
         episodes = [urljoin("http://www.svt.se", x) for x in videos]
 
         if options.all_last > 0:
-            return sorted(episodes)[-options.all_last:]
-        return sorted(episodes)
+            return episodes[-options.all_last:]
+        return episodes
 
     def videos_to_list(self, lvideos, videos):
         url = self.url + "/" + str(lvideos["id"])
