@@ -165,6 +165,7 @@ class Options(object):
         self.stream_prio = None
         self.remux = False
         self.silent_semi = False
+        self.proxy = None
 
 def get_multiple_media(urls, options):
     if options.output and os.path.isfile(options.output):
