@@ -60,7 +60,7 @@ from svtplay_dl.service.vidme import Vidme
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
 
-__version__ = "1.9.6"
+__version__ = "1.9.7"
 
 sites = [
     Aftonbladet,
