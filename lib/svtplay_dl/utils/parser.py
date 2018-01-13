@@ -84,4 +84,42 @@ def parser(version):
 
     parser.add_argument('urls', nargs="*")
     options = parser.parse_args()
+    return parser, options
+
+
+def mergeparseroption(options, parser):
+    options.output = parser.output
+    options.resume = parser.resume
+    options.live = parser.live
+    options.capture_time = parser.capture_time
+    options.silent = parser.silent
+    options.force = parser.force
+    options.quality = parser.quality
+    options.flexibleq = parser.flexibleq
+    options.list_quality = parser.list_quality
+    options.subtitle = parser.subtitle
+    options.merge_subtitle = parser.merge_subtitle
+    options.silent_semi = parser.silent_semi
+    options.username = parser.username
+    options.password = parser.password
+    options.thumbnail = parser.thumbnail
+    options.all_episodes = parser.all_episodes
+    options.all_last = parser.all_last
+    options.force_subtitle = parser.force_subtitle
+    options.require_subtitle = parser.require_subtitle
+    options.preferred = parser.preferred
+    options.verbose = parser.verbose
+    options.exclude = parser.exclude
+    options.get_url = parser.get_url
+    options.ssl_verify = parser.ssl_verify
+    options.http_headers = parser.http_headers
+    options.stream_prio = parser.stream_prio
+    options.remux = parser.remux
+    options.get_all_subtitles = parser.get_all_subtitles
+    options.get_raw_subtitles = parser.get_raw_subtitles
+    options.convert_subtitle_colors = parser.convert_subtitle_colors
+    options.include_clips = parser.include_clips
+    options.cmoreoperatorlist = parser.cmoreoperatorlist
+    options.cmoreoperator = parser.cmoreoperator
+    options.proxy = parser.proxy
     return options

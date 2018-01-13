@@ -11,7 +11,7 @@ import re
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
 from svtplay_dl.utils import select_quality, list_quality, ensure_unicode
-from svtplay_dl.utils.parser import parser
+from svtplay_dl.utils.parser import parser, mergeparseroption
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -383,14 +383,14 @@ def setup_log(silent, verbose=False):
 
 def main():
     """ Main program """
-    options = parser(__version__)
+    parse, options = parser(__version__)
 
     if len(options.urls) == 0:
-        parser.print_help()
+        parse.print_help()
         sys.exit(0)
     urls = options.urls
     if len(urls) < 1:
-        parser.error("Incorrect number of arguments")
+        parse.error("Incorrect number of arguments")
     if options.exclude:
         options.exclude = options.exclude.split(",")
     if options.require_subtitle:
@@ -428,39 +428,3 @@ def main():
         print("")
 
 
-def mergeparseroption(options, parser):
-    options.output = parser.output
-    options.resume = parser.resume
-    options.live = parser.live
-    options.capture_time = parser.capture_time
-    options.silent = parser.silent
-    options.force = parser.force
-    options.quality = parser.quality
-    options.flexibleq = parser.flexibleq
-    options.list_quality = parser.list_quality
-    options.subtitle = parser.subtitle
-    options.merge_subtitle = parser.merge_subtitle
-    options.silent_semi = parser.silent_semi
-    options.username = parser.username
-    options.password = parser.password
-    options.thumbnail = parser.thumbnail
-    options.all_episodes = parser.all_episodes
-    options.all_last = parser.all_last
-    options.force_subtitle = parser.force_subtitle
-    options.require_subtitle = parser.require_subtitle
-    options.preferred = parser.preferred
-    options.verbose = parser.verbose
-    options.exclude = parser.exclude
-    options.get_url = parser.get_url
-    options.ssl_verify = parser.ssl_verify
-    options.http_headers = parser.http_headers
-    options.stream_prio = parser.stream_prio
-    options.remux = parser.remux
-    options.get_all_subtitles = parser.get_all_subtitles
-    options.get_raw_subtitles = parser.get_raw_subtitles
-    options.convert_subtitle_colors = parser.convert_subtitle_colors
-    options.include_clips = parser.include_clips
-    options.cmoreoperatorlist = parser.cmoreoperatorlist
-    options.cmoreoperator = parser.cmoreoperator
-    options.proxy = parser.proxy
-    return options
