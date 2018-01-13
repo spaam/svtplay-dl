@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 import os
-import xml.etree.ElementTree as ET
 import copy
 import json
 import hashlib

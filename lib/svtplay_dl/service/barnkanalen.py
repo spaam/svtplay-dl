@@ -2,21 +2,12 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import os
-import xml.etree.ElementTree as ET
-import copy
 import json
-import hashlib
+
 
 from svtplay_dl.log import log
-from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.utils import filenamify, is_py2
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
-from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
 
