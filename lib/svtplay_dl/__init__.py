@@ -176,6 +176,7 @@ class Options(object):
         self.hls_time_stamp = False
 
 
+
 def get_multiple_media(urls, options):
     if options.output and os.path.isfile(options.output):
         log.error("Output must be a directory if used with multiple URLs")
@@ -480,7 +481,7 @@ def main():
             options.subtitle = True
     if options.merge_subtitle:
         options.remux = True
-    options = mergeParserOption(Options(), options)
+    options = mergeparseroption(Options(), options)
     if options.silent_semi:
         options.silent = True
     setup_log(options.silent, options.verbose)
@@ -508,7 +509,7 @@ def main():
         print("")
 
 
-def mergeParserOption(options, parser):
+def mergeparseroption(options, parser):
     options.output = parser.output
     options.resume = parser.resume
     options.live = parser.live
