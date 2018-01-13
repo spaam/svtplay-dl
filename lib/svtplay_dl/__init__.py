@@ -311,7 +311,7 @@ def get_one_media(stream, options):
         elif options.merge_subtitle:
             options.merge_subtitle = False
 
-    if options.subtitle and options.output != "-" and not options.get_url:
+    if options.subtitle and not options.get_url:
         options_subs_dl(subfixes)
         if options.force_subtitle:
             return
@@ -342,11 +342,7 @@ def get_one_media(stream, options):
             sys.exit(2)
 
         if options.thumbnail and hasattr(stream, "get_thumbnail"):
-            if options.output != "-":
-                log.info("Getting thumbnail")
-                stream.get_thumbnail(options)
-            else:
-                log.warning("Can not get thumbnail when fetching to stdout")
+            stream.get_thumbnail(options)
         post = postprocess(stream, options, subfixes)
 
         if stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments) and post.detect:
