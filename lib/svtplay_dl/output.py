@@ -5,10 +5,9 @@ import sys
 import time
 import re
 import os
-import platform
 from datetime import timedelta
 
-from svtplay_dl.utils import is_py2, filenamify, decode_html_entities, ensure_unicode
+from svtplay_dl.utils import filenamify, decode_html_entities, ensure_unicode
 from svtplay_dl.utils.terminal import get_terminal_size
 from svtplay_dl.log import log
 
@@ -117,12 +116,6 @@ def progressbar(total, pos, msg=""):
 
 
 def filename(stream):
-    if stream.options.output:
-        if is_py2:
-            if platform.system() == "Windows":
-                stream.options.output = stream.options.output.decode("latin1")
-            else:
-                stream.options.output = stream.options.output.decode("utf-8")
     if not stream.options.output or os.path.isdir(stream.options.output):
         data = ensure_unicode(stream.get_urldata())
         if data is None:

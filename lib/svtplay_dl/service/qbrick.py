@@ -6,7 +6,6 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.rtmp import RTMP
 
@@ -50,10 +49,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
         streams = xml.find("body").find("switch")
-        if is_py2_old:
-            sa = list(streams.getiterator("video"))
-        else:
-            sa = list(streams.iter("video"))
+        sa = list(streams.iter("video"))
 
         for i in sa:
             self.options.other = "-y '{0}'".format(i.attrib["src"])

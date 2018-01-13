@@ -9,7 +9,6 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils import is_py2_old, is_py2
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
@@ -17,17 +16,9 @@ from svtplay_dl.error import ServiceError
 
 log = logging.getLogger('svtplay_dl')
 
-if is_py2:
-    def bytes(string=None, encoding="ascii"):
-        if string is None:
-            return ""
-        return string
 
-    def _chr(temp):
-        return temp
-else:
-    def _chr(temp):
-        return chr(temp)
+def _chr(temp):
+    return chr(temp)
 
 
 class HDSException(UIException):
@@ -53,17 +44,11 @@ def hdsparse(options, res, manifest):
         streams[0] = ServiceError("Can't read HDS playlist. {0}".format(res.status_code))
         return streams
     data = res.text
-    if is_py2 and isinstance(data, unicode):
-        data = data.encode("utf-8")
 
     xml = ET.XML(data)
 
-    if is_py2_old:
-        bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
-    else:
-        bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
+    bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+    mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
 
     if xml.find("{http://ns.adobe.com/f4m/1.0}drmAdditionalHeader") is not None:
         streams[0] = ServiceError("HDS DRM protected content.")

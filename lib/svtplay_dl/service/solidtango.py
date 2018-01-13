@@ -8,7 +8,6 @@ from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.utils import is_py2
 
 
 class Solidtango(Service):
@@ -55,8 +54,6 @@ class Solidtango(Service):
                 yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")
                 return
             xmldoc = data.text
-            if is_py2 and isinstance(xmldoc, unicode):
-                xmldoc = xmldoc.encode("utf8")
             xml = ET.XML(xmldoc)
             elements = xml.findall(".//manifest")
             streams = hlsparse(self.options, self.http.request("get", elements[0].text), elements[0].text)

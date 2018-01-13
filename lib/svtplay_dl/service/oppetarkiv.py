@@ -11,7 +11,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.utils import ensure_unicode, filenamify, is_py2, decode_html_entities
+from svtplay_dl.utils import ensure_unicode, filenamify, decode_html_entities
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import urlparse, parse_qs
 
@@ -140,10 +140,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
     def outputfilename(self, data, filename, raw):
         directory = os.path.dirname(filename)
-        if is_py2:
-            id = hashlib.sha256(data["programVersionId"]).hexdigest()[:7]
-        else:
-            id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
+        id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
 
         datatitle = re.search('data-title="([^"]+)"', self.get_urldata())
         if not datatitle:
@@ -151,8 +148,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         datat = decode_html_entities(datatitle.group(1))
         name = self.name(datat)
         episode = self.seasoninfo(datat)
-        if is_py2:
-            name = name.encode("utf8")
+
         if episode:
             title = "{0}.{1}-{2}-svtplay".format(name, episode, id)
         else:

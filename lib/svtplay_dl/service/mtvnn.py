@@ -5,7 +5,6 @@ import json
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -88,10 +87,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         content = self.http.request("get", contenturl).content
         xml = ET.XML(content)
         ss = xml.find("video").find("item")
-        if is_py2_old:
-            sa = list(ss.getiterator("rendition"))
-        else:
-            sa = list(ss.iter("rendition"))
+        sa = list(ss.iter("rendition"))
 
         for i in sa:
             yield RTMP(self.options, i.find("src").text, i.attrib["bitrate"])

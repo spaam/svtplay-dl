@@ -8,10 +8,9 @@ import random
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils import filenamify, is_py2
+from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log
 
 
@@ -104,12 +103,7 @@ class Dplay(Service):
         season = jsondata["data"]["attributes"]["seasonNumber"]
         episode = jsondata["data"]["attributes"]["episodeNumber"]
         name = jsondata["data"]["attributes"]["name"]
-        if is_py2:
-            show = filenamify(show).encode("latin1")
-            name = filenamify(name).encode("latin1")
-        else:
-            show = filenamify(show)
-
+        show = filenamify(show)
         return filenamify("{0}.s{1:02d}e{2:02d}.{3}".format(show, int(season), int(episode), name))
 
     def find_all_episodes(self, options):

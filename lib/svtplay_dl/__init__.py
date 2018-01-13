@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from svtplay_dl.error import UIException
 from svtplay_dl.log import log
-from svtplay_dl.utils import select_quality, list_quality, is_py2, ensure_unicode
+from svtplay_dl.utils import select_quality, list_quality, ensure_unicode
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -209,9 +209,6 @@ def get_media(url, options):
         if not stream:
             log.error("That site is not supported. Make a ticket or send a message")
             sys.exit(2)
-
-    if is_py2:
-        url = ensure_unicode(url)
 
     if options.all_episodes:
         get_all_episodes(stream, copy.copy(options), url)

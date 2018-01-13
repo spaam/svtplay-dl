@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify, is_py2
+from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -249,10 +249,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             vid = str(data["programVersionId"])
         else:
             vid = str(data["id"])
-        if is_py2:
-            id = hashlib.sha256(vid).hexdigest()[:7]
-        else:
-            id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
+        id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
             other = None

@@ -21,10 +21,6 @@ from requests.packages.urllib3.util.retry import Retry
 
 from svtplay_dl import error
 
-is_py2 = (sys.version_info[0] == 2)
-is_py3 = (sys.version_info[0] == 3)
-is_py2_old = (sys.version_info < (2, 7))
-
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
 
@@ -192,7 +188,7 @@ def ensure_unicode(s):
     Ensure string is a unicode string. If it isn't it assumed it is
     utf-8 and decodes it to a unicode string.
     """
-    if (is_py2 and isinstance(s, str)) or (is_py3 and isinstance(s, bytes)):
+    if isinstance(s, bytes):
         s = s.decode('utf-8', 'replace')
     return s
 

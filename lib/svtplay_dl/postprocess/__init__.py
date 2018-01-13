@@ -6,7 +6,7 @@ import re
 from requests import post, codes, Timeout
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import which, is_py3, run_program
+from svtplay_dl.utils import which, run_program
 
 
 class postprocess(object):
@@ -31,7 +31,7 @@ class postprocess(object):
                 txt = '\r\n'.join(lines[2:])
                 return txt
 
-            if platform.system() == "Windows" and is_py3:
+            if platform.system() == "Windows":
                 fd = open(self, encoding="utf8")
             else:
                 fd = open(self)

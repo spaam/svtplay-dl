@@ -5,7 +5,6 @@ import subprocess
 import shlex
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import is_py2
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.output import output
 
@@ -30,10 +29,7 @@ class RTMP(VideoRetriever):
         if self.options.silent:
             args.append("-q")
         if self.options.other:
-            if is_py2:
-                args += shlex.split(self.options.other.encode("utf-8"))
-            else:
-                args += shlex.split(self.options.other)
+            args += shlex.split(self.options.other)
 
         if self.options.verbose:
             args.append("-V")
