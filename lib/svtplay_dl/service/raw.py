@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import os
+import re
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
@@ -22,7 +23,7 @@ class Raw(Service):
             self.options.output = filename
             extention = True
 
-        if self.url.find(".f4m") > 0:
+        if re.search(".f4m", self.url):
             if extention:
                 self.options.output = "%s.flv" % self.options.output
 
@@ -30,7 +31,7 @@ class Raw(Service):
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
-        if self.url.find(".m3u8") > 0:
+        if re.search(".m3u8", self.url):
             streams = hlsparse(self.options, self.http.request("get", self.url), self.url)
             if extention:
                 self.options.output = "%s.ts" % self.options.output

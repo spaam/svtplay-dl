@@ -55,28 +55,36 @@ def hlsparse(options, res, url, **kwargs):
     keycookie = kwargs.pop("keycookie", None)
 
     media = {}
-    for i in m3u8.master_playlist:
-        audio_url = None
-        if i["TAG"] == "EXT-X-MEDIA":
-            if "DEFAULT" in i and (i["DEFAULT"].upper() == "YES"):
-                if i["TYPE"] and ("URI" in i):
-                    if i["GROUP-ID"] not in media:
-                        media[i["GROUP-ID"]] = []
-                    media[i["GROUP-ID"]].append(i["URI"])
-            continue
-        elif i["TAG"] == "EXT-X-STREAM-INF":
-            bit_rate = float(i["BANDWIDTH"]) / 1000
+    if m3u8.master_playlist:
+        for i in m3u8.master_playlist:
+            audio_url = None
+            if i["TAG"] == "EXT-X-MEDIA":
+                if "DEFAULT" in i and (i["DEFAULT"].upper() == "YES"):
+                    if i["TYPE"] and ("URI" in i):
+                        if i["GROUP-ID"] not in media:
+                            media[i["GROUP-ID"]] = []
+                        media[i["GROUP-ID"]].append(i["URI"])
+                continue
+            elif i["TAG"] == "EXT-X-STREAM-INF":
+                bit_rate = float(i["BANDWIDTH"]) / 1000
 
-            if "AUDIO" in i and (i["AUDIO"] in media):
-                audio_url = media[i["AUDIO"]][0]
+                if "AUDIO" in i and (i["AUDIO"] in media):
+                    audio_url = media[i["AUDIO"]][0]
 
-            urls = _get_full_url(i["URI"], url)
-        else:
-            continue # Needs to be changed to utilise other tags.
-        res2 = http.get(urls, cookies=res.cookies)
-        if res2.status_code < 400:
+                urls = _get_full_url(i["URI"], url)
+            else:
+                continue # Needs to be changed to utilise other tags.
+            res2 = http.get(urls, cookies=res.cookies)
+            if res2.status_code < 400:
 
-            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
+                streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
+
+    elif m3u8.media_segment:
+        streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie)
+
+    else:
+        streams[0] = ServiceError("Can't find HLS playlist in m3u8 file.")
+
     return streams
 
 
