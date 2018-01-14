@@ -6,6 +6,7 @@ import os
 import xml.etree.ElementTree as ET
 import json
 import copy
+from datetime import datetime, timedelta
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -21,6 +22,21 @@ class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
 
     def get(self):
+
+        parse = urlparse(self.url)
+        if parse.path[:8] == "/kanaler":
+            channel = parse.path[9:]
+
+            start_time = "2018-01-14T23:00:00"#datetime.now() - timedelta(minutes=30)
+            end_time = "2018-01-14T23:30:00"#start_time + timedelta(minutes=1)
+
+            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(channel, start_time, end_time)
+            streams = hlsparse(self.options, self.http.request("get", url), url)
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
+            return
+
         data = self.get_urldata()
 
         vid = findvid(self.url, data)
