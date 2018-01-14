@@ -6,6 +6,7 @@ import sys
 import os
 import logging
 import copy
+import re
 from optparse import OptionParser
 
 from svtplay_dl.error import UIException
@@ -194,7 +195,7 @@ def get_media(url, options):
         generic = Generic(options, url)
         url, stream = generic.get(sites)
     if not stream:
-        if url.find(".f4m") > 0 or url.find(".m3u8") > 0:
+        if re.search(".f4m", url) or re.search(".m3u8", url):
             stream = Raw(options, url)
         if not stream:
             log.error("That site is not supported. Make a ticket or send a message")
