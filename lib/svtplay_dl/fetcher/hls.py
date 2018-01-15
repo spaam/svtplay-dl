@@ -6,7 +6,7 @@ import os
 import re
 import copy
 import time
-import datetime
+from datetime import datetime, timedelta
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
@@ -139,7 +139,7 @@ class HLS(VideoRetriever):
 
             if not self.options.silent:
                 if self.options.live:
-                    progressbar(size_media, index + 1, ''.join(['DU: ', str(datetime.timedelta(seconds=int(duration)))]))
+                    progressbar(size_media, index + 1, ''.join(['DU: ', str(timedelta(seconds=int(duration)))]))
                 else:
                     eta.increment()
                     progressbar(size_media, index + 1, ''.join(['ETA: ', str(eta)]))
@@ -175,6 +175,15 @@ class HLS(VideoRetriever):
                     time.sleep(1.0)
 
                 start_time = time.time()
+
+                if self.options.hls_time_stamp:
+
+                    end_time_stamp = (datetime.now() - timedelta(hours=1, seconds=10)).replace(microsecond=0)
+                    start_time_stamp = end_time_stamp - timedelta(minutes=1)
+
+                    base_url = self.url.split(".m3u8")[0]
+                    self.url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+
                 new_m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
                 for n_m3u in new_m3u8.media_segment:
                     if n_m3u not in m3u8.media_segment:

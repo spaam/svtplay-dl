@@ -25,12 +25,14 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         parse = urlparse(self.url)
         if parse.path[:8] == "/kanaler":
-            channel = parse.path[9:]
 
-            start_time = "2018-01-14T23:00:00"#datetime.now() - timedelta(minutes=30)
-            end_time = "2018-01-14T23:30:00"#start_time + timedelta(minutes=1)
+            end_time_stamp = (datetime.now() - timedelta(hours=1, seconds=10)).replace(microsecond=0)
+            start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(channel, start_time, end_time)
+            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat())
+
+            self.options.live = True
+            self.options.hls_time_stamp = True
             streams = hlsparse(self.options, self.http.request("get", url), url)
             if streams:
                 for n in list(streams.keys()):
