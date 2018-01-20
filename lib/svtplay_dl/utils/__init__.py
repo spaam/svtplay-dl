@@ -32,6 +32,7 @@ FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36
 
 # TODO: should be set as the default option in the argument parsing?
 DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
+LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http", "rtmp"]
 
 log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
@@ -132,9 +133,13 @@ def select_quality(options, streams):
 
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
-    proto_prio = DEFAULT_PROTOCOL_PRIO
+
     if options.stream_prio:
         proto_prio = options.stream_prio.split(',')
+    elif options.live or streams[0].options.live:
+        proto_prio = LIVE_PROTOCOL_PRIO
+    else:
+        proto_prio = DEFAULT_PROTOCOL_PRIO
 
     # Filter away any unwanted protocols, and prioritize
     # based on --stream-priority.
