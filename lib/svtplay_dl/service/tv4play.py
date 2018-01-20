@@ -26,7 +26,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         if parse.path[:8] == "/kanaler":
 
-            end_time_stamp = (datetime.now() - timedelta(hours=1, seconds=10)).replace(microsecond=0)
+            end_time_stamp = (datetime.utcnow() - timedelta(seconds=10)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
             url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat())
