@@ -131,15 +131,17 @@ class HLS(VideoRetriever):
         decryptor = None
         size_media = len(m3u8.media_segment)
         eta = ETA(size_media)
+        total_duration = 0
         duration = 0
         for index, i in enumerate(m3u8.media_segment):
             if "duration" in i["EXTINF"]:
-                duration += i["EXTINF"]["duration"]
+                duration = i["EXTINF"]["duration"]
+                total_duration += duration
             item = _get_full_url(i["URI"], self.url)
 
             if not self.options.silent:
                 if self.options.live:
-                    progressbar(size_media, index + 1, ''.join(['DU: ', str(timedelta(seconds=int(duration)))]))
+                    progressbar(size_media, index + 1, ''.join(['DU: ', str(timedelta(seconds=int(total_duration)))]))
                 else:
                     eta.increment()
                     progressbar(size_media, index + 1, ''.join(['ETA: ', str(eta)]))
@@ -167,18 +169,18 @@ class HLS(VideoRetriever):
 
             file_d.write(data)
 
-            if (self.options.capture_time > 0) and duration >= (self.options.capture_time * 60):
+            if (self.options.capture_time > 0) and total_duration >= (self.options.capture_time * 60):
                 break
 
             if (size_media == (index + 1)) and self.options.live:
-                while (start_time + i["EXTINF"]["duration"] * 2) >= time.time():
+                while (start_time + duration * 2) >= time.time():
                     time.sleep(1.0)
 
                 start_time = time.time()
 
                 if self.options.hls_time_stamp:
 
-                    end_time_stamp = (datetime.now() - timedelta(hours=1, seconds=10)).replace(microsecond=0)
+                    end_time_stamp = (datetime.utcnow() - timedelta(seconds=duration)).replace(microsecond=0)
                     start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                     base_url = self.url.split(".m3u8")[0]
