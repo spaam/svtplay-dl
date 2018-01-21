@@ -133,9 +133,11 @@ class HLS(VideoRetriever):
         eta = ETA(size_media)
         total_duration = 0
         duration = 0
+        max_duration = 0
         for index, i in enumerate(m3u8.media_segment):
             if "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
+                max_duration = max(max_duration, duration)
                 total_duration += duration
             item = _get_full_url(i["URI"], self.url)
 
@@ -173,25 +175,31 @@ class HLS(VideoRetriever):
                 break
 
             if (size_media == (index + 1)) and self.options.live:
-                while (start_time + duration * 2) >= time.time():
-                    time.sleep(1.0)
+                sleep_int = (start_time + max_duration * 2) - time.time()
+                if sleep_int > 0:
+                    time.sleep(sleep_int)
 
-                start_time = time.time()
+                size_media_old = size_media
+                while size_media_old == size_media:
+                    start_time = time.time()
 
-                if self.options.hls_time_stamp:
+                    if self.options.hls_time_stamp:
 
-                    end_time_stamp = (datetime.utcnow() - timedelta(seconds=duration)).replace(microsecond=0)
-                    start_time_stamp = end_time_stamp - timedelta(minutes=1)
+                        end_time_stamp = (datetime.utcnow() - timedelta(seconds=max_duration * 2)).replace(microsecond=0)
+                        start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-                    base_url = self.url.split(".m3u8")[0]
-                    self.url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        base_url = self.url.split(".m3u8")[0]
+                        self.url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
 
-                new_m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
-                for n_m3u in new_m3u8.media_segment:
-                    if n_m3u not in m3u8.media_segment:
-                        m3u8.media_segment.append(n_m3u)
+                    new_m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
+                    for n_m3u in new_m3u8.media_segment:
+                        if n_m3u not in m3u8.media_segment:
+                            m3u8.media_segment.append(n_m3u)
 
-                size_media = len(m3u8.media_segment)
+                    size_media = len(m3u8.media_segment)
+
+                    if size_media_old == size_media:
+                        time.sleep(max_duration)
 
         file_d.close()
         if not self.options.silent:
