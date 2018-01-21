@@ -74,10 +74,10 @@ def hdsparse(options, res, manifest):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
-    manifest = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
+    url = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
-        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
+        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), url, i.attrib["bitrate"], url_id=i.attrib["url"], bootstrap=bootstrapid,
                                                 metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring, cookies=res.cookies)
     return streams
 
@@ -97,7 +97,7 @@ class HDS(VideoRetriever):
         antal = None
         if box[2] == b"abst":
             antal = readbox(bootstrap, box[0])
-        baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
+        baseurl = self.url[0:self.url.rfind("/")]
 
         file_d = output(self.options, "flv")
         if file_d is None:
@@ -114,7 +114,7 @@ class HDS(VideoRetriever):
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.url, start, querystring)
+            url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.kwargs["url_id"], start, querystring)
             if not self.options.silent:
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
