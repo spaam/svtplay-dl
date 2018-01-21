@@ -97,6 +97,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not match:
             match = re.search(r'data-id="([^"]+)"', self.get_urldata())
         if not match:
+            match = re.search(r'data-id=([^ ]+) ', self.get_urldata())
+        if not match:
             match = re.search(r'data-videoid="([^"]+)"', self.get_urldata())
         if not match:
             match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
