@@ -58,13 +58,18 @@ class Aftonbladet(Service):
             yield ServiceError("Can't find video info")
             return
 
-        videos = self._get_video(match.group(1))
+        try:
+            janson = json.loads(match.group(1))
+        except json.decoder.JSONDecodeError:
+            yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
+            return
+
+        videos = self._get_video(janson)
         for i in videos:
             yield i
 
-    def _get_video(self, url):
+    def _get_video(self, janson):
 
-        janson = json.loads(url)
         articleid = janson["article"]["currentArticleId"]
         components = janson["articles"][articleid]["article"]["components"]
         for i in components:
