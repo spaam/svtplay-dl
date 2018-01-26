@@ -34,6 +34,7 @@ from svtplay_dl.service.flowonline import Flowonline
 from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.lemonwhale import Lemonwhale
+from svtplay_dl.service.mtvnn import MtvMusic
 from svtplay_dl.service.mtvnn import Mtvnn
 from svtplay_dl.service.mtvservices import Mtvservices
 from svtplay_dl.service.nhl import NHL
@@ -83,6 +84,7 @@ sites = [
     Twitch,
     Lemonwhale,
     Mtvservices,
+    MtvMusic,
     Mtvnn,
     NHL,
     Nrk,

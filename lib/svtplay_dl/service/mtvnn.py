@@ -10,6 +10,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.utils.urllib import urlparse
 
 
 # This is _very_ similar to mtvservices..
@@ -92,3 +93,47 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             episodes.append("http://www.nickelodeon.se/serier/{0}-something/videos/{1}-something".format(programid, i))
             n += 1
         return episodes
+
+
+class MtvMusic(Service, OpenGraphThumbMixin):
+    supported_domains = ['mtv.se']
+
+    def get(self):
+        data = self.get_urldata()
+
+        if self.exclude():
+            yield ServiceError("Excluding video")
+            return
+
+        match = re.search('window.pagePlaylist = (.*);', data)
+
+        if not match:
+            yield ServiceError("Can't find video info")
+            return
+
+        try:
+            janson = json.loads(match.group(1))
+        except:
+            yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
+            return
+
+        parse = urlparse(self.url)
+        wanted_id = parse.path.split("/")[-1].split("-")[0]
+
+        for n in janson:
+            if wanted_id == str(n["id"]):
+
+                mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/mgid:arc:video:mtv.se:{0}?acceptMethods=hls".format(n["video_token"])
+                hls_asset = self.http.request("get", mrssxmlurl)
+                xml = ET.XML(hls_asset.text)
+
+                if xml.find("./video") is not None and xml.find("./video").find("item") is not None and \
+                   xml.find("./video").find("item").find("rendition") is not None and \
+                   xml.find("./video").find("item").find("rendition").find("src") is not None:
+
+                    hls_url = xml.find("./video").find("item").find("rendition").find("src").text
+                    stream = hlsparse(self.options, self.http.request("get", hls_url), hls_url)
+                    if stream:
+
+                        for key in list(stream.keys()):
+                                yield stream[key]
