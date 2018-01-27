@@ -1,0 +1,23 @@
+environment:
+  PYTHON: "C:\\Python35"
+  PYTHON_VERSION: 3.5
+  PYTHON_ARCH: "32"
+
+init:
+  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
+
+install:
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python -m pip install -U pip setuptools"
+  - "pip install requests PySocks pycrypto"
+  - "pip install pyinstaller"
+
+test_script:
+  - "pip install -e ."
+
+
+after_test:
+  - "pyinstaller spec/svtplay-dl.spec"
+  - ps: ls dist
+
+build: off
