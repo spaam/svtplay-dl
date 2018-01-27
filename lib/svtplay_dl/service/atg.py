@@ -3,14 +3,13 @@
 from __future__ import absolute_import
 import json
 import os
-import re
-import unicodedata
 from datetime import datetime
 
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.utils import filenamify
 
 
 class Atg(Service):
@@ -42,7 +41,7 @@ class Atg(Service):
 
         if "title" in janson:
             directory = os.path.dirname(self.options.output)
-            title = re.sub(r"[^\S\n\t]+|\\|/", "_", janson["title"])
+            title = filenamify(janson["title"])
             self.options.output = os.path.join(directory, title)
 
         if "urls" in janson:
