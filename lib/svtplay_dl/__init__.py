@@ -19,6 +19,7 @@ from svtplay_dl.output import filename
 from svtplay_dl.postprocess import postprocess
 
 from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
+from svtplay_dl.service.atg import Atg
 from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
@@ -67,6 +68,7 @@ __version__ = "1.9.7"
 sites = [
     Aftonbladet,
     Aftonbladettv,
+    Atg,
     Bambuser,
     Barnkanalen,
     Bigbrother,
