@@ -51,7 +51,7 @@ def hlsparse(options, res, url, **kwargs):
         streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
         return streams
     m3u8 = M3U8(res.text)
-    http = HTTP(options)
+
     keycookie = kwargs.pop("keycookie", None)
 
     media = {}
@@ -74,10 +74,8 @@ def hlsparse(options, res, url, **kwargs):
                 urls = _get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
-            res2 = http.get(urls, cookies=res.cookies)
-            if res2.status_code < 400:
 
-                streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
+            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
 
     elif m3u8.media_segment:
         streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie)
