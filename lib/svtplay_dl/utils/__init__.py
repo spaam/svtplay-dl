@@ -179,7 +179,14 @@ def select_quality(options, streams):
         raise error.UIException("Can't find that quality. Try one of: %s (or "
                                 "try --flexible-quality)" % quality)
 
-    return stream_hash[wanted[0]]
+    http = HTTP(options)
+    # Test if the wanted stream is available. If not try with the second best and so on.
+    for w in wanted:
+        res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs["cookies"])
+        if res is not None and res.status_code < 400:
+            return stream_hash[w]
+
+    raise error.UIException("Streams not available to download.")
 
 
 def ensure_unicode(s):
