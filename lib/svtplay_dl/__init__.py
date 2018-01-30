@@ -40,13 +40,6 @@ def setup_log(silent, verbose=False):
 def main():
     """ Main program """
     parse, options = parser(__version__)
-
-    if len(options.urls) == 0:
-        parse.print_help()
-        sys.exit(0)
-    urls = options.urls
-    if len(urls) < 1:
-        parse.error("Incorrect number of arguments")
     if options.exclude:
         options.exclude = options.exclude.split(",")
     if options.require_subtitle:
@@ -56,13 +49,12 @@ def main():
             options.subtitle = True
     if options.merge_subtitle:
         options.remux = True
-    options = mergeparseroption(Options(), options)
+
     if options.silent_semi:
         options.silent = True
-    setup_log(options.silent, options.verbose)
 
     if options.cmoreoperatorlist:
-        c = Cmore(options, urls)
+        c = Cmore(options, None)
         c.operatorlist()
         sys.exit(0)
 
@@ -72,8 +64,16 @@ def main():
                              https=options.proxy)
 
     if options.flexibleq and not options.quality:
-        log.error("flexible-quality requires a quality")
-        sys.exit(4)
+        logging.error("flexible-quality requires a quality")
+
+    if len(options.urls) == 0:
+        parse.print_help()
+        sys.exit(0)
+    urls = options.urls
+    options = mergeparseroption(Options(), options)
+    if len(urls) < 1:
+        parse.error("Incorrect number of arguments")
+    setup_log(options.silent, options.verbose)
 
     try:
         if len(urls) == 1:
@@ -82,5 +82,3 @@ def main():
             get_multiple_media(urls, options)
     except KeyboardInterrupt:
         print("")
-
-
