@@ -1,0 +1,22 @@
+sudo: false
+language: python
+
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=lint
+
+install:
+  - pip install tox
+
+script:
+  - tox -- --verbose 
+
+deploy:
+  provider: pypi
+  user: spaam
+  password:
+    secure: YMxYmNOexO13ORBYPFPQrbt9RiLgRPmhTxHRuBVkrICXc1AXli+YGX56hF9nabCFsBT+OEEiGEux5QwSPXGDs2SoQWPKkcCS7uxD3l9QmZuA39IfwsaoDfPziU3Mr+heAmM8WdTls6rFEbUJEMG1/bNVqmijOWDBUi/k9MAC2N4=
+  on:
+    tags: true
+
