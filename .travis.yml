@@ -6,6 +6,8 @@ matrix:
     - python: 3.6
       env: TOXENV=lint
 
+cache: pip
+
 install:
   - pip install tox
 
