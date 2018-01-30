@@ -5,6 +5,8 @@ import re
 import copy
 import os
 import hashlib
+from urllib.parse import urlparse, parse_qs
+
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
@@ -13,7 +15,6 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.utils import ensure_unicode, filenamify, decode_html_entities
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.urllib import urlparse, parse_qs
 
 
 class OppetArkiv(Service, OpenGraphThumbMixin):

@@ -7,8 +7,8 @@ import xml.etree.ElementTree as ET
 import json
 import copy
 from datetime import datetime, timedelta
+from urllib.parse import urlparse, parse_qs, quote_plus
 
-from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify
 from svtplay_dl.fetcher.hls import hlsparse

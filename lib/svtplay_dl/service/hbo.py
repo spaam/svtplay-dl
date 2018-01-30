@@ -4,8 +4,9 @@ from __future__ import absolute_import
 import re
 import copy
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 
-from svtplay_dl.utils.urllib import urlparse
+
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP

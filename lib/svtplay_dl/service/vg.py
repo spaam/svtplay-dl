@@ -3,9 +3,9 @@ import re
 import json
 import copy
 import os
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.utils import filenamify
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hds import hdsparse

@@ -4,9 +4,9 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+from urllib.parse import unquote_plus
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 

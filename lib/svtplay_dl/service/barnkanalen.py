@@ -3,11 +3,11 @@
 from __future__ import absolute_import
 import re
 import json
+from urllib.parse import urljoin, urlparse, parse_qs
 
 
 from svtplay_dl.log import log
 from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.error import ServiceError
 
 

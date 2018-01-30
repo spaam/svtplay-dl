@@ -3,13 +3,13 @@ import re
 import os
 import json
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils.urllib import urlparse
 
 
 # This is _very_ similar to mtvservices..

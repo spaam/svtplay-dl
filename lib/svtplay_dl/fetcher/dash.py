@@ -6,9 +6,9 @@ import xml.etree.ElementTree as ET
 import os
 import re
 from datetime import datetime
+from urllib.parse import urljoin
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar
-from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 

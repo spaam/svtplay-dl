@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 import re
 import copy
 import os
+from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils import filenamify
-from svtplay_dl.utils.urllib import urljoin, urlparse
 from svtplay_dl.error import ServiceError
 
 

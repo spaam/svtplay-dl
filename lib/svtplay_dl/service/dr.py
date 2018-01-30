@@ -5,6 +5,7 @@ import base64
 import re
 import json
 import copy
+from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -12,8 +13,6 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils.urllib import urlparse, urljoin
-
 
 
 class Dr(Service, OpenGraphThumbMixin):

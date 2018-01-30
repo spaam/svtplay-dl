@@ -3,10 +3,9 @@
 from __future__ import absolute_import
 import re
 import logging
+from urllib.parse import urlparse
 
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.utils import download_thumbnail, HTTP
-
 
 
 class Service(object):

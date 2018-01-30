@@ -9,8 +9,8 @@ import re
 import json
 import os
 import copy
+from urllib.parse import urlparse, quote_plus
 
-from svtplay_dl.utils.urllib import urlparse, quote_plus
 from svtplay_dl.service import Service
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log

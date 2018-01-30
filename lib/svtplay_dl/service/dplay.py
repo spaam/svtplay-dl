@@ -5,10 +5,10 @@ import re
 import os
 import hashlib
 import random
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils import filenamify
 from svtplay_dl.log import log

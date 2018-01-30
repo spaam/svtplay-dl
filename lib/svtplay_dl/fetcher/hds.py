@@ -7,9 +7,9 @@ import logging
 import binascii
 import copy
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.error import ServiceError

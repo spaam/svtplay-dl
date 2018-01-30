@@ -3,11 +3,11 @@
 from __future__ import absolute_import
 import re
 import os
+from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils import filenamify
-from svtplay_dl.utils.urllib import urljoin, urlparse
 from svtplay_dl.error import ServiceError
 
 

@@ -4,12 +4,12 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils.urllib import urlparse
 
 
 class Picsearch(Service, OpenGraphThumbMixin):

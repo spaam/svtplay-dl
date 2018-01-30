@@ -6,12 +6,11 @@ import os
 import copy
 import json
 import hashlib
-from operator import itemgetter
+from urllib.parse import urljoin, urlparse, parse_qs
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.utils import filenamify
-from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
