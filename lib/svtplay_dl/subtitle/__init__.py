@@ -1,9 +1,10 @@
 import xml.etree.ElementTree as ET
 import json
 import re
+from io import StringIO
+
 from svtplay_dl.log import log
 from svtplay_dl.utils import decode_html_entities, HTTP
-from svtplay_dl.utils.io import StringIO
 from svtplay_dl.output import output
 from requests import __build__ as requests_version
 import platform
