@@ -75,7 +75,7 @@ def get_all_episodes(stream, options, url):
             substream = service_handler(sites, copy.copy(options), o)
 
         log.info("Episode %d of %d", idx + 1, len(episodes))
-        log.info("Url: %s",o)
+        log.info("Url: %s", o)
 
         # get_one_media overwrites options.output...
         get_one_media(substream, copy.copy(options))
