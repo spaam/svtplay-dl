@@ -24,7 +24,8 @@ class Sr(Service, OpenGraphThumbMixin):
 
         match = re.search('data-audio-type="publication" data-audio-id="(\d+)">', data)  # Nyheter
         if match:
-            dataurl = "https://sverigesradio.se/sida/playerajax/getaudiourl?id={0}&type={1}&quality=high&format=iis".format(match.group(1), "publication")
+            dataurl = "https://sverigesradio.se/sida/playerajax/" \
+                      "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(match.group(1), "publication")
             data = self.http.request("get", dataurl).text
             playerinfo = json.loads(data)
             yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
@@ -46,7 +47,8 @@ class Sr(Service, OpenGraphThumbMixin):
                 yield ServiceError("Can't find audio info")
                 return
 
-        dataurl = "https://sverigesradio.se/sida/playerajax/getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
+        dataurl = "https://sverigesradio.se/sida/playerajax/" \
+                  "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
         yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)

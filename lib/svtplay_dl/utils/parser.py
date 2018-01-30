@@ -116,7 +116,8 @@ def parser(version):
     subtitle.add_argument("-S", "--subtitle", action="store_true", dest="subtitle", default=False,
                           help="download subtitle from the site if available")
     subtitle.add_argument("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle", default=False,
-                          help="merge subtitle with video/audio file with corresponding ISO639-3 language code. this invokes --remux automatically. use with -S for external also.")
+                          help="merge subtitle with video/audio file with corresponding ISO639-3 language code."
+                               "this invokes --remux automatically. use with -S for external also.")
     subtitle.add_argument("--force-subtitle", dest="force_subtitle", default=False, action="store_true",
                           help="download only subtitle if its used with -S")
     subtitle.add_argument("--require-subtitle", dest="require_subtitle", default=False, action="store_true",

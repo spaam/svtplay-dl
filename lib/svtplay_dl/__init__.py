@@ -5,7 +5,6 @@ from __future__ import absolute_import, unicode_literals
 import sys
 import logging
 
-from svtplay_dl.log import log
 from svtplay_dl.utils.parser import parser, mergeparseroption, Options
 from svtplay_dl.utils.getmedia import get_media, get_multiple_media
 
@@ -13,7 +12,7 @@ from svtplay_dl.service.cmore import Cmore
 
 __version__ = "1.9.11"
 
-log = logging.getLogger('svtplay_dl')
+logging.getLogger('svtplay_dl')
 
 
 def setup_log(silent, verbose=False):
@@ -33,8 +32,8 @@ def setup_log(silent, verbose=False):
     hdlr = logging.StreamHandler(stream)
     hdlr.setFormatter(fmt)
 
-    log.addHandler(hdlr)
-    log.setLevel(level)
+    logging.addHandler(hdlr)
+    logging.setLevel(level)
 
 
 def main():

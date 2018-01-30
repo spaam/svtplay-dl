@@ -34,7 +34,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not isinstance(mediaid, str):
             mediaid = mediaid.group(1)
 
-        jsondata = self.http.request("get", "http://csp.screen9.com/player?eventParam=1&ajaxauth={0}&method=embed&mediaid={1}".format(ajax_auth.group(1), mediaid)).text
+        jsondata = self.http.request("get", "http://csp.screen9.com/player?eventParam=1&"
+                                            "ajaxauth={0}&method=embed&mediaid={1}".format(ajax_auth.group(1), mediaid)).text
         jsondata = json.loads(jsondata)
 
         if "data" in jsondata:

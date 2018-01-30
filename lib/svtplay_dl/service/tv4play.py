@@ -128,7 +128,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def _get_show_info(self):
         show = self._get_showname()
         live = str(self.options.live).lower()
-        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&platform=web&node_nids={1}&per_page=99999".format(live, show)).text
+        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&"
+                                        "platform=web&node_nids={1}&per_page=99999".format(live, show)).text
         jsondata = json.loads(data)
         return jsondata
 
@@ -139,7 +140,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
         run = True
         live = str(self.options.live).lower()
         while run:
-            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
+            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}"
+                                            "&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
             jsondata = json.loads(data)
             for i in jsondata["results"]:
                 if vid == i["id"]:

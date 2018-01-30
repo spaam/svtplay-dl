@@ -58,7 +58,8 @@ class Dr(Service, OpenGraphThumbMixin):
             else:
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(self.options), self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}), stream["Uri"])
+                        streams = hdsparse(copy.copy(self.options), self.http.request("get", stream["Uri"],
+                                                                                      params={"hdcore": "3.7.0"}), stream["Uri"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]

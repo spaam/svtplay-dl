@@ -5,8 +5,6 @@
 # The unittest framwork doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
 
-import unittest
-
 
 class HandlesURLsTestMixin():
     """
