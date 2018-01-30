@@ -9,6 +9,7 @@ import logging
 
 log = logging.getLogger('svtplay_dl')
 
+
 class Service(object):
     supported_domains = []
     supported_domains_re = []
@@ -45,8 +46,8 @@ class Service(object):
         if urlp.netloc in cls.supported_domains:
             return True
 
-        # For every listed domain, try with www. subdomain as well.
-        if urlp.netloc in ['www.'+x for x in cls.supported_domains]:
+        # For every listed domain, try with www.subdomain as well.
+        if urlp.netloc in ['www.' + x for x in cls.supported_domains]:
             return True
 
         return False
@@ -75,9 +76,10 @@ class Service(object):
     # the options parameter is unused, but is part of the
     # interface, so we don't want to remove it. Thus, the
     # pylint ignore.
-    def find_all_episodes(self, options): # pylint: disable-msg=unused-argument
+    def find_all_episodes(self, options):  # pylint: disable-msg=unused-argument
         log.warning("--all-episodes not implemented for this service")
         return [self.url]
+
 
 def opengraph_get(html, prop):
     """
@@ -203,6 +205,7 @@ class Generic(Service):
                     return self.url, i(self.options, match.group(1))
 
         return self.url, stream
+
 
 def service_handler(sites, options, url):
     handler = None

@@ -10,7 +10,7 @@ from svtplay_dl.utils import which, is_py3
 
 
 class postprocess(object):
-    def __init__(self, stream, options, subfixes = []):
+    def __init__(self, stream, options, subfixes=[]):
         self.stream = stream
         self.merge_subtitle = options.merge_subtitle
         self.external_subtitle = options.subtitle
@@ -42,9 +42,12 @@ class postprocess(object):
             random_sentences = ' '.join(sample(parse(self), 8)).replace('\r\n', '')
             url = 'https://whatlanguage.herokuapp.com'
             payload = {"query": random_sentences}
-            headers = {'content-type': 'application/json'} # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
+            # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
+            headers = {'content-type': 'application/json'}
             try:
-                r = post(url, data=dumps(payload), headers=headers, timeout=30) # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume, and it is heroku after all (fast enough)
+                # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume,
+                # and it is heroku after all (fast enough)
+                r = post(url, data=dumps(payload), headers=headers, timeout=30)
                 if r.status_code == codes.ok:
                     try:
                         response = r.json()
@@ -66,7 +69,8 @@ class postprocess(object):
         }
         if len(self.subfixes) >= 2:
             log.info("Determining the languages of the subtitles.")
-        else: log.info("Determining the language of the subtitle.")
+        else:
+            log.info("Determining the language of the subtitle.")
         if self.get_all_subtitles:
             from re import match
             for subfix in self.subfixes:
@@ -84,7 +88,8 @@ class postprocess(object):
             langs += [query(subfile)]
         if len(langs) >= 2:
             log.info("Language codes: " + ', '.join(langs))
-        else: log.info("Language code: " + langs[0])
+        else:
+            log.info("Language code: " + langs[0])
         return langs
 
     def remux(self):
@@ -113,7 +118,8 @@ class postprocess(object):
             if self.merge_subtitle:
                 langs = self.sublanguage()
                 for stream_num, language in enumerate(langs):
-                    arguments += ["-map", str(stream_num + 1), "-c:s:" + str(stream_num), "mov_text", "-metadata:s:s:" + str(stream_num), "language=" + language]
+                    arguments += ["-map", str(stream_num + 1), "-c:s:" + str(stream_num), "mov_text",
+                                  "-metadata:s:s:" + str(stream_num), "language=" + language]
                 if len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
                         subfile = "{0}.srt".format(name + subfix)
@@ -138,8 +144,10 @@ class postprocess(object):
                     for subfix in self.subfixes:
                         subfile = "{0}.srt".format(name + subfix)
                         os.remove(subfile)
-                else: os.remove(subfile)
-            else: log.info("Muxing done, removing the old file.")
+                else:
+                    os.remove(subfile)
+            else:
+                log.info("Muxing done, removing the old file.")
             os.remove(orig_filename)
             os.rename(tempfile, new_name)
 
@@ -165,7 +173,8 @@ class postprocess(object):
         if self.merge_subtitle:
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=2):
-                arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text", "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
+                arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
+                              "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
                     subfile = "{0}.srt".format(name + subfix)
@@ -192,5 +201,6 @@ class postprocess(object):
                 for subfix in self.subfixes:
                     subfile = "{0}.srt".format(name + subfix)
                     os.remove(subfile)
-            else: os.remove(subfile)
+            else:
+                os.remove(subfile)
         os.rename(tempfile, orig_filename)

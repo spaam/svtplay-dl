@@ -47,4 +47,3 @@ class Vidme(Service, OpenGraphThumbMixin):
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
-

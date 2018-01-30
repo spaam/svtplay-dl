@@ -6,14 +6,18 @@ from __future__ import absolute_import
 import unittest
 from svtplay_dl.utils import protocol_prio
 
+
 class Stream(object):
     def __init__(self, proto, bitrate):
         self.proto = proto
         self.bitrate = bitrate
+
     def name(self):
         return self.proto
+
     def __repr__(self):
         return '%s(%d)' % (self.proto.upper(), self.bitrate)
+
 
 class PrioStreamsTest(unittest.TestCase):
     def _gen_proto_case(self, ordered, unordered, expected=None):

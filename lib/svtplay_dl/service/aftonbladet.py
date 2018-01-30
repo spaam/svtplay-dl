@@ -43,6 +43,7 @@ class Aftonbladettv(Service):
             for n in list(streams.keys()):
                 yield streams[n]
 
+
 class Aftonbladet(Service):
     supported_domains = ["aftonbladet.se"]
 
@@ -77,7 +78,7 @@ class Aftonbladet(Service):
                 for n in i["components"]:
                     if "type" in n and n["type"] == "video":
                         streams = hlsparse(self.options, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
-                                               n["videoAsset"]["streamUrls"]["hls"])
+                                           n["videoAsset"]["streamUrls"]["hls"])
                         if streams:
                             for key in list(streams.keys()):
                                 yield streams[key]
@@ -88,10 +89,13 @@ class Aftonbladet(Service):
                 streamUrls = i["videoAsset"]["streamUrls"]
 
                 if "hls" in streamUrls:
-                    streams.append(hlsparse(self.options, self.http.request("get", streamUrls["hls"]), streamUrls["hls"]))
+                    streams.append(hlsparse(self.options, self.http.request("get", streamUrls["hls"]),
+                                            streamUrls["hls"]))
 
                 if "hds" in streamUrls:
-                    streams.append(hdsparse(self.options, self.http.request("get", streamUrls["hds"], params={"hdcore": "3.7.0"}), streamUrls["hds"]))
+                    streams.append(hdsparse(self.options, self.http.request("get", streamUrls["hds"],
+                                                                            params={"hdcore": "3.7.0"}),
+                                            streamUrls["hds"]))
 
                 if streams:
                     for s in streams:

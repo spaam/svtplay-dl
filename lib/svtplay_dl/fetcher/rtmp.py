@@ -46,5 +46,3 @@ class RTMP(VideoRetriever):
             log.error("Could not execute rtmpdump: {0}".format(e.strerror))
             return
         self.finished = True
-
-

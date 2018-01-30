@@ -3,11 +3,14 @@
 
 from __future__ import absolute_import
 
+
 class UIException(Exception):
     pass
 
+
 class ServiceError(Exception):
     pass
+
 
 class NoRequestedProtocols(UIException):
     """

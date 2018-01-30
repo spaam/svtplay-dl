@@ -16,6 +16,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.utils import filenamify, is_py2
 from svtplay_dl.log import log
 
+
 class Dplay(Service):
     supported_domains = ['dplay.se', 'dplay.dk', "dplay.no"]
 
@@ -83,23 +84,26 @@ class Dplay(Service):
         data = self.http.request("get", "http://geo.{0}/geo.js".format(domain)).text
         dataj = json.loads(data)
         geo = dataj["countryCode"]
-        timestamp = (int(time.time())+3600)*1000
+        timestamp = (int(time.time()) + 3600) * 1000
         cookie = {"dsc-geo": quote('{{"countryCode":"{0}","expiry":{1}}}'.format(geo, timestamp))}
         if self.options.cookies:
             self.options.cookies.update(cookie)
         else:
             self.options.cookies = cookie
-        data = self.http.request("get", "https://secure.{0}/secure/api/v2/user/authorization/stream/{1}?stream_type=hds".format(domain, vid), cookies=self.options.cookies)
+        url = "https://secure.{0}/secure/api/v2/user/authorization/stream/{1}?stream_type=hds".format(domain, vid)
+        data = self.http.request("get", url, cookies=self.options.cookies)
         if data.status_code == 403 or data.status_code == 401:
             yield ServiceError("Geoblocked video")
             return
         dataj = json.loads(data.text)
         if not channel and "hds" in dataj:
-            streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}), dataj["hds"])
+            streams = hdsparse(copy.copy(self.options), self.http.request("get", dataj["hds"], params={"hdcore": "3.8.0"}),
+                               dataj["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
-        data = self.http.request("get", "https://secure.{0}/secure/api/v2/user/authorization/stream/{1}?stream_type=hls".format(domain, vid), cookies=self.options.cookies)
+        url = "https://secure.{0}/secure/api/v2/user/authorization/stream/{1}?stream_type=hls".format(domain, vid)
+        data = self.http.request("get", url, cookies=self.options.cookies)
         dataj = json.loads(data.text)
         if "hls" in dataj:
             streams = hlsparse(self.options, self.http.request("get", dataj["hls"]), dataj["hls"])
@@ -126,8 +130,9 @@ class Dplay(Service):
         data = self.http.request("get", "https://secure.{0}/login/".format(domain), cookies={})
         options.cookies = data.cookies
         match = re.search('realm_code" value="([^"]+)"', data.text)
-        postdata = {"username" : options.username, "password": options.password, "remember_me": "true", "realm_code": match.group(1)}
-        data = self.http.request("post", "https://secure.{0}/secure/api/v1/user/auth/login".format(domain), data=postdata, cookies=options.cookies)
+        postdata = {"username": options.username, "password": options.password, "remember_me": "true", "realm_code": match.group(1)}
+        data = self.http.request("post", "https://secure.{0}/secure/api/v1/user/auth/login".format(domain),
+                                 data=postdata, cookies=options.cookies)
         if data.status_code == 200:
             options.cookies = data.cookies
             return True

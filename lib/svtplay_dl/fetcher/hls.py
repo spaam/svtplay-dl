@@ -73,7 +73,7 @@ def hlsparse(options, res, url, **kwargs):
 
                 urls = _get_full_url(i["URI"], url)
             else:
-                continue # Needs to be changed to utilise other tags.
+                continue  # Needs to be changed to utilise other tags.
             res2 = http.get(urls, cookies=res.cookies)
             if res2.status_code < 400:
 
@@ -205,6 +205,7 @@ class HLS(VideoRetriever):
         if not self.options.silent:
             progress_stream.write('\n')
         self.finished = True
+
 
 class M3U8():
     # Created for hls version <=7
@@ -347,7 +348,7 @@ class M3U8():
                         info = _get_tuple_attribute(attr)
                         if "BANDWIDTH" not in info:
                             raise ValueError("Can't find 'BANDWIDTH' in 'EXT-X-STREAM-INF'")
-                        info["URI"] = lines[index+1]
+                        info["URI"] = lines[index + 1]
 
                     # 4.3.4.3.  EXT-X-I-FRAME-STREAM-INF
                     elif tag == "EXT-X-I-FRAME-STREAM-INF":
@@ -405,7 +406,7 @@ def _get_tag_attribute(line):
     try:
         search_line = re.search("^([A-Z\-]*):(.*)", line)
         return search_line.group(1), search_line.group(2)
-    except:
+    except Exception:
         return line, None
 
 

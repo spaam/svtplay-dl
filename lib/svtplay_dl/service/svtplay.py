@@ -19,6 +19,7 @@ from svtplay_dl.error import ServiceError
 
 URL_VIDEO_API = "http://api.svt.se/videoplayer-api/video/"
 
+
 class Svtplay(Service, OpenGraphThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 
@@ -117,9 +118,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 elif i["format"] == "hds":
                     match = re.search(r"\/se\/secure\/", i["url"])
                     if not match:
-                        streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
+                        streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
+                                           i["url"])
                         if alt:
-                            alt_streams = hdsparse(self.options, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}), alt.request.url)
+                            alt_streams = hdsparse(self.options, self.http.request("get", alt.request.url,
+                                                                                   params={"hdcore": "3.7.0"}),
+                                                   alt.request.url)
                 elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
                     streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
                     if alt:
@@ -214,7 +218,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
             if "versions" in n:
                 for i in n["versions"]:
                     parse = urlparse(i["contentUrl"])
-                    filename = "" # output is None here.
+                    filename = ""  # output is None here.
                     if "accessService" in i:
                         if i["accessService"] == "audioDescription":
                             filename += "-syntolkat"

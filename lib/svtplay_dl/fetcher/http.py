@@ -34,4 +34,3 @@ class HTTP(VideoRetriever):
 
         file_d.close()
         self.finished = True
-

@@ -9,13 +9,11 @@ from svtplay_dl.fetcher.hls import hlsparse
 
 class Raw(Service):
     def get(self):
-        data = self.get_urldata()
-
         if self.exclude():
             return
 
         extention = False
-        filename = os.path.basename(self.url[:self.url.rfind("/")-1])
+        filename = os.path.basename(self.url[:self.url.rfind("/") - 1])
         if self.options.output and os.path.isdir(self.options.output):
             self.options.output = os.path.join(os.path.dirname(self.options.output), filename)
             extention = True

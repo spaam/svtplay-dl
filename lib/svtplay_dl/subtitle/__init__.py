@@ -10,7 +10,7 @@ import platform
 
 
 class subtitle(object):
-    def __init__(self, options, subtype, url, subfix = None):
+    def __init__(self, options, subtype, url, subfix=None):
         self.url = url
         self.subtitle = None
         self.options = options
@@ -45,16 +45,16 @@ class subtitle(object):
             data = self.wrst(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
-            
+
         if self.subfix:
             self.options.output = self.options.output + self.subfix
-            
+
         if self.options.get_raw_subtitles:
             subdata = self.raw(subdata)
             self.save_file(subdata, self.subtype)
-        
+
         self.save_file(data, "srt")
-        
+
     def save_file(self, data, subtype):
         if platform.system() == "Windows" and is_py3:
             file_d = output(self.options, subtype, mode="wt", encoding="utf-8")
@@ -64,15 +64,14 @@ class subtitle(object):
             return
         file_d.write(data)
         file_d.close()
-        
-        
-    def raw(self, subdata): 
+
+    def raw(self, subdata):
         if is_py2:
             data = subdata.text.encode("utf-8")
         else:
             data = subdata.text
         return data
-        
+
     def tt(self, subdata):
         i = 1
         data = ""
@@ -176,7 +175,7 @@ class subtitle(object):
                         subs += "%s\n%s --> %s\n" % (number, timestr(timea), timestr(sync.group(1)))
                         text = "%s\n" % TAG_RE.sub('', data.replace("<br>", "\n"))
                         text = decode_html_entities(text)
-                        if text[len(text)-2] != "\n":
+                        if text[len(text) - 2] != "\n":
                             text += "\n"
                         subs += text
                         number += 1
@@ -230,7 +229,8 @@ class subtitle(object):
                     matchx = re.search(r'(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)', i)
                     hour1 = 0
                     hour2 = 0
-                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ","))
+                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","),
+                                                                      hour2, matchx.group("m2"), matchx.group("s2").replace(".", ","))
                 srt += time
                 block = 1
                 subnr = False
@@ -242,19 +242,19 @@ class subtitle(object):
                 subnr = True
             else:
                 if self.options.convert_subtitle_colors:
-                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
+                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00',
+                              '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
                     sub = i
                     for tag, color in colors.items():
                         regex1 = '<' + tag + '>'
                         replace = '<font color="' + color + '">'
                         sub = re.sub(regex1, replace, sub)
-                        
-                    sub = re.sub('</.+>', '</font>',sub)
+
+                    sub = re.sub('</.+>', '</font>', sub)
                 else:
                     sub = re.sub('<[^>]*>', '', i)
-                                        
                 srt += sub.strip()
-                srt+="\n"
+                srt += "\n"
         srt = decode_html_entities(srt)
         if is_py2:
             return srt.encode("utf-8")

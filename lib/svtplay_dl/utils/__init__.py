@@ -38,12 +38,13 @@ log = logging.getLogger('svtplay_dl')
 progress_stream = sys.stderr
 
 retry = Retry(
-            total=5,
-            read=5,
-            connect=5,
-            backoff_factor=0.3,
-            status_forcelist=(500, 502, 504),
-        )
+    total=5,
+    read=5,
+    connect=5,
+    backoff_factor=0.3,
+    status_forcelist=(500, 502, 504)
+)
+
 
 class HTTP(Session):
     def __init__(self, options, *args, **kwargs):
@@ -87,6 +88,7 @@ def list_quality(videos):
     for i in data:
         log.info("%s\t%s", i[0], i[1].upper())
 
+
 def protocol_prio(streams, priolist):
     """
     Given a list of VideoRetriever objects and a prioritized list of
@@ -96,15 +98,14 @@ def protocol_prio(streams, priolist):
     """
     # Map score's to the reverse of the list's index values
     proto_score = dict(zip(priolist, range(len(priolist), 0, -1)))
-    log.debug("Protocol priority scores (higher is better): %s",
-        str(proto_score))
+    log.debug("Protocol priority scores (higher is better): %s", str(proto_score))
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
     prioritized = [(s.bitrate, proto_score[s.name()], s) for
                    s in streams if s.name() in proto_score]
-    return [x[2] for
-            x in sorted(prioritized, key=itemgetter(0,1), reverse=True)]
+    return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
+
 
 def select_quality(options, streams):
     high = 0
@@ -155,7 +156,7 @@ def select_quality(options, streams):
     # is the stream with the highest priority protocol.
     stream_hash = {}
     for s in streams:
-        if not s.bitrate in stream_hash:
+        if s.bitrate not in stream_hash:
             stream_hash[s.bitrate] = s
 
     avail = sorted(stream_hash.keys(), reverse=True)
@@ -163,7 +164,7 @@ def select_quality(options, streams):
     # wanted_lim is a two element tuple defines lower/upper bounds
     # (inclusive). By default, we want only the best for you
     # (literally!).
-    wanted_lim = (avail[0],)*2
+    wanted_lim = (avail[0],) * 2
     if optq:
         wanted_lim = (optq - optf, optq + optf)
 
@@ -179,6 +180,7 @@ def select_quality(options, streams):
                                 "try --flexible-quality)" % quality)
 
     return stream_hash[wanted[0]]
+
 
 def ensure_unicode(s):
     """
@@ -198,6 +200,7 @@ def decode_html_entities(s):
         <3 &
     """
     parser = HTMLParser.HTMLParser()
+
     def unesc(m):
         return parser.unescape(m.group())
     return re.sub(r'(&[^;]+;)', unesc, ensure_unicode(s))

@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import unittest
 from svtplay_dl.utils import filenamify
 
+
 class filenamifyTest(unittest.TestCase):
     test_values = [
         ["foo", "foo"],
@@ -17,7 +18,7 @@ class filenamifyTest(unittest.TestCase):
         ['foo-bar baz', "foo-bar.baz"],
         [u'Jason "Timbuktu" Diakité', "jason.timbuktu.diakite"],
         [u'Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play',
-          'matlagning.del.1.av.10-raksmorgas.svt.play'],
+         'matlagning.del.1.av.10-raksmorgas.svt.play'],
         ['$FOOBAR', "foobar"],
     ]
 

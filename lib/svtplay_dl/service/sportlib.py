@@ -62,7 +62,6 @@ class Sportlib(Service, OpenGraphThumbMixin):
         token = janson["data"]["streamUrl"]["token"]
         hlsplaylist = janson["data"]["streamUrl"]["cdnUrl"]
 
-
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
             title = filenamify(janson["data"]["title"])

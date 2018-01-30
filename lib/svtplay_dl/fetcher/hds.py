@@ -29,6 +29,7 @@ else:
     def _chr(temp):
         return chr(temp)
 
+
 class HDSException(UIException):
     def __init__(self, url, message):
         self.url = url
@@ -77,8 +78,10 @@ def hdsparse(options, res, manifest):
     url = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
-        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), url, i.attrib["bitrate"], url_id=i.attrib["url"], bootstrap=bootstrapid,
-                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring, cookies=res.cookies)
+        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), url, i.attrib["bitrate"], url_id=i.attrib["url"],
+                                                bootstrap=bootstrapid,
+                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text,
+                                                querystring=querystring, cookies=res.cookies)
     return streams
 
 
@@ -131,7 +134,6 @@ class HDS(VideoRetriever):
         if not self.options.silent:
             progress_stream.write('\n')
         self.finished = True
-
 
 
 def readbyte(data, pos):
@@ -335,4 +337,3 @@ def decode_f4f(fragID, fragData):
         tagLen &= 0x00ffffff
         start += tagLen + 11 + 4
     return start
-

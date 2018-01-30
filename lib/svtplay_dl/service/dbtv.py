@@ -21,7 +21,7 @@ class Dbtv(Service, OpenGraphThumbMixin):
             return
 
         parse = urlparse(self.url)
-        vidoid = parse.path[parse.path.rfind("/")+1:]
+        vidoid = parse.path[parse.path.rfind("/") + 1:]
         match = re.search(r'JSONdata = ({.*});', data)
         if not match:
             yield ServiceError("Cant find json data")
@@ -36,4 +36,4 @@ class Dbtv(Service, OpenGraphThumbMixin):
                         yield streams[n]
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
-                        yield HTTP(copy.copy(self.options), n["URL"], int(n["rate"])/1000)
+                        yield HTTP(copy.copy(self.options), n["URL"], int(n["rate"]) / 1000)

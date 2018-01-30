@@ -138,7 +138,6 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
         return episodes
 
-
     def outputfilename(self, data, filename, raw):
         directory = os.path.dirname(filename)
         if is_py2:

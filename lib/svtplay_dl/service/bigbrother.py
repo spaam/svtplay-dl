@@ -72,4 +72,4 @@ class Bigbrother(Service, OpenGraphThumbMixin):
                     yield streams[n]
 
             if i["defaultURL"].endswith("mp4"):
-                yield HTTP(copy.copy(self.options), i["defaultURL"], i["encodingRate"]/1024)
+                yield HTTP(copy.copy(self.options), i["defaultURL"], i["encodingRate"] / 1024)

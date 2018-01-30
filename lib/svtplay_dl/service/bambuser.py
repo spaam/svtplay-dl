@@ -30,11 +30,10 @@ class Bambuser(Service, OpenGraphThumbMixin):
         info = json.loads(data)["result"]
         video = info["url"]
         if video[:4] == "rtmp":
-            playpath = info["id"][len(info["id"])-36:]
+            playpath = info["id"][len(info["id"]) - 36:]
             self.options.other = "-y {0}".format(playpath)
             if info["type"] == "live":
                 self.options.live = True
             yield RTMP(copy.copy(self.options), video, "0")
         else:
             yield HTTP(copy.copy(self.options), video, "0")
-

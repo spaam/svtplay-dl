@@ -173,6 +173,7 @@ class Options(object):
         self.proxy = None
         self.hls_time_stamp = False
 
+
 def get_multiple_media(urls, options):
     if options.output and os.path.isfile(options.output):
         log.error("Output must be a directory if used with multiple URLs")
@@ -187,6 +188,7 @@ def get_multiple_media(urls, options):
     for url in urls:
         get_media(url, copy.copy(options))
 
+
 def get_media(url, options):
     if "http" not in url[:4]:
         url = "http://%s" % url
@@ -194,7 +196,7 @@ def get_media(url, options):
     if options.silent_semi:
         options.silent = True
     if options.verbose:
-        log.debug("version: {0}".format( __version__))
+        log.debug("version: {0}".format(__version__))
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
@@ -236,7 +238,7 @@ def get_all_episodes(stream, options, url):
             substream = service_handler(sites, copy.copy(options), o)
 
         log.info("Episode %d of %d", idx + 1, len(episodes))
-        log.info("Url: %s",o) 
+        log.info("Url: %s", o)
 
         # get_one_media overwrites options.output...
         get_one_media(substream, copy.copy(options))
@@ -292,7 +294,7 @@ def get_one_media(stream, options):
                     print(sub.url)
             else:
                 print(subs[0].url)
-        if options.force_subtitle: 
+        if options.force_subtitle:
             return
 
     def options_subs_dl(subfixes):
@@ -305,7 +307,7 @@ def get_one_media(stream, options):
                             subfixes += [sub.subfix]
                         else:
                             options.get_all_subtitles = False
-            else: 
+            else:
                 subs[0].download()
         elif options.merge_subtitle:
             options.merge_subtitle = False
@@ -393,8 +395,8 @@ def main():
     parser.add_option("-l", "--live",
                       action="store_true", dest="live", default=False,
                       help="enable for live streams (RTMP based ones)")
-    parser.add_option("-c", "--capture_time", default=-1, type=int, metavar = "capture_time",
-                      help = "define capture time in minutes of a live stream")
+    parser.add_option("-c", "--capture_time", default=-1, type=int, metavar="capture_time",
+                      help="define capture time in minutes of a live stream")
     parser.add_option("-s", "--silent",
                       action="store_true", dest="silent", default=False,
                       help="be less verbose")
@@ -414,7 +416,8 @@ def main():
                       action="store_true", dest="subtitle", default=False,
                       help="download subtitle from the site if available")
     parser.add_option("-M", "--merge-subtitle", action="store_true", dest="merge_subtitle",
-                      default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code. this invokes --remux automatically. use with -S for external also.")
+                      default=False, help="merge subtitle with video/audio file with corresponding ISO639-3 language code."
+                                          "this invokes --remux automatically. use with -S for external also.")
     parser.add_option("--force-subtitle", dest="force_subtitle", default=False,
                       action="store_true", help="download only subtitle if its used with -S")
     parser.add_option("--require-subtitle", dest="require_subtitle", default=False,
@@ -424,7 +427,7 @@ def main():
     parser.add_option("--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true",
                       help="also download the subtitles in their native format")
     parser.add_option("--convert-subtitle-colors", dest="convert_subtitle_colors", default=False, action="store_true",
-                        help="converts the color information in subtitles, to <font color=""> tags")
+                      help="converts the color information in subtitles, to <font color=""> tags")
     parser.add_option("-u", "--username", default=None,
                       help="username")
     parser.add_option("-p", "--password", default=None,

@@ -12,9 +12,6 @@ from __future__ import absolute_import
 import unittest
 import svtplay_dl.fetcher.hls as hls
 from svtplay_dl.fetcher.hls import M3U8
-from svtplay_dl.utils import HTTP
-from svtplay_dl import Options
-
 
 # Example HLS playlist, source:
 # loosly inspired by
@@ -37,6 +34,7 @@ something4/else.m3u8
 #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=41457,CODECS="mp4a.40.2"
 something0/else.m3u8
 '''
+
 
 class HlsTest(unittest.TestCase):
     def test_get_full_url_1(self):
@@ -89,11 +87,16 @@ class HlsTest(unittest.TestCase):
             {
                 'playlist': M3U_EXAMPLE,
                 'expected': [
-                    {"PROGRAM-ID": "1", "BANDWIDTH": "232370", "TAG": "EXT-X-STREAM-INF", "URI": "something1/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d4015"},
-                    {"PROGRAM-ID": "1", "BANDWIDTH": "649879", "TAG": "EXT-X-STREAM-INF", "URI": "something2/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401e"},
-                    {"PROGRAM-ID": "1", "BANDWIDTH": "991714", "TAG": "EXT-X-STREAM-INF", "URI": "something3/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401e"},
-                    {"PROGRAM-ID": "1", "BANDWIDTH": "1927833", "TAG": "EXT-X-STREAM-INF", "URI": "something4/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401f"},
-                    {"PROGRAM-ID": "1", "BANDWIDTH": "41457", "TAG": "EXT-X-STREAM-INF", "URI": "something0/else.m3u8", "CODECS": "mp4a.40.2"}
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "232370", "TAG": "EXT-X-STREAM-INF",
+                     "URI": "something1/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d4015"},
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "649879", "TAG": "EXT-X-STREAM-INF",
+                     "URI": "something2/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401e"},
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "991714", "TAG": "EXT-X-STREAM-INF",
+                     "URI": "something3/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401e"},
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "1927833", "TAG": "EXT-X-STREAM-INF",
+                     "URI": "something4/else.m3u8", "CODECS": "mp4a.40.2, avc1.4d401f"},
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "41457", "TAG": "EXT-X-STREAM-INF",
+                     "URI": "something0/else.m3u8", "CODECS": "mp4a.40.2"}
                 ]
             }
             # More examples can be found on "https://developer.apple.com/streaming/examples/"

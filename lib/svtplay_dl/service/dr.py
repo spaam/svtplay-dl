@@ -15,6 +15,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.utils.urllib import urlparse, urljoin
 from svtplay_dl.utils import is_py3
 
+
 class Dr(Service, OpenGraphThumbMixin):
     supported_domains = ['dr.dk']
 
@@ -79,11 +80,9 @@ class Dr(Service, OpenGraphThumbMixin):
             newstyle = '_' in encpath
             if newstyle:
                 encbasepath = encpath.split('_')[0]
-                path = base64.b64decode(encbasepath + '===').decode('latin1') if is_py3 else\
-                       base64.b64decode(encbasepath + '===')
+                path = base64.b64decode(encbasepath + '===').decode('latin1') if is_py3 else base64.b64decode(encbasepath + '===')
             else:
-                path = base64.b64decode(encpath + '===').decode('latin1') if is_py3 else\
-                       base64.b64decode(encpath + '===')
+                path = base64.b64decode(encpath + '===').decode('latin1') if is_py3 else base64.b64decode(encpath + '===')
 
             if '/view/' in path:
                 continue
@@ -91,17 +90,17 @@ class Dr(Service, OpenGraphThumbMixin):
             params = 'offset=0&limit=1000'
             if newstyle:
                 encparams = base64.b64encode(params.encode('latin1')).decode('latin1').rstrip('=') if is_py3 else \
-                            base64.b64encode(params).rstrip('=')
+                    base64.b64encode(params).rstrip('=')
                 encpath = '{0}_{1}'.format(encbasepath, encparams)
             else:
                 path = '{0}?{1}'.format(urlparse(path).path, params)
-                encpath = base64.b64encode(path.encode('latin1')).decode('latin1').rstrip('=') if is_py3 else\
-                          base64.b64encode(path).rstrip('=')
+                encpath = base64.b64encode(path.encode('latin1')).decode('latin1').rstrip('=') if is_py3 else \
+                    base64.b64encode(path).rstrip('=')
 
             url = urljoin('https://www.dr.dk/tv/partial/',
                           '{0}/{1}'.format(enccomp, encpath))
-            data = self.http.request('get', url).content.decode('latin1') if is_py3 else\
-                   self.http.request('get', url).content
+            data = self.http.request('get', url).content.decode('latin1') if is_py3 else \
+                self.http.request('get', url).content
 
             matches = re.findall(r'"program-link" href="([^"]+)">', data)
             episodes = [urljoin('https://www.dr.dk/', url) for url in matches]

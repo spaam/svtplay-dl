@@ -53,5 +53,3 @@ class Sr(Service, OpenGraphThumbMixin):
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
         yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
-
-

@@ -104,25 +104,25 @@ class EtaTest(unittest.TestCase):
         # processes one item per second, and make the size be
         # 100.
         eta = svtplay_dl.output.ETA(100)
-        self.assertEqual(eta.left, 100) # no progress yet
-        self.assertEqual(str(eta), "(unknown)") # no progress yet
+        self.assertEqual(eta.left, 100)  # no progress yet
+        self.assertEqual(str(eta), "(unknown)")  # no progress yet
 
-        mock_time.return_value = float(10) # sleep(10)
+        mock_time.return_value = float(10)  # sleep(10)
         eta.update(10)
         self.assertEqual(eta.left, 90)
-        self.assertEqual(str(eta), "0:01:30") # 90 items left, 90s left
+        self.assertEqual(str(eta), "0:01:30")  # 90 items left, 90s left
 
         mock_time.return_value += 1
-        eta.increment() # another item completed in one second!
+        eta.increment()  # another item completed in one second!
         self.assertEqual(eta.left, 89)
         self.assertEqual(str(eta), "0:01:29")
 
         mock_time.return_value += 9
-        eta.increment(9) # another item completed in one second!
+        eta.increment(9)  # another item completed in one second!
         self.assertEqual(eta.left, 80)
         self.assertEqual(str(eta), "0:01:20")
 
-        mock_time.return_value = float(90) # sleep(79)
+        mock_time.return_value = float(90)  # sleep(79)
         eta.update(90)
         self.assertEqual(eta.left, 10)
         self.assertEqual(str(eta), "0:00:10")

@@ -6,7 +6,6 @@ import json
 import copy
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle

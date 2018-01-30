@@ -24,7 +24,7 @@ class Barnkanalen(Svtplay):
             return True
 
         # For every listed domain, try with www. subdomain as well.
-        if urlp.netloc in ['www.'+x for x in cls.supported_domains] and correctpath:
+        if urlp.netloc in ['www.' + x for x in cls.supported_domains] and correctpath:
             return True
 
         return False
@@ -105,4 +105,3 @@ class Barnkanalen(Svtplay):
                 videos.append(parse.path)
 
         return videos
-

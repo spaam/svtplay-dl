@@ -61,7 +61,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
             match = re.search("mtvnn.com:([^&]+)", mrssxmlurl)
             if match:
-                urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists") # it use playlists dunno from where it gets it
+                urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists")  # it use playlists dunno from where it gets it
                 hlsapi = "http://api.mtvnn.com/v2/{0}/{1}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
                 data = self.http.request("get", hlsapi).text
 
@@ -78,7 +78,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             log.error("Couldn't program id")
             return
         programid = match.group(1)
-        match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'", self.get_urldata())
+        match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'",
+                           self.get_urldata())
         if not match:
             log.error("Couldn't retrieve episode list")
             return
@@ -113,7 +114,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
 
         try:
             janson = json.loads(match.group(1))
-        except:
+        except Exception:
             yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
             return
 

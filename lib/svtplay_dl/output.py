@@ -5,7 +5,6 @@ import sys
 import time
 import re
 import os
-import io
 import platform
 from datetime import timedelta
 
@@ -106,7 +105,7 @@ def progressbar(total, pos, msg=""):
     function.
     """
     width = get_terminal_size()[0] - 40
-    rel_pos = int(float(pos)/total*width)
+    rel_pos = int(float(pos) / total * width)
     bar = ''.join(["=" * rel_pos, "." * (width - rel_pos)])
 
     # Determine how many digits in total (base 10)
@@ -142,7 +141,7 @@ def filename(stream):
 
 
 def output(options, extension="mp4", openfd=True, mode="wb", **kwargs):
-    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
+    subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
 
     ext = re.search(r"(\.\w{2,4})$", options.output)
     if not ext:
@@ -171,11 +170,11 @@ def output(options, extension="mp4", openfd=True, mode="wb", **kwargs):
 
 
 def findexpisode(directory, service, name):
-    subtitlefiles = ["srt", "smi", "tt","sami", "wrst"]
+    subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
     match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)
     if not match:
         return False
-    
+
     videoid = match.group(1)
     extension = match.group(2)
 

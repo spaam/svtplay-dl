@@ -49,7 +49,7 @@ class Solidtango(Service):
                 yield streams[n]
         else:
             parse = urlparse(self.url)
-            url2 = "https://{0}/api/v1/play/{1}.xml".format(parse.netloc, parse.path[parse.path.rfind("/")+1:])
+            url2 = "https://{0}/api/v1/play/{1}.xml".format(parse.netloc, parse.path[parse.path.rfind("/") + 1:])
             data = self.http.request("get", url2)
             if data.status_code != 200:
                 yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")

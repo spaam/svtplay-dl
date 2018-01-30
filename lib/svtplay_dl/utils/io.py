@@ -13,4 +13,3 @@ if is_py2:
     from StringIO import StringIO
 else:
     from io import StringIO
-

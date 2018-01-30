@@ -29,7 +29,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             end_time_stamp = (datetime.utcnow() - timedelta(seconds=20)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat())
+            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(parse.path[9:],
+                                                                                              start_time_stamp.isoformat(),
+                                                                                              end_time_stamp.isoformat())
 
             self.options.live = True
             self.options.hls_time_stamp = True
@@ -45,12 +47,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if not vid:
             yield ServiceError("Can't find video id for {0}.".format(self.url))
             return
-
-        # if self.options.username and self.options.password:
-            # work = self._login(self.options.username, self.options.password)
-            # if isinstance(work, Exception):
-                # yield work
-                # return
 
         url = "http://prima.tv4play.se/api/web/asset/{0}/play".format(vid)
         data = self.http.request("get", url, cookies=self.cookies)
@@ -109,8 +105,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
                     self.options.other = "-W {0} -y {1}".format(swf, i.find("url").text)
                     yield RTMP(copy.copy(self.options), i.find("base").text, i.find("bitrate").text)
-                elif parse.path[len(parse.path)-3:len(parse.path)] == "f4m":
-                    streams = hdsparse(self.options, self.http.request("get", i.find("url").text, params={"hdcore": "3.7.0"}), i.find("url").text)
+                elif parse.path[len(parse.path) - 3:len(parse.path)] == "f4m":
+                    streams = hdsparse(self.options, self.http.request("get", i.find("url").text,
+                                                                       params={"hdcore": "3.7.0"}), i.find("url").text)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -174,7 +171,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             else:
                 show = match.group(1)
         else:
-            show = parse.path[parse.path.find("/", 1)+1:]
+            show = parse.path[parse.path.find("/", 1) + 1:]
         if show and not re.search("%", show):
             if is_py2 and isinstance(show, unicode):
                 show = show.encode("utf-8")
@@ -214,12 +211,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         premium = False
-        # if options.username and options.password:
-            # premium = self._login(options.username, options.password)
-            # if isinstance(premium, Exception):
-                # log.error(premium.message)
-                # return None
-
         jsondata = self._get_show_info()
 
         episodes = []
@@ -244,25 +235,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 n += 1
 
         return episodes
-
-    # def _login(self, username, password):
-        # data = self.http.request("get", "https://www.tv4play.se/session/new?https=")
-        # url = "https://account.services.tv4play.se/session/authenticate"
-        # postdata = {"username" : username, "password": password, "https": "", "client": "web"}
-
-        # data = self.http.request("post", url, data=postdata, cookies=self.cookies)
-        # try:
-            # res = data.json()
-        # except ValueError:
-            # return ServiceError("Cant decode output from tv4play")
-        # if "errors" in res:
-            # message = res["errors"][0]
-            # if is_py2:
-                # message = message.encode("utf8")
-            # return ServiceError(message)
-        # self.cookies={"JSESSIONID": res["vimond_session_token"]}
-
-        # return True
 
 
 def findvid(url, data):

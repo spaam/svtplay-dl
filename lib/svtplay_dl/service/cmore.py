@@ -12,6 +12,7 @@ from svtplay_dl.utils import filenamify
 from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.error import ServiceError
 
+
 class Cmore(Service):
     supported_domains = ['www.cmore.se']
 
@@ -78,7 +79,7 @@ class Cmore(Service):
         janson = res.json()["asset"]["metadata"]
         if isinstance(janson["title"], list):
             for i in janson["title"]:
-                if i["@xml:lang"] == "sv_SE": # if we add other .tld, we might need to change this.
+                if i["@xml:lang"] == "sv_SE":  # if we add other .tld, we might need to change this.
                     name = i["$"]
         else:
             name = janson["title"]["$"]

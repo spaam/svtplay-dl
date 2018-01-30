@@ -9,6 +9,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils import decode_html_entities
 
+
 class Lemonwhale(Service):
     # lemonwhale.com is just bogus for generic
     supported_domains = ['vk.se', 'lemonwhale.com']

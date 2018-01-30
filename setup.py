@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# ex:ts=4:sw=4:sts=4:et
-# -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from setuptools import setup, find_packages
 import sys
 import os
@@ -22,20 +19,19 @@ else:
     deps.append("PySocks")
 
 setup(
-    name = "svtplay-dl",
-    version = svtplay_dl.__version__,
-    packages = find_packages(
+    name="svtplay-dl",
+    version=svtplay_dl.__version__,
+    packages=find_packages(
         'lib',
         exclude=["tests", "*.tests", "*.tests.*"]),
     install_requires=deps,
-    package_dir = {'': 'lib'},
-    scripts = ['bin/svtplay-dl'],
-
-    author = "Johan Andersson",
-    author_email = "j@i19.se",
-    description = "Command-line program to download videos from various video on demand sites",
-    license = "MIT",
-    url = "https://svtplay-dl.se",
+    package_dir={'': 'lib'},
+    scripts=['bin/svtplay-dl'],
+    author="Johan Andersson",
+    author_email="j@i19.se",
+    description="Command-line program to download videos from various video on demand sites",
+    license="MIT",
+    url="https://svtplay-dl.se",
     classifiers=["Development Status :: 5 - Production/Stable",
                  "Environment :: Console",
                  "Operating System :: POSIX",
