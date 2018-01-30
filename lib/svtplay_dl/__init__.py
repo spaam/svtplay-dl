@@ -7,7 +7,7 @@ import logging
 
 from svtplay_dl.log import log
 from svtplay_dl.utils.parser import parser, mergeparseroption, Options
-from svtplay_dl.utils.getmedia import get_all_episodes, get_media, get_multiple_media, get_one_media
+from svtplay_dl.utils.getmedia import get_media, get_multiple_media
 
 from svtplay_dl.service.cmore import Cmore
 
