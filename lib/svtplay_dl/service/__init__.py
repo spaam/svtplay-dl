@@ -2,12 +2,11 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
+import logging
+
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.utils import download_thumbnail, HTTP
 
-import logging
-
-log = logging.getLogger('svtplay_dl')
 
 
 class Service(object):
@@ -73,7 +72,7 @@ class Service(object):
     # interface, so we don't want to remove it. Thus, the
     # pylint ignore.
     def find_all_episodes(self, options):  # pylint: disable-msg=unused-argument
-        log.warning("--all-episodes not implemented for this service")
+        logging.warning("--all-episodes not implemented for this service")
         return [self.url]
 
 
