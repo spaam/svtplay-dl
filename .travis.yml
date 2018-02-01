@@ -9,7 +9,7 @@ matrix:
 cache: pip
 
 install:
-  - pip install tox
+  - pip install -r requirements-dev.txt -r requirements.txt
 
 script:
   - tox -- --verbose 
