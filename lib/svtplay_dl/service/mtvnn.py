@@ -19,6 +19,47 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
     def get(self):
         data = self.get_urldata()
+        parse = urlparse(self.url)
+
+        if parse.netloc.endswith("se"):
+
+            match = re.search('<div class="video-player" (.*)>', data)
+
+            if not match:
+                yield ServiceError("Can't find video info")
+                return
+
+            match_id = re.search('data-id="([0-9a-fA-F|\-]+)" ', match.group(1))
+
+            if not match_id:
+                yield ServiceError("Can't find video info")
+                return
+
+            wanted_id = match_id.group(1)
+            url_service = "http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{0}&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c".format(wanted_id)
+            service_asset = self.http.request("get", url_service)
+            match_guid = re.search('<guid isPermaLink="false">(.*)</guid>', service_asset.text)
+
+            if not match_guid:
+                yield ServiceError("Can't find video info")
+                return
+
+            hls_url = "https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{0}?arcStage=staging&accountOverride=intl.mtvi.com&billingSection=intl&ep=a9cc543c&acceptMethods=hls".format(match_guid.group(1))
+            hls_asset = self.http.request("get", hls_url)
+            xml = ET.XML(hls_asset.text)
+
+            if xml.find("./video") is not None and xml.find("./video").find("item") is not None and \
+                            xml.find("./video").find("item").find("rendition") is not None and \
+                            xml.find("./video").find("item").find("rendition").find("src") is not None:
+
+                hls_url = xml.find("./video").find("item").find("rendition").find("src").text
+                stream = hlsparse(self.options, self.http.request("get", hls_url), hls_url)
+                if stream:
+
+                    for key in list(stream.keys()):
+                        yield stream[key]
+            return
+
         match = re.search(r'data-mrss=[\'"](http://gakusei-cluster.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
         if not match:
             yield ServiceError("Can't find id for the video")
