@@ -12,7 +12,6 @@ from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils import HTTP
 
 
 class HLSException(UIException):
@@ -55,11 +54,13 @@ def hlsparse(options, res, url, **kwargs):
     keycookie = kwargs.pop("keycookie", None)
 
     media = {}
+    options.segments = m3u8.segments
+
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
             audio_url = None
             if i["TAG"] == "EXT-X-MEDIA":
-                if "DEFAULT" in i and (i["DEFAULT"].upper() == "YES"):
+                if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
                     if i["TYPE"] and ("URI" in i):
                         if i["GROUP-ID"] not in media:
                             media[i["GROUP-ID"]] = []
@@ -69,7 +70,7 @@ def hlsparse(options, res, url, **kwargs):
                 bit_rate = float(i["BANDWIDTH"]) / 1000
 
                 if "AUDIO" in i and (i["AUDIO"] in media):
-                    audio_url = media[i["AUDIO"]][0]
+                    audio_url = _get_full_url(media[i["AUDIO"]][0], url)
 
                 urls = _get_full_url(i["URI"], url)
             else:
@@ -92,27 +93,18 @@ class HLS(VideoRetriever):
 
     def download(self):
 
-        if self.audio:
-            if self.options.live:
-                raise LiveHLSException(self.url)
+        if self.options.segments:
+            if self.audio:
+                self._download(self.audio, file_name=(copy.copy(self.options), "m4a"))
+            self._download(self.url, file_name=(self.options, "mp4"))
 
-            cookies = self.kwargs["cookies"]
-            audio_data_m3u = self.http.request("get", self.audio, cookies=cookies).text
-            audio_m3u8 = M3U8(audio_data_m3u)
-            total_size = audio_m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["n"] + audio_m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["o"]
-            self._download_url(audio_m3u8.media_segment[0]["URI"], audio=True, total_size=total_size)
-
-            data_m3u = self.http.request("get", self.url, cookies=cookies).text
-            m3u8 = M3U8(data_m3u)
-            total_size = m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["n"] + m3u8.media_segment[-1]["EXT-X-BYTERANGE"]["o"]
-            self._download_url(m3u8.media_segment[0]["URI"], total_size=total_size)
         else:
-            self._download()
+            self._download(self.url, file_name=(self.options, "ts"))
 
-    def _download(self):
+    def _download(self, url, file_name):
         cookies = self.kwargs["cookies"]
         start_time = time.time()
-        m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
+        m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
         key = None
 
         if m3u8.encrypted:
@@ -122,7 +114,7 @@ class HLS(VideoRetriever):
                 log.error("You need to install pycrypto to download encrypted HLS streams")
                 sys.exit(2)
 
-        file_d = output(self.options, "ts")
+        file_d = output(file_name[0], file_name[1])
         if file_d is None:
             return
 
@@ -137,7 +129,7 @@ class HLS(VideoRetriever):
                 duration = i["EXTINF"]["duration"]
                 max_duration = max(max_duration, duration)
                 total_duration += duration
-            item = _get_full_url(i["URI"], self.url)
+            item = _get_full_url(i["URI"], url)
 
             if not self.options.silent:
                 if self.options.live:
@@ -158,7 +150,7 @@ class HLS(VideoRetriever):
 
                 # Update key/decryptor
                 if "EXT-X-KEY" in i:
-                    keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], self.url)
+                    keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], url)
                     key = self.http.request("get", keyurl, cookies=keycookies).content
                     decryptor = AES.new(key, AES.MODE_CBC, os.urandom(16))
 
@@ -186,10 +178,10 @@ class HLS(VideoRetriever):
                         end_time_stamp = (datetime.utcnow() - timedelta(seconds=max_duration * 2)).replace(microsecond=0)
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-                        base_url = self.url.split(".m3u8")[0]
-                        self.url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        base_url = url.split(".m3u8")[0]
+                        url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
 
-                    new_m3u8 = M3U8(self.http.request("get", self.url, cookies=cookies).text)
+                    new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:
                         if n_m3u not in m3u8.media_segment:
                             m3u8.media_segment.append(n_m3u)
@@ -228,12 +220,13 @@ class M3U8():
         self.master_playlist = []
 
         self.encrypted = False
+        self.segments = False
 
         self.parse_m3u(data)
 
     def __str__(self):
-        return "Version: {0}\nMedia Segment: {1}\nMedia Playlist: {2}\nMaster Playlist: {3}\nEncrypted: {4}"\
-            .format(self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted)
+        return "Version: {0}\nMedia Segment: {1}\nMedia Playlist: {2}\nMaster Playlist: {3}\nEncrypted: {4}\tSegments: {5}"\
+            .format(self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.segments)
 
     def parse_m3u(self, data):
         if not data.startswith("#EXTM3U"):
@@ -370,7 +363,7 @@ class M3U8():
                     tag_type = M3U8.TAG_TYPES["MEDIA_PLAYLIST"]
                     # 4.3.5.1. EXT-X-INDEPENDENT-SEGMENTS
                     if tag == "EXT-X-INDEPENDENT-SEGMENTS":
-                        pass
+                        self.segments = True
 
                     # 4.3.5.2. EXT-X-START
                     elif tag == "EXT-X-START":
