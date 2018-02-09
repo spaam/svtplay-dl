@@ -12,6 +12,7 @@ from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils.urllib import urljoin
 
 
 class HLSException(UIException):
@@ -35,7 +36,7 @@ def _get_full_url(url, srcurl):
 
     # remove everything after last / in the path of the URL
     baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
-    returl = "{0}/{1}".format(baseurl, url)
+    returl = urljoin(baseurl, url)
 
     return returl
 
