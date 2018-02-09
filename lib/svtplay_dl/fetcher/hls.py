@@ -35,7 +35,7 @@ def _get_full_url(url, srcurl):
         return "{0}{1}".format(baseurl.group(1), url)
 
     # remove everything after last / in the path of the URL
-    baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1', srcurl)
+    baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1/', srcurl)
     returl = urljoin(baseurl, url)
 
     return returl
