@@ -184,7 +184,7 @@ class HLS(VideoRetriever):
 
                     new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:
-                        if n_m3u not in m3u8.media_segment:
+                        if not any(d["URI"] == n_m3u["URI"] for d in m3u8.media_segment):
                             m3u8.media_segment.append(n_m3u)
 
                     size_media = len(m3u8.media_segment)
