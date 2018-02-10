@@ -179,7 +179,7 @@ class DASH(VideoRetriever):
                 n += 1
             data = self.http.request("get", i, cookies=cookies)
 
-            if data.status_code == 404:
+            if not data or (data.status_code == 404):
                 break
             data = data.content
             file_d.write(data)

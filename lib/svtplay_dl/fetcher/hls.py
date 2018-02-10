@@ -140,7 +140,7 @@ class HLS(VideoRetriever):
                     progressbar(size_media, index + 1, ''.join(['ETA: ', str(eta)]))
 
             data = self.http.request("get", item, cookies=cookies)
-            if data.status_code == 404:
+            if not data or (data.status_code == 404):
                 break
             data = data.content
             if m3u8.encrypted:
