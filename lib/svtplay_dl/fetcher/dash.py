@@ -5,7 +5,7 @@ import copy
 import xml.etree.ElementTree as ET
 import os
 import re
-
+import dateutil.parser
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar
 from svtplay_dl.utils.urllib import urljoin
@@ -25,43 +25,57 @@ class LiveDASHException(DASHException):
             url, "This is a live DASH stream, and they are not supported.")
 
 
-def templateelemt(element, filename, idnumber):
+def templateelemt(element, filename, idnumber, offset_sec):
     files = []
+    timescale = 1
+    duration = 1
 
     init = element.attrib["initialization"]
     media = element.attrib["media"]
     if "startNumber" in element.attrib:
         start = int(element.attrib["startNumber"])
     else:
-        start = 0
-    timeline = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline")
-    if timeline is None:
-        return
+        start = 1
 
-    rvalue = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
-    selements = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
-    selements.pop()
-    if rvalue:
-        total = int(rvalue[0].attrib["r"]) + len(selements) + 1
+    if "timescale" in element.attrib:
+        timescale = float(element.attrib["timescale"])
+
+    if "duration" in element.attrib:
+        duration = float(element.attrib["duration"])
+
+    if offset_sec is not None:
+        start += int(offset_sec / ( duration / timescale ))
+
+    total = 1
+    selements = None
+    rvalue = None
+    timeline = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline")
+    if timeline is not None:
+
+        rvalue = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S[@r]")
+        selements = timeline.findall(".//{urn:mpeg:dash:schema:mpd:2011}S")
+        selements.pop()
+
+        if rvalue:
+            total = int(rvalue[0].attrib["r"]) + len(selements) + 1
 
     name = media.replace("$RepresentationID$", idnumber)
     files.append(urljoin(filename, init.replace("$RepresentationID$", idnumber)))
 
     if "$Time$" in media:
-        time = []
-        time.append(0)
+        time = [0]
         for n in selements:
             time.append(int(n.attrib["d"]))
         match = re.search("\$Time\$", name)
         if match:
-            number = 0
             if len(selements) < 3:
                 for n in range(start, start + total):
                     new = name.replace("$Time$", str(n * int(rvalue[0].attrib["d"])))
                     files.append(urljoin(filename, new))
             else:
+                number = 0
                 for n in time:
-                    number += int(n)
+                    number += n
                     new = name.replace("$Time$", str(number))
                     files.append(urljoin(filename, new))
     if "$Number" in name:
@@ -76,7 +90,7 @@ def templateelemt(element, filename, idnumber):
     return files
 
 
-def adaptionset(element, url, baseurl=None):
+def adaptionset(element, url, baseurl=None, offset_sec=None):
     streams = {}
 
     dirname = os.path.dirname(url) + "/"
@@ -90,7 +104,7 @@ def adaptionset(element, url, baseurl=None):
         files = []
         segments = False
         filename = dirname
-        bitrate = int(int(i.attrib["bandwidth"]) / 1000)
+        bitrate = int(i.attrib["bandwidth"]) / 1000
         idnumber = i.attrib["id"]
 
         if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
@@ -101,12 +115,13 @@ def adaptionset(element, url, baseurl=None):
             files.append(filename)
         if template is not None:
             segments = True
-            files = templateelemt(template, filename, idnumber)
+            files = templateelemt(template, filename, idnumber, offset_sec)
         elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
             segments = True
-            files = templateelemt(i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
+            files = templateelemt(i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber, offset_sec)
 
-        streams[bitrate] = {"segments": segments, "files": files}
+        if files:
+            streams[bitrate] = {"segments": segments, "files": files}
 
     return streams
 
@@ -114,6 +129,7 @@ def adaptionset(element, url, baseurl=None):
 def dashparse(options, res, url):
     streams = {}
     baseurl = None
+    offset_sec = None
 
     if not res:
         return None
@@ -129,16 +145,30 @@ def dashparse(options, res, url):
     if xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
         baseurl = xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL").text
 
+    if "availabilityStartTime" in xml.attrib:
+        availabilityStartTime = xml.attrib["availabilityStartTime"]
+        publishTime = xml.attrib["publishTime"]
+
+        datetime_start = dateutil.parser.parse(availabilityStartTime).replace(tzinfo=None)
+        datetime_publish = dateutil.parser.parse(publishTime).replace(tzinfo=None)
+        diff_publish = datetime_publish - datetime_start
+        offset_sec = diff_publish.total_seconds()
+
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
-    audiofiles = adaptionset(temp, url, baseurl)
+    audiofiles = adaptionset(temp, url, baseurl, offset_sec)
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
-    videofiles = adaptionset(temp, url, baseurl)
+    videofiles = adaptionset(temp, url, baseurl, offset_sec)
+
+    if not audiofiles or not videofiles:
+        streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
+        return
+
+    options.other = "mp4"
 
     for i in videofiles.keys():
-        bitrate = (int(i) + int(list(audiofiles.keys())[0]))
-        options.other = "mp4"
+        bitrate = i + list(audiofiles.keys())[0]
         options.segments = videofiles[i]["segments"]
-        streams[int(bitrate)] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies,
+        streams[bitrate] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies,
                                      audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
 
     return streams
