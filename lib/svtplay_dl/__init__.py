@@ -28,6 +28,7 @@ from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dplay import Dplay
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.efn import Efn
+from svtplay_dl.service.eurosport import Eurosport
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.facebook import Facebook
 from svtplay_dl.service.filmarkivet import Filmarkivet
@@ -78,6 +79,7 @@ sites = [
     Dplay,
     Dr,
     Efn,
+    Eurosport,
     Expressen,
     Facebook,
     Filmarkivet,
