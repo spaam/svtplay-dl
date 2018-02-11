@@ -202,7 +202,7 @@ def get_media(url, options):
         generic = Generic(options, url)
         url, stream = generic.get(sites)
     if not stream:
-        if re.search(".f4m", url) or re.search(".m3u8", url):
+        if re.search(".f4m", url) or re.search(".m3u8", url) or re.search(".mpd", url):
             stream = Raw(options, url)
         if not stream:
             log.error("That site is not supported. Make a ticket or send a message")
