@@ -200,7 +200,16 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     index = len(i["program"]["name"])
                     return "{0}.{1}{2}".format(i["title"][:index], season, i["title"][index:])
                 return i["title"]
-        return self._get_clip_info(vid)
+
+        aname = self._get_clip_info(vid)
+        if aname is not None:
+            return aname
+
+        aname = self._get_showname()
+        if aname is not None:
+            return aname
+
+        return "tv4Stream"
 
     def _getdays(self, data, text):
         try:
