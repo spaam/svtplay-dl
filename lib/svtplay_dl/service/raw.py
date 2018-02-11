@@ -5,6 +5,7 @@ import re
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.dash import dashparse
 
 
 class Raw(Service):
@@ -13,7 +14,7 @@ class Raw(Service):
             return
 
         extention = False
-        filename = os.path.basename(self.url[:self.url.rfind("/") - 1])
+        filename = os.path.basename(self.url[:self.url.rfind("/")])
         if self.options.output and os.path.isdir(self.options.output):
             self.options.output = os.path.join(os.path.dirname(self.options.output), filename)
             extention = True
@@ -21,18 +22,25 @@ class Raw(Service):
             self.options.output = filename
             extention = True
 
+        streams = []
         if re.search(".f4m", self.url):
             if extention:
-                self.options.output = "%s.flv" % self.options.output
+                self.options.output = "{0}.flv".format(self.options.output)
 
-            streams = hdsparse(self.options, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url)
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
+            streams.append(hdsparse(self.options, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url))
+
         if re.search(".m3u8", self.url):
-            streams = hlsparse(self.options, self.http.request("get", self.url), self.url)
-            if extention:
-                self.options.output = "%s.ts" % self.options.output
+            streams.append(hlsparse(self.options, self.http.request("get", self.url), self.url))
 
-            for n in list(streams.keys()):
-                yield streams[n]
+            if extention:
+                self.options.output = "{0}.ts".format(self.options.output)
+
+        if re.search(".mpd", self.url):
+            streams.append(dashparse(self.options, self.http.request("get", self.url), self.url))
+
+            if extention:
+                self.options.output = "{0}.mp4".format(self.options.output)
+
+        for stream in streams:
+            for n in list(stream.keys()):
+                yield stream[n]
