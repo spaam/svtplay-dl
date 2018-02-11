@@ -53,6 +53,7 @@ def hlsparse(options, res, url, **kwargs):
     m3u8 = M3U8(res.text)
 
     keycookie = kwargs.pop("keycookie", None)
+    authorization = kwargs.pop("authorization", None)
 
     media = {}
     options.segments = m3u8.segments
@@ -77,10 +78,10 @@ def hlsparse(options, res, url, **kwargs):
             else:
                 continue  # Needs to be changed to utilise other tags.
 
-            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, audio=audio_url)
+            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
-        streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie)
+        streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization)
 
     else:
         streams[0] = ServiceError("Can't find HLS playlist in m3u8 file.")
@@ -144,15 +145,18 @@ class HLS(VideoRetriever):
                 break
             data = data.content
             if m3u8.encrypted:
+                headers = {}
                 if self.keycookie:
                     keycookies = self.keycookie
                 else:
                     keycookies = cookies
+                if self.authorization:
+                    headers["authorization"] = self.authorization
 
                 # Update key/decryptor
                 if "EXT-X-KEY" in i:
                     keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], url)
-                    key = self.http.request("get", keyurl, cookies=keycookies).content
+                    key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
                     decryptor = AES.new(key, AES.MODE_CBC, os.urandom(16))
 
                 if decryptor:
