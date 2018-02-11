@@ -32,14 +32,8 @@ class Raw(Service):
         if re.search(".m3u8", self.url):
             streams.append(hlsparse(self.options, self.http.request("get", self.url), self.url))
 
-            if extention:
-                self.options.output = "{0}.ts".format(self.options.output)
-
         if re.search(".mpd", self.url):
             streams.append(dashparse(self.options, self.http.request("get", self.url), self.url))
-
-            if extention:
-                self.options.output = "{0}.mp4".format(self.options.output)
 
         for stream in streams:
             for n in list(stream.keys()):
