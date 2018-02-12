@@ -56,16 +56,22 @@ def hlsparse(options, res, url, **kwargs):
     authorization = kwargs.pop("authorization", None)
 
     media = {}
+    segments = None
 
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
             audio_url = None
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
-                    if i["TYPE"] and ("URI" in i):
-                        if i["GROUP-ID"] not in media:
-                            media[i["GROUP-ID"]] = []
-                        media[i["GROUP-ID"]].append(i["URI"])
+                    if i["TYPE"]:
+                        if "URI" in i:
+                            if segments is None:
+                                segments = True
+                            if i["GROUP-ID"] not in media:
+                                media[i["GROUP-ID"]] = []
+                            media[i["GROUP-ID"]].append(i["URI"])
+                        else:
+                            segments = False
                 continue
             elif i["TAG"] == "EXT-X-STREAM-INF":
                 bit_rate = float(i["BANDWIDTH"]) / 1000
@@ -77,7 +83,7 @@ def hlsparse(options, res, url, **kwargs):
             else:
                 continue  # Needs to be changed to utilise other tags.
 
-            options.segments = audio_url is not None
+            options.segments = bool(segments)
             streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
@@ -230,8 +236,8 @@ class M3U8():
         self.parse_m3u(data)
 
     def __str__(self):
-        return "Version: {0}\nMedia Segment: {1}\nMedia Playlist: {2}\nMaster Playlist: {3}\nEncrypted: {4}\tSegments: {5}"\
-            .format(self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.segments)
+        return "Version: {0}\nMedia Segment: {1}\nMedia Playlist: {2}\nMaster Playlist: {3}\nEncrypted: {4}\tIndependent_segments: {5}"\
+            .format(self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.independent_segments)
 
     def parse_m3u(self, data):
         if not data.startswith("#EXTM3U"):
