@@ -56,7 +56,6 @@ def hlsparse(options, res, url, **kwargs):
     authorization = kwargs.pop("authorization", None)
 
     media = {}
-    options.segments = m3u8.segments
 
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
@@ -78,6 +77,7 @@ def hlsparse(options, res, url, **kwargs):
             else:
                 continue  # Needs to be changed to utilise other tags.
 
+            options.segments = audio_url is not None
             streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
@@ -225,7 +225,7 @@ class M3U8():
         self.master_playlist = []
 
         self.encrypted = False
-        self.segments = False
+        self.independent_segments = False
 
         self.parse_m3u(data)
 
@@ -368,7 +368,7 @@ class M3U8():
                     tag_type = M3U8.TAG_TYPES["MEDIA_PLAYLIST"]
                     # 4.3.5.1. EXT-X-INDEPENDENT-SEGMENTS
                     if tag == "EXT-X-INDEPENDENT-SEGMENTS":
-                        self.segments = True
+                        self.independent_segments = True
 
                     # 4.3.5.2. EXT-X-START
                     elif tag == "EXT-X-START":
