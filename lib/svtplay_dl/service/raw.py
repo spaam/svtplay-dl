@@ -36,5 +36,6 @@ class Raw(Service):
             streams.append(dashparse(self.options, self.http.request("get", self.url), self.url))
 
         for stream in streams:
-            for n in list(stream.keys()):
-                yield stream[n]
+            if stream:
+                for n in list(stream.keys()):
+                    yield stream[n]
