@@ -193,7 +193,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         episodes = self._grab_episodes(options, seasons)
         if options.all_last > 0:
-            return sorted(episodes)[-options.all_last:]
+            return episodes[-options.all_last:]
         return sorted(episodes)
 
     def _grab_episodes(self, options, seasons):
@@ -202,6 +202,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search("(sasong|sesong)-\d+", urlparse(self.url).path)
         if match:
             baseurl = self.url[:self.url.rfind("/")]
+            baseurl = baseurl[:baseurl.rfind("/")]
 
         for i in seasons:
             url = "{0}/{1}-{2}".format(baseurl, self._isswe(self.url), i)
@@ -226,7 +227,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return "sesong"
 
     def _conentpage(self, data):
-        return re.search('"ContentPageProgramStore":({.*}), "StartPageStore', data)
+        return re.search('"ContentPageProgramStore":({.*}),[ ]*"StartPageStore', data)
 
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
