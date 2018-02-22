@@ -13,6 +13,7 @@ from svtplay_dl.log import log
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.utils.urllib import urljoin
+from svtplay_dl.subtitle import subtitle
 
 
 class HLSException(UIException):
@@ -54,6 +55,7 @@ def hlsparse(options, res, url, **kwargs):
 
     keycookie = kwargs.pop("keycookie", None)
     authorization = kwargs.pop("authorization", None)
+    httpobject = kwargs.pop("httpobject", None)
 
     media = {}
     segments = None
@@ -61,6 +63,7 @@ def hlsparse(options, res, url, **kwargs):
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
             audio_url = None
+            subtitle_url = None
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
                     if i["TYPE"]:
@@ -78,12 +81,15 @@ def hlsparse(options, res, url, **kwargs):
 
                 if "AUDIO" in i and (i["AUDIO"] in media):
                     audio_url = _get_full_url(media[i["AUDIO"]][0], url)
-
+                if "SUBTITLES" in i and (i["SUBTITLES"] in media):
+                    subtitle_url = _get_full_url(media[i["SUBTITLES"]][0], url)
                 urls = _get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
-
             options.segments = bool(segments)
+            if subtitle_url and httpobject:
+                m3u8s = M3U8(httpobject.request("get", subtitle_url, cookies=res.cookies).text)
+                streams[1] = subtitle(copy.copy(options), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
             streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
