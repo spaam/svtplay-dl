@@ -187,9 +187,9 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 videos = self._genre(dataj)
             else:
                 if parse.query:
-                    match = re.search("tab=(.+)", parse.query)
-                    if match:
-                        tab = match.group(1)
+                    query = parse_qs(parse.query)
+                    if "tab" in query:
+                        tab = query["tab"][0]
 
                 if dataj["relatedVideoContent"]:
                     items = dataj["relatedVideoContent"]["relatedVideosAccordion"]
