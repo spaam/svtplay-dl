@@ -42,6 +42,8 @@ class subtitle(object):
             if "tv4play" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
                 subdata.encoding = "utf-8"
                 self.bom = True
+            if "dplay" in self.url:
+                subdata.encoding = "utf-8"
             data = self.wrst(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
