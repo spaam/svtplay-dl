@@ -7,11 +7,11 @@ import copy
 import time
 from datetime import datetime, timedelta
 import binascii
+from urllib.parse import urljoin
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils.urllib import urljoin
 from svtplay_dl.subtitle import subtitle
 
 
