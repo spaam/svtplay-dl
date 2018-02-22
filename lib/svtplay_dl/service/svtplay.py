@@ -6,6 +6,7 @@ import os
 import copy
 import json
 import hashlib
+from operator import itemgetter
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
@@ -209,6 +210,8 @@ class Svtplay(Service, OpenGraphThumbMixin):
         return episodes
 
     def videos_to_list(self, lvideos, videos):
+        if "episodeNumber" in lvideos[0] and lvideos[0]["episodeNumber"]:
+            lvideos = sorted(lvideos, key=itemgetter('episodeNumber'))
         for n in lvideos:
             parse = urlparse(n["contentUrl"])
             if parse.path not in videos:
