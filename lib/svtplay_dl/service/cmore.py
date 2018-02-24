@@ -9,29 +9,36 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils import filenamify
-from svtplay_dl.utils.urllib import urljoin
+from svtplay_dl.utils.urllib import urljoin, urlparse
 from svtplay_dl.error import ServiceError
 
 
 class Cmore(Service):
-    supported_domains = ['www.cmore.se']
+    supported_domains = ['www.cmore.se', 'www.cmore.dk', 'www.cmore.no', 'www.cmore.fi']
 
     def get(self):
         if not self.options.username or not self.options.password:
             yield ServiceError("You need username and password to download things from this site.")
             return
+
         token, message = self._login()
         if not token:
             yield ServiceError(message)
             return
+
         res = self.http.get(self.url)
         match = re.search('data-asset-id="([^"]+)"', res.text)
         if not match:
             yield ServiceError("Can't find video id")
             return
-        url = "https://restapi.cmore.se/api/tve_web/asset/{0}/play.json?protocol=VUDASH".format(match.group(1))
+
+        tld = self._gettld()
+        url = "https://restapi.cmore.{0}/api/tve_web/asset/{1}/play.json?protocol=VUDASH".format(tld, match.group(1))
         res = self.http.get(url, headers={"authorization": "Bearer {0}".format(token)})
         janson = res.json()
+        if "error" in janson:
+            yield ServiceError("This video is geoblocked")
+            return
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
@@ -74,13 +81,23 @@ class Cmore(Service):
                         yield streams[n]
 
     def _autoname(self, vid):
-        url = "https://restapi.cmore.se/api/tve_web/asset/{0}.json?expand=metadata".format(vid)
+        url = "https://restapi.cmore.{0}/api/tve_web/asset/{1}.json?expand=metadata".format(self._gettld(), vid)
         res = self.http.get(url)
         janson = res.json()["asset"]["metadata"]
         if isinstance(janson["title"], list):
             for i in janson["title"]:
-                if i["@xml:lang"] == "sv_SE":  # if we add other .tld, we might need to change this.
-                    name = i["$"]
+                if self._gettld() == "se":
+                    if i["@xml:lang"] == "sv_SE":
+                        name = i["$"]
+                elif self._gettld() == "dk":
+                    if i["@xml:lang"] == "da_DK":
+                        name = i["$"]
+                elif self._gettld() == "no":
+                    if i["@xml:lang"] == "nb_NO":
+                        name = i["$"]
+                elif self._gettld() == "fi":
+                    if i["@xml:lang"] == "fi_FI":
+                        name = i["$"]
         else:
             name = janson["title"]["$"]
 
@@ -99,7 +116,7 @@ class Cmore(Service):
         res = self.http.get(self.url)
         tags = re.findall('<a class="card__link" href="([^"]+)"', res.text)
         for i in tags:
-            url = urljoin("https://www.cmore.se/", i)
+            url = urljoin("https://www.cmore.{}/".format(self._gettld()), i)
             if url not in episodes:
                 episodes.append(url)
 
@@ -107,15 +124,24 @@ class Cmore(Service):
             return sorted(episodes[-options.all_last:])
         return sorted(episodes)
 
+    def _gettld(self):
+        print(self.url)
+        if isinstance(self.url, list):
+            parse = urlparse(self.url[0])
+        else:
+            parse = urlparse(self.url)
+        return re.search('\.(\w{2})$', parse.netloc).group(1)
+
     def _login(self):
-        url = "https://www.cmore.se/login"
+        tld = self._gettld()
+        url = "https://www.cmore.{}/login".format(tld)
         res = self.http.get(url, cookies=self.cookies)
         if self.options.cmoreoperator:
             post = {"username": self.options.username, "password": self.options.password,
-                    "operator": self.options.cmoreoperator, "country_code": "se"}
+                    "operator": self.options.cmoreoperator, "country_code": tld}
         else:
             post = {"username": self.options.username, "password": self.options.password}
-        res = self.http.post("https://account.cmore.se/session?client=cmore-web-prod", json=post, cookies=self.cookies)
+        res = self.http.post("https://account.cmore.{}/session?client=cmore-web-prod".format(tld), json=post, cookies=self.cookies)
         if res.status_code >= 400:
             return None, "Wrong username or password"
         janson = res.json()
@@ -123,6 +149,6 @@ class Cmore(Service):
         return token, None
 
     def operatorlist(self):
-        res = self.http.get("https://tve.cmore.se/country/se/operator?client=cmore-web")
+        res = self.http.get("https://tve.cmore.se/country/{0}/operator?client=cmore-web".format(self._gettld()))
         for i in res.json()["data"]["operators"]:
             print("operator: '{0}'".format(i["name"].lower()))
