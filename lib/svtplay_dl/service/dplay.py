@@ -42,6 +42,10 @@ class Dplay(Service):
             else:
                 self.options.output = title
 
+        if self.exclude():
+            yield ServiceError("Excluding video")
+            return
+
         api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(self.domain, janson["data"]["id"])
         res = self.http.get(api)
         if res.status_code > 400:
