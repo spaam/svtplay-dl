@@ -114,12 +114,8 @@ class Cmore(Service):
             post = {"username": self.options.username, "password": self.options.password,
                     "operator": self.options.cmoreoperator, "country_code": "se"}
         else:
-            match = re.search('authenticity_token" value="([^"]+)"', res.text)
-            if not match:
-                return None, "Can't find authenticity_token needed to login"
-            post = {"username": self.options.username, "password": self.options.password, "authenticity_token": match.group(1),
-                    "redirect": "true"}
-        res = self.http.post("https://account.cmore.se/session?client=web", json=post, cookies=self.cookies)
+            post = {"username": self.options.username, "password": self.options.password}
+        res = self.http.post("https://account.cmore.se/session?client=cmore-web-prod", json=post, cookies=self.cookies)
         if res.status_code >= 400:
             return None, "Wrong username or password"
         janson = res.json()
@@ -127,9 +123,6 @@ class Cmore(Service):
         return token, None
 
     def operatorlist(self):
-        res = self.http.get("https://www.cmore.se/operator/login")
-        res.encoding = "utf-8"
-        match = re.findall('<option value="([^"]+)">([^"]+)</option>', res.text)
-        for i in match:
-            message = "operator: '{0}' value: '{1}'".format(i[1], i[0].replace("-", ""))
-            print(message)
+        res = self.http.get("https://tve.cmore.se/country/se/operator?client=cmore-web")
+        for i in res.json()["data"]["operators"]:
+            print("operator: '{0}'".format(i["name"].lower()))
