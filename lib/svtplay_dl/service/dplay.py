@@ -62,11 +62,12 @@ class Dplay(Service):
         show = match.group(1)
         season = jsondata["data"]["attributes"]["seasonNumber"]
         episode = jsondata["data"]["attributes"]["episodeNumber"]
+        name = jsondata["data"]["attributes"]["name"]
         if is_py2:
             show = filenamify(show).encode("latin1")
         else:
             show = filenamify(show)
-        return filenamify("{0}.s{1:02d}e{2:02d}".format(show, int(season), int(episode)))
+        return filenamify("{0}.s{1:02d}e{2:02d}.{3}".format(show, int(season), int(episode), name))
 
     def find_all_episodes(self, options):
         parse = urlparse(self.url)
