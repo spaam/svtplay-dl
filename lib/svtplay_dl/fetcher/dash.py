@@ -5,7 +5,6 @@ import copy
 import xml.etree.ElementTree as ET
 import os
 import re
-import dateutil.parser
 from datetime import datetime
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar
@@ -154,8 +153,8 @@ def dashparse(options, res, url):
         availabilityStartTime = xml.attrib["availabilityStartTime"]
         publishTime = xml.attrib["publishTime"]
 
-        datetime_start = dateutil.parser.parse(availabilityStartTime)
-        datetime_publish = dateutil.parser.parse(publishTime)
+        datetime_start = datetime.strptime(availabilityStartTime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        datetime_publish = datetime.strptime(publishTime, "%Y-%m-%dT%H:%M:%S.%fZ")
         diff_publish = datetime_publish - datetime_start
         offset_sec = diff_publish.total_seconds()
 
