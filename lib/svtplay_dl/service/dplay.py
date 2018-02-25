@@ -38,7 +38,8 @@ class Dplay(Service):
             channel = True
             self.options.live = True
         else:
-            url = "https://disco-api.{}/content{}".format(self.domain, parse.path)
+            match = re.search("(videos|videoer)/(.*)$", parse.path)
+            url = "https://disco-api.{}/content/videos/{}".format(self.domain, match.group(2))
         res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
         janson = res.json()
         if "errors" in janson:
@@ -93,7 +94,7 @@ class Dplay(Service):
         parse = urlparse(self.url)
         self.domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
 
-        match = re.search("^/(program|videos)/([^/]+)", parse.path)
+        match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
         if not match:
             log.error("Can't find show name")
             return None
