@@ -154,7 +154,7 @@ class Dplay(Service):
 
     def _token(self):
         # random device id for cookietoken
-        deviceid = hashlib.sha256(bytes(int(random.random()*1000))).hexdigest()
+        deviceid = hashlib.sha256(bytes(int(random.random() * 1000))).hexdigest()
         url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, self.domain.replace(".", ""), deviceid)
         res = self.http.get(url)
         if res.status_code > 400:
