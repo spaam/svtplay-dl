@@ -25,14 +25,30 @@ class Dplay(Service):
         if not self._token():
             log.error("Something went wrong getting token for requests")
 
-        url = "https://disco-api.{}/content{}".format(self.domain, parse.path)
+        if self.options.username and self.options.password:
+            premium = self._login()
+            if not premium:
+                log.warning("Wrong username/password.")
+
+        channel = False
+        if "kanaler" in parse.path:
+            match = re.search("kanaler/([^/]+)$", parse.path)
+            path = "/channels/{}".format(match.group(1))
+            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            channel = True
+            self.options.live = True
+        else:
+            url = "https://disco-api.{}/content{}".format(self.domain, parse.path)
         res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
         janson = res.json()
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
             self.options.service = "dplay"
-            name = self._autoname(janson)
+            if channel:
+                name = filenamify(janson["data"]["attributes"]["name"])
+            else:
+                name = self._autoname(janson)
             if name is None:
                 yield ServiceError("Cant find vid id for autonaming")
                 return
@@ -48,8 +64,9 @@ class Dplay(Service):
 
         api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(self.domain, janson["data"]["id"])
         res = self.http.get(api)
+        print(res.cookies)
         if res.status_code > 400:
-            yield ServiceError("This video is geoblocked")
+            yield ServiceError("You dont have permission to watch this")
             return
         streams = hlsparse(self.options, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
                            res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http)
@@ -83,7 +100,7 @@ class Dplay(Service):
 
         premium = False
         if self.options.username and self.options.password:
-            premium = self.login()
+            premium = self._login()
             if not premium:
                 log.warning("Wrong username/password.")
 
@@ -107,7 +124,7 @@ class Dplay(Service):
             return episodes[:options.all_last]
         return episodes
 
-    def login(self):
+    def _login(self):
         url = "https://disco-api.{}/login".format(self.domain)
         login = {"credentials": {"username": self.options.username, "password": self.options.password}}
         res = self.http.post(url, json=login)
