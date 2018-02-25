@@ -7,6 +7,7 @@ import copy
 import json
 import hashlib
 from urllib.parse import urljoin, urlparse, parse_qs
+from operator import itemgetter
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
