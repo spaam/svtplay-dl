@@ -45,10 +45,10 @@ def templateelemt(element, filename, idnumber, offset_sec, duration_sec):
         duration = float(element.attrib["duration"])
 
     if offset_sec is not None and duration_sec is None:
-        start += int(offset_sec / ( duration / timescale ))
+        start += int(offset_sec / (duration / timescale))
 
     if duration_sec is not None:
-        total = int(duration_sec / ( duration / timescale ))
+        total = int(duration_sec / (duration / timescale))
 
     selements = None
     rvalue = None
