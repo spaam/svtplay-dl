@@ -41,6 +41,9 @@ class Dplay(Service):
             url = "https://disco-api.{}/content{}".format(self.domain, parse.path)
         res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
         janson = res.json()
+        if "errors" in janson:
+            yield ServiceError("Cant find any videos on this url")
+            return
 
         if self.options.output_auto:
             directory = os.path.dirname(self.options.output)
