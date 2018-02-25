@@ -89,7 +89,8 @@ def hlsparse(options, res, url, **kwargs):
             if subtitle_url and httpobject:
                 m3u8s = M3U8(httpobject.request("get", subtitle_url, cookies=res.cookies).text)
                 streams[1] = subtitle(copy.copy(options), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
-            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
+            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate,
+                                         cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
         options.segments = False
