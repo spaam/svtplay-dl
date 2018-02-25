@@ -160,9 +160,7 @@ def dashparse(options, res, url):
 
         if "mediaPresentationDuration" in xml.attrib:
             mediaPresentationDuration = xml.attrib["mediaPresentationDuration"]
-            nofrag, frag = mediaPresentationDuration.split(".")
-            nofrag_dt = datetime.strptime(nofrag, 'PT%HH%MM%S')
-            dt = nofrag_dt.replace(microsecond=int(frag[:-1]))
+            dt = datetime.strptime(mediaPresentationDuration, 'PT%HH%MM%S.%fS')
             duration_sec = (dt - datetime(1900, 1, 1)).total_seconds()
 
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
