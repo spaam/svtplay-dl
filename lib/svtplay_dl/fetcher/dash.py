@@ -176,7 +176,7 @@ def dashparse(options, res, url):
         bitrate = i + list(audiofiles.keys())[0]
         options.segments = videofiles[i]["segments"]
         streams[bitrate] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies,
-                                     audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
+                                audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
 
     return streams
 

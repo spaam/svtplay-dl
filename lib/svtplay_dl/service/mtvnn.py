@@ -47,9 +47,9 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             hls_asset = self.http.request("get", hls_url)
             xml = ET.XML(hls_asset.text)
 
-            if xml.find("./video") is not None and xml.find("./video").find("item") is not None and \
-                            xml.find("./video").find("item").find("rendition") is not None and \
-                            xml.find("./video").find("item").find("rendition").find("src") is not None:
+            if xml.find("./video") is not None and xml.find("./video").find("item") is not None \
+                    and xml.find("./video").find("item").find("rendition") is not None \
+                    and xml.find("./video").find("item").find("rendition").find("src") is not None:
 
                 hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                 stream = hlsparse(self.options, self.http.request("get", hls_url), hls_url)
