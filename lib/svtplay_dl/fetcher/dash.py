@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import dateutil.parser
+from datetime import datetime
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar
 from svtplay_dl.utils.urllib import urljoin
@@ -25,10 +26,11 @@ class LiveDASHException(DASHException):
             url, "This is a live DASH stream, and they are not supported.")
 
 
-def templateelemt(element, filename, idnumber, offset_sec):
+def templateelemt(element, filename, idnumber, offset_sec, duration_sec):
     files = []
     timescale = 1
     duration = 1
+    total = 1
 
     init = element.attrib["initialization"]
     media = element.attrib["media"]
@@ -43,10 +45,12 @@ def templateelemt(element, filename, idnumber, offset_sec):
     if "duration" in element.attrib:
         duration = float(element.attrib["duration"])
 
-    if offset_sec is not None:
+    if offset_sec is not None and duration_sec is None:
         start += int(offset_sec / ( duration / timescale ))
 
-    total = 1
+    if duration_sec is not None:
+        total = int(duration_sec / ( duration / timescale ))
+
     selements = None
     rvalue = None
     timeline = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline")
@@ -90,7 +94,7 @@ def templateelemt(element, filename, idnumber, offset_sec):
     return files
 
 
-def adaptionset(element, url, baseurl=None, offset_sec=None):
+def adaptionset(element, url, baseurl=None, offset_sec=None, duration_sec=None):
     streams = {}
 
     dirname = os.path.dirname(url) + "/"
@@ -115,10 +119,10 @@ def adaptionset(element, url, baseurl=None, offset_sec=None):
             files.append(filename)
         if template is not None:
             segments = True
-            files = templateelemt(template, filename, idnumber, offset_sec)
+            files = templateelemt(template, filename, idnumber, offset_sec, duration_sec)
         elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
             segments = True
-            files = templateelemt(i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber, offset_sec)
+            files = templateelemt(i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber, offset_sec, duration_sec)
 
         if files:
             streams[bitrate] = {"segments": segments, "files": files}
@@ -130,6 +134,7 @@ def dashparse(options, res, url):
     streams = {}
     baseurl = None
     offset_sec = None
+    duration_sec = None
 
     if not res:
         return None
@@ -149,15 +154,22 @@ def dashparse(options, res, url):
         availabilityStartTime = xml.attrib["availabilityStartTime"]
         publishTime = xml.attrib["publishTime"]
 
-        datetime_start = dateutil.parser.parse(availabilityStartTime).replace(tzinfo=None)
-        datetime_publish = dateutil.parser.parse(publishTime).replace(tzinfo=None)
+        datetime_start = dateutil.parser.parse(availabilityStartTime)
+        datetime_publish = dateutil.parser.parse(publishTime)
         diff_publish = datetime_publish - datetime_start
         offset_sec = diff_publish.total_seconds()
 
+        if "mediaPresentationDuration" in xml.attrib:
+            mediaPresentationDuration = xml.attrib["mediaPresentationDuration"]
+            nofrag, frag = mediaPresentationDuration.split(".")
+            nofrag_dt = datetime.strptime(nofrag, 'PT%HH%MM%S')
+            dt = nofrag_dt.replace(microsecond=int(frag[:-1]))
+            duration_sec = (dt - datetime(1900, 1, 1)).total_seconds()
+
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
-    audiofiles = adaptionset(temp, url, baseurl, offset_sec)
+    audiofiles = adaptionset(temp, url, baseurl, offset_sec, duration_sec)
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
-    videofiles = adaptionset(temp, url, baseurl, offset_sec)
+    videofiles = adaptionset(temp, url, baseurl, offset_sec, duration_sec)
 
     if not audiofiles or not videofiles:
         streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
