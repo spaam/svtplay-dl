@@ -135,7 +135,7 @@ class Dplay(Service):
             res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
             janson = res.json()
             for i in janson["data"]:
-                if not premium and not "Free" in i["attributes"]["packages"]:
+                if not premium and "Free" not in i["attributes"]["packages"]:
                     continue
                 episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
         if len(episodes) == 0:
