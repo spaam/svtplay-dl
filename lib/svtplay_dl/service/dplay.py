@@ -68,7 +68,6 @@ class Dplay(Service):
 
         api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(self.domain, janson["data"]["id"])
         res = self.http.get(api)
-        print(res.cookies)
         if res.status_code > 400:
             yield ServiceError("You dont have permission to watch this")
             return
