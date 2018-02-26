@@ -85,8 +85,10 @@ class Dplay(Service):
         name = jsondata["data"]["attributes"]["name"]
         if is_py2:
             show = filenamify(show).encode("latin1")
+            name = filenamify(name).encode("latin1")
         else:
             show = filenamify(show)
+
         return filenamify("{0}.s{1:02d}e{2:02d}.{3}".format(show, int(season), int(episode), name))
 
     def find_all_episodes(self, options):
