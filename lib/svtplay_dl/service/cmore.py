@@ -125,7 +125,6 @@ class Cmore(Service):
         return sorted(episodes)
 
     def _gettld(self):
-        print(self.url)
         if isinstance(self.url, list):
             parse = urlparse(self.url[0])
         else:

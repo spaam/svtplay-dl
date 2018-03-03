@@ -78,7 +78,6 @@ class Urplay(Service, OpenGraphThumbMixin):
                 res = self.http.get(urljoin("https://urskola.se", match.group(1)))
                 data = res.text
             tags = re.findall('<a class="puff program tv video" title="[^"]+" href="([^"]+)"', data)
-            print(tags)
             for i in tags:
                 url = urljoin("https://urskola.se/", i)
                 if url not in episodes:
