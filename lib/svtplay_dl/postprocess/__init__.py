@@ -1,12 +1,12 @@
 from json import dumps
 from random import sample
-import subprocess
 import os
 import platform
+import re
 from requests import post, codes, Timeout
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import which, is_py3
+from svtplay_dl.utils import which, is_py3, run_program
 
 
 class postprocess(object):
@@ -104,16 +104,19 @@ class postprocess(object):
             name, ext = os.path.splitext(orig_filename)
             new_name = u"{0}.mp4".format(name)
 
+            cmd = [self.detect, "-i", orig_filename]
+            _, stdout, stderr = run_program(cmd, False) # return 1 is good here.
+            videotrack, audiotrack = self._checktracks(stderr)
+
             if self.merge_subtitle:
                 log.info(u"Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
             else:
                 log.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
 
             tempfile = u"{0}.temp".format(orig_filename)
-            arguments = ["-map", "0:v", "-map", "0:a", "-c", "copy", "-copyts", "-f", "mp4"]
+            arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-copyts", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
-            cmd = [self.detect, "-i", orig_filename]
 
             if self.merge_subtitle:
                 langs = self.sublanguage()
@@ -130,12 +133,8 @@ class postprocess(object):
 
             arguments += ["-y", tempfile]
             cmd += arguments
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-            if p.returncode != 0:
-                stderr = stderr.decode('utf-8', 'replace')
-                msg = stderr.strip().split('\n')[-1]
-                log.error("Something went wrong: {0}".format(msg))
+            returncode, stdout, stderr = run_program(cmd)
+            if returncode != 0:
                 return
 
             if self.merge_subtitle and not self.external_subtitle:
@@ -159,6 +158,11 @@ class postprocess(object):
             return
 
         orig_filename = self.stream.options.output
+
+        cmd = [self.detect, "-i", orig_filename]
+        _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
+        videotrack, audiotrack = self._checktracks(stderr)
+
         if self.merge_subtitle:
             log.info("Merge audio, video and subtitle into {0}".format(orig_filename))
         else:
@@ -172,8 +176,8 @@ class postprocess(object):
 
         if self.merge_subtitle:
             langs = self.sublanguage()
-            for stream_num, language in enumerate(langs, start=2):
-                arguments += ["-map", "0", "-map", "1", "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
+            for stream_num, language in enumerate(langs, start=audiotrack + 1):
+                arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack), "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
                               "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
@@ -185,12 +189,8 @@ class postprocess(object):
 
         arguments += ["-y", tempfile]
         cmd += arguments
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        if p.returncode != 0:
-            stderr = stderr.decode('utf-8', 'replace')
-            msg = stderr.strip().split('\n')[-1]
-            log.error("Something went wrong: {0}".format(msg))
+        returncode, stdout, stderr = run_program(cmd)
+        if returncode != 1:
             return
 
         log.info("Merging done, removing old files.")
@@ -204,3 +204,17 @@ class postprocess(object):
             else:
                 os.remove(subfile)
         os.rename(tempfile, orig_filename)
+
+    def _checktracks(self, output):
+        allstuff = re.findall("Stream \#\d:(\d)\[[^\[]+\]: (Video|Audio): (.*)", output)
+        videotrack = 0
+        audiotrack = 1
+        for stream in allstuff:
+            if stream[1] == "Video":
+                videotrack = stream[0]
+            if stream[1] == "Audio":
+                if stream[2] == "mp3, 0 channels":
+                    continue
+                audiotrack = stream[0]
+
+        return videotrack, audiotrack
