@@ -7,6 +7,7 @@ import re
 import copy
 import time
 from datetime import datetime, timedelta
+import binascii
 
 from svtplay_dl.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.log import log
@@ -93,6 +94,7 @@ def hlsparse(options, res, url, **kwargs):
             streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate, cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
 
     elif m3u8.media_segment:
+        options.segments = False
         streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization)
 
     else:
@@ -124,6 +126,7 @@ class HLS(VideoRetriever):
         if m3u8.encrypted:
             try:
                 from Crypto.Cipher import AES
+                from Crypto import Random
             except ImportError:
                 log.error("You need to install pycrypto to download encrypted HLS streams")
                 sys.exit(2)
@@ -169,7 +172,8 @@ class HLS(VideoRetriever):
                 if "EXT-X-KEY" in i:
                     keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], url)
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
-                    decryptor = AES.new(key, AES.MODE_CBC, os.urandom(16))
+                    vi = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else Random.new().read(AES.block_size)
+                    decryptor = AES.new(key, AES.MODE_CBC, vi)
 
                 if decryptor:
                     data = decryptor.decrypt(data)
