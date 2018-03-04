@@ -37,6 +37,27 @@ class Dplay(Service):
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             channel = True
             self.options.live = True
+        elif "program" in parse.path:
+            match = re.search("(programmer|program)/([^/]+)$", parse.path)
+            path = "/shows/{}".format(match.group(2))
+            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
+            programid = res.json()["data"]["id"]
+            qyerystring = "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&" \
+                          "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
+            res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
+            janson = res.json()
+            vid = 0
+            slug = None
+            for i in janson["data"]:
+                if int(i["id"]) > vid:
+                    vid = int(i["id"])
+                    slug = i["attributes"]["path"]
+            if slug:
+                url = "https://disco-api.{}/content/videos/{}".format(self.domain, slug)
+            else:
+                yield ServiceError("Cant find latest video on program url")
+                return
         else:
             match = re.search("(videos|videoer)/(.*)$", parse.path)
             url = "https://disco-api.{}/content/videos/{}".format(self.domain, match.group(2))
