@@ -183,7 +183,7 @@ def select_quality(options, streams):
     # Test if the wanted stream is available. If not try with the second best and so on.
     for w in wanted:
         res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs["cookies"])
-        if res is not None and res.status_code < 400:
+        if res is not None and res.status_code < 404:
             return stream_hash[w]
 
     raise error.UIException("Streams not available to download.")
