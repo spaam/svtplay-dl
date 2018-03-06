@@ -169,9 +169,13 @@ class postprocess(object):
             log.info("Merge audio and video into {0}".format(orig_filename))
 
         tempfile = u"{0}.temp".format(orig_filename)
-        name = os.path.splitext(orig_filename)[0]
-        audio_filename = u"{0}.m4a".format(name)
+        name, ext = os.path.splitext(orig_filename)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
+        if ext == ".ts":
+            audio_filename = u"{0}.audio.ts".format(name)
+            arguments += ["-bsf:a", "aac_adtstoasc"]
+        else:
+            audio_filename = u"{0}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
         if self.merge_subtitle:
