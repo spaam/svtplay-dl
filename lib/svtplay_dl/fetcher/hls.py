@@ -111,8 +111,8 @@ class HLS(VideoRetriever):
 
         if self.options.segments:
             if self.audio:
-                self._download(self.audio, file_name=(copy.copy(self.options), "m4a"))
-            self._download(self.url, file_name=(self.options, "mp4"))
+                self._download(self.audio, file_name=(copy.copy(self.options), "audio.ts"))
+            self._download(self.url, file_name=(self.options, "ts"))
 
         else:
             self._download(self.url, file_name=(self.options, "ts"))
