@@ -70,17 +70,16 @@ def templateelemt(element, filename, idnumber, offset_sec, duration_sec):
         for n in selements:
             time.append(int(n.attrib["d"]))
         match = re.search("\$Time\$", name)
-        if match:
-            if len(selements) < 3:
-                for n in range(start, start + total):
-                    new = name.replace("$Time$", str(n * int(rvalue[0].attrib["d"])))
-                    files.append(urljoin(filename, new))
-            else:
-                number = 0
-                for n in time:
-                    number += n
-                    new = name.replace("$Time$", str(number))
-                    files.append(urljoin(filename, new))
+        if rvalue and (match is not None) and (len(selements) < 3):
+            for n in range(start, start + total):
+                new = name.replace("$Time$", str(n * int(rvalue[0].attrib["d"])))
+                files.append(urljoin(filename, new))
+        else:
+            number = 0
+            for n in time:
+                number += n
+                new = name.replace("$Time$", str(number))
+                files.append(urljoin(filename, new))
     if "$Number" in name:
         if re.search("\$Number(\%\d+)d\$", name):
             vname = name.replace("$Number", "").replace("$", "")
