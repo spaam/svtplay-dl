@@ -352,10 +352,9 @@ def get_one_media(stream, options):
 
         if stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments) and post.detect:
             post.merge()
-        if (stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments)) and not post.detect and stream.finished:
+        elif (stream.name() == "dash" or (stream.name() == "hls" and stream.options.segments)) and not post.detect and stream.finished:
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-
-        if stream.name() == "hls" or options.remux:
+        elif stream.name() == "hls" or options.remux:
             if post.detect:
                 post.remux()
             else:
