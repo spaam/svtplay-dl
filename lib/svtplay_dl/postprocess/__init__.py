@@ -194,7 +194,7 @@ class postprocess(object):
         arguments += ["-y", tempfile]
         cmd += arguments
         returncode, stdout, stderr = run_program(cmd)
-        if returncode != 1:
+        if returncode != 0:
             return
 
         log.info("Merging done, removing old files.")
