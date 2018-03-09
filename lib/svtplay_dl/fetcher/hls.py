@@ -67,7 +67,7 @@ def hlsparse(options, res, url, **kwargs):
             subtitle_url = None
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
-                    if i["TYPE"]:
+                    if i["TYPE"] and i["TYPE"] != "SUBTITLES":
                         if "URI" in i:
                             if segments is None:
                                 segments = True
