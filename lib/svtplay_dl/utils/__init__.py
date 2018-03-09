@@ -14,13 +14,10 @@ try:
 except ImportError:
     # pylint: disable-msg=import-error
     import html.parser as HTMLParser
-try:
-    from requests import Session
-    from requests.adapters import HTTPAdapter
-    from requests.packages.urllib3.util.retry import Retry
-except ImportError:
-    print("You need to install python-requests to use this script")
-    sys.exit(3)
+
+from requests import Session
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from svtplay_dl import error
 

@@ -124,12 +124,8 @@ class HLS(VideoRetriever):
         key = None
 
         if m3u8.encrypted:
-            try:
-                from Crypto.Cipher import AES
-                from Crypto import Random
-            except ImportError:
-                log.error("You need to install pycrypto to download encrypted HLS streams")
-                sys.exit(2)
+            from Crypto.Cipher import AES
+            from Crypto import Random
 
         file_d = output(file_name[0], file_name[1])
         if file_d is None:
