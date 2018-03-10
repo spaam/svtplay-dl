@@ -276,11 +276,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if season:
             if len(dataj["format_position"]["episode"]) > 0:
                 episode = dataj["format_position"]["episode"]
-            try:
-                episode = int(episode)
-            except ValueError:
-                title = filenamify(episode)
-                episode = None
+            if episode:
+                try:
+                    episode = int(episode)
+                except TypeError:
+                    title = filenamify(episode)
+                    episode = None
 
         if dataj["type"] == "clip":
             # Removes the show name from the end of the filename
