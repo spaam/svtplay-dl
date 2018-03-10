@@ -118,7 +118,7 @@ class HLS(VideoRetriever):
             self._download(self.url, file_name=(self.options, "ts"))
 
     def _download(self, url, file_name):
-        cookies = self.kwargs["cookies"]
+        cookies = self.kwargs.get("cookies", None)
         start_time = time.time()
         m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
         key = None
