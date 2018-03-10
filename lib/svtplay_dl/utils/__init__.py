@@ -180,7 +180,7 @@ def select_quality(options, streams):
     http = HTTP(options)
     # Test if the wanted stream is available. If not try with the second best and so on.
     for w in wanted:
-        res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs.pop("cookies", None))
+        res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs.get("cookies", None))
         if res is not None and res.status_code < 404:
             return stream_hash[w]
 
