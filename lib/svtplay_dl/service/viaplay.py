@@ -282,6 +282,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 except TypeError:
                     title = filenamify(episode)
                     episode = None
+            else:
+                title = filenamify(dataj["title"])
 
         if dataj["type"] == "clip":
             # Removes the show name from the end of the filename
