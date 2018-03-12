@@ -6,7 +6,6 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 
-
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
 
@@ -45,7 +44,6 @@ class HTTP(Session):
 
     def split_header(self, headers):
         return dict(x.split('=') for x in headers.split(';'))
-
 
 
 def download_thumbnail(options, url):

@@ -52,5 +52,3 @@ def filenamify(title):
     title = re.sub(r'\.-\.', '-', title)
 
     return title
-
-

@@ -9,6 +9,7 @@ from svtplay_dl import error
 DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
 LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http", "rtmp"]
 
+
 def sort_quality(data):
     data = sorted(data, key=lambda x: (x.bitrate, x.name()), reverse=True)
     datas = []
