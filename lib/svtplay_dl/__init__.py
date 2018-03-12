@@ -12,28 +12,26 @@ from svtplay_dl.service.cmore import Cmore
 
 __version__ = "1.9.11"
 
-logging.getLogger('svtplay_dl')
+log = logging.getLogger('svtplay_dl')
 
 
 def setup_log(silent, verbose=False):
     logging.addLevelName(25, "INFO")
-    fmt = logging.Formatter('%(levelname)s: %(message)s')
+    fmt = '%(levelname)s: %(message)s'
     if silent:
         stream = sys.stderr
         level = 25
     elif verbose:
         stream = sys.stderr
         level = logging.DEBUG
-        fmt = logging.Formatter('%(levelname)s [%(created)s] %(pathname)s/%(funcName)s: %(message)s')
+        fmt = '%(levelname)s [%(created)s] %(filename)s/%(funcName)s: %(message)s'
     else:
         stream = sys.stdout
         level = logging.INFO
 
+    logging.basicConfig(level=level, format=fmt)
     hdlr = logging.StreamHandler(stream)
-    hdlr.setFormatter(fmt)
-
-    logging.addHandler(hdlr)
-    logging.setLevel(level)
+    log.addHandler(hdlr)
 
 
 def main():
