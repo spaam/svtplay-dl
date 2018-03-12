@@ -8,15 +8,10 @@ import svtplay_dl
 
 deps = []
 
-if sys.version_info[0] == 2 and sys.version_info[1] <= 7 and sys.version_info[2] < 9:
-    deps.append("requests>=2.0.0")
-    deps.append("PySocks")
-    deps.append("pyOpenSSL")
-    deps.append("ndg-httpsclient")
-    deps.append("pyasn1")
-else:
-    deps.append(["requests>=2.0.0"])
-    deps.append("PySocks")
+
+deps.append("requests>=2.0.0")
+deps.append("PySocks")
+deps.append("pycryptodome")
 
 setup(
     name="svtplay-dl",
@@ -36,11 +31,10 @@ setup(
                  "Environment :: Console",
                  "Operating System :: POSIX",
                  "Operating System :: Microsoft :: Windows",
-                 "Programming Language :: Python :: 2.6",
                  "Programming Language :: Python :: 2.7",
-                 "Programming Language :: Python :: 3.3",
                  "Programming Language :: Python :: 3.4",
                  "Programming Language :: Python :: 3.5",
+                 "Programming Language :: Python :: 3.6",
                  "Topic :: Internet :: WWW/HTTP",
                  "Topic :: Multimedia :: Sound/Audio",
                  "Topic :: Multimedia :: Video",
