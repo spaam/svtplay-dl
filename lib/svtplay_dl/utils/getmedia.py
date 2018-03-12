@@ -10,7 +10,7 @@ from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.output import filename
 from svtplay_dl.postprocess import postprocess
-from svtplay_dl.utils import select_quality, list_quality
+from svtplay_dl.utils.stream import select_quality, list_quality
 from svtplay_dl.error import UIException
 
 

@@ -2,10 +2,10 @@ from __future__ import absolute_import
 import re
 import json
 import uuid
+from urllib.parse import urlparse, quote
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils.urllib import urlparse, quote
 from svtplay_dl.error import ServiceError
 
 

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-
 from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
 from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
@@ -40,7 +39,6 @@ from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.vg import Vg
 from svtplay_dl.service.viaplay import Viaplay
 from svtplay_dl.service.viasatsport import Viasatsport
-from svtplay_dl.service.vidme import Vidme
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
 
@@ -82,7 +80,6 @@ sites = [
     Urplay,
     Viaplay,
     Viasatsport,
-    Vidme,
     Vimeo,
     Vg,
     Youplay,

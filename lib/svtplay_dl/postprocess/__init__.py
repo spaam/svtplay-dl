@@ -7,7 +7,7 @@ from requests import post, codes, Timeout
 from re import match
 
 from svtplay_dl.log import log
-from svtplay_dl.utils import which, run_program
+from svtplay_dl.utils.proc import which, run_program
 
 
 class postprocess(object):

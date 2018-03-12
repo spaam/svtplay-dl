@@ -8,7 +8,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils import decode_html_entities
+from svtplay_dl.utils.text import decode_html_entities
 
 
 class Expressen(Service):

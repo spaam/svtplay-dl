@@ -7,7 +7,7 @@ import re
 import os
 from datetime import timedelta
 
-from svtplay_dl.utils import filenamify, decode_html_entities, ensure_unicode
+from svtplay_dl.utils.text import filenamify, decode_html_entities, ensure_unicode
 from svtplay_dl.utils.terminal import get_terminal_size
 from svtplay_dl.log import log
 

@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils.text import filenamify
 
 
 class Atg(Service):

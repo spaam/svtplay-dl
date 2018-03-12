@@ -13,7 +13,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.utils import ensure_unicode, filenamify, decode_html_entities
+from svtplay_dl.utils.text import ensure_unicode, filenamify, decode_html_entities
 from svtplay_dl.subtitle import subtitle
 
 

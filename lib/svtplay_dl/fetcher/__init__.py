@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import copy
 
 from svtplay_dl.output import progress_stream, output, ETA, progressbar
-from svtplay_dl.utils import HTTP
+from svtplay_dl.utils.http import HTTP
 
 
 class VideoRetriever(object):

@@ -5,7 +5,7 @@ import re
 import logging
 from urllib.parse import urlparse
 
-from svtplay_dl.utils import download_thumbnail, HTTP
+from svtplay_dl.utils.http import download_thumbnail, HTTP
 
 
 class Service(object):

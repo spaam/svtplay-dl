@@ -4,7 +4,6 @@ from svtplay_dl.fetcher.hls import hlsparse
 
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-
 from svtplay_dl.error import ServiceError
 
 

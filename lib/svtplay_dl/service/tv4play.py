@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs, quote_plus
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
