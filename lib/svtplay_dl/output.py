@@ -157,12 +157,12 @@ def output(options, extension="mp4", openfd=True, mode="wb", **kwargs):
             findexpisode(os.path.dirname(os.path.realpath(options.output)), options.service, os.path.basename(options.output)):
         if extension in subtitlefiles:
             if not options.force_subtitle:
-                if not (options.silent or options.silent_semi):
+                if not options.silent:
                     log.warn("File (%s) already exists. Use --force-subtitle to overwrite" % options.output)
                 return None
         else:
             if not options.force:
-                if not (options.silent or options.silent_semi):
+                if not options.silent:
                     log.warn("File (%s) already exists. Use --force to overwrite" % options.output)
                 return None
     if openfd:
