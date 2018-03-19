@@ -1,5 +1,4 @@
 import re
-import json
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay
@@ -11,17 +10,10 @@ class Svt(Svtplay):
     def get(self):
 
         data = self.get_urldata()
-        match = re.search("window.svt.nyh.reduxState=({.*});", data)
         match_data_video_id = re.search("data-video-id=\"(.+?)\"", data)
 
         if match_data_video_id:
             id = match_data_video_id.group(1)
-
-        elif match:
-            janson = json.loads(match.group(1))
-            context = janson["appState"]["location"]["context"]
-            areaData = janson["areaData"]["articles"][context]["media"]
-            id = areaData[0]["id"]
 
         else:
             yield ServiceError("Cant find video info.")
