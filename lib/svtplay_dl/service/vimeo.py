@@ -20,11 +20,20 @@ class Vimeo(Service, OpenGraphThumbMixin):
             yield ServiceError("Excluding video")
             return
 
-        match = re.search('data-config-url="([^"]+)" data-fallback-url', data)
-        if not match:
+        match_cfg_url = re.search('data-config-url="([^"]+)" data-fallback-url', data)
+        match_clip_page_cfg = re.search( r'vimeo\.clip_page_config\s*=\s*({.+?});', data)
+
+        if match_cfg_url:
+            player_url = match_cfg_url.group(1).replace("&amp;", "&")
+
+        elif match_clip_page_cfg:
+            page_config = json.loads(match_clip_page_cfg.group(1))
+            player_url = page_config["player"]["config_url"]
+
+        else:
             yield ServiceError("Can't find video file for: {0}".format(self.url))
             return
-        player_url = match.group(1).replace("&amp;", "&")
+
         player_data = self.http.request("get", player_url).text
 
         if player_data:
