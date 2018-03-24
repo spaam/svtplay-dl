@@ -196,7 +196,7 @@ class HLS(VideoRetriever):
 
                     if self.options.hls_time_stamp:
 
-                        end_time_stamp = (datetime.utcnow() - timedelta(seconds=max_duration * 2)).replace(microsecond=0)
+                        end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=max_duration * 2)).replace(microsecond=0)
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
