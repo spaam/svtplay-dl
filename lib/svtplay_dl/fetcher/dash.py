@@ -152,15 +152,14 @@ def dashparse(options, res, url):
         availabilityStartTime = xml.attrib["availabilityStartTime"]
         publishTime = xml.attrib["publishTime"]
 
-        datetime_start = datetime.strptime(availabilityStartTime, "%Y-%m-%dT%H:%M:%S.%fZ")
-        datetime_publish = datetime.strptime(publishTime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        datetime_start = parse_dates(availabilityStartTime)
+        datetime_publish = parse_dates(publishTime)
         diff_publish = datetime_publish - datetime_start
         offset_sec = diff_publish.total_seconds()
 
         if "mediaPresentationDuration" in xml.attrib:
             mediaPresentationDuration = xml.attrib["mediaPresentationDuration"]
-            dt = datetime.strptime(mediaPresentationDuration, 'PT%HH%MM%S.%fS')
-            duration_sec = (dt - datetime(1900, 1, 1)).total_seconds()
+            duration_sec = (parse_dates(mediaPresentationDuration) - datetime(1900, 1, 1)).total_seconds()
 
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
     audiofiles = adaptionset(temp, url, baseurl, offset_sec, duration_sec)
@@ -180,6 +179,21 @@ def dashparse(options, res, url):
                                      audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
 
     return streams
+
+
+def parse_dates(date_str):
+    date_patterns = ["%Y-%m-%dT%H:%M:%S.%fZ", "PT%HH%MM%S.%fS", "PT%HH%MM%SS", "PT%MM%S.%fS", "PT%MM%SS"]
+    dt = None
+    for pattern in date_patterns:
+        try:
+            dt = datetime.strptime(date_str, pattern)
+            break
+        except:
+            pass
+    if not dt:
+        raise ValueError("Can't parse date format: {0}".format(date_str))
+
+    return dt
 
 
 class DASH(VideoRetriever):
