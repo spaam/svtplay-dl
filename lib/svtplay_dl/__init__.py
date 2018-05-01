@@ -40,6 +40,7 @@ from svtplay_dl.service.mtvnn import MtvMusic
 from svtplay_dl.service.mtvnn import Mtvnn
 from svtplay_dl.service.mtvservices import Mtvservices
 from svtplay_dl.service.nhl import NHL
+from svtplay_dl.service.npo import Npo
 from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.picsearch import Picsearch
@@ -90,6 +91,7 @@ sites = [
     MtvMusic,
     Mtvnn,
     NHL,
+    Npo,
     Nrk,
     Qbrick,
     Picsearch,
