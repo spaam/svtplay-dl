@@ -192,24 +192,25 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return None
 
     def _autoname(self, vid):
-        jsondata = self._get_show_info()
-        for i in jsondata["results"]:
-            if vid == i["id"]:
-                season = self._seasoninfo(i)
-                if season:
-                    index = len(i["program"]["name"])
-                    return "{0}.{1}{2}".format(i["title"][:index], season, i["title"][index:])
-                return i["title"]
+        try:
+            jsondata = self._get_show_info()
+            for i in jsondata["results"]:
+                if vid == i["id"] and ("title" in i):
+                    season = self._seasoninfo(i)
+                    if season and ("program" in i) and ("name" in i["program"]):
+                        index = len(i["program"]["name"])
+                        return "{0}.{1}{2}".format(i["title"][:index], season, i["title"][index:])
+                    return i["title"]
 
-        aname = self._get_clip_info(vid)
-        if aname is not None:
-            return aname
+            aname = self._get_clip_info(vid)
+            if aname is not None:
+                return aname
 
-        aname = self._get_showname()
-        if aname is not None:
-            return aname
-
-        return "tv4Stream"
+            aname = self._get_showname()
+            if aname is not None:
+                return aname
+        except():
+            return "tv4Stream"
 
     def _getdays(self, data, text):
         try:
