@@ -9,15 +9,17 @@ init:
 install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install -U pip setuptools"
-  - "pip install requests PySocks pycrypto"
-  - "pip install pyinstaller"
+  - "pip install -r requirements-dev.txt -r requirements.txt"
+  - "pip install nuitka"
 
 test_script:
   - "pip install -e ."
 
 
 after_test:
-  - "pyinstaller spec/svtplay-dl.spec"
+  - "mkdir svtplay-dl"
+  - "nuitka --recurse-all --output svtplay-dl bin/svtplay-dl"
   - ps: ls dist
+  - "7z.exe a -tzip svtplay-dl-zip svtplay-dl"
 
 build: off
