@@ -12,6 +12,7 @@ deps = []
 deps.append("requests>=2.0.0")
 deps.append("PySocks")
 deps.append("pycryptodome")
+deps.append("pyyaml")
 
 setup(
     name="svtplay-dl",
