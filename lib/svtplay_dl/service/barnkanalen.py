@@ -9,6 +9,7 @@ from svtplay_dl.log import log
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.error import ServiceError
+from svtplay_dl.utils import select_episodes
 
 
 class Barnkanalen(Svtplay):
@@ -92,9 +93,7 @@ class Barnkanalen(Svtplay):
 
         episodes = [urljoin("http://www.svt.se", x) for x in videos]
 
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
-        return episodes
+        return select_episodes(options, episodes)
 
     def videos_to_list(self, lvideos, videos):
         url = self.url + "/" + str(lvideos["id"])

@@ -153,6 +153,7 @@ class Options(object):
         self.password = None
         self.thumbnail = False
         self.all_episodes = False
+        self.all_first = -1
         self.all_last = -1
         self.merge_subtitle = False
         self.force_subtitle = False
@@ -447,6 +448,8 @@ def main():
                       help="try to download all episodes")
     parser.add_option("--all-last", dest="all_last", default=-1, type=int,
                       metavar="NN", help="get last NN episodes instead of all episodes")
+    parser.add_option("--all-first", dest="all_first", default=-1, type=int,
+                      metavar="NN", help="get first NN episodes instead of all episodes")
     parser.add_option("-P", "--preferred", default=None,
                       metavar="preferred", help="preferred download method (dash, hls, hds, http or rtmp)")
     parser.add_option("--exclude", dest="exclude", default=None,
@@ -534,6 +537,7 @@ def mergeParserOption(options, parser):
     options.password = parser.password
     options.thumbnail = parser.thumbnail
     options.all_episodes = parser.all_episodes
+    options.all_first = parser.all_first
     options.all_last = parser.all_last
     options.force_subtitle = parser.force_subtitle
     options.require_subtitle = parser.require_subtitle

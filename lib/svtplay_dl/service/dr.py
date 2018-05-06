@@ -13,7 +13,7 @@ from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 from svtplay_dl.utils.urllib import urlparse, urljoin
-from svtplay_dl.utils import is_py3
+from svtplay_dl.utils import is_py3, select_episodes
 
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -113,12 +113,7 @@ class Dr(Service, OpenGraphThumbMixin):
                         for url in matches
                         if url.startswith(prefix)]
 
-        if options.all_last != -1:
-            episodes = episodes[:options.all_last]
-        else:
-            episodes.reverse()
-
-        return episodes
+        return select_episodes(options, episodes)
 
     def find_stream(self, options, resource):
         tempresource = resource['Data'][0]['Assets']

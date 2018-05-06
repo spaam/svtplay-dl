@@ -283,3 +283,28 @@ def run_program(cmd, show=True):
         msg = stderr.strip()
         log.error("Something went wrong: {0}".format(msg))
     return p.returncode, stdout, stderr
+
+
+def select_episodes(options, episodes, sort=True, reverse=False):
+
+    if sort:
+        episodes = sorted(episodes, reverse=reverse)
+
+    new_epi_first = []
+    new_epi_last = []
+
+    if options.all_first > 0:
+        new_epi_first = episodes[:options.all_first]
+
+    if options.all_last > 0:
+        new_epi_last = episodes[-options.all_last:]
+
+    if new_epi_first or new_epi_last:
+
+        for e in new_epi_last:
+            if e not in new_epi_first:
+                new_epi_first.append(e)
+
+        return new_epi_first
+
+    return episodes

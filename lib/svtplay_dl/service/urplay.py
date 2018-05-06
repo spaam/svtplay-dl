@@ -11,7 +11,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils import filenamify, select_episodes
 
 
 class Urplay(Service, OpenGraphThumbMixin):
@@ -94,12 +94,4 @@ class Urplay(Service, OpenGraphThumbMixin):
                 if match and match.group(1) == keyword:
                     episodes.append(urljoin("https://urplay.se/", i))
 
-        episodes_new = []
-        n = 0
-        for i in episodes:
-            if n == options.all_last:
-                break
-            if i not in episodes_new:
-                episodes_new.append(i)
-            n += 1
-        return episodes_new
+        return select_episodes(options, episodes)

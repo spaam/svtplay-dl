@@ -11,7 +11,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils import filenamify, is_py2
+from svtplay_dl.utils import filenamify, is_py2, select_episodes
 from svtplay_dl.log import log
 
 
@@ -146,9 +146,7 @@ class Dplay(Service):
                 episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
         if len(episodes) == 0:
             log.error("Cant find any playable files")
-        if options.all_last > 0:
-            return episodes[:options.all_last]
-        return episodes
+        return select_episodes(options, episodes)
 
     def _login(self):
         url = "https://disco-api.{}/login".format(self.domain)
