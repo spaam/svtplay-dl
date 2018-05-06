@@ -103,6 +103,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r'iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
         if match:
             return match.group(1)
+
+        match = re.search(r'<meta property="og:image" content="([\S]+)"', html_data)
+        if match:
+            return match.group(1).split("/")[-2]
+
         return None
 
     def get(self):
