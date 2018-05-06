@@ -10,7 +10,7 @@ import json
 import copy
 import os
 
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils import filenamify, select_episodes
 from svtplay_dl.utils.urllib import urlparse
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -201,9 +201,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     seasons.append(i["seasonNumber"])
 
         episodes = self._grab_episodes(options, seasons)
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
-        return sorted(episodes)
+        return select_episodes(options, episodes)
 
     def _grab_episodes(self, options, seasons):
         episodes = []

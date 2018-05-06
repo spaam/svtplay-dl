@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from svtplay_dl.utils.urllib import urlparse, parse_qs, quote_plus
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old, is_py2, filenamify
+from svtplay_dl.utils import is_py2_old, is_py2, filenamify, select_episodes
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
@@ -224,7 +224,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
         jsondata = self._get_show_info()
 
         episodes = []
-        n = 1
         for i in jsondata["results"]:
             if premium:
                 text = "availability_group_premium"
@@ -240,11 +239,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 url = "http://www.tv4play.se/program/{0}?video_id={1}"\
                     .format(i["program"]["nid"], video_id)
                 episodes.append(url)
-                if n == options.all_last:
-                    break
-                n += 1
 
-        return episodes
+        return select_episodes(options, episodes)
 
 
 def findvid(url, data):

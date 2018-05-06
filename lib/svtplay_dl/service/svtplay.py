@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from svtplay_dl.log import log
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify, is_py2
+from svtplay_dl.utils import filenamify, is_py2, select_episodes
 from svtplay_dl.utils.urllib import urlparse, urljoin, parse_qs
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -206,9 +206,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
-        return episodes
+        return select_episodes(options, episodes)
 
     def videos_to_list(self, lvideos, videos):
         if "episodeNumber" in lvideos[0] and lvideos[0]["episodeNumber"]:

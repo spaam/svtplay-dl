@@ -8,7 +8,7 @@ from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils import filenamify, select_episodes
 from svtplay_dl.utils.urllib import urljoin, urlparse
 from svtplay_dl.error import ServiceError
 
@@ -120,9 +120,7 @@ class Cmore(Service):
             if url not in episodes:
                 episodes.append(url)
 
-        if options.all_last > 0:
-            return sorted(episodes[-options.all_last:])
-        return sorted(episodes)
+        return select_episodes(options, episodes)
 
     def _gettld(self):
         if isinstance(self.url, list):

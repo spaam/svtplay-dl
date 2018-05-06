@@ -11,7 +11,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.utils import ensure_unicode, filenamify, is_py2, decode_html_entities
+from svtplay_dl.utils import ensure_unicode, filenamify, is_py2, decode_html_entities, select_episodes
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.urllib import urlparse, parse_qs
 
@@ -114,12 +114,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                 return
         program = match.group(1)
         episodes = []
-
-        n = 0
-        if self.options.all_last > 0:
-            sort = "tid_fallande"
-        else:
-            sort = "tid_stigande"
+        sort = "tid_stigande"
 
         while True:
             url = "http://www.oppetarkiv.se/etikett/titel/{0}/?sida={1}&sort={2}&embed=true".format(program, page, sort)
@@ -130,13 +125,10 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             data = data.text
             regex = re.compile(r'href="(/video/[^"]+)"')
             for match in regex.finditer(data):
-                if n == self.options.all_last:
-                    break
                 episodes.append("http://www.oppetarkiv.se{0}".format(match.group(1)))
-                n += 1
             page += 1
 
-        return episodes
+        return select_episodes(options, episodes)
 
     def outputfilename(self, data, filename, raw):
         directory = os.path.dirname(filename)

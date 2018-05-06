@@ -5,7 +5,7 @@ import json
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import is_py2_old
+from svtplay_dl.utils import is_py2_old, select_episodes
 from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
@@ -128,13 +128,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         for i in match:
             episodNr.append(i[3])
         episodes = []
-        n = 0
+
         for i in sorted(episodNr):
-            if n == options.all_last:
-                break
             episodes.append("http://www.nickelodeon.se/serier/{0}-something/videos/{1}-something".format(programid, i))
-            n += 1
-        return episodes
+        return select_episodes(options, episodes)
 
 
 class MtvMusic(Service, OpenGraphThumbMixin):
