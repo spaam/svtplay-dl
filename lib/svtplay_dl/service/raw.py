@@ -11,12 +11,7 @@ from svtplay_dl.fetcher.dash import dashparse
 class Raw(Service):
     def get(self):
         filename = os.path.basename(self.url[:self.url.rfind("/")])
-        if self.options.output and os.path.isdir(self.options.output):
-            self.options.output = os.path.join(os.path.dirname(self.options.output), filename)
-            extention = True
-        elif self.options.output is None:
-            self.options.output = filename
-            extention = True
+        self.output["title"] = filename
 
         streams = []
         if re.search(".f4m", self.url):

@@ -73,7 +73,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         if self.options.get("output_auto"):
-            self.options.service = "tv4play"
             basename = self._autoname(vid)
             if not basename:
                 yield ServiceError("Cant find vid id for autonaming.")
