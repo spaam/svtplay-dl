@@ -19,7 +19,7 @@ test_script:
 after_test:
   - "mkdir svtplay-dl"
   - "nuitka --recurse-all --output svtplay-dl bin/svtplay-dl"
-  - ps: ls dist
+  - "svtplay-dl/svtplay-dl.exe --version"
   - "7z.exe a -tzip svtplay-dl-zip svtplay-dl"
 
 build: off
