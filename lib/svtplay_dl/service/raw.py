@@ -10,10 +10,6 @@ from svtplay_dl.fetcher.dash import dashparse
 
 class Raw(Service):
     def get(self):
-        if self.exclude():
-            return
-
-        extention = False
         filename = os.path.basename(self.url[:self.url.rfind("/")])
         if self.options.output and os.path.isdir(self.options.output):
             self.options.output = os.path.join(os.path.dirname(self.options.output), filename)

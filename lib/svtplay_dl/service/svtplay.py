@@ -71,10 +71,6 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         self.outputfilename(janson["video"])
 
-        if self.exclude():
-            yield ServiceError("Excluding video.")
-            return
-
         if "programVersionId" in janson["video"]:
             vid = janson["video"]["programVersionId"]
         else:

@@ -79,10 +79,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield ServiceError("Cant find vid id for autonaming.")
                 return
 
-        if self.exclude():
-            yield ServiceError("Excluding video.")
-            return
-
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
                 base = urlparse(i.find("base").text)

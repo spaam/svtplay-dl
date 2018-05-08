@@ -236,8 +236,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
         if "msg" not in dataj:
-            filename = self.outputfilename(dataj, vid, self.options.output)
-            if not self.exclude2(filename) and url not in episodes:
+            if url not in episodes:
                 episodes.append(url)
         return episodes
 
