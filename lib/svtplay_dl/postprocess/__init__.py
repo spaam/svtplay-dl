@@ -158,7 +158,7 @@ class postprocess(object):
         if self.stream.finished is False:
             return
 
-        orig_filename = self.stream.options.output
+        orig_filename = self.stream.output
 
         cmd = [self.detect, "-i", orig_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
