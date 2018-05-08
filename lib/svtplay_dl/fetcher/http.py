@@ -20,7 +20,7 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.output, "mp4")
+        file_d = output(self.output, self.config, "mp4")
         if file_d is None:
             return
 

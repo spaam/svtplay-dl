@@ -79,7 +79,7 @@ class Dplay(Service):
         if res.status_code > 400:
             yield ServiceError("You dont have permission to watch this")
             return
-        streams = hlsparse(self.options, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
+        streams = hlsparse(self.config, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
                            res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http)
         if streams:
             for n in list(streams.keys()):
@@ -93,7 +93,7 @@ class Dplay(Service):
         self.output["episodename"] = jsondata["data"]["attributes"]["name"]
         return self.output["title"]
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         parse = urlparse(self.url)
         self.domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
 
@@ -106,7 +106,7 @@ class Dplay(Service):
             log.error("Something went wrong getting token for requests")
 
         premium = False
-        if self.options.username and self.options.password:
+        if self.config.get("username") and self.config.get("password"):
             premium = self._login()
             if not premium:
                 log.warning("Wrong username/password.")
@@ -127,8 +127,8 @@ class Dplay(Service):
                 episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
         if len(episodes) == 0:
             log.error("Cant find any playable files")
-        if options.all_last > 0:
-            return episodes[:options.all_last]
+        if config.get("all_last") > 0:
+            return episodes[:config.get("all_last")]
         return episodes
 
     def _login(self):

@@ -6,12 +6,12 @@ from svtplay_dl.utils.http import HTTP
 
 
 class VideoRetriever(object):
-    def __init__(self, options, url, bitrate=0, **kwargs):
-        self.options = options
+    def __init__(self, config, url, bitrate=0, **kwargs):
+        self.config = config
         self.url = url
         self.bitrate = int(bitrate)
         self.kwargs = kwargs
-        self.http = HTTP(options)
+        self.http = HTTP(config)
         self.finished = False
         self.audio = kwargs.pop("audio", None)
         self.files = kwargs.pop("files", None)
@@ -39,9 +39,9 @@ class VideoRetriever(object):
 
         bytes_so_far = 8192
         if audio:
-            file_d = output(copy.copy(self.options), "m4a")
+            file_d = output(copy.copy(self.output), self.config, "m4a")
         else:
-            file_d = output(self.options, self.options.get("other"))
+            file_d = output(self.output, self.config, "mp4")
 
         if file_d is None:
             return
@@ -49,7 +49,7 @@ class VideoRetriever(object):
         eta = ETA(total_size)
         while bytes_so_far < total_size:
 
-            if not self.options.silent:
+            if not self.config.get("silent"):
                 eta.update(bytes_so_far)
                 progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 

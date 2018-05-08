@@ -128,7 +128,7 @@ def adaptionset(element, url, baseurl=None, offset_sec=None, duration_sec=None):
     return streams
 
 
-def dashparse(options, res, url, output=None):
+def dashparse(config, res, url, output=None):
     streams = {}
     baseurl = None
     offset_sec = None
@@ -174,7 +174,7 @@ def dashparse(options, res, url, output=None):
 
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]
-        streams[bitrate] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies,
+        streams[bitrate] = DASH(copy.copy(config), url, bitrate, cookies=res.cookies,
                                 audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"],
                                 output=output, segments=videofiles[i]["segments"])
 
@@ -201,7 +201,7 @@ class DASH(VideoRetriever):
         return "dash"
 
     def download(self):
-        if self.options.get("live") and not self.options.get("force"):
+        if self.config.get("live") and not self.config.get("force"):
             raise LiveDASHException(self.url)
 
         if self.segments:
@@ -217,15 +217,15 @@ class DASH(VideoRetriever):
         cookies = self.kwargs["cookies"]
 
         if audio:
-            file_d = output(copy.copy(self.output), self.options, extension="m4a")
+            file_d = output(copy.copy(self.output), self.config, extension="m4a")
         else:
-            file_d = output(self.output, self.options, extension=self.options.get("other"))
+            file_d = output(self.output, self.config, extension="m4v")
         if file_d is None:
             return
         eta = ETA(len(files))
         n = 1
         for i in files:
-            if not self.options.get("silent"):
+            if not self.config.get("silent"):
                 eta.increment()
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
@@ -237,6 +237,6 @@ class DASH(VideoRetriever):
             file_d.write(data)
 
         file_d.close()
-        if not self.options.get("silent"):
+        if not self.config.get("silent"):
             progress_stream.write('\n')
         self.finished = True

@@ -40,7 +40,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
                 if i["format"] == "websrt":
-                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"])
 
         if len(data["videoReferences"]) == 0:
             yield ServiceError("Media doesn't have any associated videos (yet?)")
@@ -71,7 +71,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                     if "alt" in query and len(query["alt"]) > 0:
                         alt = self.http.get(query["alt"][0])
                         if alt:
-                            streams = hdsparse(self.options,
+                            streams = hdsparse(self.config,
                                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
                                                alt.request.url)
                             if streams:

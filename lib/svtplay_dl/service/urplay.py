@@ -36,9 +36,9 @@ class Urplay(Service, OpenGraphThumbMixin):
                     else:
                         subtype = "tt"
                     if self.config.get("get_all_subtitles"):
-                        yield subtitle(copy.copy(self.options), subtype, absurl, "-" + filenamify(sub["label"]))
+                        yield subtitle(copy.copy(self.config), subtype, absurl, "-" + filenamify(sub["label"]))
                     else:
-                        yield subtitle(copy.copy(self.options), subtype, absurl)
+                        yield subtitle(copy.copy(self.config), subtype, absurl)
 
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]

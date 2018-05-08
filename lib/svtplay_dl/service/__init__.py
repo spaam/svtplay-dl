@@ -23,7 +23,7 @@ class Service(object):
         self.output = {"title": None, "season": None, "episode": None, "episodename": None,
                        "id": None, "service": self.__class__.__name__.lower()}
         if not http:
-            self.http = HTTP(options=config)
+            self.http = HTTP(config)
         else:
             self.http = http
 

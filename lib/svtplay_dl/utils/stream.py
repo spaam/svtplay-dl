@@ -43,24 +43,24 @@ def protocol_prio(streams, priolist):
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
-def select_quality(options, streams):
+def select_quality(config, streams):
     high = 0
-    if isinstance(options.get("quality"), str):
+    if isinstance(config.get("quality"), str):
         try:
-            quality = int(options.get("quality").split("-")[0])
-            if len(options.get("quality").split("-")) > 1:
-                high = int(options.get("quality").split("-")[1])
+            quality = int(config.get("quality").split("-")[0])
+            if len(config.get("quality").split("-")) > 1:
+                high = int(config.get("quality").split("-")[1])
         except ValueError:
             raise error.UIException("Requested quality is invalid. use a number or range lowerNumber-higherNumber")
     else:
-        quality = options.get("quality")
+        quality = config.get("quality")
     try:
         optq = int(quality)
     except ValueError:
         raise error.UIException("Requested quality needs to be a number")
 
     try:
-        optf = int(options.get("flexibleq"))
+        optf = int(config.get("flexibleq"))
     except ValueError:
         raise error.UIException("Flexible-quality needs to be a number")
 
@@ -71,9 +71,9 @@ def select_quality(options, streams):
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
 
-    if options.get("stream_prio"):
-        proto_prio = options.get("stream_prio").split(',')
-    elif options.get("live") or streams[0].options.get("live"):
+    if config.get("stream_prio"):
+        proto_prio = config.get("stream_prio").split(',')
+    elif config.get("live") or streams[0].config.get("live"):
         proto_prio = LIVE_PROTOCOL_PRIO
     else:
         proto_prio = DEFAULT_PROTOCOL_PRIO
@@ -115,7 +115,7 @@ def select_quality(options, streams):
         raise error.UIException("Can't find that quality. Try one of: %s (or "
                                 "try --flexible-quality)" % quality)
 
-    http = HTTP(options)
+    http = HTTP(config)
     # Test if the wanted stream is available. If not try with the second best and so on.
     for w in wanted:
         res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs.get("cookies", None))

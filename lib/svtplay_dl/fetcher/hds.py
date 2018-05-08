@@ -34,7 +34,7 @@ class LiveHDSException(HDSException):
             url, "This is a live HDS stream, and they are not supported.")
 
 
-def hdsparse(options, res, manifest, output=None):
+def hdsparse(config, res, manifest, output=None):
     streams = {}
     bootstrap = {}
 
@@ -64,7 +64,7 @@ def hdsparse(options, res, manifest, output=None):
     url = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
-        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(options), url, i.attrib["bitrate"], url_id=i.attrib["url"],
+        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(config), url, i.attrib["bitrate"], url_id=i.attrib["url"],
                                                 bootstrap=bootstrapid,
                                                 metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text,
                                                 querystring=querystring, cookies=res.cookies, output=output)
@@ -76,7 +76,7 @@ class HDS(VideoRetriever):
         return "hds"
 
     def download(self):
-        if self.options.get("live") and not self.options.get("force"):
+        if self.config.get("live") and not self.config.get("force"):
             raise LiveHDSException(self.url)
 
         querystring = self.kwargs["querystring"]
@@ -88,7 +88,7 @@ class HDS(VideoRetriever):
             antal = readbox(bootstrap, box[0])
         baseurl = self.url[0:self.url.rfind("/")]
 
-        file_d = output(self.options, "flv")
+        file_d = output(self.output, self.config, "flv")
         if file_d is None:
             return
 
@@ -104,7 +104,7 @@ class HDS(VideoRetriever):
         eta = ETA(total)
         while i <= total:
             url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.kwargs["url_id"], start, querystring)
-            if not self.options.get("silent"):
+            if not self.config.get("silent"):
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
             data = self.http.request("get", url, cookies=cookies)
@@ -117,7 +117,7 @@ class HDS(VideoRetriever):
             start += 1
 
         file_d.close()
-        if not self.options.get("silent"):
+        if not self.config.get("silent"):
             progress_stream.write('\n')
         self.finished = True
 

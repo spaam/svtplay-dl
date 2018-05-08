@@ -22,16 +22,16 @@ class RTMP(VideoRetriever):
         if self.config.get("resume"):
             args.append("-e")
 
-        file_d = output(self.options, "flv", False)
+        file_d = output(self.output, self.config, "flv", False)
         if file_d is None:
             return
-        args += ["-o", self.options.output]
+        args += ["-o", self.output]
         if self.options.silent:
             args.append("-q")
-        if self.options.other:
-            args += shlex.split(self.options.other)
+        if self.kwargs.get("other"):
+            args += shlex.split(self.kwargs.pop("other"))
 
-        if self.options.verbose:
+        if self.config.get("verbose"):
             args.append("-V")
 
         command = ["rtmpdump", "-r", self.url] + args

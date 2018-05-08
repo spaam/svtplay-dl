@@ -24,16 +24,14 @@ class Raw(Service):
 
         streams = []
         if re.search(".f4m", self.url):
-            if extention:
-                self.options.output = "{0}.flv".format(self.options.output)
-
-            streams.append(hdsparse(self.options, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url))
+            self.output["ext"] = "flv"
+            streams.append(hdsparse(self.config, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url))
 
         if re.search(".m3u8", self.url):
-            streams.append(hlsparse(self.options, self.http.request("get", self.url), self.url))
+            streams.append(hlsparse(self.config, self.http.request("get", self.url), self.url))
 
         if re.search(".mpd", self.url):
-            streams.append(dashparse(self.options, self.http.request("get", self.url), self.url))
+            streams.append(dashparse(self.config, self.http.request("get", self.url), self.url))
 
         for stream in streams:
             if stream:

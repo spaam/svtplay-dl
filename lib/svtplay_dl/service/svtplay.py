@@ -43,7 +43,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                 yield ServiceError("Can't decode api request: {0}".format(res.request.url))
                 return
             videos = self._get_video(janson)
-            self.options.live = True
+            self.config.set("live", True)
             for i in videos:
                 yield i
             return
@@ -93,7 +93,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "websrt" and "url" in i:
-                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:

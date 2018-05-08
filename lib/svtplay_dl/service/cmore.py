@@ -56,7 +56,7 @@ class Cmore(Service):
                         for n in list(streams.keys()):
                             yield streams[n]
                 if i["mediaFormat"] == "webvtt":
-                    yield subtitle(copy.copy(self.options), "wrst", i["url"])
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"])
         else:
             i = janson["playback"]["items"]["item"]
             if i["mediaFormat"] == "ism":

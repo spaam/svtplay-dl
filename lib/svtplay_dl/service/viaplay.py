@@ -147,18 +147,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 subtype = "wrst"
             else:
                 subtype = "sami"
-            yield subtitle(copy.copy(self.options), subtype, dataj["sami_path"])
+            yield subtitle(copy.copy(self.config), subtype, dataj["sami_path"], output=self.output)
         if dataj["subtitles_webvtt"]:
-            yield subtitle(copy.copy(self.options), "wrst", dataj["subtitles_webvtt"])
+            yield subtitle(copy.copy(self.config), "wrst", dataj["subtitles_webvtt"], output=self.output)
         if dataj["subtitles_for_hearing_impaired"]:
             if dataj["subtitles_for_hearing_impaired"].endswith("vtt"):
                 subtype = "wrst"
             else:
                 subtype = "sami"
-            if self.options.get_all_subtitles:
-                yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"], "-SDH")
+            if self.config.get("get_all_subtitles"):
+                yield subtitle(copy.copy(self.config), subtype, dataj["subtitles_for_hearing_impaired"], "-SDH", output=self.output)
             else:
-                yield subtitle(copy.copy(self.options), subtype, dataj["subtitles_for_hearing_impaired"])
+                yield subtitle(copy.copy(self.config), subtype, dataj["subtitles_for_hearing_impaired"], output=self.output)
 
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
@@ -175,8 +175,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     return
                 filename = "{0}://{1}:{2}{3}".format(parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y {0}".format(match.group(2))
-                self.options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf {0}".format(path)
-                yield RTMP(copy.copy(self.config), filename, 800)
+                other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf {0}".format(path)
+                yield RTMP(copy.copy(self.config), filename, 800, other=other)
 
         if streamj["streams"]["hls"]:
             streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
@@ -201,7 +201,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return episodes[-options.all_last:]
         return sorted(episodes)
 
-    def _grab_episodes(self, options, seasons):
+    def _grab_episodes(self, config, seasons):
         episodes = []
         baseurl = self.url
         match = re.search("(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
@@ -219,7 +219,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     if "program" in janson["format"]["videos"][str(i)]:
                         for n in janson["format"]["videos"][str(i)]["program"]:
                             episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
-                    if options.include_clips:
+                    if config.get("include_clips"):
                         if "clip" in janson["format"]["videos"][str(i)]:
                             for n in janson["format"]["videos"][str(i)]["clip"]:
                                 episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)

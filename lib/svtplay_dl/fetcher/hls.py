@@ -91,7 +91,7 @@ def hlsparse(config, res, url, **kwargs):
                 streams[1] = subtitle(copy.copy(config), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
             streams[int(bit_rate)] = HLS(copy.copy(config), urls, bit_rate,
                                          cookies=res.cookies, keycookie=keycookie, authorization=authorization,
-                                         audio=audio_url, output=output, segments=bool(segments))
+                                         audio=audio_url, output=output, segments=bool(segments), kwargs=kwargs)
 
     elif m3u8.media_segment:
         config.set("segments", False)
@@ -109,14 +109,13 @@ class HLS(VideoRetriever):
         return "hls"
 
     def download(self):
-
-        if self.options.segments:
+        if self.segments:
             if self.audio:
-                self._download(self.audio, file_name=(copy.copy(self.options), "audio.ts"))
-            self._download(self.url, file_name=(self.options, "ts"))
+                self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
+            self._download(self.url, file_name=(self.output, "ts"))
 
         else:
-            self._download(self.url, file_name=(self.options, "ts"))
+            self._download(self.url, file_name=(self.output, "ts"))
 
     def _download(self, url, file_name):
         cookies = self.kwargs.get("cookies", None)
@@ -133,11 +132,11 @@ class HLS(VideoRetriever):
                 return Random.new().read(AES.block_size)
             except ImportError:
                 return os.urandom(16)
-
-        file_d = output(file_name[0], file_name[1])
+        file_d = output(file_name[0], self.config, file_name[1])
         if file_d is None:
             return
 
+        hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
         decryptor = None
         size_media = len(m3u8.media_segment)
         eta = ETA(size_media)
@@ -151,8 +150,8 @@ class HLS(VideoRetriever):
                 total_duration += duration
             item = _get_full_url(i["URI"], url)
 
-            if not self.options.silent:
-                if self.options.live:
+            if not self.config.get("silent"):
+                if self.config.get("live"):
                     progressbar(size_media, index + 1, ''.join(['DU: ', str(timedelta(seconds=int(total_duration)))]))
                 else:
                     eta.increment()
@@ -185,10 +184,10 @@ class HLS(VideoRetriever):
 
             file_d.write(data)
 
-            if (self.options.capture_time > 0) and total_duration >= (self.options.capture_time * 60):
+            if self.config.get("capture_time") > 0 and total_duration >= self.config.get("capture_time") * 60:
                 break
 
-            if (size_media == (index + 1)) and self.options.live:
+            if (size_media == (index + 1)) and self.config.get("live"):
                 sleep_int = (start_time + max_duration * 2) - time.time()
                 if sleep_int > 0:
                     time.sleep(sleep_int)
@@ -197,9 +196,9 @@ class HLS(VideoRetriever):
                 while size_media_old == size_media:
                     start_time = time.time()
 
-                    if self.options.hls_time_stamp:
-
-                        end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=max_duration * 2)).replace(microsecond=0)
+                    if hls_time_stamp:
+                        end_time_stamp = (datetime.utcnow() - timedelta(minutes=1,
+                                                                        seconds=max_duration * 2)).replace(microsecond=0)
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
@@ -216,7 +215,7 @@ class HLS(VideoRetriever):
                         time.sleep(max_duration)
 
         file_d.close()
-        if not self.options.silent:
+        if not self.config.get("silent"):
             progress_stream.write('\n')
         self.finished = True
 

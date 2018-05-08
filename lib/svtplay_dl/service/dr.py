@@ -50,7 +50,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 return
             if "SubtitlesList" in resource and len(resource["SubtitlesList"]) > 0:
                 suburl = resource["SubtitlesList"][0]["Uri"]
-                yield subtitle(copy.copy(self.options), "wrst", suburl)
+                yield subtitle(copy.copy(self.config), "wrst", suburl)
             if "Data" in resource:
                 streams = self.find_stream(self.config, resource)
                 for i in streams:

@@ -33,10 +33,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             self.config.set("live", True)
             self.options.hls_time_stamp = True
-            streams = hlsparse(self.options, self.http.request("get", url), url)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
+            streams = hlsparse(self.config, self.http.request("get", url), url)
             return
 
         data = self.get_urldata()
@@ -92,15 +92,14 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 if "rtmp" in base.scheme:
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
                     self.options.other = "-W {0} -y {1}".format(swf, i.find("url").text)
-                    yield RTMP(copy.copy(self.options), i.find("base").text, i.find("bitrate").text)
+                    yield RTMP(copy.copy(self.config), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path) - 3:len(parse.path)] == "f4m":
-                    streams = hdsparse(self.options, self.http.request("get", i.find("url").text,
-                                                                       params={"hdcore": "3.7.0"}), i.find("url").text)
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                    streams = hdsparse(self.config, self.http.request("get", i.find("url").text,
+                                                                      params={"hdcore": "3.7.0"}), i.find("url").text)
+                    for n in list(streams.keys()):
+                        yield streams[n]
             elif i.find("mediaFormat").text == "webvtt":
-                yield subtitle(copy.copy(self.options), "wrst", i.find("url").text)
+                yield subtitle(copy.copy(self.config), "wrst", i.find("url").text, output=self.output)
 
         url = "https://prima.tv4play.se/api/web/asset/{0}/play?protocol=hls3".format(vid)
         data = self.http.request("get", url, cookies=self.cookies).content
@@ -111,10 +110,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(self.options, self.http.request("get", i.find("url").text), i.find("url").text)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
+                    streams = hlsparse(self.config, self.http.request("get", i.find("url").text), i.find("url").text)
 
     def _get_show_info(self):
         show = self._get_showname()

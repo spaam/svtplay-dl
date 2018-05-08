@@ -13,12 +13,12 @@ import platform
 
 
 class subtitle(object):
-    def __init__(self, options, subtype, url, subfix=None, **kwargs):
+    def __init__(self, config, subtype, url, subfix=None, **kwargs):
         self.url = url
         self.subtitle = None
-        self.options = options
+        self.config = config
         self.subtype = subtype
-        self.http = HTTP(options)
+        self.http = HTTP(config)
         self.subfix = subfix
         self.bom = False
         self.output = kwargs.pop("output", None)
