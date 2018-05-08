@@ -20,7 +20,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ['tv4play.se', 'tv4.se']
 
     def get(self):
-
         parse = urlparse(self.url)
         if parse.path[:8] == "/kanaler":
 

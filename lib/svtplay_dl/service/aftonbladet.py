@@ -61,7 +61,6 @@ class Aftonbladet(Service):
             yield i
 
     def _get_video(self, janson):
-
         articleid = janson["article"]["currentArticleId"]
         components = janson["articles"][articleid]["article"]["components"]
         for i in components:
@@ -75,7 +74,6 @@ class Aftonbladet(Service):
                                 yield streams[key]
 
             if "videoAsset" in i and "streamUrls" in i["videoAsset"]:
-
                 streams = []
                 streamUrls = i["videoAsset"]["streamUrls"]
 
