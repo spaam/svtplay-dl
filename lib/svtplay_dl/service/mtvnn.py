@@ -70,7 +70,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         self.output["title"] = title
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
-        self.options.other = "-W {0}".format(self.http.check_redirect(swfurl))
+        other = "-W {0}".format(self.http.check_redirect(swfurl))
 
         contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
         content = self.http.request("get", contenturl).content
@@ -79,7 +79,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         sa = list(ss.iter("rendition"))
 
         for i in sa:
-            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"])
+            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"], other=other)
 
         match = re.search("gon.viacom_config=([^;]+);", self.get_urldata())
         if match:
