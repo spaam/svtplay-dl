@@ -164,9 +164,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
                 streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                for n in list(streams.keys()):
+                    yield streams[n]
             else:
                 parse = urlparse(filename)
                 match = re.search("^(/[^/]+)/(.*)", parse.path)
@@ -180,9 +179,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         if streamj["streams"]["hls"]:
             streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
+            for n in list(streams.keys()):
+                yield streams[n]
 
     def find_all_episodes(self, options):
         seasons = []

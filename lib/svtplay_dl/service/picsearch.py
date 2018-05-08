@@ -55,9 +55,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
             for i in jansson["media"]["playerconfig"]["playlist"]:
                 if "provider" in i and i["provider"] == "httpstreaming":
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                    for n in list(streams.keys()):
+                        yield streams[n]
 
     def get_auth(self):
         match = re.search(r"picsearch_ajax_auth[ ]*=[ ]*['\"]([^'\"]+)['\"]", self.get_urldata())

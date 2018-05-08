@@ -33,10 +33,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             self.config.set("live", True)
             self.options.hls_time_stamp = True
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
             streams = hlsparse(self.config, self.http.request("get", url), url)
+            for n in list(streams.keys()):
+                yield streams[n]
             return
 
         data = self.get_urldata()
@@ -110,10 +109,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
                     streams = hlsparse(self.config, self.http.request("get", i.find("url").text), i.find("url").text)
+                    for n in list(streams.keys()):
+                        yield streams[n]
 
     def _get_show_info(self):
         show = self._get_showname()

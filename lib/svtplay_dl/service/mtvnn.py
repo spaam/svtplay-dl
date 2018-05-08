@@ -53,10 +53,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
                 hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                 stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url)
-                if stream:
-
-                    for key in list(stream.keys()):
-                        yield stream[key]
+                for key in list(stream.keys()):
+                    yield stream[key]
             return
 
         match = re.search(r'data-mrss=[\'"](http://gakusei-cluster.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
@@ -96,9 +94,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 dataj = json.loads(data)
                 for i in dataj["local_playlist_videos"]:
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                    for n in list(streams.keys()):
+                        yield streams[n]
 
     def find_all_episodes(self, config):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())

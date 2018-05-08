@@ -135,14 +135,14 @@ def dashparse(config, res, url, output=None):
     duration_sec = None
 
     if not res:
-        return None
+        return streams
 
     if res.status_code >= 400:
         streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
         return streams
     if len(res.text) < 1:
         streams[0] = ServiceError("Can't read DASH playlist. {0}, size: {1}".format(res.status_code, len(res.text)))
-        return
+        return streams
     xml = ET.XML(res.text)
 
     if xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
@@ -168,9 +168,7 @@ def dashparse(config, res, url, output=None):
 
     if not audiofiles or not videofiles:
         streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
-        return
-
-    options.set("other", "mp4")
+        return streams
 
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]

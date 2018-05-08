@@ -61,9 +61,8 @@ class Cmore(Service):
             i = janson["playback"]["items"]["item"]
             if i["mediaFormat"] == "ism":
                 streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                for n in list(streams.keys()):
+                    yield streams[n]
 
     def _autoname(self, vid):
         url = "https://restapi.cmore.{0}/api/tve_web/asset/{1}.json?expand=metadata".format(self._gettld(), vid)

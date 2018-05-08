@@ -81,9 +81,8 @@ class Dplay(Service):
             return
         streams = hlsparse(self.config, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
                            res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http)
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        for n in list(streams.keys()):
+            yield streams[n]
 
     def _autoname(self, jsondata):
         match = re.search('^([^/]+)/', jsondata["data"]["attributes"]["path"])

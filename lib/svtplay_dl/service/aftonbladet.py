@@ -35,9 +35,8 @@ class Aftonbladettv(Service):
             data = json.loads(data)
 
         streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"])
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        for n in list(streams.keys()):
+            yield streams[n]
 
 
 class Aftonbladet(Service):
@@ -89,7 +88,6 @@ class Aftonbladet(Service):
                                                                            params={"hdcore": "3.7.0"}),
                                             streamUrls["hds"]))
 
-                if streams:
-                    for s in streams:
-                        for key in list(s.keys()):
-                            yield s[key]
+                for s in streams:
+                    for key in list(s.keys()):
+                        yield s[key]

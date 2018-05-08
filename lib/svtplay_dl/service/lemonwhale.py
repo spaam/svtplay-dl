@@ -34,9 +34,8 @@ class Lemonwhale(Service):
         jdata = json.loads(data)
         if "videos" in jdata:
             streams = self.get_video(jdata)
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
+            for n in list(streams.keys()):
+                yield streams[n]
 
     def get_vid(self):
         match = re.search(r'video url-([^"]+)', self.get_urldata())

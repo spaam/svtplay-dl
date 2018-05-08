@@ -98,6 +98,5 @@ class Eurosport(Service):
             hls_url = res.json()["stream"]["complete"]
 
         streams = hlsparse(self.config, self.http.request("get", hls_url), hls_url, authorization=access_token)
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        for n in list(streams.keys()):
+            yield streams[n]

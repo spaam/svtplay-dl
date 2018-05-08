@@ -26,6 +26,5 @@ class Viasatsport(Service, OpenGraphThumbMixin):
         if re.search("/live/", hls):
             self.config.set("live", True)
         streams = hlsparse(self.config, self.http.request("get", hls), hls)
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        for n in list(streams.keys()):
+            yield streams[n]

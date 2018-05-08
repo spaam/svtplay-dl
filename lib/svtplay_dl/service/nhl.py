@@ -46,6 +46,5 @@ class NHL(Service, OpenGraphThumbMixin):
             janson = res.json()
             for i in janson["user_verified_event"][0]["user_verified_content"][0]["user_verified_media_item"]:
                 streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                for n in list(streams.keys()):
+                    yield streams[n]

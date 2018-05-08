@@ -39,7 +39,7 @@ def hdsparse(config, res, manifest, output=None):
     bootstrap = {}
 
     if not res:
-        return None
+        return streams
 
     if res.status_code >= 400:
         streams[0] = ServiceError("Can't read HDS playlist. {0}".format(res.status_code))
