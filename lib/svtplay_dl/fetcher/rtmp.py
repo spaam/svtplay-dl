@@ -6,7 +6,7 @@ import shlex
 
 from svtplay_dl.log import log
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import output, formatname
 
 
 class RTMP(VideoRetriever):
@@ -26,8 +26,8 @@ class RTMP(VideoRetriever):
         file_d = output(self.output, self.config, "flv", False)
         if file_d is None:
             return
-        args += ["-o", self.output]
-        if self.options.silent:
+        args += ["-o", formatname(self.output, self.config, "flv")]
+        if self.config.get("silent"):
             args.append("-q")
         if self.kwargs.get("other"):
             args += shlex.split(self.kwargs.pop("other"))
