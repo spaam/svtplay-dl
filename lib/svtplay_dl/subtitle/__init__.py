@@ -27,7 +27,7 @@ class subtitle(object):
         return "<Subtitle(type={}, url={}>".format(self.subtype, self.url)
 
     def download(self):
-        subdata = self.http.request("get", self.url, cookies=self.options.cookies)
+        subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
             log.warning("Can't download subtitle file")
             return
