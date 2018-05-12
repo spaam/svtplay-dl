@@ -248,7 +248,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         if not other:
             other = desc
-        else:
+        elif desc:
             other += "-{}".format(desc)
 
         self.output["title"] = name
