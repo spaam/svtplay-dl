@@ -56,9 +56,9 @@ class subtitle(object):
             data = self.raw(subdata)
 
         if self.subfix:
-            self.options.output = self.options.output + self.subfix
+            self.output = self.options.output + self.subfix
 
-        if self.options.get_raw_subtitles:
+        if self.config.get("get_raw_subtitles"):
             subdata = self.raw(subdata)
             self.save_file(subdata, self.subtype)
 
@@ -66,9 +66,9 @@ class subtitle(object):
 
     def save_file(self, data, subtype):
         if platform.system() == "Windows":
-            file_d = output(self.options, subtype, mode="wt", encoding="utf-8")
+            file_d = output(self.output, self.config, subtype, mode="wt", encoding="utf-8")
         else:
-            file_d = output(self.options, subtype, mode="wt")
+            file_d = output(self.output, self.config, subtype, mode="wt")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
@@ -230,7 +230,7 @@ class subtitle(object):
                 srt += "%s\n" % number
                 subnr = True
             else:
-                if self.options.convert_subtitle_colors:
+                if self.config.get("convert_subtitle_colors"):
                     colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00',
                               '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
                     sub = i
