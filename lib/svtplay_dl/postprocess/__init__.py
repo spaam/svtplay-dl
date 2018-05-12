@@ -7,6 +7,7 @@ from requests import post, codes, Timeout
 from re import match
 
 from svtplay_dl.log import log
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import which, run_program
 
 
@@ -156,7 +157,7 @@ class postprocess(object):
         if self.stream.finished is False:
             return
 
-        orig_filename = self.stream.output
+        orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
 
         cmd = [self.detect, "-i", orig_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
