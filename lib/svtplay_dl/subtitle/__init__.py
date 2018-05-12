@@ -23,6 +23,9 @@ class subtitle(object):
         self.bom = False
         self.output = kwargs.pop("output", None)
 
+    def __repr__(self):
+        return "<Subtitle(type={}, url={}>".format(self.subtype, self.url)
+
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)
         if subdata.status_code != 200:
