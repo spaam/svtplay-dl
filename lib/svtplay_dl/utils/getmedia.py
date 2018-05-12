@@ -8,9 +8,10 @@ from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.service.services import sites, Raw
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.output import filename
+from svtplay_dl.utils.output import filename, formatname
 from svtplay_dl.postprocess import postprocess
 from svtplay_dl.utils.stream import select_quality, list_quality
+from svtplay_dl.utils.text import exclude
 from svtplay_dl.error import UIException
 
 
@@ -99,16 +100,17 @@ def get_one_media(stream, config):
     streams = stream.get()
     try:
         for i in streams:
-            if isinstance(i, VideoRetriever):
-                if config.get("preferred"):
-                    if config.get("preferred").lower() == i.name():
+            if not exclude(config, formatname(i.output, config)):
+                if isinstance(i, VideoRetriever):
+                    if config.get("preferred"):
+                        if config.get("preferred").lower() == i.name():
+                            videos.append(i)
+                    else:
                         videos.append(i)
-                else:
-                    videos.append(i)
-            if isinstance(i, subtitle):
-                subs.append(i)
-            if isinstance(i, Exception):
-                error.append(i)
+                if isinstance(i, subtitle):
+                    subs.append(i)
+                if isinstance(i, Exception):
+                    error.append(i)
     except Exception as e:
         if config.get("verbose"):
             raise

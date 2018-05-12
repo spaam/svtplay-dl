@@ -37,8 +37,6 @@ def setup_log(silent, verbose=False):
 def main():
     """ Main program """
     parse, options = parser(__version__)
-    if options.exclude:
-        options.exclude = options.exclude.split(",")
     if options.require_subtitle:
         if options.merge_subtitle:
             options.merge_subtitle = True

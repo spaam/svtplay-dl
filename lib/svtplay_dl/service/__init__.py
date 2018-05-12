@@ -59,20 +59,6 @@ class Service(object):
     def get_subtitle(self, options):
         pass
 
-    def exclude(self):
-        if self.config.get("exclude"):
-            for i in self.config.get("exclude"):
-                if i in self.config.get("output"):
-                    return True
-        return False
-
-    def exclude2(self, filename):
-        if self.options.exclude:
-            for i in self.options.exclude:
-                if i in filename:
-                    return True
-        return False
-
     # the options parameter is unused, but is part of the
     # interface, so we don't want to remove it. Thus, the
     # pylint ignore.

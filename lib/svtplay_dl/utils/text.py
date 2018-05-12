@@ -52,3 +52,12 @@ def filenamify(title):
     title = re.sub(r'\.-\.', '-', title)
 
     return title
+
+
+def exclude(config, name):
+    if config.get("exclude"):
+        excludes = config.get("exclude").split(",")
+        for exclude in excludes:
+            if exclude in name:
+                return True
+    return False
