@@ -156,9 +156,8 @@ def formatname(output, config, extension):
     return name
 
 
-def output(output, config, extension="mp4", mode="wb", **kwargs):
-    # subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
-    print(output)
+def output(output, config, extension=".mp4", mode="wb", **kwargs):
+    subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
 
     name = formatname(output, config, extension)
     if config.get("output") and os.path.isdir(os.path.expanduser(config.get("output"))):
@@ -166,56 +165,42 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
     elif config.get("path") and os.path.isdir(os.path.expanduser(config.get("path"))):
         name = os.path.join(os.path.expanduser(config.get("output")), name)
 
-    filename, ext = os.path.splitext(name)
-
-    # ext = re.search(r"(\.\w{2,4})$", options.output)
-    # if not ext:
-    #     options.output = "%s.%s" % (options.output, extension)
-    # if options.output_auto and ext:
-    #     options.output = "%s.%s" % (options.output, extension)
-    # elif extension == "srt" and ext:
-    #     options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
-    # if ext and extension == "srt" and ext.group(1).split(".")[-1] in subtitlefiles:
-    #    options.output = "%s.srt" % options.output[:options.output.rfind(ext.group(1))]
     logging.info("Outfile: %s", name)
     if os.path.isfile(name):
         logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
         return None
-    # if os.path.isfile(name) or \
-    #         findexpisode(os.path.dirname(os.path.realpath(name)), options.service, os.path.basename(options.output)):
-    #     if extension in subtitlefiles:
-    #         if not options.force_subtitle:
-    #             if not (options.silent or options.silent_semi):
-    #                 logging.warning("File (%s) already exists. Use --force-subtitle to overwrite" % options.output)
-    #             return None
-    #     else:
-    #         if not options.force:
-    #             if not (options.silent or options.silent_semi):
-    #                 logging.warning("File (%s) already exists. Use --force to overwrite" % options.output)
-    #             return None
+    if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)):
+        if extension in subtitlefiles:
+            if not config.get("force_subtitle"):
+                if not (config.get("silent") or config.get("silent_semi")):
+                    logging.warning("File ({}) already exists. Use --force-subtitle to overwrite".format(name))
+                    return None
+        else:
+            if not config.get("force"):
+                print()
+                if not (config.get("silent") or config.get("silent_semi")):
+                    logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
+                    return None
     file_d = open(name, mode, **kwargs)
     return file_d
 
 
-def findexpisode(directory, service, name):
+def findexpisode(output, directory, name):
     subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
-    match = re.search(r"-(\w+)-\w+.(\w{2,3})$", name)
-    if not match:
-        return False
 
-    videoid = match.group(1)
-    extension = match.group(2)
+    orgname, orgext = os.path.splitext(name)
 
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     for i in files:
-        match = re.search(r"-(\w+)-\w+.(\w{2,3})$", i)
-        if match:
-            if service:
-                if extension in subtitlefiles:
-                    if name.find(service) and match.group(1) == videoid and match.group(2) == extension:
-                        return True
-                elif match.group(2) not in subtitlefiles and match.group(2) != "m4a":
-                    if name.find(service) and match.group(1) == videoid:
-                        return True
+        lsname, lsext = os.path.splitext(i)
+        if output["service"]:
+            if orgext[1:] in subtitlefiles:
+                if name.find(output["service"]) > 0 and lsname.find(output["service"]) > 0 and \
+                        name.find(output["id"]) > 0 and lsname.find(output["id"]) > 0 and \
+                        orgext == lsext:
+                    return True
+            elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
+                if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
+                    return True
 
     return False
