@@ -11,11 +11,9 @@ from svtplay_dl.utils.proc import which, run_program
 
 
 class postprocess(object):
-    def __init__(self, stream, options, subfixes=None):
+    def __init__(self, stream, config, subfixes=None):
         self.stream = stream
-        self.merge_subtitle = options.get("merge_subtitle")
-        self.external_subtitle = options.get("subtitle")
-        self.get_all_subtitles = options.get("get_all_subtitles")
+        self.config = config
         self.subfixes = subfixes
         self.detect = None
         for i in ["ffmpeg", "avconv"]:
@@ -73,7 +71,7 @@ class postprocess(object):
             log.info("Determining the languages of the subtitles.")
         else:
             log.info("Determining the language of the subtitle.")
-        if self.get_all_subtitles:
+        if self.config.get("get_all_subtitles"):
             for subfix in self.subfixes:
                 if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip('-'))]:
                     if 'oversattning' in subfix.strip('-'):
@@ -109,7 +107,7 @@ class postprocess(object):
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
             videotrack, audiotrack = self._checktracks(stderr)
 
-            if self.merge_subtitle:
+            if self.config.get("merge_subtitle"):
                 log.info(u"Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
             else:
                 log.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
@@ -119,7 +117,7 @@ class postprocess(object):
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
-            if self.merge_subtitle:
+            if self.config.get("merge_subtitle"):
                 langs = self.sublanguage()
                 for stream_num, language in enumerate(langs):
                     arguments += ["-map", str(stream_num + 1), "-c:s:" + str(stream_num), "mov_text",
@@ -138,7 +136,7 @@ class postprocess(object):
             if returncode != 0:
                 return
 
-            if self.merge_subtitle and not self.external_subtitle:
+            if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
                 log.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
@@ -164,7 +162,7 @@ class postprocess(object):
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         videotrack, audiotrack = self._checktracks(stderr)
 
-        if self.merge_subtitle:
+        if self.config.get("merge_subtitle"):
             log.info("Merge audio, video and subtitle into {0}".format(orig_filename))
         else:
             log.info("Merge audio and video into {0}".format(orig_filename))
@@ -179,7 +177,7 @@ class postprocess(object):
             audio_filename = u"{0}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
-        if self.merge_subtitle:
+        if self.config.get("merge_subtitle"):
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
                 arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack),
@@ -202,7 +200,7 @@ class postprocess(object):
         log.info("Merging done, removing old files.")
         os.remove(orig_filename)
         os.remove(audio_filename)
-        if self.merge_subtitle and not self.external_subtitle:
+        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
                     subfile = "{0}.srt".format(name + subfix)
