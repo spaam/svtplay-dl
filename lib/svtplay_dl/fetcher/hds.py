@@ -76,6 +76,7 @@ class HDS(VideoRetriever):
         return "hds"
 
     def download(self):
+        self.output_extention = "flv"
         if self.config.get("live") and not self.config.get("force"):
             raise LiveHDSException(self.url)
 

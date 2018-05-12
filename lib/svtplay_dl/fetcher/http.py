@@ -12,6 +12,7 @@ class HTTP(VideoRetriever):
 
     def download(self):
         """ Get the stream from HTTP """
+        self.output_extention = "mp4"  # this might be wrong..
         data = self.http.request("get", self.url, stream=True)
         try:
             total_size = data.headers['content-length']

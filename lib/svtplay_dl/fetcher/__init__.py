@@ -19,6 +19,7 @@ class VideoRetriever(object):
         self.authorization = kwargs.pop("authorization", None)
         self.output = kwargs.pop("output", None)
         self.segments = kwargs.pop("segments", None)
+        self.output_extention = None
 
     def __repr__(self):
         return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)

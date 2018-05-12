@@ -15,6 +15,7 @@ class RTMP(VideoRetriever):
 
     def download(self):
         """ Get the stream from RTMP """
+        self.output_extention = "flv"
         args = []
         if self.config.get("live"):
             args.append("-v")

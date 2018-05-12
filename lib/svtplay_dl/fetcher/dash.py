@@ -199,6 +199,7 @@ class DASH(VideoRetriever):
         return "dash"
 
     def download(self):
+        self.output_extention = "mp4"
         if self.config.get("live") and not self.config.get("force"):
             raise LiveDASHException(self.url)
 
@@ -217,7 +218,7 @@ class DASH(VideoRetriever):
         if audio:
             file_d = output(copy.copy(self.output), self.config, extension="m4a")
         else:
-            file_d = output(self.output, self.config, extension="m4v")
+            file_d = output(self.output, self.config, extension="mp4")
         if file_d is None:
             return
         eta = ETA(len(files))
