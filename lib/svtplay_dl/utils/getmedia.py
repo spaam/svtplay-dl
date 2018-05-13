@@ -87,7 +87,7 @@ def get_one_media(stream, config):
     if not filename(stream):
         return
     if config.get("merge_subtitle"):
-        from svtplay_dl.utils import which
+        from svtplay_dl.utils.proc import which
         if not which('ffmpeg'):
             log.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
             log.info("https://ffmpeg.org/download.html")
