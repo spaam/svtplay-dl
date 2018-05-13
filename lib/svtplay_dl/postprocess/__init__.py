@@ -81,10 +81,12 @@ class postprocess(object):
                         subfix = subfix.strip('-')
                     langs += [exceptions[subfix]]
                     continue
-                subfile = "{0}.srt".format(os.path.splitext(self.stream.options.output)[0] + subfix)
+                subfile = "{0}.srt".format(os.path.splitext(formatname(self.stream.output, self.config,
+                                                                       self.stream.output_extention))[0] + subfix)
                 langs += [query(subfile)]
         else:
-            subfile = "{0}.srt".format(os.path.splitext(self.stream.options.output)[0])
+            subfile = "{0}.srt".format(os.path.splitext(formatname(self.stream.output, self.config,
+                                                                   self.stream.output_extention))[0])
             langs += [query(subfile)]
         if len(langs) >= 2:
             log.info("Language codes: " + ', '.join(langs))
@@ -99,8 +101,8 @@ class postprocess(object):
         if self.stream.finished is False:
             return
 
-        if self.stream.options.output.endswith('.mp4') is False:
-            orig_filename = self.stream.options.output
+        if formatname(self.stream.output, self.config, self.stream.output_extention).endswith('.mp4') is False:
+            orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
             name, ext = os.path.splitext(orig_filename)
             new_name = u"{0}.mp4".format(name)
 
