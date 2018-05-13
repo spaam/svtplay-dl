@@ -2,7 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 
-from svtplay_dl.output import output, ETA, progressbar
+from svtplay_dl.utils.output import ETA, progressbar, output
 from svtplay_dl.fetcher import VideoRetriever
 
 
@@ -20,7 +20,7 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.options, "mp4")
+        file_d = output(self.output, "mp4")
         if file_d is None:
             return
 
@@ -28,7 +28,7 @@ class HTTP(VideoRetriever):
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
-            if not self.options.silent:
+            if not self.options.get("silent"):
                 eta.update(bytes_so_far)
                 progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 

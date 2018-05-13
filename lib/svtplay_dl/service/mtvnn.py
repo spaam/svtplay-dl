@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import re
-import os
 import json
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
@@ -21,7 +20,6 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
 
         if parse.netloc.endswith("se"):
-
             match = re.search('<div class="video-player" (.*)>', data)
 
             if not match:
@@ -54,7 +52,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                     and xml.find("./video").find("item").find("rendition").find("src") is not None:
 
                 hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                stream = hlsparse(self.options, self.http.request("get", hls_url), hls_url)
+                stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url)
                 if stream:
 
                     for key in list(stream.keys()):
@@ -71,16 +69,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         xml = ET.XML(data)
         mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
+        self.output["title"] = title
 
         swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
         self.options.other = "-W {0}".format(self.http.check_redirect(swfurl))
@@ -92,7 +81,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         sa = list(ss.iter("rendition"))
 
         for i in sa:
-            yield RTMP(self.options, i.find("src").text, i.attrib["bitrate"])
+            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"])
 
         match = re.search("gon.viacom_config=([^;]+);", self.get_urldata())
         if match:
@@ -106,12 +95,12 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
                 dataj = json.loads(data)
                 for i in dataj["local_playlist_videos"]:
-                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
         if match is None:
             log.error("Couldn't program id")
@@ -128,7 +117,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         episodes = []
         n = 0
         for i in sorted(episodNr):
-            if n == options.all_last:
+            if n == config.get("all_last"):
                 break
             episodes.append("http://www.nickelodeon.se/serier/{0}-something/videos/{1}-something".format(programid, i))
             n += 1
@@ -141,12 +130,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search('window.pagePlaylist = (.*);', data)
-
         if not match:
             yield ServiceError("Can't find video info")
             return
@@ -173,7 +157,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
                    xml.find("./video").find("item").find("rendition").find("src") is not None:
 
                     hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                    stream = hlsparse(self.options, self.http.request("get", hls_url), hls_url)
+                    stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url)
                     if stream:
 
                         for key in list(stream.keys()):

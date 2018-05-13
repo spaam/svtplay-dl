@@ -1,15 +1,12 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 import re
 import copy
-import os
 from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.error import ServiceError
 
 
@@ -17,7 +14,7 @@ class Cmore(Service):
     supported_domains = ['www.cmore.se', 'www.cmore.dk', 'www.cmore.no', 'www.cmore.fi']
 
     def get(self):
-        if not self.options.username or not self.options.password:
+        if not self.config.get("username") or not self.config.get("password"):
             yield ServiceError("You need username and password to download things from this site.")
             return
 
@@ -40,22 +37,10 @@ class Cmore(Service):
             yield ServiceError("This video is geoblocked")
             return
 
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            self.options.service = "cmore"
-            basename = self._autoname(match.group(1))
-            if basename is None:
-                yield ServiceError("Cant find vid id for autonaming")
-                return
-            title = "{0}-{1}-{2}".format(basename, match.group(1), self.options.service)
-            title = filenamify(title)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
+        basename = self._autoname(match.group(1))
+        self.output["id"] = match.group(1)
+        if basename is None:
+            yield ServiceError("Cant find vid id for autonaming")
             return
 
         if "drmProtected" in janson["playback"]:
@@ -66,7 +51,7 @@ class Cmore(Service):
         if isinstance(janson["playback"]["items"]["item"], list):
             for i in janson["playback"]["items"]["item"]:
                 if i["mediaFormat"] == "ism":
-                    streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -75,7 +60,7 @@ class Cmore(Service):
         else:
             i = janson["playback"]["items"]["item"]
             if i["mediaFormat"] == "ism":
-                streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
@@ -102,11 +87,12 @@ class Cmore(Service):
             name = janson["title"]["$"]
 
         if "season" in janson:
-            season = "{0:02d}".format(int(janson["season"]["$"]))
-            name = "{0}.S{1}E{2:02d}".format(name, season, int(janson["episode"]["$"]))
-        return name
+            self.output["season"] = int(janson["season"]["$"])
+            self.output["episode"] = int(janson["episode"]["$"])
+        self.output["title"] = name
+        return self.output["title"]
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         episodes = []
 
         token, message = self._login()
@@ -120,8 +106,8 @@ class Cmore(Service):
             if url not in episodes:
                 episodes.append(url)
 
-        if options.all_last > 0:
-            return sorted(episodes[-options.all_last:])
+        if config.get("all_last") > 0:
+            return sorted(episodes[-config.get("all_last"):])
         return sorted(episodes)
 
     def _gettld(self):

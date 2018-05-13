@@ -2,7 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import os
 import hashlib
 import random
 from urllib.parse import urlparse
@@ -10,7 +9,6 @@ from urllib.parse import urlparse
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.log import log
 
 
@@ -24,7 +22,7 @@ class Dplay(Service):
         if not self._token():
             log.error("Something went wrong getting token for requests")
 
-        if self.options.username and self.options.password:
+        if self.config.get("username") and self.config.get("password"):
             premium = self._login()
             if not premium:
                 log.warning("Wrong username/password.")
@@ -35,7 +33,7 @@ class Dplay(Service):
             path = "/channels/{}".format(match.group(1))
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             channel = True
-            self.options.live = True
+            self.config.set("live", True)
         elif "program" in parse.path:
             match = re.search("(programmer|program)/([^/]+)$", parse.path)
             path = "/shows/{}".format(match.group(2))
@@ -66,25 +64,15 @@ class Dplay(Service):
             yield ServiceError("Cant find any videos on this url")
             return
 
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            self.options.service = "dplay"
-            if channel:
-                name = filenamify(janson["data"]["attributes"]["name"])
-            else:
-                name = self._autoname(janson)
-            if name is None:
-                yield ServiceError("Cant find vid id for autonaming")
-                return
-            title = "{0}-{1}-{2}".format(name, janson["data"]["id"], self.options.service)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
+        if channel:
+            name = janson["data"]["attributes"]["name"]
+            self.output["title"] = name
+        else:
+            name = self._autoname(janson)
+        if name is None:
+            yield ServiceError("Cant find vid id for autonaming")
             return
+        self.output["id"] = janson["data"]["id"]
 
         api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(self.domain, janson["data"]["id"])
         res = self.http.get(api)
@@ -99,12 +87,11 @@ class Dplay(Service):
 
     def _autoname(self, jsondata):
         match = re.search('^([^/]+)/', jsondata["data"]["attributes"]["path"])
-        show = match.group(1)
-        season = jsondata["data"]["attributes"]["seasonNumber"]
-        episode = jsondata["data"]["attributes"]["episodeNumber"]
-        name = jsondata["data"]["attributes"]["name"]
-        show = filenamify(show)
-        return filenamify("{0}.s{1:02d}e{2:02d}.{3}".format(show, int(season), int(episode), name))
+        self.output["title"] = match.group(1)
+        self.output["season"] = int(jsondata["data"]["attributes"]["seasonNumber"])
+        self.output["episode"] = int(jsondata["data"]["attributes"]["episodeNumber"])
+        self.output["episodename"] = jsondata["data"]["attributes"]["name"]
+        return self.output["title"]
 
     def find_all_episodes(self, options):
         parse = urlparse(self.url)
@@ -146,7 +133,7 @@ class Dplay(Service):
 
     def _login(self):
         url = "https://disco-api.{}/login".format(self.domain)
-        login = {"credentials": {"username": self.options.username, "password": self.options.password}}
+        login = {"credentials": {"username": self.config.get("username"), "password": self.config.get("password")}}
         res = self.http.post(url, json=login)
         if res.status_code > 400:
             return False

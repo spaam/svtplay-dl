@@ -15,10 +15,6 @@ class Lemonwhale(Service):
     supported_domains = ['vk.se', 'lemonwhale.com']
 
     def get(self):
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         vid = self.get_vid()
         if not vid:
             yield ServiceError("Can't find video id")
@@ -63,5 +59,5 @@ class Lemonwhale(Service):
         for i in videos:
             if i["name"] == "auto":
                 hls = "{0}{1}".format(janson["videos"][0]["media"]["base"], i["url"])
-        streams = hlsparse(self.options, self.http.request("get", hls), hls)
+        streams = hlsparse(self.config, self.http.request("get", hls), hls)
         return streams

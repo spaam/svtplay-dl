@@ -2,12 +2,10 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import os
 from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.error import ServiceError
 
 
@@ -38,7 +36,7 @@ class Sportlib(Service, OpenGraphThumbMixin):
         sid = janson["data"][0]["id"]
 
         data = {"client_id": cid, "client_secret": cs, "grant_type": "password",
-                "username": self.options.username, "password": self.options.password}
+                "username": self.config.get("username"), "password": self.config.get("password")}
         res = self.http.post("https://core.oz.com/oauth2/token?channelId={}".format(sid), data=data)
         if res.status_code > 200:
             yield ServiceError("Wrong username / password?")
@@ -62,19 +60,13 @@ class Sportlib(Service, OpenGraphThumbMixin):
         token = janson["data"]["streamUrl"]["token"]
         hlsplaylist = janson["data"]["streamUrl"]["cdnUrl"]
 
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            title = filenamify(janson["data"]["title"])
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
+        self.output["title"] = janson["data"]["title"]
 
         # get cookie
         postjson = {"name": cookiename, "value": token}
         res = self.http.post("https://playlist.oz.com/cookie", json=postjson)
         cookies = res.cookies
-        streams = hlsparse(self.options, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies)
+        streams = hlsparse(self.config, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

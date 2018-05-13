@@ -6,13 +6,14 @@ from io import StringIO
 from svtplay_dl.log import log
 from svtplay_dl.utils.text import decode_html_entities
 from svtplay_dl.utils.http import HTTP
-from svtplay_dl.output import output
+from svtplay_dl.utils.output import output
+
 from requests import __build__ as requests_version
 import platform
 
 
 class subtitle(object):
-    def __init__(self, options, subtype, url, subfix=None):
+    def __init__(self, options, subtype, url, subfix=None, **kwargs):
         self.url = url
         self.subtitle = None
         self.options = options
@@ -20,6 +21,7 @@ class subtitle(object):
         self.http = HTTP(options)
         self.subfix = subfix
         self.bom = False
+        self.output = kwargs.pop("output", None)
 
     def download(self):
         subdata = self.http.request("get", self.url, cookies=self.options.cookies)

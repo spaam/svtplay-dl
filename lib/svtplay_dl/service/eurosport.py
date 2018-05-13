@@ -29,7 +29,7 @@ class Eurosport(Service):
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
 
-        logindict = {"type": "email-password", "email": {"address": self.options.username}, "password": {"value": self.options.password}}
+        logindict = {"type": "email-password", "email": {"address": self.config.get("username")}, "password": {"value": self.config.get("password")}}
 
         res = self.http.post("https://eu-west-1-api.svcs.eurosportplayer.com/v2/user/identity", json=logindict,
                              headers={"authorization": access_token, "Accept": "application/vnd.identity-service+json; version=1.0"})
@@ -68,7 +68,7 @@ class Eurosport(Service):
             query["channelCallsigns"] = vid
             query["onAir"] = True
 
-            self.options.live = True  # lets override to true
+            self.config.set("live", True)  # lets override to true
 
             url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/" \
                   "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
@@ -97,7 +97,7 @@ class Eurosport(Service):
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["complete"]
 
-        streams = hlsparse(self.options, self.http.request("get", hls_url), hls_url, authorization=access_token)
+        streams = hlsparse(self.config, self.http.request("get", hls_url), hls_url, authorization=access_token)
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]

@@ -12,14 +12,20 @@ class Service(object):
     supported_domains = []
     supported_domains_re = []
 
-    def __init__(self, options, _url):
-        self.options = options
+    def __init__(self, config, _url, http=None):
+        self.config = config
         self._url = _url
         self._urldata = None
         self._error = False
         self.subtitle = None
         self.cookies = {}
-        self.http = HTTP(options)
+        self.auto_name = None
+        self.output = {"title": None, "season": None, "episode": None, "episodename": None,
+                       "id": None, "service": self.__class__.__name__.lower()}
+        if not http:
+            self.http = HTTP(options=config)
+        else:
+            self.http = http
 
     @property
     def url(self):
@@ -54,9 +60,9 @@ class Service(object):
         pass
 
     def exclude(self):
-        if self.options.exclude:
-            for i in self.options.exclude:
-                if i in self.options.output:
+        if self.config.get("exclude"):
+            for i in self.config.get("exclude"):
+                if i in self.config.get("output"):
                     return True
         return False
 
@@ -207,6 +213,7 @@ def service_handler(sites, options, url):
     for i in sites:
         if i.handles(url):
             handler = i(options, url)
+            print(handler)
             break
 
     return handler

@@ -17,10 +17,6 @@ class Aftonbladettv(Service):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         apiurl = None
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
@@ -32,13 +28,13 @@ class Aftonbladettv(Service):
         videoId = data["playerOptions"]["id"]
         apiurl = data["playerOptions"]["api"]
         vendor = data["playerOptions"]["vendor"]
-        self.options.live = data["live"]
-        if not self.options.live:
+        self.config.set("live", data["live"])
+        if not self.config.get("live"):
             dataurl = "{0}{1}/assets/{2}?appName=svp-player".format(apiurl, vendor, videoId)
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
 
-        streams = hlsparse(self.options, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"])
+        streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"])
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]
@@ -49,10 +45,6 @@ class Aftonbladet(Service):
 
     def get(self):
         data = self.get_urldata()
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
 
         match = re.search('window.FLUX_STATE = ({.*})</script>', data)
         if not match:
@@ -77,7 +69,7 @@ class Aftonbladet(Service):
             if "components" in i:
                 for n in i["components"]:
                     if "type" in n and n["type"] == "video":
-                        streams = hlsparse(self.options, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
+                        streams = hlsparse(self.config, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
                                            n["videoAsset"]["streamUrls"]["hls"])
                         if streams:
                             for key in list(streams.keys()):
@@ -89,12 +81,12 @@ class Aftonbladet(Service):
                 streamUrls = i["videoAsset"]["streamUrls"]
 
                 if "hls" in streamUrls:
-                    streams.append(hlsparse(self.options, self.http.request("get", streamUrls["hls"]),
+                    streams.append(hlsparse(self.config, self.http.request("get", streamUrls["hls"]),
                                             streamUrls["hls"]))
 
                 if "hds" in streamUrls:
-                    streams.append(hdsparse(self.options, self.http.request("get", streamUrls["hds"],
-                                                                            params={"hdcore": "3.7.0"}),
+                    streams.append(hdsparse(self.config, self.http.request("get", streamUrls["hds"],
+                                                                           params={"hdcore": "3.7.0"}),
                                             streamUrls["hds"]))
 
                 if streams:

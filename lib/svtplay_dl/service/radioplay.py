@@ -17,15 +17,11 @@ class Radioplay(Service):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r"RP.vcdData = ({.*});</script>", data)
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):
-                yield HTTP(copy.copy(self.options), data["station"]["streams"][i], i)
+                yield HTTP(copy.copy(self.config), data["station"]["streams"][i], i)
         else:
             yield ServiceError("Can't find stream info")
             return

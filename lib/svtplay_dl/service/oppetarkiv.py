@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import re
 import copy
-import os
 import hashlib
 from urllib.parse import urlparse, parse_qs
 
@@ -13,7 +12,7 @@ from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.utils.text import ensure_unicode, filenamify, decode_html_entities
+from svtplay_dl.utils.text import ensure_unicode, decode_html_entities
 from svtplay_dl.subtitle import subtitle
 
 
@@ -34,15 +33,10 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
         data = data.json()
         if "live" in data:
-            self.options.live = data["live"]
+            self.config.set("live", data["live"])
 
-        if self.options.output_auto:
-            self.options.service = "svtplay"
-            self.options.output = self.outputfilename(data, self.options.output, ensure_unicode(self.get_urldata()))
+        self.outputfilename(data, ensure_unicode(self.get_urldata()))
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
                 if i["format"] == "websrt":
@@ -56,22 +50,21 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
             query = parse_qs(parse.query)
             if i["format"] == "hls" or i["format"] == "ios":
-                streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = hlsparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                        streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
             if i["format"] == "hds" or i["format"] == "flash":
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
-                                       i["url"])
+                    streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -85,7 +78,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                                 for n in list(streams.keys()):
                                     yield streams[n]
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
@@ -93,7 +86,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                        streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
@@ -104,7 +97,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             return match.group(1)
         return None
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         page = 1
         data = self.get_urldata()
         match = re.search(r'"/etikett/titel/([^"/]+)', data)
@@ -117,7 +110,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         episodes = []
 
         n = 0
-        if self.options.all_last > 0:
+        if self.config.get("all_last") > 0:
             sort = "tid_fallande"
         else:
             sort = "tid_stigande"
@@ -131,7 +124,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             data = data.text
             regex = re.compile(r'href="(/video/[^"]+)"')
             for match in regex.finditer(data):
-                if n == self.options.all_last:
+                if n == self.config.get("all_last"):
                     break
                 episodes.append("http://www.oppetarkiv.se{0}".format(match.group(1)))
                 n += 1
@@ -139,38 +132,26 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
         return episodes
 
-    def outputfilename(self, data, filename, raw):
-        directory = os.path.dirname(filename)
+    def outputfilename(self, data):
         id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
+        self.output["id"] = id
 
         datatitle = re.search('data-title="([^"]+)"', self.get_urldata())
         if not datatitle:
             return None
         datat = decode_html_entities(datatitle.group(1))
-        name = self.name(datat)
-        episode = self.seasoninfo(datat)
-
-        if episode:
-            title = "{0}.{1}-{2}-svtplay".format(name, episode, id)
-        else:
-            title = "{0}-{1}-svtplay".format(name, id)
-        title = filenamify(title)
-        if len(directory):
-            output = os.path.join(directory, title)
-        else:
-            output = title
-        return output
+        self.output["title"] = self.name(datat)
+        self.seasoninfo(datat)
 
     def seasoninfo(self, data):
-        episode = None
         match = re.search("S.song (\d+) - Avsnitt (\d+)", data)
         if match:
-            episode = "s{0:02d}e{1:02d}".format(int(match.group(1)), int(match.group(2)))
+            self.output["season"] = int(match.group(1))
+            self.output["episode"] = int(match.group(2))
         else:
             match = re.search("Avsnitt (\d+)", data)
             if match:
-                episode = "e{0:02d}".format(int(match.group(1)))
-        return episode
+                self.output["episode"] = int(match.group(1))
 
     def name(selfs, data):
         if data.find(" - S.song") > 0:

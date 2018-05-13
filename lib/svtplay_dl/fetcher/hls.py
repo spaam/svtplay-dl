@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import binascii
 from urllib.parse import urljoin
 
-from svtplay_dl.output import progressbar, progress_stream, ETA, output
+from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -41,7 +41,7 @@ def _get_full_url(url, srcurl):
     return returl
 
 
-def hlsparse(options, res, url, **kwargs):
+def hlsparse(config, res, url, **kwargs):
     streams = {}
 
     if not res:
@@ -55,6 +55,7 @@ def hlsparse(options, res, url, **kwargs):
     keycookie = kwargs.pop("keycookie", None)
     authorization = kwargs.pop("authorization", None)
     httpobject = kwargs.pop("httpobject", None)
+    output = kwargs.pop("output", None)
 
     media = {}
     segments = None
@@ -85,16 +86,17 @@ def hlsparse(options, res, url, **kwargs):
                 urls = _get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
-            options.segments = bool(segments)
             if subtitle_url and httpobject:
                 m3u8s = M3U8(httpobject.request("get", subtitle_url, cookies=res.cookies).text)
-                streams[1] = subtitle(copy.copy(options), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
-            streams[int(bit_rate)] = HLS(copy.copy(options), urls, bit_rate,
-                                         cookies=res.cookies, keycookie=keycookie, authorization=authorization, audio=audio_url)
+                streams[1] = subtitle(copy.copy(config), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
+            streams[int(bit_rate)] = HLS(copy.copy(config), urls, bit_rate,
+                                         cookies=res.cookies, keycookie=keycookie, authorization=authorization,
+                                         audio=audio_url, output=output, segments=bool(segments))
 
     elif m3u8.media_segment:
-        options.segments = False
-        streams[0] = HLS(copy.copy(options), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization)
+        config.set("segments", False)
+        streams[0] = HLS(copy.copy(config), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization,
+                         output=output, segments=False)
 
     else:
         streams[0] = ServiceError("Can't find HLS playlist in m3u8 file.")

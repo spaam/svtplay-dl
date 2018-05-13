@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import copy
 
-from svtplay_dl.output import progress_stream, output, ETA, progressbar
+from svtplay_dl.utils.output import output, ETA, progressbar
 from svtplay_dl.utils.http import HTTP
 
 
@@ -17,6 +17,8 @@ class VideoRetriever(object):
         self.files = kwargs.pop("files", None)
         self.keycookie = kwargs.pop("keycookie", None)
         self.authorization = kwargs.pop("authorization", None)
+        self.output = kwargs.pop("output", None)
+        self.segments = kwargs.pop("segments", None)
 
     def __repr__(self):
         return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
@@ -39,7 +41,7 @@ class VideoRetriever(object):
         if audio:
             file_d = output(copy.copy(self.options), "m4a")
         else:
-            file_d = output(self.options, self.options.other)
+            file_d = output(self.options, self.options.get("other"))
 
         if file_d is None:
             return
@@ -61,5 +63,5 @@ class VideoRetriever(object):
 
         file_d.close()
         progressbar(bytes_so_far, total_size, "ETA: complete")
-        progress_stream.write('\n')
+        # progress_stream.write('\n')
         self.finished = True

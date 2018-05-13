@@ -12,9 +12,6 @@ class NHL(Service, OpenGraphThumbMixin):
     supported_domains = ['nhl.com']
 
     def get(self):
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
         match = re.search("var initialMedia\s+= ({[^;]+);", self.get_urldata())
         if not match:
             yield ServiceError("Cant find any media on that page")
@@ -27,7 +24,7 @@ class NHL(Service, OpenGraphThumbMixin):
         if "playbacks" in janson["metaData"]:
             for i in janson["metaData"]["playbacks"]:
                 if "CLOUD" in i["name"]:
-                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -48,7 +45,7 @@ class NHL(Service, OpenGraphThumbMixin):
             res = self.http.get(url)
             janson = res.json()
             for i in janson["user_verified_event"][0]["user_verified_content"][0]["user_verified_media_item"]:
-                streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]

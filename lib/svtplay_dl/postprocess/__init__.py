@@ -13,9 +13,9 @@ from svtplay_dl.utils.proc import which, run_program
 class postprocess(object):
     def __init__(self, stream, options, subfixes=None):
         self.stream = stream
-        self.merge_subtitle = options.merge_subtitle
-        self.external_subtitle = options.subtitle
-        self.get_all_subtitles = options.get_all_subtitles
+        self.merge_subtitle = options.get("merge_subtitle")
+        self.external_subtitle = options.get("subtitle")
+        self.get_all_subtitles = options.get("get_all_subtitles")
         self.subfixes = subfixes
         self.detect = None
         for i in ["ffmpeg", "avconv"]:

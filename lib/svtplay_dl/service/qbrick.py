@@ -16,10 +16,6 @@ class Qbrick(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         if re.findall(r"di.se", self.url):
             match = re.search("src=\"(http://qstream.*)\"></iframe", data)
             if not match:
@@ -44,7 +40,7 @@ class Qbrick(Service, OpenGraphThumbMixin):
             return
         live = xml.find("media").find("item").find("playlist").find("stream").attrib["isLive"]
         if live == "true":
-            self.options.live = True
+            self.config.set("live", True)
         data = self.http.request("get", url).content
         xml = ET.XML(data)
         server = xml.find("head").find("meta").attrib["base"]
@@ -53,4 +49,4 @@ class Qbrick(Service, OpenGraphThumbMixin):
 
         for i in sa:
             self.options.other = "-y '{0}'".format(i.attrib["src"])
-            yield RTMP(copy.copy(self.options), server, i.attrib["system-bitrate"])
+            yield RTMP(copy.copy(self.config), server, i.attrib["system-bitrate"])

@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 from urllib.parse import urljoin
 
-from svtplay_dl.output import progress_stream, output, ETA, progressbar
+from svtplay_dl.utils.output import output, progress_stream, ETA, progressbar
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 
@@ -128,7 +128,7 @@ def adaptionset(element, url, baseurl=None, offset_sec=None, duration_sec=None):
     return streams
 
 
-def dashparse(options, res, url):
+def dashparse(options, res, url, output=None):
     streams = {}
     baseurl = None
     offset_sec = None
@@ -170,13 +170,13 @@ def dashparse(options, res, url):
         streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
         return
 
-    options.other = "mp4"
+    options.set("other", "mp4")
 
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]
-        options.segments = videofiles[i]["segments"]
         streams[bitrate] = DASH(copy.copy(options), url, bitrate, cookies=res.cookies,
-                                audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"])
+                                audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"],
+                                output=output, segments=videofiles[i]["segments"])
 
     return streams
 
@@ -201,10 +201,10 @@ class DASH(VideoRetriever):
         return "dash"
 
     def download(self):
-        if self.options.live and not self.options.force:
+        if self.options.get("live") and not self.options.get("force"):
             raise LiveDASHException(self.url)
 
-        if self.options.segments:
+        if self.segments:
             if self.audio:
                 self._download2(self.audio, audio=True)
             self._download2(self.files)
@@ -217,15 +217,15 @@ class DASH(VideoRetriever):
         cookies = self.kwargs["cookies"]
 
         if audio:
-            file_d = output(copy.copy(self.options), "m4a")
+            file_d = output(copy.copy(self.output), self.options, extension="m4a")
         else:
-            file_d = output(self.options, self.options.other)
+            file_d = output(self.output, self.options, extension=self.options.get("other"))
         if file_d is None:
             return
         eta = ETA(len(files))
         n = 1
         for i in files:
-            if not self.options.silent:
+            if not self.options.get("silent"):
                 eta.increment()
                 progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
                 n += 1
@@ -237,6 +237,6 @@ class DASH(VideoRetriever):
             file_d.write(data)
 
         file_d.close()
-        if not self.options.silent:
+        if not self.options.get("silent"):
             progress_stream.write('\n')
         self.finished = True

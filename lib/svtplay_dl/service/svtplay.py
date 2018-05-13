@@ -2,7 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import os
 import copy
 import json
 import hashlib
@@ -70,9 +69,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         return
                     janson = json.loads(match.group(1))["videoPage"]
 
-        if self.options.output_auto:
-            self.options.service = "svtplay"
-            self.options.output = self.outputfilename(janson["video"], self.options.output)
+        self.outputfilename(janson["video"])
 
         if self.exclude():
             yield ServiceError("Excluding video.")
@@ -112,23 +109,23 @@ class Svtplay(Service, OpenGraphThumbMixin):
                     alt = self.http.get(query["alt"][0])
 
                 if i["format"] == "hls":
-                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = hlsparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
 
                 elif i["format"] == "hds":
                     match = re.search(r"\/se\/secure\/", i["url"])
                     if not match:
-                        streams = hdsparse(self.options, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
-                                           i["url"])
+                        streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
+                                           i["url"], output=self.output)
                         if alt:
-                            alt_streams = hdsparse(self.options, self.http.request("get", alt.request.url,
-                                                                                   params={"hdcore": "3.7.0"}),
-                                                   alt.request.url)
+                            alt_streams = hdsparse(self.config, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
+                                                   alt.request.url, output=self.output)
                 elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                    streams = dashparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = dashparse(self.options, self.http.request("get", alt.request.url), alt.request.url)
+                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url),
+                                                alt.request.url, output=self.output)
 
                 if streams:
                     for n in list(streams.keys()):
@@ -170,7 +167,7 @@ class Svtplay(Service, OpenGraphThumbMixin):
 
         return videos
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         parse = urlparse(self._url)
 
         videos = []
@@ -200,14 +197,14 @@ class Svtplay(Service, OpenGraphThumbMixin):
                         else:
                             if "klipp" not in i["slug"] and "kommande" not in i["slug"]:
                                 videos = self.videos_to_list(i["videos"], videos)
-                        if self.options.include_clips:
+                        if self.config.get("include_clips"):
                             if i["slug"] == "klipp":
                                 videos = self.videos_to_list(i["videos"], videos)
 
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
+        if config.get("all_last") > 0:
+            return episodes[-config.get("all_last"):]
         return episodes
 
     def videos_to_list(self, lvideos, videos):
@@ -216,34 +213,23 @@ class Svtplay(Service, OpenGraphThumbMixin):
         for n in lvideos:
             parse = urlparse(n["contentUrl"])
             if parse.path not in videos:
-                filename = self.outputfilename(n, self.options.output)
-                if not self.exclude2(filename):
-                    videos.append(parse.path)
+                videos.append(parse.path)
             if "versions" in n:
                 for i in n["versions"]:
                     parse = urlparse(i["contentUrl"])
-                    filename = ""  # output is None here.
-                    if "accessService" in i:
-                        if i["accessService"] == "audioDescription":
-                            filename += "-syntolkat"
-                        if i["accessService"] == "signInterpretation":
-                            filename += "-teckentolkat"
-                    if not self.exclude2(filename) and parse.path not in videos:
+                    if parse.path not in videos:
                         videos.append(parse.path)
 
         return videos
 
-    def outputfilename(self, data, filename):
-        if filename:
-            directory = os.path.dirname(filename)
-        else:
-            directory = ""
+    def outputfilename(self, data):
         name = None
+        desc = None
         if "programTitle" in data and data["programTitle"]:
             name = filenamify(data["programTitle"])
         elif "titleSlug" in data and data["titleSlug"]:
             name = filenamify(data["titleSlug"])
-        other = filenamify(data["title"])
+        other = data["title"]
 
         if "programVersionId" in data:
             vid = str(data["programVersionId"])
@@ -256,31 +242,31 @@ class Svtplay(Service, OpenGraphThumbMixin):
         elif name is None:
             name = other
             other = None
-        season = self.seasoninfo(data)
-        title = name
-        if season:
-            title += ".{}".format(season)
-        if other:
-            title += ".{}".format(other)
+
+        season, episode = self.seasoninfo(data)
         if "accessService" in data:
             if data["accessService"] == "audioDescription":
-                title += "-syntolkat"
+                desc = "syntolkat"
             if data["accessService"] == "signInterpretation":
-                title += "-teckentolkat"
-        title += "-{}-{}".format(id, self.__class__.__name__.lower())
-        title = filenamify(title)
-        if len(directory):
-            output = os.path.join(directory, title)
+                desc = "teckentolkat"
+
+        if not other:
+            other = desc
         else:
-            output = title
-        return output
+            other += "-{}".format(desc)
+
+        self.output["title"] = name
+        self.output["id"] = id
+        self.output["season"] = season
+        self.output["episode"] = episode
+        self.output["episodename"] = other
 
     def seasoninfo(self, data):
         if "season" in data and data["season"]:
             season = "{:02d}".format(data["season"])
             episode = "{:02d}".format(data["episodeNumber"])
             if int(season) == 0 and int(episode) == 0:
-                return None
-            return "S{}E{}".format(season, episode)
+                return None, None
+            return season, episode
         else:
-            return None
+            return None, None

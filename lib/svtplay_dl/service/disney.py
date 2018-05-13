@@ -5,11 +5,9 @@ from __future__ import absolute_import
 import json
 import re
 import copy
-import os
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
@@ -22,11 +20,6 @@ class Disney(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         if parse.hostname == "video.disney.se" or parse.hostname == "disneyjunior.disney.se":
             data = self.get_urldata()
-
-            if self.exclude():
-                yield ServiceError("Excluding video")
-                return
-
             match = re.search(r"Grill.burger=({.*}):", data)
             if not match:
                 yield ServiceError("Can't find video info")
@@ -41,7 +34,7 @@ class Disney(Service, OpenGraphThumbMixin):
                                     res = self.http.get(i["url"])
                                     match = re.search('button primary" href="([^"]+)"', res.text)
                                     if match:
-                                        yield HTTP(copy.copy(self.options), match.group(1), i["bitrate"])
+                                        yield HTTP(copy.copy(self.config), match.group(1), i["bitrate"])
         else:
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
@@ -66,20 +59,11 @@ class Disney(Service, OpenGraphThumbMixin):
                 else:
                     yield ServiceError("Cant find video info")
                     return
-            if self.options.output_auto:
-                for i in jsondata["playlists"][0]["playlist"]:
-                    if entryid in i["id"]:
-                        title = i["longId"]
-                        break
-
-                directory = os.path.dirname(self.options.output)
-                self.options.service = "disney"
-                title = "{0}-{1}".format(title, self.options.service)
-                title = filenamify(title)
-                if len(directory):
-                    self.options.output = os.path.join(directory, title)
-                else:
-                    self.options.output = title
+            for i in jsondata["playlists"][0]["playlist"]:
+                if entryid in i["id"]:
+                    title = i["longId"]
+                    break
+            self.output["title"] = title
 
             url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid={0}&uiconf_id={1}&entry_id={2}" \
                   "&playerId={3}&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi".format(partnerid, uiconfid, entryid, uniq)
@@ -90,23 +74,12 @@ class Disney(Service, OpenGraphThumbMixin):
             match = re.search(r"window.kalturaIframePackageData = ({.*});", data)
             jsondata = json.loads(match.group(1))
             ks = jsondata["enviornmentConfig"]["ks"]
-            if self.options.output_auto:
-                name = jsondata["entryResult"]["meta"]["name"]
-                directory = os.path.dirname(self.options.output)
-                self.options.service = "disney"
-                title = "{0}-{1}".format(name, self.options.service)
-                title = filenamify(title)
-                if len(directory):
-                    self.options.output = os.path.join(directory, title)
-                else:
-                    self.options.output = title
-
-            if self.exclude():
-                return
+            name = jsondata["entryResult"]["meta"]["name"]
+            self.output["title"] = name
 
             url = "http://cdnapi.kaltura.com/p/{0}/sp/{1}00/playManifest/entryId/{2}/format/applehttp/protocol/http/a.m3u8" \
                   "?ks={3}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(self.options, self.http.request("get", redirect), redirect)
+            streams = hlsparse(self.config, self.http.request("get", redirect), redirect)
             for n in list(streams.keys()):
                 yield streams[n]

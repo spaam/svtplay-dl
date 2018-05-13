@@ -2,7 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import, unicode_literals
 import re
-import os
 import xml.etree.ElementTree as ET
 import json
 import copy
@@ -10,7 +9,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs, quote_plus
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hds import hdsparse
@@ -33,7 +31,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                                                                                               start_time_stamp.isoformat(),
                                                                                               end_time_stamp.isoformat())
 
-            self.options.live = True
+            self.config.set("live", True)
             self.options.hls_time_stamp = True
             streams = hlsparse(self.options, self.http.request("get", url), url)
             if streams:
@@ -68,7 +66,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         sa = list(ss.iter("item"))
 
         if xml.find("live").text:
-            self.options.live = (xml.find("live").text != "false")
+            self.config.set("live", (xml.find("live").text != "false"))
         if xml.find("drmProtected").text == "true":
             yield ServiceError("We can't download DRM protected content from this site.")
             return
@@ -76,19 +74,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't download something that is not started.")
             return
 
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
+        if self.options.get("output_auto"):
             self.options.service = "tv4play"
             basename = self._autoname(vid)
             if not basename:
                 yield ServiceError("Cant find vid id for autonaming.")
                 return
-            title = "{0}-{1}-{2}".format(basename, vid, self.options.service)
-            title = filenamify(title)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
 
         if self.exclude():
             yield ServiceError("Excluding video.")
@@ -127,7 +118,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
     def _get_show_info(self):
         show = self._get_showname()
-        live = str(self.options.live).lower()
+        live = str(self.config.get("live")).lower()
         data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&"
                                         "platform=web&node_nids={1}&per_page=99999".format(live, show)).text
         jsondata = json.loads(data)
@@ -138,7 +129,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         page = 1
         assets = page * 1000
         run = True
-        live = str(self.options.live).lower()
+        live = str(self.config.get("live")).lower()
         while run:
             data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}"
                                             "&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
@@ -178,33 +169,40 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if "episode" in data:
                 episode = "{:02d}".format(data["episode"])
                 if int(season) == 0 and int(episode) == 0:
-                    return None
-                return "s{0}e{1}".format(season, episode)
+                    return False
+                self.output["season"] = season
+                self.output["episode"] = episode
+                return True
             else:
-                return "s{0}".format(season)
+                self.output["season"] = season
+                return True
         else:
-            return None
+            return False
 
     def _autoname(self, vid):
-        try:
-            jsondata = self._get_show_info()
-            for i in jsondata["results"]:
-                if vid == i["id"] and ("title" in i):
-                    season = self._seasoninfo(i)
-                    if season and ("program" in i) and ("name" in i["program"]):
-                        index = len(i["program"]["name"])
-                        return "{0}.{1}{2}".format(i["title"][:index], season, i["title"][index:])
-                    return i["title"]
+        jsondata = self._get_show_info()
+        for i in jsondata["results"]:
+            if vid == i["id"]:
+                season = self._seasoninfo(i)
+                if season:
+                    index = len(i["program"]["name"])
+                    self.output["title"] = i["title"][:index]
+                    self.output["episodename"] = i["title"][index:]
+                    return True
+                self.output["title"] = i["title"]
+                return True
 
-            aname = self._get_clip_info(vid)
-            if aname is not None:
-                return aname
+        aname = self._get_clip_info(vid)
+        if aname is not None:
+            self.output["title"] = aname
+            return True
 
-            aname = self._get_showname()
-            if aname is not None:
-                return aname
-        except():
-            return "tv4Stream"
+        aname = self._get_showname()
+        if aname is not None:
+            self.output["title"] = aname
+            return True
+
+        return "tv4Stream"
 
     def _getdays(self, data, text):
         try:
@@ -213,7 +211,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             days = 999
         return days
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         premium = False
         jsondata = self._get_show_info()
 
@@ -231,10 +229,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             if days > 0:
                 video_id = i["id"]
-                url = "http://www.tv4play.se/program/{0}?video_id={1}"\
-                    .format(i["program"]["nid"], video_id)
+                url = "http://www.tv4play.se/program/{0}?video_id={1}".format(i["program"]["nid"], video_id)
                 episodes.append(url)
-                if n == options.all_last:
+                if n == config.get("all_last"):
                     break
                 n += 1
 

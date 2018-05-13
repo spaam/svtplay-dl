@@ -2,11 +2,9 @@ from __future__ import absolute_import
 import re
 import json
 import copy
-import os
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -28,29 +26,17 @@ class Vg(Service, OpenGraphThumbMixin):
         videoid = match.group(1)
         data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/{0}?appName=vgtv-website".format(videoid)).text
         jsondata = json.loads(data)
-
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            title = jsondata["title"]
-            title = filenamify(title)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
+        self.output["title"] = jsondata["title"]
 
         if "hds" in jsondata["streamUrls"]:
-            streams = hdsparse(self.options, self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}),
+            streams = hdsparse(self.config, self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}),
                                jsondata["streamUrls"]["hds"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(self.options, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"])
+            streams = hlsparse(self.config, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"])
             for n in list(streams.keys()):
                 yield streams[n]
         if "mp4" in jsondata["streamUrls"]:
-            yield HTTP(copy.copy(self.options), jsondata["streamUrls"]["mp4"])
+            yield HTTP(copy.copy(self.config), jsondata["streamUrls"]["mp4"])

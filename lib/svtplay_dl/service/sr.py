@@ -18,21 +18,17 @@ class Sr(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search('data-audio-type="publication" data-audio-id="(\d+)">', data)  # Nyheter
         if match:
             dataurl = "https://sverigesradio.se/sida/playerajax/" \
                       "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(match.group(1), "publication")
             data = self.http.request("get", dataurl).text
             playerinfo = json.loads(data)
-            yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
+            yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128)
             return
         match = re.search(r'href="(/topsy/ljudfil/\d+-mp3)"', data)  # Ladda ner
         if match:
-            yield HTTP(copy.copy(self.options), urljoin("https://sverigesradio.se", match.group(1)), 128)
+            yield HTTP(copy.copy(self.config), urljoin("https://sverigesradio.se", match.group(1)), 128)
             return
         else:
             match = re.search('data-audio-type="episode" data-audio-id="(\d+)"', data)  # Ladda ner med musik
@@ -51,4 +47,4 @@ class Sr(Service, OpenGraphThumbMixin):
                   "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
-        yield HTTP(copy.copy(self.options), playerinfo["audioUrl"], 128)
+        yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128)

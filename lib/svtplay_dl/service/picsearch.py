@@ -18,10 +18,6 @@ class Picsearch(Service, OpenGraphThumbMixin):
     def get(self):
         self.backupapi = None
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         ajax_auth = self.get_auth()
         if not ajax_auth:
             yield ServiceError("Cant find token for video")
@@ -40,16 +36,16 @@ class Picsearch(Service, OpenGraphThumbMixin):
 
         if "data" in jsondata:
             if "live" in jsondata["data"]["publishing_status"]:
-                self.options.live = jsondata["data"]["publishing_status"]["live"]
+                self.config.set("live", jsondata["data"]["publishing_status"]["live"])
             playlist = jsondata["data"]["streams"]
             for i in playlist:
                     if "application/x-mpegurl" in i:
-                        streams = hlsparse(self.options, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"])
+                        streams = hlsparse(self.config, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"])
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if "video/mp4" in i:
-                        yield HTTP(copy.copy(self.options), i["video/mp4"], 800)
+                        yield HTTP(copy.copy(self.config), i["video/mp4"], 800)
 
         if self.backupapi:
             res = self.http.get(self.backupapi.replace("i=", ""), params={"i": "object"})
@@ -58,7 +54,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             jansson = json.loads(data)
             for i in jansson["media"]["playerconfig"]["playlist"]:
                 if "provider" in i and i["provider"] == "httpstreaming":
-                    streams = hlsparse(self.options, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]

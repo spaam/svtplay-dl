@@ -17,9 +17,6 @@ class Solidtango(Service):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
         match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
         if match:
             data = self.http.request("get", match.group(1)).text
@@ -32,18 +29,18 @@ class Solidtango(Service):
 
         match = re.search('is_livestream: true', data)
         if match:
-            self.options.live = True
+            self.config.set("live", True)
         match = re.search('isLivestream: true', data)
         if match:
-            self.options.live = True
+            self.config.set("live", True)
         match = re.search('html5_source: "([^"]+)"', data)
         match2 = re.search('hlsURI: "([^"]+)"', data)
         if match:
-            streams = hlsparse(self.options, self.http.request("get", match.group(1)), match.group(1))
+            streams = hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1))
             for n in list(streams.keys()):
                 yield streams[n]
         elif match2:
-            streams = hlsparse(self.options, self.http.request("get", match2.group(1)), match2.group(1))
+            streams = hlsparse(self.config, self.http.request("get", match2.group(1)), match2.group(1))
             for n in list(streams.keys()):
                 yield streams[n]
         else:
@@ -56,6 +53,6 @@ class Solidtango(Service):
             xmldoc = data.text
             xml = ET.XML(xmldoc)
             elements = xml.findall(".//manifest")
-            streams = hlsparse(self.options, self.http.request("get", elements[0].text), elements[0].text)
+            streams = hlsparse(self.config, self.http.request("get", elements[0].text), elements[0].text)
             for n in list(streams.keys()):
                 yield streams[n]

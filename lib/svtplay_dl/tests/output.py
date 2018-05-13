@@ -7,7 +7,7 @@
 
 from __future__ import absolute_import
 import unittest
-import svtplay_dl.output
+import svtplay_dl.utils.output
 from mock import patch
 
 
@@ -26,69 +26,69 @@ class mockfile(object):
 class progressTest(unittest.TestCase):
     def setUp(self):
         self.mockfile = mockfile()
-        svtplay_dl.output.progress_stream = self.mockfile
+        svtplay_dl.utils.output.progress_stream = self.mockfile
 
     @patch('svtplay_dl.output.progressbar')
     def test_0_0(self, pbar):
-        svtplay_dl.output.progress(0, 0)
+        svtplay_dl.utils.output.progress(0, 0)
         self.assertFalse(pbar.called)
 
     @patch('svtplay_dl.output.progressbar')
     def test_0_100(self, pbar):
-        svtplay_dl.output.progress(0, 100)
+        svtplay_dl.utils.output.progress(0, 100)
         pbar.assert_any_call(100, 0, "")
 
 
 class progressbarTest(unittest.TestCase):
     def setUp(self):
-        self.old_termsiz = svtplay_dl.output.get_terminal_size
-        svtplay_dl.output.get_terminal_size = lambda: (50, 25)
+        self.old_termsiz = svtplay_dl.utils.output.get_terminal_size
+        svtplay_dl.utils.output.get_terminal_size = lambda: (50, 25)
 
         self.mockfile = mockfile()
-        svtplay_dl.output.progress_stream = self.mockfile
+        svtplay_dl.utils.output.progress_stream = self.mockfile
 
     def tearDown(self):
-        svtplay_dl.output.get_terminal_size = self.old_termsiz
+        svtplay_dl.utils.output.get_terminal_size = self.old_termsiz
 
     def test_0_100(self):
-        svtplay_dl.output.progressbar(100, 0)
+        svtplay_dl.utils.output.progressbar(100, 0)
         self.assertEqual(
             self.mockfile.read(), "\r[000/100][..........] "
         )
 
     def test_progress_1_100(self):
-        svtplay_dl.output.progressbar(100, 1)
+        svtplay_dl.utils.output.progressbar(100, 1)
         self.assertEqual(
             self.mockfile.read(), "\r[001/100][..........] "
         )
 
     def test_progress_2_100(self):
-        svtplay_dl.output.progressbar(100, 2)
+        svtplay_dl.utils.output.progressbar(100, 2)
         self.assertEqual(
             self.mockfile.read(), "\r[002/100][..........] "
         )
 
     def test_progress_50_100(self):
-        svtplay_dl.output.progressbar(100, 50)
+        svtplay_dl.utils.output.progressbar(100, 50)
         self.assertEqual(
             self.mockfile.read(), "\r[050/100][=====.....] "
         )
 
     def test_progress_100_100(self):
-        svtplay_dl.output.progressbar(100, 100)
+        svtplay_dl.utils.output.progressbar(100, 100)
         self.assertEqual(
             self.mockfile.read(), "\r[100/100][==========] "
         )
 
     def test_progress_20_100_msg(self):
-        svtplay_dl.output.progressbar(100, 20, "msg")
+        svtplay_dl.utils.output.progressbar(100, 20, "msg")
         self.assertEqual(
             self.mockfile.read(), "\r[020/100][==........] msg"
         )
 
     def test_progress_20_100_termwidth(self):
-        svtplay_dl.output.get_terminal_size = lambda: (75, 25)
-        svtplay_dl.output.progressbar(100, 20)
+        svtplay_dl.utils.output.get_terminal_size = lambda: (75, 25)
+        svtplay_dl.utils.output.progressbar(100, 20)
         self.assertEqual(
             self.mockfile.read(),
             "\r[020/100][=======............................] "
@@ -103,7 +103,7 @@ class EtaTest(unittest.TestCase):
         # Let's make this simple; we'll create something that
         # processes one item per second, and make the size be
         # 100.
-        eta = svtplay_dl.output.ETA(100)
+        eta = svtplay_dl.utils.output.ETA(100)
         self.assertEqual(eta.left, 100)  # no progress yet
         self.assertEqual(str(eta), "(unknown)")  # no progress yet
 

@@ -2,25 +2,18 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import json
-import os
 from datetime import datetime
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.utils.text import filenamify
 
 
 class Atg(Service):
     supported_domains = ["atgplay.se"]
 
     def get(self):
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         parse = urlparse(self.url)
 
         if not parse.path.startswith("/video"):
@@ -40,15 +33,13 @@ class Atg(Service):
             return
 
         if "title" in janson:
-            directory = os.path.dirname(self.options.output)
-            title = filenamify(janson["title"])
-            self.options.output = os.path.join(directory, title)
+            self.output["title"] = janson["title"]
 
         if "urls" in janson:
             for i in janson["urls"]:
                 stream = None
                 if "m3u" == i:
-                    stream = hlsparse(self.options, self.http.request("get", janson["urls"]["m3u"]), janson["urls"]["m3u"])
+                    stream = hlsparse(self.config, self.http.request("get", janson["urls"]["m3u"]), janson["urls"]["m3u"])
 
                 if stream:
                     for key in list(stream.keys()):

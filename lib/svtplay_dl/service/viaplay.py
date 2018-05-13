@@ -8,7 +8,6 @@ from __future__ import absolute_import
 import re
 import json
 import copy
-import os
 from urllib.parse import urlparse
 
 
@@ -128,14 +127,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return
 
         if dataj["type"] == "live":
-            self.options.live = True
+            self.config.set("live", True)
 
-        if self.options.output_auto:
-            self.options.output = self.outputfilename(dataj, vid, self.options.output)
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
+        self.output["id"] = vid
+        self._autoname(dataj)
 
         streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/{0}".format(vid))
         if streams.status_code == 403:
@@ -168,7 +163,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
-                streams = hdsparse(self.options, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
+                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
@@ -181,10 +176,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 filename = "{0}://{1}:{2}{3}".format(parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y {0}".format(match.group(2))
                 self.options.other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf {0}".format(path)
-                yield RTMP(copy.copy(self.options), filename, 800)
+                yield RTMP(copy.copy(self.config), filename, 800)
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(self.options, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
+            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]
@@ -255,21 +250,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
         data = self.http.request("get", url)
         return data
 
-    def outputfilename(self, data, vid, filename):
-        self.options.service = "viafree"
-        if filename:
-            directory = os.path.dirname(filename)
-        else:
-            directory = ""
-
-        basename = self._autoname(data)
-        title = "{0}-{1}-{2}".format(basename, vid, self.options.service)
-        if len(directory):
-            output = os.path.join(directory, title)
-        else:
-            output = title
-        return output
-
     def _autoname(self, dataj):
         program = dataj["format_slug"]
         season = None
@@ -286,7 +266,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 try:
                     episode = int(episode)
                 except TypeError:
-                    title = filenamify(episode)
+                    title = episode
                     episode = None
             else:
                 title = filenamify(dataj["title"])
@@ -296,9 +276,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
             # e.g. Showname.S0X.title instead of Showname.S07.title-showname
             match = re.search(r'(.+)-', dataj["title"])
             if match:
-                title = filenamify(match.group(1))
+                title = match.group(1)
             else:
-                title = filenamify(dataj["title"])
+                title = dataj["title"]
             if "derived_from_id" in dataj:
                 if dataj["derived_from_id"]:
                     parent_id = dataj["derived_from_id"]
@@ -310,12 +290,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
                         if len(datajparent["format_position"]["episode"]) > 0:
                             episode = datajparent["format_position"]["episode"]
 
-        name = filenamify(program)
-        if season:
-            name = "{0}.s{1:02d}".format(name, int(season))
-        if episode:
-            name = "{0}e{1:02d}".format(name, int(episode))
-        if title:
-            name = "{0}.{1}".format(name, title)
+        self.output["title"] = program
+        self.output["season"] = int(season)
+        self.output["episode"] = int(episode)
+        self.output["episodename"] = title
 
-        return name
+        return True

@@ -16,11 +16,6 @@ class Youplay(Service, OpenGraphThumbMixin):
 
     def get(self):
         data = self.get_urldata()
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r'script async defer src="(//content.youplay.se[^"]+)"', data)
         if not match:
             yield ServiceError("Cant find video info for {0}".format(self.url))
@@ -47,4 +42,4 @@ class Youplay(Service, OpenGraphThumbMixin):
         for i in jsondata["episode"]["sources"]:
             match = re.search(r"mp4_(\d+)", i)
             if match:
-                yield HTTP(copy.copy(self.options), jsondata["episode"]["sources"][i], match.group(1))
+                yield HTTP(copy.copy(self.config), jsondata["episode"]["sources"][i], match.group(1))

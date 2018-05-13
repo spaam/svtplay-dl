@@ -50,15 +50,11 @@ class Barnkanalen(Svtplay):
             return
 
         if "live" in janson["video"]:
-            self.options.live = janson["video"]["live"]
+            self.config.set("live", janson["video"]["live"])
 
         if self.options.output_auto:
             self.options.service = "svtplay"
-            self.options.output = self.outputfilename(janson["video"], self.options.output)
-
-        if self.exclude():
-            yield ServiceError("Excluding video.")
-            return
+            self.options.output = self.outputfilename(janson["video"])
 
         if "programVersionId" in janson["video"]:
             vid = janson["video"]["programVersionId"]

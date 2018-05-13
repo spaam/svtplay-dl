@@ -13,12 +13,8 @@ class Filmarkivet(Service, OpenGraphThumbMixin):
     supported_domains = ["filmarkivet.se"]
 
     def get(self):
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r'[^/]file: "(http[^"]+)', self.get_urldata())
         if not match:
             yield ServiceError("Can't find the video file")
             return
-        yield HTTP(copy.copy(self.options), match.group(1), 480)
+        yield HTTP(copy.copy(self.config), match.group(1), 480)

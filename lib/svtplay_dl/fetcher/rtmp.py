@@ -6,7 +6,7 @@ import shlex
 
 from svtplay_dl.log import log
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.output import output
+from svtplay_dl.utils.output import output
 
 
 class RTMP(VideoRetriever):
@@ -16,10 +16,10 @@ class RTMP(VideoRetriever):
     def download(self):
         """ Get the stream from RTMP """
         args = []
-        if self.options.live:
+        if self.config.get("live"):
             args.append("-v")
 
-        if self.options.resume:
+        if self.config.get("resume"):
             args.append("-e")
 
         file_d = output(self.options, "flv", False)

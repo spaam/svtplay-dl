@@ -1,11 +1,9 @@
 from __future__ import absolute_import
 import re
-import os
 from urllib.parse import urlparse
 
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
@@ -34,20 +32,10 @@ class Pokemon(Service, OpenGraphThumbMixin):
                 if season == n["season"] and episode == n["episode"]:
                     stream = n["stream_url"]
 
-        if self.options.output_auto:
-            directory = os.path.dirname(self.options.output)
-            basename = os.path.basename(self.options.output)
-            title = "pokemon.s{0}e{1}-{2}".format(season, episode, basename)
-            title = filenamify(title)
-            if len(directory):
-                self.options.output = os.path.join(directory, title)
-            else:
-                self.options.output = title
+        self.output["title"] = "pokemon"
+        self.output["season"] = season
+        self.output["episode"] = episode
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
-        streams = hlsparse(self.options, self.http.request("get", stream), stream)
+        streams = hlsparse(self.config, self.http.request("get", stream), stream)
         for n in list(streams.keys()):
             yield streams[n]

@@ -17,10 +17,6 @@ class Dbtv(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         parse = urlparse(self.url)
         vidoid = parse.path[parse.path.rfind("/") + 1:]
         match = re.search(r'JSONdata = ({.*});', data)
@@ -32,9 +28,9 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == int(vidoid):
                 if i["HLSURL"]:
-                    streams = hlsparse(self.options, self.http.request("get", i["HLSURL"]), i["HLSURL"])
+                    streams = hlsparse(self.config, self.http.request("get", i["HLSURL"]), i["HLSURL"])
                     for n in list(streams.keys()):
                         yield streams[n]
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
-                        yield HTTP(copy.copy(self.options), n["URL"], int(n["rate"]) / 1000)
+                        yield HTTP(copy.copy(self.config), n["URL"], int(n["rate"]) / 1000)

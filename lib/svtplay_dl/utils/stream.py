@@ -45,22 +45,22 @@ def protocol_prio(streams, priolist):
 
 def select_quality(options, streams):
     high = 0
-    if isinstance(options.quality, str):
+    if isinstance(options.get("quality"), str):
         try:
-            quality = int(options.quality.split("-")[0])
-            if len(options.quality.split("-")) > 1:
-                high = int(options.quality.split("-")[1])
+            quality = int(options.get("quality").split("-")[0])
+            if len(options.get("quality").split("-")) > 1:
+                high = int(options.get("quality").split("-")[1])
         except ValueError:
             raise error.UIException("Requested quality is invalid. use a number or range lowerNumber-higherNumber")
     else:
-        quality = options.quality
+        quality = options.get("quality")
     try:
         optq = int(quality)
     except ValueError:
         raise error.UIException("Requested quality needs to be a number")
 
     try:
-        optf = int(options.flexibleq)
+        optf = int(options.get("flexibleq"))
     except ValueError:
         raise error.UIException("Flexible-quality needs to be a number")
 
@@ -71,9 +71,9 @@ def select_quality(options, streams):
     # Extract protocol prio, in the form of "hls,hds,http,rtmp",
     # we want it as a list
 
-    if options.stream_prio:
-        proto_prio = options.stream_prio.split(',')
-    elif options.live or streams[0].options.live:
+    if options.get("stream_prio"):
+        proto_prio = options.get("stream_prio").split(',')
+    elif options.get("live") or streams[0].options.get("live"):
         proto_prio = LIVE_PROTOCOL_PRIO
     else:
         proto_prio = DEFAULT_PROTOCOL_PRIO

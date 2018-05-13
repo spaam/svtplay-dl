@@ -5,7 +5,6 @@ import re
 import json
 
 from svtplay_dl.service import Service
-from svtplay_dl.error import ServiceError
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils.text import decode_html_entities
@@ -16,10 +15,6 @@ class Expressen(Service):
 
     def get(self):
         data = self.get_urldata()
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
 
         match = re.search('="(https://www.expressen.se/tvspelare[^"]+)"', data)
         if not match:
@@ -35,10 +30,10 @@ class Expressen(Service):
         dataj = json.loads(match.group(1))
         if "streams" in dataj:
             if "iPad" in dataj["streams"]:
-                streams = hlsparse(self.options, self.http.request("get", dataj["streams"]["iPad"]), dataj["streams"]["iPad"])
+                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["iPad"]), dataj["streams"]["iPad"])
                 for n in list(streams.keys()):
                     yield streams[n]
             if "hashHls" in dataj["streams"]:
-                streams = hlsparse(self.options, self.http.request("get", dataj["streams"]["hashHls"]), dataj["streams"]["hashHls"])
+                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["hashHls"]), dataj["streams"]["hashHls"])
                 for n in list(streams.keys()):
                     yield streams[n]

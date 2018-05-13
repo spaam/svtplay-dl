@@ -19,16 +19,19 @@ retry = Retry(
 
 
 class HTTP(Session):
-    def __init__(self, options, *args, **kwargs):
+    def __init__(self, options={}, *args, **kwargs):
+        global http
         Session.__init__(self, *args, **kwargs)
         adapter = HTTPAdapter(max_retries=retry)
+
         self.mount('http://', adapter)
         self.mount('https://', adapter)
-        self.verify = options.ssl_verify
-        self.proxy = options.proxy
-        if options.http_headers:
-            self.headers.update(self.split_header(options.http_headers))
+        self.verify = options.get("ssl_verify")
+        self.proxy = options.get("proxy")
+        if options.get("http_headers"):
+            self.headers.update(self.split_header(options.get("http_headers")))
         self.headers.update({"User-Agent": FIREFOX_UA})
+
 
     def check_redirect(self, url):
         return self.get(url, stream=True).url

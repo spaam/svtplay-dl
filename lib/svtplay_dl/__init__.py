@@ -5,10 +5,10 @@ from __future__ import absolute_import, unicode_literals
 import sys
 import logging
 
-from svtplay_dl.utils.parser import parser, mergeparseroption, Options
+from svtplay_dl.utils.parser import setup_defaults, parser, mergeparseroption
 from svtplay_dl.utils.getmedia import get_media, get_multiple_media
-
 from svtplay_dl.service.cmore import Cmore
+
 
 __version__ = "1.9.11"
 
@@ -67,11 +67,10 @@ def main():
         parse.print_help()
         sys.exit(0)
     urls = options.urls
-    options = mergeparseroption(Options(), options)
+    options = mergeparseroption(setup_defaults(), options)
     if len(urls) < 1:
         parse.error("Incorrect number of arguments")
-    setup_log(options.silent, options.verbose)
-
+    setup_log(options.get("silent"), options.get("verbose"))
     try:
         if len(urls) == 1:
             get_media(urls[0], options, __version__)

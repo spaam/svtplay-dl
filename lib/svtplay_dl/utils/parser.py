@@ -1,5 +1,14 @@
 import argparse
 
+from yaml import load
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+
+configdata = None
+
 
 class Options(object):
     """
@@ -24,41 +33,17 @@ class Options(object):
     """
 
     def __init__(self):
-        self.output = None
-        self.resume = False
-        self.live = False
-        self.capture_time = -1
-        self.silent = False
-        self.force = False
-        self.quality = 0
-        self.flexibleq = 0
-        self.list_quality = False
-        self.other = None
-        self.subtitle = False
-        self.username = None
-        self.password = None
-        self.thumbnail = False
-        self.all_episodes = False
-        self.all_last = -1
-        self.merge_subtitle = False
-        self.force_subtitle = False
-        self.require_subtitle = False
-        self.get_all_subtitles = False
-        self.get_raw_subtitles = False
-        self.convert_subtitle_colors = False
-        self.preferred = None
-        self.verbose = False
-        self.output_auto = False
-        self.service = None
-        self.cookies = None
-        self.exclude = None
-        self.get_url = False
-        self.ssl_verify = True
-        self.http_headers = None
-        self.stream_prio = None
-        self.remux = False
-        self.silent_semi = False
-        self.proxy = None
+        self.default = {}
+
+    def set(self, key, value):
+        self.default[key] = value
+
+    def get(self, key):
+        if key in self.default:
+            return self.default[key]
+
+    def get_variable(self):
+        return self.default
 
 
 def parser(version):
@@ -149,39 +134,109 @@ def parser(version):
     return parser, options
 
 
+def setup_defaults():
+    options = Options()
+    options.set("output", None)
+    options.set("resume", False)
+    options.set("live", False)
+    options.set("capture_time", -1)
+    options.set("silent", False)
+    options.set("force", False)
+    options.set("quality", 0)
+    options.set("flexibleq", 0)
+    options.set("list_quality", False)
+    options.set("other", None)
+    options.set("subtitle", False)
+    options.set("username", None)
+    options.set("password", None)
+    options.set("thumbnail", False)
+    options.set("all_episodes", False)
+    options.set("all_last", -1)
+    options.set("merge_subtitle", False)
+    options.set("force_subtitle", False)
+    options.set("require_subtitle", False)
+    options.set("get_all_subtitles", False)
+    options.set("get_raw_subtitles", False)
+    options.set("convert_subtitle_colors", False)
+    options.set("preferred", None)
+    options.set("verbose", False)
+    options.set("output_auto", False)
+    options.set("service", None)
+    options.set("cookies", None)
+    options.set("exclude", None)
+    options.set("get_url", False)
+    options.set("ssl_verify", True)
+    options.set("http_headers", None)
+    options.set("stream_prio", None)
+    options.set("remux", False)
+    options.set("silent_semi", False)
+    options.set("proxy", None)
+    options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
+    return options
+
+
 def mergeparseroption(options, parser):
-    options.output = parser.output
-    options.resume = parser.resume
-    options.live = parser.live
-    options.capture_time = parser.capture_time
-    options.silent = parser.silent
-    options.force = parser.force
-    options.quality = parser.quality
-    options.flexibleq = parser.flexibleq
-    options.list_quality = parser.list_quality
-    options.subtitle = parser.subtitle
-    options.merge_subtitle = parser.merge_subtitle
-    options.silent_semi = parser.silent_semi
-    options.username = parser.username
-    options.password = parser.password
-    options.thumbnail = parser.thumbnail
-    options.all_episodes = parser.all_episodes
-    options.all_last = parser.all_last
-    options.force_subtitle = parser.force_subtitle
-    options.require_subtitle = parser.require_subtitle
-    options.preferred = parser.preferred
-    options.verbose = parser.verbose
-    options.exclude = parser.exclude
-    options.get_url = parser.get_url
-    options.ssl_verify = parser.ssl_verify
-    options.http_headers = parser.http_headers
-    options.stream_prio = parser.stream_prio
-    options.remux = parser.remux
-    options.get_all_subtitles = parser.get_all_subtitles
-    options.get_raw_subtitles = parser.get_raw_subtitles
-    options.convert_subtitle_colors = parser.convert_subtitle_colors
-    options.include_clips = parser.include_clips
-    options.cmoreoperatorlist = parser.cmoreoperatorlist
-    options.cmoreoperator = parser.cmoreoperator
-    options.proxy = parser.proxy
+    options.set("output", parser.output)
+    options.set("resume", parser.resume)
+    options.set("live", parser.live)
+    options.set("capture_time", parser.capture_time)
+    options.set("silent", parser.silent)
+    options.set("force", parser.force)
+    options.set("quality", parser.quality)
+    options.set("flexibleq", parser.flexibleq)
+    options.set("list_quality", parser.list_quality)
+    options.set("subtitle", parser.subtitle)
+    options.set("merge_subtitle", parser.merge_subtitle)
+    options.set("silent_semi", parser.silent_semi)
+    options.set("username", parser.username)
+    options.set("password", parser.password)
+    options.set("thumbnail", parser.thumbnail)
+    options.set("all_episodes", parser.all_episodes)
+    options.set("all_last", parser.all_last)
+    options.set("force_subtitle", parser.force_subtitle)
+    options.set("require_subtitle", parser.require_subtitle)
+    options.set("preferred", parser.preferred)
+    options.set("verbose", parser.verbose)
+    options.set("exclude", parser.exclude)
+    options.set("get_url", parser.get_url)
+    options.set("ssl_verify", parser.ssl_verify)
+    options.set("http_headers", parser.http_headers)
+    options.set("stream_prio", parser.stream_prio)
+    options.set("remux", parser.remux)
+    options.set("get_all_subtitles", parser.get_all_subtitles)
+    options.set("get_raw_subtitles", parser.get_raw_subtitles)
+    options.set("convert_subtitle_colors", parser.convert_subtitle_colors)
+    options.set("include_clips", parser.include_clips)
+    options.set("cmoreoperatorlist", parser.cmoreoperatorlist)
+    options.set("cmoreoperator", parser.cmoreoperator)
+    options.set("proxy", parser.proxy)
+    return options
+
+
+def merge(old, new):
+    z = old.copy()
+    z.update(new)
+    return z
+
+
+def readconfig(options, configfile, service=None, preset=None):
+    global configdata
+
+    if configdata is None:
+        print("config is not cached")
+        with open(configfile) as fd:
+            data = fd.read()
+            configdata = load(data, Loader=Loader)
+    if configdata:
+        print("config is cached!")
+
+    if "default" in configdata:
+        options = merge(options, configdata["default"])
+
+    if service and "service" in configdata and service in configdata["service"]:
+        options = merge(options, configdata["service"][service])
+
+    if preset and "presets" in configdata and preset in configdata["presets"]:
+        options = merge(options, configdata["presets"][preset])
+
     return options
