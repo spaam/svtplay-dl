@@ -51,7 +51,7 @@ def parser(version):
     general = parser.add_argument_group()
 
     general.add_argument('--version', action='version', version='%(prog)s {0}'.format(version))
-    general.add_argument("-o", "--output", metavar="output", help="outputs to the given filename or folder")
+    general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
     general.add_argument("-f", "--force", action="store_true", dest="force", default=False,
                          help="overwrite if file exists already")
     general.add_argument("-r", "--resume", action="store_true", dest="resume", default=False,
