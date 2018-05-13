@@ -185,7 +185,6 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
                     return None
         else:
             if not config.get("force"):
-                print()
                 if not (config.get("silent") or config.get("silent_semi")):
                     logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
                     return None

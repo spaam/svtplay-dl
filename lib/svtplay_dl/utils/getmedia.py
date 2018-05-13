@@ -38,6 +38,7 @@ def get_media(url, options, version="Unknown"):
         options.set("silent", True)
     if options.get("verbose"):
         log.debug("version: {0}".format(version))
+
     stream = service_handler(sites, options, url)
     if not stream:
         generic = Generic(options, url)
@@ -86,6 +87,7 @@ def get_one_media(stream, config):
     # Make an automagic filename
     if not filename(stream):
         return
+
     if config.get("merge_subtitle"):
         from svtplay_dl.utils.proc import which
         if not which('ffmpeg'):

@@ -199,7 +199,6 @@ def service_handler(sites, options, url):
     for i in sites:
         if i.handles(url):
             handler = i(options, url)
-            print(handler)
             break
 
     return handler
