@@ -186,7 +186,7 @@ def parse_dates(date_str):
         try:
             dt = datetime.strptime(date_str, pattern)
             break
-        except:
+        except Exception:
             pass
     if not dt:
         raise ValueError("Can't parse date format: {0}".format(date_str))
