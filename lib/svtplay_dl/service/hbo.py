@@ -24,10 +24,6 @@ class Hbo(Service):
             log.error("Something wrong with that url")
             return
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search("^/(.*).html", other)
         if not match:
             log.error("Cant find video file")

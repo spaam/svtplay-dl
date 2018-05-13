@@ -94,8 +94,6 @@ class Barnkanalen(Svtplay):
         url = self.url + "/" + str(lvideos["id"])
         parse = urlparse(url)
         if parse.path not in videos:
-            filename = self.outputfilename(lvideos, self.options.output)
-            if not self.exclude2(filename):
-                videos.append(parse.path)
+            videos.append(parse.path)
 
         return videos

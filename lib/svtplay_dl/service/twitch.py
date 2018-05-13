@@ -49,10 +49,6 @@ class Twitch(Service):
     def get(self):
         urlp = urlparse(self.url)
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)
         if not match:
             if re.search("clips.twitch.tv", urlp.netloc):

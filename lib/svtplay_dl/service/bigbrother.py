@@ -18,10 +18,6 @@ class Bigbrother(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r'id="(bcPl[^"]+)"', data)
         if not match:
             yield ServiceError("Can't find flash id.")

@@ -17,10 +17,6 @@ class Ruv(Service):
     def get(self):
         data = self.get_urldata()
 
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r'"([^"]+geo.php)"', data)
         if match:
             data = self.http.request("get", match.group(1)).content

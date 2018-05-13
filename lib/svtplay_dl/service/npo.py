@@ -16,11 +16,6 @@ class Npo(Service):
     supported_domains = ["npo.nl", "ntr.nl", "omroepwnl.nl", "zapp.nl", "npo3.nl"]
 
     def get(self):
-
-        if self.exclude():
-            yield ServiceError("Excluding video")
-            return
-
         # Get video id
         parse = urlparse(self.url)
         video_id = parse.path.split("/")[-1]
