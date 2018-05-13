@@ -128,7 +128,19 @@ def filename(stream):
     return True
 
 
-def formatname(output, config, extension):
+def formatname(output, config, extension="mp4"):
+    name = _formatname(output, config, extension)
+    if config.get("output") and os.path.isdir(os.path.expanduser(config.get("output"))):
+        name = os.path.join(config.get("output"), name)
+    elif config.get("path") and os.path.isdir(os.path.expanduser(config.get("path"))):
+        name = os.path.join(os.path.expanduser(config.get("output")), name)
+    elif config.get("output"):
+        filename, _ = os.path.splitext(config.get("output"))
+        name = "{}.{}".format(config.get("output"), extension)
+    return name
+
+
+def _formatname(output, config, extension):
     output["ext"] = extension
     name = config.get("filename")
     for key in output:
@@ -156,14 +168,10 @@ def formatname(output, config, extension):
     return name
 
 
-def output(output, config, extension=".mp4", mode="wb", **kwargs):
+def output(output, config, extension="mp4", mode="wb", **kwargs):
     subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
 
     name = formatname(output, config, extension)
-    if config.get("output") and os.path.isdir(os.path.expanduser(config.get("output"))):
-        name = os.path.join(config.get("output"), name)
-    elif config.get("path") and os.path.isdir(os.path.expanduser(config.get("path"))):
-        name = os.path.join(os.path.expanduser(config.get("output")), name)
 
     logging.info("Outfile: %s", name)
     if os.path.isfile(name):
