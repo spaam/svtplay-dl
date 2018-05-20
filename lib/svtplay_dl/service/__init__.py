@@ -3,7 +3,9 @@
 from __future__ import absolute_import
 import re
 import logging
+import os
 from urllib.parse import urlparse
+from svtplay_dl.utils.parser import readconfig, setup_defaults, merge
 
 from svtplay_dl.utils.http import download_thumbnail, HTTP
 
@@ -13,7 +15,6 @@ class Service(object):
     supported_domains_re = []
 
     def __init__(self, config, _url, http=None):
-        self.config = config
         self._url = _url
         self._urldata = None
         self._error = False
@@ -26,6 +27,14 @@ class Service(object):
             self.http = HTTP(config)
         else:
             self.http = http
+
+        #  Config
+        if os.path.isfile(config.get("configfile")):
+            self.config = merge(readconfig(setup_defaults(), config.get("configfile"),
+                                           service=self.__class__.__name__.lower()).get_variable(), config.get_variable())
+        else:
+            self.config = config
+        logging.debug("service: {}".format(self.__class__.__name__.lower()))
 
     @property
     def url(self):

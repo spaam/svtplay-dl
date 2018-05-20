@@ -1,6 +1,8 @@
 import argparse
+import platform
+import os
 
-from yaml import load
+from yaml import safe_load
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -8,6 +10,12 @@ except ImportError:
 
 
 configdata = None
+
+if platform.system() == "Windows":
+    APPDATA = os.environ["APPDATA"]
+    CONFIGFILE = os.path.join(APPDATA, "svtplay-dl", "svtplay-dl.yaml")
+else:
+    CONFIGFILE = os.path.expanduser("~/.svtplay-dl.yaml")
 
 
 class Options(object):
@@ -45,6 +53,9 @@ class Options(object):
     def get_variable(self):
         return self.default
 
+    def set_variable(self, value):
+        self.default = value
+
 
 def parser(version):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
@@ -52,6 +63,7 @@ def parser(version):
 
     general.add_argument('--version', action='version', version='%(prog)s {0}'.format(version))
     general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
+    general.add_argument("--config", dest="configfile", metavar="configfile", default=CONFIGFILE, help="Specify configuration file")
     general.add_argument("-f", "--force", action="store_true", dest="force", default=False,
                          help="overwrite if file exists already")
     general.add_argument("-r", "--resume", action="store_true", dest="resume", default=False,
@@ -137,6 +149,7 @@ def parser(version):
 def setup_defaults():
     options = Options()
     options.set("output", None)
+    options.set("configfile", CONFIGFILE)
     options.set("resume", False)
     options.set("live", False)
     options.set("capture_time", -1)
@@ -236,27 +249,26 @@ def _special_settings(config):
 def merge(old, new):
     z = old.copy()
     z.update(new)
-    return z
+    options = Options()
+    options.set_variable(z)
+    return options
 
 
-def readconfig(options, configfile, service=None, preset=None):
+def readconfig(config, configfile, service=None, preset=None):
     global configdata
 
-    if configdata is None:
-        print("config is not cached")
+    if configfile and configdata is None:
         with open(configfile) as fd:
             data = fd.read()
-            configdata = load(data, Loader=Loader)
-    if configdata:
-        print("config is cached!")
+            configdata = safe_load(data)
 
     if "default" in configdata:
-        options = merge(options, configdata["default"])
+        config = merge(config.get_variable(), configdata["default"])
 
     if service and "service" in configdata and service in configdata["service"]:
-        options = merge(options, configdata["service"][service])
+        config = merge(config.get_variable(), configdata["service"][service])
 
     if preset and "presets" in configdata and preset in configdata["presets"]:
-        options = merge(options, configdata["presets"][preset])
+        config = merge(config.get_variable(), configdata["presets"][preset])
 
-    return options
+    return config

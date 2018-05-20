@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import sys
 import logging
+import yaml
 
 from svtplay_dl.utils.parser import setup_defaults, parser, parsertoconfig
 from svtplay_dl.utils.getmedia import get_media, get_multiple_media
@@ -62,3 +63,6 @@ def main():
             get_multiple_media(urls, config)
     except KeyboardInterrupt:
         print("")
+    except (yaml.YAMLError, yaml.MarkedYAMLError) as e:
+        logging.error('Your settings file(s) contain invalid YAML syntax! Please fix and restart!, {}'.format(str(e)))
+        sys.exit(2)
