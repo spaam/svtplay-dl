@@ -28,7 +28,7 @@ POD2MAN ?= pod2man --section 1 --utf8 \
                    --release "svtplay-dl $(VERSION)" \
                    --date "$(LATEST_RELEASE_DATE)"
 
-PYTHON ?= /usr/bin/env python
+PYTHON ?= /usr/bin/env python3
 export PYTHONPATH=lib
 
 # If you don't have a python3 environment (e.g. mock for py3 and

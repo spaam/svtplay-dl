@@ -17,7 +17,7 @@ export PACKAGES = svtplay_dl \
                  svtplay_dl.postprocess
 export PYFILES = $(sort $(addsuffix /*.py,$(subst .,/,$(PACKAGES))))
 
-PYTHON ?= /usr/bin/env python
+PYTHON ?= /usr/bin/env python3
 
 VERSION = $(shell git describe 2>/dev/null || echo $(LATEST_RELEASE)-unknown)
 
