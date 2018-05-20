@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
 from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.error import ServiceError
 
 
 class Hbo(Service):

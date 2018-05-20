@@ -3,11 +3,6 @@ import platform
 import os
 
 from yaml import safe_load
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
-
 
 configdata = None
 
