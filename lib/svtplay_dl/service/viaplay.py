@@ -242,7 +242,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
     def _get_video_data(self, vid):
         url = "http://playapi.mtgx.tv/v3/videos/{0}".format(vid)
-        self.options.other = ""
         data = self.http.request("get", url)
         return data
 
