@@ -49,44 +49,46 @@ def get_media(url, options, version="Unknown"):
             sys.exit(2)
 
     if options.get("all_episodes"):
-        get_all_episodes(stream, copy.copy(options), url)
+        get_all_episodes(stream, url)
     else:
-        get_one_media(stream, copy.copy(options))
+        get_one_media(stream)
 
 
-def get_all_episodes(stream, options, url):
-    if options.output and os.path.isfile(options.output):
+def get_all_episodes(stream, url):
+    name = os.path.dirname(formatname(dict(), stream.config))
+
+    if name and os.path.isfile(name):
         log.error("Output must be a directory if used with --all-episodes")
         sys.exit(2)
-    elif options.output and not os.path.exists(options.output):
+    elif name and not os.path.exists(name):
         try:
-            os.makedirs(options.output)
+            os.makedirs(name)
         except OSError as e:
             log.error("%s: %s", e.strerror, e.filename)
             return
 
-    episodes = stream.find_all_episodes(options)
+    episodes = stream.find_all_episodes(stream.config)
     if episodes is None:
         return
     for idx, o in enumerate(episodes):
         if o == url:
             substream = stream
         else:
-            substream = service_handler(sites, copy.copy(options), o)
+            substream = service_handler(sites, copy.copy(stream.config), o)
 
         log.info("Episode %d of %d", idx + 1, len(episodes))
         log.info("Url: %s", o)
 
         # get_one_media overwrites options.output...
-        get_one_media(substream, copy.copy(options))
+        get_one_media(substream)
 
 
-def get_one_media(stream, config):
+def get_one_media(stream):
     # Make an automagic filename
     if not filename(stream):
         return
 
-    if config.get("merge_subtitle"):
+    if stream.config.get("merge_subtitle"):
         from svtplay_dl.utils.proc import which
         if not which('ffmpeg'):
             log.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
@@ -100,10 +102,10 @@ def get_one_media(stream, config):
     streams = stream.get()
     try:
         for i in streams:
-            if not exclude(config, formatname(i.output, config)):
+            if not exclude(stream.config, formatname(i.output, stream.config)):
                 if isinstance(i, VideoRetriever):
-                    if config.get("preferred"):
-                        if config.get("preferred").lower() == i.name():
+                    if stream.config.get("preferred"):
+                        if stream.config.get("preferred").lower() == i.name():
                             videos.append(i)
                     else:
                         videos.append(i)
@@ -112,7 +114,7 @@ def get_one_media(stream, config):
                 if isinstance(i, Exception):
                     error.append(i)
     except Exception as e:
-        if config.get("verbose"):
+        if stream.config.get("verbose"):
             raise
         else:
             log.error("svtplay-dl crashed")
@@ -121,41 +123,41 @@ def get_one_media(stream, config):
             log.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
         sys.exit(3)
 
-    if config.get("require_subtitle") and not subs:
+    if stream.config.get("require_subtitle") and not subs:
         log.info("No subtitles available")
         return
 
-    if config.get("subtitle") and config.get("get_url"):
+    if stream.config.get("subtitle") and stream.config.get("get_url"):
         if subs:
-            if config.get("get_all_subtitles"):
+            if stream.config.get("get_all_subtitles"):
                 for sub in subs:
                     print(sub.url)
             else:
                 print(subs[0].url)
-        if config.force_subtitle:
+        if stream.config.force_subtitle:
             return
 
     def options_subs_dl(subfixes):
         if subs:
-            if config.get("get_all_subtitles"):
+            if stream.config.get("get_all_subtitles"):
                 for sub in subs:
                     sub.download()
-                    if config.get("merge_subtitle"):
+                    if stream.config.get("merge_subtitle"):
                         if sub.subfix:
                             subfixes += [sub.subfix]
                         else:
-                            config.set("get_all_subtitles", False)
+                            stream.config.set("get_all_subtitles", False)
             else:
                 subs[0].download()
-        elif config.get("merge_subtitle"):
-            config.set("merge_subtitle", False)
+        elif stream.config.get("merge_subtitle"):
+            stream.config.set("merge_subtitle", False)
 
-    if config.get("subtitle") and not config.get("get_url"):
+    if stream.config.get("subtitle") and not stream.config.get("get_url"):
         options_subs_dl(subfixes)
-        if config.get("force_subtitle"):
+        if stream.config.get("force_subtitle"):
             return
 
-    if config.get("merge_subtitle") and not config.get("subtitle"):
+    if stream.config.get("merge_subtitle") and not stream.config.get("subtitle"):
         options_subs_dl(subfixes)
 
     if not videos:
@@ -163,31 +165,31 @@ def get_one_media(stream, config):
         for exc in error:
             log.error(str(exc))
     else:
-        if config.get("list_quality"):
+        if stream.config.get("list_quality"):
             list_quality(videos)
             return
         try:
-            stream = select_quality(config, videos)
-            if config.get("get_url"):
+            stream = select_quality(stream.config, videos)
+            if stream.config.get("get_url"):
                 print(stream.url)
                 return
             log.info("Selected to download %s, bitrate: %s",
                      stream.name(), stream.bitrate)
             stream.download()
         except UIException as e:
-            if config.get("verbose"):
+            if stream.config.get("verbose"):
                 raise e
             log.error(e)
             sys.exit(2)
 
-        if config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
-            stream.get_thumbnail(config)
-        post = postprocess(stream, config, subfixes)
+        if stream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
+            stream.get_thumbnail(stream.config)
+        post = postprocess(stream, stream.config, subfixes)
         if stream.name() == "dash" and post.detect:
             post.merge()
         if stream.name() == "dash" and not post.detect and stream.finished:
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-        if config.get("remux"):
+        if stream.config.get("remux"):
             post.remux()
-        if config.get("silent_semi") and stream.finished:
+        if stream.config.get("silent_semi") and stream.finished:
             log.log(25, "Download of %s was completed" % stream.options.output)
