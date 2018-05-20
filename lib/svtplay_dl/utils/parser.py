@@ -172,45 +172,65 @@ def setup_defaults():
     options.set("silent_semi", False)
     options.set("proxy", None)
     options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
-    return options
+    return _special_settings(options)
 
 
-def mergeparseroption(options, parser):
-    options.set("output", parser.output)
-    options.set("resume", parser.resume)
-    options.set("live", parser.live)
-    options.set("capture_time", parser.capture_time)
-    options.set("silent", parser.silent)
-    options.set("force", parser.force)
-    options.set("quality", parser.quality)
-    options.set("flexibleq", parser.flexibleq)
-    options.set("list_quality", parser.list_quality)
-    options.set("subtitle", parser.subtitle)
-    options.set("merge_subtitle", parser.merge_subtitle)
-    options.set("silent_semi", parser.silent_semi)
-    options.set("username", parser.username)
-    options.set("password", parser.password)
-    options.set("thumbnail", parser.thumbnail)
-    options.set("all_episodes", parser.all_episodes)
-    options.set("all_last", parser.all_last)
-    options.set("force_subtitle", parser.force_subtitle)
-    options.set("require_subtitle", parser.require_subtitle)
-    options.set("preferred", parser.preferred)
-    options.set("verbose", parser.verbose)
-    options.set("exclude", parser.exclude)
-    options.set("get_url", parser.get_url)
-    options.set("ssl_verify", parser.ssl_verify)
-    options.set("http_headers", parser.http_headers)
-    options.set("stream_prio", parser.stream_prio)
-    options.set("remux", parser.remux)
-    options.set("get_all_subtitles", parser.get_all_subtitles)
-    options.set("get_raw_subtitles", parser.get_raw_subtitles)
-    options.set("convert_subtitle_colors", parser.convert_subtitle_colors)
-    options.set("include_clips", parser.include_clips)
-    options.set("cmoreoperatorlist", parser.cmoreoperatorlist)
-    options.set("cmoreoperator", parser.cmoreoperator)
-    options.set("proxy", parser.proxy)
-    return options
+def parsertoconfig(config, parser):
+    config.set("output", parser.output)
+    config.set("configfile", parser.configfile)
+    config.set("resume", parser.resume)
+    config.set("live", parser.live)
+    config.set("capture_time", parser.capture_time)
+    config.set("silent", parser.silent)
+    config.set("force", parser.force)
+    config.set("quality", parser.quality)
+    config.set("flexibleq", parser.flexibleq)
+    config.set("list_quality", parser.list_quality)
+    config.set("subtitle", parser.subtitle)
+    config.set("merge_subtitle", parser.merge_subtitle)
+    config.set("silent_semi", parser.silent_semi)
+    config.set("username", parser.username)
+    config.set("password", parser.password)
+    config.set("thumbnail", parser.thumbnail)
+    config.set("all_episodes", parser.all_episodes)
+    config.set("all_last", parser.all_last)
+    config.set("force_subtitle", parser.force_subtitle)
+    config.set("require_subtitle", parser.require_subtitle)
+    config.set("preferred", parser.preferred)
+    config.set("verbose", parser.verbose)
+    config.set("exclude", parser.exclude)
+    config.set("get_url", parser.get_url)
+    config.set("ssl_verify", parser.ssl_verify)
+    config.set("http_headers", parser.http_headers)
+    config.set("stream_prio", parser.stream_prio)
+    config.set("remux", parser.remux)
+    config.set("get_all_subtitles", parser.get_all_subtitles)
+    config.set("get_raw_subtitles", parser.get_raw_subtitles)
+    config.set("convert_subtitle_colors", parser.convert_subtitle_colors)
+    config.set("include_clips", parser.include_clips)
+    config.set("cmoreoperatorlist", parser.cmoreoperatorlist)
+    config.set("cmoreoperator", parser.cmoreoperator)
+    config.set("proxy", parser.proxy)
+    return _special_settings(config)
+
+
+def _special_settings(config):
+    if config.get("require_subtitle"):
+        if config.get("merge_subtitle"):
+            config.set("merge_subtitle", True)
+        else:
+            config.set("subtitle", True)
+    if config.get("merge_subtitle"):
+        config.set("remux", True)
+
+    if config.get("silent_semi"):
+        config.set("silent", True)
+
+    if config.get("proxy"):
+        config.set("proxy", config.get("proxy").replace("socks5", "socks5h", 1))
+        config.set("proxy", dict(http=config.get("proxy"),
+                             https=config.get("proxy")))
+    return config
 
 
 def merge(old, new):

@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 import sys
 import logging
 
-from svtplay_dl.utils.parser import setup_defaults, parser, mergeparseroption
+from svtplay_dl.utils.parser import setup_defaults, parser, parsertoconfig
 from svtplay_dl.utils.getmedia import get_media, get_multiple_media
 from svtplay_dl.service.cmore import Cmore
 
@@ -37,26 +37,11 @@ def setup_log(silent, verbose=False):
 def main():
     """ Main program """
     parse, options = parser(__version__)
-    if options.require_subtitle:
-        if options.merge_subtitle:
-            options.merge_subtitle = True
-        else:
-            options.subtitle = True
-    if options.merge_subtitle:
-        options.remux = True
-
-    if options.silent_semi:
-        options.silent = True
 
     if options.cmoreoperatorlist:
         c = Cmore(options, None)
         c.operatorlist()
         sys.exit(0)
-
-    if options.proxy:
-        options.proxy = options.proxy.replace("socks5", "socks5h", 1)
-        options.proxy = dict(http=options.proxy,
-                             https=options.proxy)
 
     if options.flexibleq and not options.quality:
         logging.error("flexible-quality requires a quality")
@@ -65,14 +50,15 @@ def main():
         parse.print_help()
         sys.exit(0)
     urls = options.urls
-    options = mergeparseroption(setup_defaults(), options)
+    config = parsertoconfig(setup_defaults(), options)
     if len(urls) < 1:
         parse.error("Incorrect number of arguments")
-    setup_log(options.get("silent"), options.get("verbose"))
+    setup_log(config.get("silent"), config.get("verbose"))
+
     try:
         if len(urls) == 1:
-            get_media(urls[0], options, __version__)
+            get_media(urls[0], config, __version__)
         else:
-            get_multiple_media(urls, options)
+            get_multiple_media(urls, config)
     except KeyboardInterrupt:
         print("")
