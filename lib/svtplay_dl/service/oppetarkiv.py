@@ -57,14 +57,14 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url)
+                        streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
             if i["format"] == "hds" or i["format"] == "flash":
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"])
+                    streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"], output=self.output)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -73,7 +73,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                         if alt:
                             streams = hdsparse(self.config,
                                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
-                                               alt.request.url)
+                                               alt.request.url, output=self.output)
                             if streams:
                                 for n in list(streams.keys()):
                                     yield streams[n]
@@ -86,7 +86,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url)
+                        streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]

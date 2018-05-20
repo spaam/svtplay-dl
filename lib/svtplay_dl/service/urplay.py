@@ -36,9 +36,9 @@ class Urplay(Service, OpenGraphThumbMixin):
                     else:
                         subtype = "tt"
                     if self.config.get("get_all_subtitles"):
-                        yield subtitle(copy.copy(self.config), subtype, absurl, "-" + filenamify(sub["label"]))
+                        yield subtitle(copy.copy(self.config), subtype, absurl, "-" + filenamify(sub["label"]), output=self.output)
                     else:
-                        yield subtitle(copy.copy(self.config), subtype, absurl)
+                        yield subtitle(copy.copy(self.config), subtype, absurl, output=self.output)
 
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
@@ -56,11 +56,11 @@ class Urplay(Service, OpenGraphThumbMixin):
             hls_hd = "{0}{1}".format(http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
             hd = True
         hls = "{0}{1}".format(http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-        streams = hlsparse(self.config, self.http.request("get", hls), hls)
+        streams = hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]
         if hd:
-            streams = hlsparse(self.config, self.http.request("get", hls_hd), hls_hd)
+            streams = hlsparse(self.config, self.http.request("get", hls_hd), hls_hd, output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]
 

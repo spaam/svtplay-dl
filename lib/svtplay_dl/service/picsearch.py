@@ -40,12 +40,13 @@ class Picsearch(Service, OpenGraphThumbMixin):
             playlist = jsondata["data"]["streams"]
             for i in playlist:
                     if "application/x-mpegurl" in i:
-                        streams = hlsparse(self.config, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"])
+                        streams = hlsparse(self.config, self.http.request("get", i["application/x-mpegurl"]),
+                                           i["application/x-mpegurl"], output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if "video/mp4" in i:
-                        yield HTTP(copy.copy(self.config), i["video/mp4"], 800)
+                        yield HTTP(copy.copy(self.config), i["video/mp4"], 800, output=self.output)
 
         if self.backupapi:
             res = self.http.get(self.backupapi.replace("i=", ""), params={"i": "object"})
@@ -54,7 +55,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             jansson = json.loads(data)
             for i in jansson["media"]["playerconfig"]["playlist"]:
                 if "provider" in i and i["provider"] == "httpstreaming":
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
 

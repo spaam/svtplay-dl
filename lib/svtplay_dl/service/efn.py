@@ -15,6 +15,6 @@ class Efn(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video info")
             return
 
-        streams = hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1))
+        streams = hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

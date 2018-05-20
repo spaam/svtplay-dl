@@ -122,11 +122,11 @@ class Dr(Service, OpenGraphThumbMixin):
                 break
         for i in links:
             if i["Target"] == "Ios" or i["Target"] == "HLS":
-                streams = hlsparse(config, self.http.request("get", i["Uri"]), i["Uri"])
+                streams = hlsparse(config, self.http.request("get", i["Uri"]), i["Uri"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
             else:
                 if i["Target"] == "Streaming":
                     config.set("other", "-y '{0}'".format(i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")))
                     rtmp = "rtmp://vod.dr.dk/cms/"
-                    yield RTMP(copy.copy(config), rtmp, i["Bitrate"])
+                    yield RTMP(copy.copy(config), rtmp, i["Bitrate"], output=self.output)

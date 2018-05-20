@@ -42,4 +42,4 @@ class Youplay(Service, OpenGraphThumbMixin):
         for i in jsondata["episode"]["sources"]:
             match = re.search(r"mp4_(\d+)", i)
             if match:
-                yield HTTP(copy.copy(self.config), jsondata["episode"]["sources"][i], match.group(1))
+                yield HTTP(copy.copy(self.config), jsondata["episode"]["sources"][i], match.group(1), output=self.output)

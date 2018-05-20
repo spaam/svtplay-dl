@@ -51,7 +51,7 @@ class Cmore(Service):
         if isinstance(janson["playback"]["items"]["item"], list):
             for i in janson["playback"]["items"]["item"]:
                 if i["mediaFormat"] == "ism":
-                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
+                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -60,7 +60,7 @@ class Cmore(Service):
         else:
             i = janson["playback"]["items"]["item"]
             if i["mediaFormat"] == "ism":
-                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
+                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
 

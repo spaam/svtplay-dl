@@ -80,7 +80,7 @@ class Dplay(Service):
             yield ServiceError("You dont have permission to watch this")
             return
         streams = hlsparse(self.config, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
-                           res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http)
+                           res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]
 

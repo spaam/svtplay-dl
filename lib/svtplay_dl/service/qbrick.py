@@ -49,4 +49,4 @@ class Qbrick(Service, OpenGraphThumbMixin):
 
         for i in sa:
             self.options.other = "-y '{0}'".format(i.attrib["src"])
-            yield RTMP(copy.copy(self.config), server, i.attrib["system-bitrate"])
+            yield RTMP(copy.copy(self.config), server, i.attrib["system-bitrate"], output=self.output)

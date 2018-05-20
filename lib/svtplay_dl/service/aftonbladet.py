@@ -34,7 +34,7 @@ class Aftonbladettv(Service):
             data = self.http.request("get", dataurl).text
             data = json.loads(data)
 
-        streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"])
+        streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
         for n in list(streams.keys()):
             yield streams[n]
 
@@ -68,7 +68,7 @@ class Aftonbladet(Service):
                 for n in i["components"]:
                     if "type" in n and n["type"] == "video":
                         streams = hlsparse(self.config, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
-                                           n["videoAsset"]["streamUrls"]["hls"])
+                                           n["videoAsset"]["streamUrls"]["hls"], output=self.output)
                         if streams:
                             for key in list(streams.keys()):
                                 yield streams[key]
@@ -79,12 +79,12 @@ class Aftonbladet(Service):
 
                 if "hls" in streamUrls:
                     streams.append(hlsparse(self.config, self.http.request("get", streamUrls["hls"]),
-                                            streamUrls["hls"]))
+                                            streamUrls["hls"], output=self.output))
 
                 if "hds" in streamUrls:
                     streams.append(hdsparse(self.config, self.http.request("get", streamUrls["hds"],
                                                                            params={"hdcore": "3.7.0"}),
-                                            streamUrls["hds"]))
+                                            streamUrls["hds"], output=self.output))
 
                 for s in streams:
                     for key in list(s.keys()):

@@ -22,11 +22,11 @@ class Facebook(Service, OpenGraphThumbMixin):
         data2 = json.loads('["{0}"]'.format(match.group(1)))
         data2 = json.loads(unquote_plus(data2[0]))
         if "sd_src_no_ratelimit" in data2["video_data"]["progressive"][0]:
-            yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["sd_src_no_ratelimit"], "240")
+            yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["sd_src_no_ratelimit"], "240", output=self.output)
         else:
             yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["sd_src"], "240")
         if "hd_src_no_ratelimit" in data2["video_data"]["progressive"][0]:
-            yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["hd_src_no_ratelimit"], "720")
+            yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["hd_src_no_ratelimit"], "720", output=self.output)
         else:
             if data2["video_data"]["progressive"][0]["hd_src"]:
-                yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["hd_src"], "720")
+                yield HTTP(copy.copy(self.config), data2["video_data"]["progressive"][0]["hd_src"], "720", output=self.output)

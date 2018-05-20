@@ -32,7 +32,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             self.config.set("live", True)
             self.options.hls_time_stamp = True
-            streams = hlsparse(self.config, self.http.request("get", url), url)
+            streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]
             return
@@ -88,7 +88,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                     yield RTMP(copy.copy(self.config), i.find("base").text, i.find("bitrate").text)
                 elif parse.path[len(parse.path) - 3:len(parse.path)] == "f4m":
                     streams = hdsparse(self.config, self.http.request("get", i.find("url").text,
-                                                                      params={"hdcore": "3.7.0"}), i.find("url").text)
+                                                                      params={"hdcore": "3.7.0"}), i.find("url").text, output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
             elif i.find("mediaFormat").text == "webvtt":
@@ -103,7 +103,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if i.find("mediaFormat").text == "mp4":
                 parse = urlparse(i.find("url").text)
                 if parse.path.endswith("m3u8"):
-                    streams = hlsparse(self.config, self.http.request("get", i.find("url").text), i.find("url").text)
+                    streams = hlsparse(self.config, self.http.request("get", i.find("url").text), i.find("url").text, output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
 

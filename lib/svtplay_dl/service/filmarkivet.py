@@ -17,4 +17,4 @@ class Filmarkivet(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Can't find the video file")
             return
-        yield HTTP(copy.copy(self.config), match.group(1), 480)
+        yield HTTP(copy.copy(self.config), match.group(1), 480, output=self.output)

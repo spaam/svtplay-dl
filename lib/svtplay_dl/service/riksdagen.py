@@ -29,6 +29,6 @@ class Riksdagen(Service, OpenGraphThumbMixin):
         for i in janson:
             if i["mimetype"] == "application/x-mpegurl":
                 data2 = self.http.get(i["url"]).json()
-                streams = hlsparse(self.config, self.http.request("get", data2["url"]), data2["url"])
+                streams = hlsparse(self.config, self.http.request("get", data2["url"]), data2["url"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]

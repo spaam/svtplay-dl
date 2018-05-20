@@ -31,4 +31,4 @@ class Mtvservices(Service):
         for i in sa:
             temp = i.find("src").text.index("gsp.comedystor")
             url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/{0}".format(i.find("src").text[temp:])
-            yield HTTP(copy.copy(self.config), url, i.attrib["height"])
+            yield HTTP(copy.copy(self.config), url, i.attrib["height"], output=self.output)

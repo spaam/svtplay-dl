@@ -34,7 +34,7 @@ class Disney(Service, OpenGraphThumbMixin):
                                     res = self.http.get(i["url"])
                                     match = re.search('button primary" href="([^"]+)"', res.text)
                                     if match:
-                                        yield HTTP(copy.copy(self.config), match.group(1), i["bitrate"])
+                                        yield HTTP(copy.copy(self.config), match.group(1), i["bitrate"], output=self.output)
         else:
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
@@ -80,6 +80,6 @@ class Disney(Service, OpenGraphThumbMixin):
             url = "http://cdnapi.kaltura.com/p/{0}/sp/{1}00/playManifest/entryId/{2}/format/applehttp/protocol/http/a.m3u8" \
                   "?ks={3}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(self.config, self.http.request("get", redirect), redirect)
+            streams = hlsparse(self.config, self.http.request("get", redirect), redirect, output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]

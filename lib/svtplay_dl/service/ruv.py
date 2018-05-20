@@ -24,7 +24,7 @@ class Ruv(Service):
             if match:
                 janson = json.loads(match.group(1))
                 self.config.get("live", checklive(janson["result"][1]))
-                streams = hlsparse(self.config, self.http.request("get", janson["result"][1]), janson["result"][1])
+                streams = hlsparse(self.config, self.http.request("get", janson["result"][1]), janson["result"][1], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
             else:
@@ -35,11 +35,11 @@ class Ruv(Service):
                 yield ServiceError("Can't find video info for: %s" % self.url)
                 return
             if match.group(1).endswith("mp4"):
-                yield HTTP(copy.copy(self.config), match.group(1), 800)
+                yield HTTP(copy.copy(self.config), match.group(1), 800, output=self.output)
             else:
                 m3u8_url = match.group(1)
                 self.config.set("live", checklive(m3u8_url))
-                yield HLS(copy.copy(self.config), m3u8_url, 800)
+                yield HLS(copy.copy(self.config), m3u8_url, 800, output=self.output)
 
 
 def checklive(url):

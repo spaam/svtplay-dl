@@ -162,7 +162,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streamj["streams"]["medium"]:
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
-                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename)
+                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}),
+                                   filename, output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
             else:
@@ -174,10 +175,11 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 filename = "{0}://{1}:{2}{3}".format(parse.scheme, parse.hostname, parse.port, match.group(1))
                 path = "-y {0}".format(match.group(2))
                 other = "-W http://flvplayer.viastream.viasat.tv/flvplayer/play/swf/player.swf {0}".format(path)
-                yield RTMP(copy.copy(self.config), filename, 800, other=other)
+                yield RTMP(copy.copy(self.config), filename, 800, other=other, output=self.output)
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"])
+            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]),
+                               streamj["streams"]["hls"], output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]
 

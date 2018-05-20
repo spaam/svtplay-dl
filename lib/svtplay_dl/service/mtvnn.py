@@ -52,7 +52,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                     and xml.find("./video").find("item").find("rendition").find("src") is not None:
 
                 hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url)
+                stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
                 for key in list(stream.keys()):
                     yield stream[key]
             return
@@ -79,7 +79,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         sa = list(ss.iter("rendition"))
 
         for i in sa:
-            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"], other=other)
+            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"], other=other, output=self.output)
 
         match = re.search("gon.viacom_config=([^;]+);", self.get_urldata())
         if match:
@@ -93,7 +93,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
                 dataj = json.loads(data)
                 for i in dataj["local_playlist_videos"]:
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
 
@@ -154,7 +154,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
                    xml.find("./video").find("item").find("rendition").find("src") is not None:
 
                     hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                    stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url)
+                    stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
                     if stream:
 
                         for key in list(stream.keys()):

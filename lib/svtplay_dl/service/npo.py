@@ -75,7 +75,7 @@ class Npo(Service):
                 raw_url = re.search(r'"url":"(.+?)"', api).group(1)
                 url = json.loads('"{0}"'.format(raw_url))
 
-                stream = hlsparse(self.options, self.http.request("get", url), url)
+                stream = hlsparse(self.options, self.http.request("get", url), url, output=self.output)
 
             if stream:
                 for key in list(stream.keys()):

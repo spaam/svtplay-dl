@@ -36,6 +36,6 @@ class Pokemon(Service, OpenGraphThumbMixin):
         self.output["season"] = season
         self.output["episode"] = episode
 
-        streams = hlsparse(self.config, self.http.request("get", stream), stream)
+        streams = hlsparse(self.config, self.http.request("get", stream), stream, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

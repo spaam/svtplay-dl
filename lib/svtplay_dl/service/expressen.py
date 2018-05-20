@@ -30,10 +30,12 @@ class Expressen(Service):
         dataj = json.loads(match.group(1))
         if "streams" in dataj:
             if "iPad" in dataj["streams"]:
-                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["iPad"]), dataj["streams"]["iPad"])
+                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["iPad"]),
+                                   dataj["streams"]["iPad"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
             if "hashHls" in dataj["streams"]:
-                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["hashHls"]), dataj["streams"]["hashHls"])
+                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["hashHls"]),
+                                   dataj["streams"]["hashHls"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]

@@ -28,9 +28,9 @@ class Dbtv(Service, OpenGraphThumbMixin):
         for i in playlist:
             if i["brightcoveId"] == int(vidoid):
                 if i["HLSURL"]:
-                    streams = hlsparse(self.config, self.http.request("get", i["HLSURL"]), i["HLSURL"])
+                    streams = hlsparse(self.config, self.http.request("get", i["HLSURL"]), i["HLSURL"], output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
                 for n in i["renditions"]:
                     if n["container"] == "MP4":
-                        yield HTTP(copy.copy(self.config), n["URL"], int(n["rate"]) / 1000)
+                        yield HTTP(copy.copy(self.config), n["URL"], int(n["rate"]) / 1000, output=self.output)

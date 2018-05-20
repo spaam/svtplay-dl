@@ -47,4 +47,4 @@ class Sr(Service, OpenGraphThumbMixin):
                   "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
-        yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128)
+        yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output)
