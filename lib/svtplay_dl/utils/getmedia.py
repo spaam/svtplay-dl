@@ -34,8 +34,6 @@ def get_media(url, options, version="Unknown"):
     if "http" not in url[:4]:
         url = "http://%s" % url
 
-    if options.get("silent_semi"):
-        options.set("silent", True)
     if options.get("verbose"):
         log.debug("version: {0}".format(version))
 
