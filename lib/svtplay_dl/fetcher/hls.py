@@ -109,7 +109,7 @@ class HLS(VideoRetriever):
         return "hls"
 
     def download(self):
-        self.output_extention = "tls"
+        self.output_extention = "ts"
         if self.segments:
             if self.audio:
                 self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
