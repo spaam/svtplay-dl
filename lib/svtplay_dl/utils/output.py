@@ -133,7 +133,7 @@ def formatname(output, config, extension="mp4"):
     if config.get("output") and os.path.isdir(os.path.expanduser(config.get("output"))):
         name = os.path.join(config.get("output"), name)
     elif config.get("path") and os.path.isdir(os.path.expanduser(config.get("path"))):
-        name = os.path.join(os.path.expanduser(config.get("output")), name)
+        name = os.path.join(os.path.expanduser(config.get("path")), name)
     elif config.get("output"):
         filename, _ = os.path.splitext(config.get("output"))
         name = "{}.{}".format(config.get("output"), extension)
