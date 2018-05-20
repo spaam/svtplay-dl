@@ -179,6 +179,8 @@ def setup_defaults():
     options.set("remux", False)
     options.set("silent_semi", False)
     options.set("proxy", None)
+    options.set("include_clips", False)
+    options.set("cmoreoperatorlist", False)
     options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
     return _special_settings(options)
 
