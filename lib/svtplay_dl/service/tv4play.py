@@ -177,7 +177,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 if season:
                     index = len(i["program"]["name"])
                     self.output["title"] = i["title"][:index]
-                    self.output["episodename"] = i["title"][index:]
+                    self.output["episodename"] = i["title"][index+3:]
                     return True
                 self.output["title"] = i["title"]
                 return True
