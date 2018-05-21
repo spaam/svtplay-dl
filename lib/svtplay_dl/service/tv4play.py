@@ -83,8 +83,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 parse = urlparse(i.find("url").text)
                 if "rtmp" in base.scheme:
                     swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-                    self.options.other = "-W {0} -y {1}".format(swf, i.find("url").text)
-                    yield RTMP(copy.copy(self.config), i.find("base").text, i.find("bitrate").text)
+                    yield RTMP(copy.copy(self.config), i.find("base").text, i.find("bitrate").text, output=self.output,
+                               other="-W {0} -y {1}".format(swf, i.find("url").text))
                 elif parse.path[len(parse.path) - 3:len(parse.path)] == "f4m":
                     streams = hdsparse(self.config, self.http.request("get", i.find("url").text,
                                                                       params={"hdcore": "3.7.0"}), i.find("url").text, output=self.output)
