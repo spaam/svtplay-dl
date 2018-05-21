@@ -183,7 +183,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             for n in list(streams.keys()):
                 yield streams[n]
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         seasons = []
         match = re.search("(sasong|sesong)-(\d+)", urlparse(self.url).path)
         if match:
@@ -195,9 +195,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 for i in janson["format"]["seasons"]:
                     seasons.append(i["seasonNumber"])
 
-        episodes = self._grab_episodes(options, seasons)
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
+        episodes = self._grab_episodes(config, seasons)
+        if config.get("all_last") > 0:
+            return episodes[-config.get("all_last"):]
         return sorted(episodes)
 
     def _grab_episodes(self, config, seasons):
