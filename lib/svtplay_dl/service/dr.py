@@ -26,7 +26,7 @@ class Dr(Service, OpenGraphThumbMixin):
             resource_url = match.group(1)
             resource_data = self.http.request("get", resource_url).content
             resource = json.loads(resource_data)
-            streams = self.find_stream(self.options, resource)
+            streams = self.find_stream(self.config, resource)
             for i in streams:
                 yield i
         else:
@@ -68,7 +68,7 @@ class Dr(Service, OpenGraphThumbMixin):
                         rtmp = "rtmp://vod.dr.dk/cms/"
                         yield RTMP(copy.copy(self.config), rtmp, stream['Bitrate'])
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         episodes = []
         matches = re.findall(r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"',
                              self.get_urldata())
@@ -106,8 +106,8 @@ class Dr(Service, OpenGraphThumbMixin):
                         for url in matches
                         if url.startswith(prefix)]
 
-        if options.all_last != -1:
-            episodes = episodes[:options.all_last]
+        if config.get("all_last") != -1:
+            episodes = episodes[:config.get("all_last")]
         else:
             episodes.reverse()
 

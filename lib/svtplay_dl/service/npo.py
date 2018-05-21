@@ -2,14 +2,12 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import json
-import os
 import re
 
 from svtplay_dl.service import Service
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.utils import filenamify
 
 
 class Npo(Service):
@@ -36,10 +34,7 @@ class Npo(Service):
             prid = janson["prid"]
 
             if "titel" in janson:
-                directory = os.path.dirname(self.options.output)
-                title = filenamify(janson["titel"])
-                self.options.output = os.path.join(directory, title)
-
+                self.output["title"] = janson["titel"]
         except json.decoder.JSONDecodeError:
             yield ServiceError("Can't decode prid request: {0}".format(prid_raw))
             return
@@ -67,7 +62,6 @@ class Npo(Service):
 
         # Get sub api and streams
         for item in janson["items"][0]:
-
             stream = None
 
             if item["format"] == "hls":
@@ -75,7 +69,7 @@ class Npo(Service):
                 raw_url = re.search(r'"url":"(.+?)"', api).group(1)
                 url = json.loads('"{0}"'.format(raw_url))
 
-                stream = hlsparse(self.options, self.http.request("get", url), url, output=self.output)
+                stream = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
 
             if stream:
                 for key in list(stream.keys()):

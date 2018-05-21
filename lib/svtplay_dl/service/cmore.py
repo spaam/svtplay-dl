@@ -120,11 +120,11 @@ class Cmore(Service):
         tld = self._gettld()
         url = "https://www.cmore.{}/login".format(tld)
         res = self.http.get(url, cookies=self.cookies)
-        if self.options.cmoreoperator:
-            post = {"username": self.options.username, "password": self.options.password,
-                    "operator": self.options.cmoreoperator, "country_code": tld}
+        if self.config.get("cmoreoperator"):
+            post = {"username": self.config.get("username"), "password": self.config.get("password"),
+                    "operator": self.config.get("cmoreoperator"), "country_code": tld}
         else:
-            post = {"username": self.options.username, "password": self.options.password}
+            post = {"username": self.config.get("username"), "password": self.config.get("password")}
         res = self.http.post("https://account.cmore.{}/session?client=cmore-web-prod".format(tld), json=post, cookies=self.cookies)
         if res.status_code >= 400:
             return None, "Wrong username or password"

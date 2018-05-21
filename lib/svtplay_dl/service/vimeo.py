@@ -38,7 +38,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
 
             if ("hls" in jsondata["request"]["files"]) and ("fastly_skyfire" in jsondata["request"]["files"]["hls"]["cdns"]):
                 hls_elem = jsondata["request"]["files"]["hls"]["cdns"]["fastly_skyfire"]
-                stream = hlsparse(self.options, self.http.request("get", hls_elem["url"]), hls_elem["url"], output=self.output)
+                stream = hlsparse(self.config, self.http.request("get", hls_elem["url"]), hls_elem["url"], output=self.output)
 
                 if stream:
                     for n in list(stream.keys()):
