@@ -31,8 +31,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                                                                                               end_time_stamp.isoformat())
 
             self.config.set("live", True)
-            self.options.hls_time_stamp = True
-            streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
+            streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output, hls_time_stamp=True)
             for n in list(streams.keys()):
                 yield streams[n]
             return
