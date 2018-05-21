@@ -170,6 +170,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return False
 
     def _autoname(self, vid):
+        self.output["id"] = vid
         jsondata = self._get_show_info()
         for i in jsondata["results"]:
             if vid == i["id"]:
