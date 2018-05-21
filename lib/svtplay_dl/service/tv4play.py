@@ -72,11 +72,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't download something that is not started.")
             return
 
-        if self.options.get("output_auto"):
-            basename = self._autoname(vid)
-            if not basename:
-                yield ServiceError("Cant find vid id for autonaming.")
-                return
+        basename = self._autoname(vid)
+        if not basename:
+            yield ServiceError("Cant find vid id for autonaming.")
+            return
 
         for i in sa:
             if i.find("mediaFormat").text == "mp4":
