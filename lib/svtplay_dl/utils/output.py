@@ -207,7 +207,8 @@ def findexpisode(output, directory, name):
                         orgext == lsext:
                     return True
             elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
-                if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
-                    return True
+                if output["id"] and output["service"]:
+                    if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
+                        return True
 
     return False
