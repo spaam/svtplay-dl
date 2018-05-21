@@ -48,5 +48,5 @@ class Qbrick(Service, OpenGraphThumbMixin):
         sa = list(streams.iter("video"))
 
         for i in sa:
-            self.options.other = "-y '{0}'".format(i.attrib["src"])
-            yield RTMP(copy.copy(self.config), server, i.attrib["system-bitrate"], output=self.output)
+            yield RTMP(copy.copy(self.config), server, i.attrib["system-bitrate"], output=self.output,
+                       other="-y '{0}'".format(i.attrib["src"]))
