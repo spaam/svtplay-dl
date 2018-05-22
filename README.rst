@@ -89,7 +89,7 @@ To install it, run
 ::
 
     # as root:
-    python setup.py install
+    python3 setup.py install
 
     # or the old method
     make
