@@ -48,7 +48,7 @@ If you want to build your own windows binaries:
 
 1. Install `Visual Studio Express`_ or some other Visual Studio thing you have.
 2. Install `nuitka`_
-3. Follow the steps listed under **From source**
+3. Follow the steps listed under `From source`_
 4. cd path\to\svtplay-dl && mkdir build
 5. `nuitka --recurse-all --output build bin/svtplay-dl`
 6. Find binary in build folder. you need `svtplay-dl.exe` and `pythonXX.dll` from that folder to run `svtplay-dl.exe`
