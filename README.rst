@@ -82,7 +82,7 @@ you don’t have them, some features will not be working.
 -  `PyYaml`_ for configure file
 -  `Requests`_
 -  `PySocks`_ to enable proxy support
-- `ffmpeg`_ or `avconv`_ for postprocessing and/or for DASH streams
+-  `ffmpeg`_ or `avconv`_ for postprocessing and/or for DASH streams
 
 To install it, run
 
