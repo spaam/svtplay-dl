@@ -5,7 +5,7 @@ Installation
 ------------
 
 Mac OSX
-~~~~~~~
+=======
 
 If you have OS X and `Homebrew`_ you can install with:
 
@@ -15,7 +15,7 @@ If you have OS X and `Homebrew`_ you can install with:
     Make sure you notice that you need to run `brew install ffmpeg` or `brew install libav` afterwards, if you don't already have one of these packages.
 
 Debian and Ubuntu
-~~~~~~~~~~~~~~~~~
+=================
 
 svtplay-dl(v 0.30) is available in Debian in Jessie and later and Ubuntu in
 14.04 and later, which means you can install it straight away using apt (even though version included in the official Debian and Ubuntu apt repos is very old and we **strongly** recommend using our own apt repo which always include the latest version.)
@@ -40,7 +40,7 @@ svtplay-dl(v 0.30) is available in Debian in Jessie and later and Ubuntu in
 … as root.
 
 Windows
-~~~~~~~
+=======
 
 You can download windows binaries from `svtplay-dl.se`_
 
@@ -54,7 +54,7 @@ If you want to build your own windows binaries:
 6. Find binary in build folder. you need `svtplay-dl.exe` and `pythonXX.dll` from that folder to run `svtplay-dl.exe`
 
 Other systems with python
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 
 ::
@@ -62,7 +62,7 @@ Other systems with python
     pip3 install svtplay-dl
 
 From source
-~~~~~~~~~~~
+===========
 
 If packaging isn’t available for your operating system, or you want to
 use a non-released version, you’ll want to install from source. Use git
@@ -98,7 +98,7 @@ To install it, run
     make install
 
 After install
-~~~~~~~~~~~~~
+=============
 ::
 
     svtplay-dl [options] URL
