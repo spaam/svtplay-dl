@@ -59,7 +59,7 @@ Other systems with python
 
 ::
 
-    pip install svtplay-dl
+    pip3 install svtplay-dl
 
 From source
 ~~~~~~~~~~~
@@ -76,9 +76,10 @@ svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
--  `Python`_ 2.7 or higher
+-  `Python`_ 3.4 or higher
 -  `RTMPDump`_ 2.4 or higher to download RTMP streams.
--  `PyCrypto`_ to download encrypted HLS streams
+-  `pycryptodome`_ to download encrypted HLS streams
+-  `PyYaml`_ for configure file
 -  `Requests`_
 -  `PySocks`_ to enable proxy support
 - `ffmpeg`_ or `avconv`_ for postprocessing and/or for DASH streams
@@ -155,7 +156,8 @@ Homepage: `svtplay-dl.se`_
 .. _Python: https://www.python.org/
 .. _Homebrew: http://brew.sh/
 .. _RTMPDump: http://rtmpdump.mplayerhq.hu/
-.. _PyCrypto: https://www.dlitz.net/software/pycrypto/
+.. _pycryptodome: https://www.pycryptodome.org/en/latest/
+.. _PyYaml: https://github.com/yaml/pyyaml
 .. _Requests: http://www.python-requests.org/
 .. _PySocks: https://github.com/Anorov/PySocks
 .. _ffmpeg: https://ffmpeg.org
