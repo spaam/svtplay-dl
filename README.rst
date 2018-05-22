@@ -88,17 +88,11 @@ To install it, run
 
 ::
 
-    # as root:
-    python3 setup.py install
-
-    # or the old method
-    make
-
-    # as root:
-    make install
+    sudo python3 setup.py install
 
 After install
 =============
+
 ::
 
     svtplay-dl [options] URL
