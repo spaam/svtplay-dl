@@ -1,0 +1,5 @@
+__version__ = "1.9.11"
+__url__ = "https://svtplay-dl.se"
+__author__ = "Johan Andersson"
+__author_email__ = "j@i19.se"
+__license__ = "MIT"

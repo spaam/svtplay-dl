@@ -4,11 +4,12 @@ import os
 
 srcdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/")
 sys.path.insert(0, srcdir)
-import svtplay_dl
+
+about = {}
+with open(os.path.join(srcdir, 'svtplay_dl', '__version__.py'), 'r') as f:
+    exec(f.read(), about)
 
 deps = []
-
-
 deps.append("requests>=2.0.0")
 deps.append("PySocks")
 deps.append("pycryptodome")
@@ -16,18 +17,18 @@ deps.append("pyyaml")
 
 setup(
     name="svtplay-dl",
-    version=svtplay_dl.__version__,
+    version=about['__version__'],
     packages=find_packages(
         'lib',
         exclude=["tests", "*.tests", "*.tests.*"]),
     install_requires=deps,
     package_dir={'': 'lib'},
     scripts=['bin/svtplay-dl'],
-    author="Johan Andersson",
-    author_email="j@i19.se",
+    author=about["__author__"],
+    author_email=about["__author_email__"],
     description="Command-line program to download videos from various video on demand sites",
-    license="MIT",
-    url="https://svtplay-dl.se",
+    license=about["__license__"],
+    url=about["__url__"],
     classifiers=["Development Status :: 5 - Production/Stable",
                  "Environment :: Console",
                  "Operating System :: POSIX",
