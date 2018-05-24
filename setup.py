@@ -5,6 +5,10 @@ import os
 srcdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/")
 sys.path.insert(0, srcdir)
 
+vi = sys.version_info
+if vi < (3, 4):
+    raise RuntimeError('svtplay-dl requires Python 3.4 or greater')
+
 about = {}
 with open(os.path.join(srcdir, 'svtplay_dl', '__version__.py'), 'r') as f:
     exec(f.read(), about)
