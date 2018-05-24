@@ -185,9 +185,9 @@ def get_one_media(stream):
         if stream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
             stream.get_thumbnail(stream.config)
         post = postprocess(stream, stream.config, subfixes)
-        if stream.name() == "dash" and post.detect:
+        if stream.audio and post.detect:
             post.merge()
-        if stream.name() == "dash" and not post.detect and stream.finished:
+        if stream.audio and not post.detect and stream.finished:
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if stream.config.get("remux"):
             post.remux()
