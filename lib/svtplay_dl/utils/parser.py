@@ -246,12 +246,13 @@ def merge(old, new):
     if isinstance(new, list):
         new = {list(i.keys())[0]: i[list(i.keys())[0]] for i in new}
     config = setup_defaults()
-    for item in new:
-        if item in new:
-            if new[item] != config.get(item):  # Check if new value is not a default one.
+    if new:
+        for item in new:
+            if item in new:
+                if new[item] != config.get(item):  # Check if new value is not a default one.
+                    old[item] = new[item]
+            else:
                 old[item] = new[item]
-        else:
-            old[item] = new[item]
     options = Options()
     options.set_variable(old)
     return options
