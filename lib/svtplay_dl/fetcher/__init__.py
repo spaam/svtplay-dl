@@ -22,7 +22,7 @@ class VideoRetriever(object):
         self.output_extention = None
 
     def __repr__(self):
-        return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
+        return "<Video(fetcher={}, bitrate={}>".format(self.__class__.__name__, self.bitrate)
 
     @property
     def name(self):
