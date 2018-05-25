@@ -105,6 +105,7 @@ def hlsparse(config, res, url, **kwargs):
 
 
 class HLS(VideoRetriever):
+    @property
     def name(self):
         return "hls"
 

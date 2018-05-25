@@ -24,6 +24,7 @@ class VideoRetriever(object):
     def __repr__(self):
         return "<Video(fetcher=%s, bitrate=%s>" % (self.__class__.__name__, self.bitrate)
 
+    @property
     def name(self):
         pass
 

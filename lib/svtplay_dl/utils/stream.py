@@ -11,14 +11,16 @@ LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http", "rtmp"]
 
 
 def sort_quality(data):
-    data = sorted(data, key=lambda x: (x.bitrate, x.name()), reverse=True)
+    data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
+    print("o: {}".format(data))
     for i in data:
-        datas.append([i.bitrate, i.name()])
+        datas.append([i.bitrate, i.name])
     return datas
 
 
 def list_quality(videos):
+    print("videos: {}".format(videos))
     data = sort_quality(videos)
     logging.info("Quality\tMethod")
     for i in data:
@@ -38,8 +40,8 @@ def protocol_prio(streams, priolist):
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
-    prioritized = [(s.bitrate, proto_score[s.name()], s) for
-                   s in streams if s.name() in proto_score]
+    prioritized = [(s.bitrate, proto_score[s.name], s) for
+                   s in streams if s.name in proto_score]
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
@@ -85,7 +87,7 @@ def select_quality(config, streams):
     if len(streams) == 0:
         raise error.NoRequestedProtocols(
             requested=proto_prio,
-            found=list(set([s.name() for s in streams]))
+            found=list(set([s.name for s in streams]))
         )
 
     # Build a dict indexed by bitrate, where each value

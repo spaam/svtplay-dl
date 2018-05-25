@@ -10,6 +10,7 @@ from svtplay_dl.utils.output import output, formatname
 
 
 class RTMP(VideoRetriever):
+    @property
     def name(self):
         return "rtmp"
 

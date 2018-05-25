@@ -195,6 +195,7 @@ def parse_dates(date_str):
 
 
 class DASH(VideoRetriever):
+    @property
     def name(self):
         return "dash"
 

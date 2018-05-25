@@ -105,7 +105,7 @@ def get_one_media(stream):
             if not exclude(stream.config, formatname(i.output, stream.config)):
                 if isinstance(i, VideoRetriever):
                     if stream.config.get("preferred"):
-                        if stream.config.get("preferred").lower() == i.name():
+                        if stream.config.get("preferred").lower() == i.name:
                             videos.append(i)
                     else:
                         videos.append(i)
@@ -174,7 +174,7 @@ def get_one_media(stream):
                 print(stream.url)
                 return
             log.info("Selected to download %s, bitrate: %s",
-                     stream.name(), stream.bitrate)
+                     stream.name, stream.bitrate)
             stream.download()
         except UIException as e:
             if stream.config.get("verbose"):

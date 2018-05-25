@@ -7,6 +7,7 @@ from svtplay_dl.fetcher import VideoRetriever
 
 
 class HTTP(VideoRetriever):
+    @property
     def name(self):
         return "http"
 

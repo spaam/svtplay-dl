@@ -72,6 +72,7 @@ def hdsparse(config, res, manifest, output=None):
 
 
 class HDS(VideoRetriever):
+    @property
     def name(self):
         return "hds"
 
