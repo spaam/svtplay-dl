@@ -189,7 +189,7 @@ def get_one_media(stream):
             post.merge()
         if stream.audio and not post.detect and stream.finished:
             log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-        if stream.config.get("remux"):
+        if stream.name == "hls" or stream.config.get("remux"):
             post.remux()
         if stream.config.get("silent_semi") and stream.finished:
             log.log(25, "Download of %s was completed" % stream.options.output)
