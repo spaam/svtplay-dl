@@ -15,6 +15,7 @@ from svtplay_dl.subtitle import subtitle
 
 country = {"sv": ".se", "da": ".dk", "no": ".no"}
 
+
 class Dplay(Service):
     supported_domains = ['dplay.se', 'dplay.dk', "dplay.no"]
 

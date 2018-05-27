@@ -100,8 +100,8 @@ def hlsparse(config, res, url, **kwargs):
                 for n in subtitles[sub]:
                     m3u8s = M3U8(httpobject.request("get", _get_full_url(n[0], url), cookies=res.cookies).text)
                     streams[int(random.randint(1, 40))] = subtitle(copy.copy(config), "wrst",
-                                                                          _get_full_url(m3u8s.media_segment[0]["URI"], url),
-                                                                          subfix=n[1], output=copy.copy(output))
+                                                                   _get_full_url(m3u8s.media_segment[0]["URI"], url),
+                                                                   subfix=n[1], output=copy.copy(output))
 
     elif m3u8.media_segment:
         config.set("segments", False)
