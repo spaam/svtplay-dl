@@ -4,12 +4,13 @@ from __future__ import absolute_import
 import re
 import hashlib
 import random
+import logging
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
-from svtplay_dl.log import log
+from svtplay_dl.subtitle import subtitle
 
 
 country = {"sv": ".se", "da": ".dk", "no": ".no"}
@@ -22,12 +23,12 @@ class Dplay(Service):
         self.domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
 
         if not self._token():
-            log.error("Something went wrong getting token for requests")
+            logging.error("Something went wrong getting token for requests")
 
         if self.config.get("username") and self.config.get("password"):
             premium = self._login()
             if not premium:
-                log.warning("Wrong username/password.")
+                logging.warning("Wrong username/password.")
 
         channel = False
         if "kanaler" in parse.path:
@@ -107,17 +108,17 @@ class Dplay(Service):
 
         match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
         if not match:
-            log.error("Can't find show name")
+            logging.error("Can't find show name")
             return None
 
         if not self._token():
-            log.error("Something went wrong getting token for requests")
+            logging.error("Something went wrong getting token for requests")
 
         premium = False
         if self.config.get("username") and self.config.get("password"):
             premium = self._login()
             if not premium:
-                log.warning("Wrong username/password.")
+                logging.warning("Wrong username/password.")
 
         url = "https://disco-api.{}/content/shows/{}".format(self.domain, match.group(2))
         res = self.http.get(url)
@@ -134,7 +135,7 @@ class Dplay(Service):
                     continue
                 episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
         if len(episodes) == 0:
-            log.error("Cant find any playable files")
+            logging.error("Cant find any playable files")
         if config.get("all_last") > 0:
             return episodes[:config.get("all_last")]
         return episodes
