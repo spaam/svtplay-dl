@@ -56,7 +56,11 @@ class subtitle(object):
             data = self.raw(subdata)
 
         if self.subfix:
-            self.output = self.options.output + self.subfix
+            if self.config.get("get_all_subtitles"):
+                if self.output["episodename"]:
+                    self.output["episodename"] = "{}-{}".format(self.output["episodename"], self.subfix)
+                else:
+                    self.output["episodename"] = self.subfix
 
         if self.config.get("get_raw_subtitles"):
             subdata = self.raw(subdata)
