@@ -36,7 +36,7 @@ class Urplay(Service, OpenGraphThumbMixin):
                     else:
                         subtype = "tt"
                     if self.config.get("get_all_subtitles"):
-                        yield subtitle(copy.copy(self.config), subtype, absurl, "-" + filenamify(sub["label"]), output=self.output)
+                        yield subtitle(copy.copy(self.config), subtype, absurl, sub["label"], output=self.output)
                     else:
                         yield subtitle(copy.copy(self.config), subtype, absurl, output=self.output)
 
