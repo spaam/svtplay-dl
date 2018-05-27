@@ -74,7 +74,7 @@ class Twitch(Service):
             return
         info = json.loads(data.text)
         self.output["title"] = "twitch-{0}".format(info["channel"]["name"])
-        self.output["name"] = info["title"]
+        self.output["episodename"] = info["title"]
 
         if "token" not in access:
             raise TwitchUrlException('video', self.url)
@@ -159,7 +159,7 @@ class Twitch(Service):
         name = re.search('slug: "([^"]+)"', self.get_urldata()).group(1)
         brodcaster = re.search('broadcaster_login: "([^"]+)"', self.get_urldata()).group(1)
         self.output["title"] = "twitch-{0}".format(brodcaster)
-        self.output["name"] = name
+        self.output["episodename"] = name
 
         dataj = json.loads(match.group(1))
         for i in dataj:
