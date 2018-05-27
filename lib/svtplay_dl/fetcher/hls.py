@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta
 import binascii
 from urllib.parse import urljoin
+import random
 
 from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.error import UIException, ServiceError
@@ -58,12 +59,12 @@ def hlsparse(config, res, url, **kwargs):
     output = kwargs.pop("output", None)
 
     media = {}
+    subtitles = {}
     segments = None
 
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
             audio_url = None
-            subtitle_url = None
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
                     if i["TYPE"] and i["TYPE"] != "SUBTITLES":
@@ -75,23 +76,32 @@ def hlsparse(config, res, url, **kwargs):
                             media[i["GROUP-ID"]].append(i["URI"])
                         else:
                             segments = False
+                if i["TYPE"] == "SUBTITLES":
+                    if "URI" in i:
+                        if i["GROUP-ID"] not in subtitles:
+                            subtitles[i["GROUP-ID"]] = []
+                        item = [i["URI"], i["LANGUAGE"]]
+                        if item not in subtitles[i["GROUP-ID"]]:
+                            subtitles[i["GROUP-ID"]].append(item)
                 continue
             elif i["TAG"] == "EXT-X-STREAM-INF":
                 bit_rate = float(i["BANDWIDTH"]) / 1000
-
                 if "AUDIO" in i and (i["AUDIO"] in media):
                     audio_url = _get_full_url(media[i["AUDIO"]][0], url)
-                if "SUBTITLES" in i and (i["SUBTITLES"] in media):
-                    subtitle_url = _get_full_url(media[i["SUBTITLES"]][0], url)
                 urls = _get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
-            if subtitle_url and httpobject:
-                m3u8s = M3U8(httpobject.request("get", subtitle_url, cookies=res.cookies).text)
-                streams[1] = subtitle(copy.copy(config), "wrst", _get_full_url(m3u8s.media_segment[0]["URI"], url))
             streams[int(bit_rate)] = HLS(copy.copy(config), urls, bit_rate,
                                          cookies=res.cookies, keycookie=keycookie, authorization=authorization,
                                          audio=audio_url, output=output, segments=bool(segments), kwargs=kwargs)
+
+        if subtitles and httpobject:
+            for sub in list(subtitles.keys()):
+                for n in subtitles[sub]:
+                    m3u8s = M3U8(httpobject.request("get", _get_full_url(n[0], url), cookies=res.cookies).text)
+                    streams[int(random.randint(1, 40))] = subtitle(copy.copy(config), "wrst",
+                                                                          _get_full_url(m3u8s.media_segment[0]["URI"], url),
+                                                                          subfix=n[1], output=copy.copy(output))
 
     elif m3u8.media_segment:
         config.set("segments", False)
