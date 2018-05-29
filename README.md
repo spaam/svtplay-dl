@@ -7,9 +7,9 @@
 
 If you have [Homebrew](https://brew.sh/) on your machine you can install by running:
 
-````
+```
     brew install svtplay-dl
-````
+```
 You will need to run `brew install ffmpeg` or `brew install libav` afterwards, if you don't already have one of these packages.
 
 ### Debian and Ubuntu
@@ -17,29 +17,29 @@ You will need to run `brew install ffmpeg` or `brew install libav` afterwards, i
 svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later, which means you can install it straight away using apt. The version in their repo is often old and thus we **strongly** recommend using our own apt repo, which always include the latest version. The svtplay-dl repo for Debian / Ubuntu can be found at [apt.svtplay.se](https://apt.svtplay-dl.se/). 
 
 ##### Add the release PGP keys:
-````    
+```
     curl -s https://svtplay-dl.se/release-key.txt | sudo apt-key add -
-````
+```
 
 ##### Add the "release" channel to your APT sources:
-````    
+```  
     echo "deb https://apt.svtplay-dl.se/ svtplay-dl release" | sudo tee /etc/apt/sources.list.d/svtplay-dl.list
-````
+```
     
 ##### Update and install svtplay-dl:
-````  
+``` 
     sudo apt-get update
 
     sudo apt-get install svtplay-dl
-````
+```
 
 ### Solus
 
 svtplay-dl is avaliable in the stable repository of [Solus](https://solus-project.com/) and can be installed by running:
 
-````
+```
 sudo eopkg it svtplay-dl
-````
+```
 
 ### Windows
 
@@ -56,9 +56,21 @@ If you want to build your own Windows binaries:
 
 ### Other systems with python
 
-````
+```
     pip3 install svtplay-dl
-````
+```
+
+### Any UNIX (Linux, BSD, macOS, etc.) 
+
+##### Download with curl
+```
+sudo curl -L https://svtplay-dl.se/download/latest/svtplay-dl -o /usr/local/bin/svtplay-dl
+```
+
+##### Make it executable
+```
+sudo chmod a+rx /usr/local/bin/svtplay-dl
+```
 
 ### From source
 
@@ -66,9 +78,9 @@ If packaging isn’t available for your operating system, or you want to
 use a non-released version, you’ll want to install from source. Use git
 to download the sources:
 
-````
+```
     git clone https://github.com/spaam/svtplay-dl
-````
+```
 
 svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
@@ -84,15 +96,15 @@ you don’t have them, some features will not be working.
 
 ##### To install it, run:
 
-````
+```
     sudo python3 setup.py install
-````
+```
 
 ## After install
 
-````
+```
     svtplay-dl [options] URL
-````
+```
 
 If you encounter any bugs or problems, don’t hesitate to open an issue [on github](https://github.com/spaam/svtplay-dl/issues).
 Or why not join the ``#svtplay-dl`` IRC channel on Freenode?
