@@ -58,7 +58,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 if match:
                     season = match.group(1)
             else:
-                return False
+                match = self._conentpage(self.get_urldata())
+                if match:
+                    print("printa")
+                return None
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
                 match = re.search('(\w+)-(\d+)', videp)
@@ -86,9 +89,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 match = self._conentpage(self.get_urldata())
                 if match:
                     janson = json.loads(match.group(1))
-                    for i in janson["format"]["videos"].keys():
-                        if "program" in janson["format"]["videos"][str(i)]:
-                            for n in janson["format"]["videos"][i]["program"]:
+                    for i in janson["formatPage"]["format"]["videos"].keys():
+                        if "program" in janson["formatPage"]["format"]["videos"][str(i)]:
+                            for n in janson["formatPage"]["format"]["videos"][i]["program"]:
                                 if str(n["episodeNumber"]) and int(episodenr) == n["episodeNumber"] and int(season) == n["seasonNumber"]:
                                     if slug is None or slug == n["formatSlug"]:
                                         return n["id"]
@@ -110,12 +113,19 @@ class Viaplay(Service, OpenGraphThumbMixin):
         return None
 
     def get(self):
+        parse = urlparse(self.url)
         vid = self._get_video_id()
         if vid is None:
-            yield ServiceError("Can't find video file for: {0}".format(self.url))
-            return
+            if parse.path[:6] == "/sport":
+                result = self._sport()
+                for i in result:
+                    yield i
+                return
+            else:
+                yield ServiceError("Can't find video file for: {0}".format(self.url))
+                return
 
-        data = self. _get_video_data(vid)
+        data = self._get_video_data(vid)
         if data.status_code == 403:
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
@@ -215,12 +225,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 match = self._conentpage(res.text)
                 if match:
                     janson = json.loads(match.group(1))
-                    if "program" in janson["format"]["videos"][str(i)]:
-                        for n in janson["format"]["videos"][str(i)]["program"]:
+                    if "program" in janson["formatPage"]["format"]["videos"][str(i)]:
+                        for n in janson["formatPage"]["format"]["videos"][str(i)]["program"]:
                             episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
                     if config.get("include_clips"):
-                        if "clip" in janson["format"]["videos"][str(i)]:
-                            for n in janson["format"]["videos"][str(i)]["clip"]:
+                        if "clip" in janson["formatPage"]["format"]["videos"][str(i)]:
+                            for n in janson["formatPage"]["format"]["videos"][str(i)]["clip"]:
                                 episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
         return episodes
 
@@ -233,7 +243,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return "sesong"
 
     def _conentpage(self, data):
-        return re.search('"ContentPageProgramStore":({.*}),[ ]*"ApplicationStore', data)
+        return re.search('=({"sportsPlayer.*}); window.__config', data)
 
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
@@ -293,3 +303,28 @@ class Viaplay(Service, OpenGraphThumbMixin):
         self.output["episodename"] = title
 
         return True
+
+    def _sport(self):
+        content = self._conentpage(self.get_urldata())
+        if not content:
+            yield ServiceError("Can't find video file for: {0}".format(self.url))
+            return
+
+        janson = json.loads(content.group(1))
+        if not janson["sportsPlayer"]["currentVideo"]:
+            yield ServiceError("Can't find video file for: {0}".format(self.url))
+            return
+
+        self.output["title"] = janson["sportsPlayer"]["currentVideo"]["title"]
+
+        res = self.http.request("get", janson["sportsPlayer"]["currentVideo"]["_links"]["streamLink"]["href"])
+        if res.status_code == 403:
+            yield ServiceError("Can't play this because the video is geoblocked.")
+            return
+
+        for i in res.json()["embedded"]["prioritizedStreams"]:
+            streams = hlsparse(self.config, self.http.request("get", i["links"]["stream"]["href"]),
+                               i["links"]["stream"]["href"], output=self.output)
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
