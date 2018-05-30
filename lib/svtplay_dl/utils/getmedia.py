@@ -102,7 +102,9 @@ def get_one_media(stream):
     streams = stream.get()
     try:
         for i in streams:
-            if not exclude(stream.config, formatname(i.output, stream.config)):
+            if isinstance(i, Exception):
+                error.append(i)
+            elif not exclude(stream.config, formatname(i.output, stream.config)):
                 if isinstance(i, VideoRetriever):
                     if stream.config.get("preferred"):
                         if stream.config.get("preferred").lower() == i.name:
@@ -111,8 +113,6 @@ def get_one_media(stream):
                         videos.append(i)
                 if isinstance(i, subtitle):
                     subs.append(i)
-                if isinstance(i, Exception):
-                    error.append(i)
     except Exception as e:
         if stream.config.get("verbose"):
             raise
