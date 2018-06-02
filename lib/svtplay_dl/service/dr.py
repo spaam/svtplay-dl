@@ -46,7 +46,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 return
             if "SubtitlesList" in resource and len(resource["SubtitlesList"]) > 0:
                 suburl = resource["SubtitlesList"][0]["Uri"]
-                yield subtitle(copy.copy(self.config), "wrst", suburl)
+                yield subtitle(copy.copy(self.config), "wrst", suburl, output=self.output)
             if "Data" in resource:
                 streams = self.find_stream(self.config, resource)
                 for i in streams:
@@ -55,18 +55,19 @@ class Dr(Service, OpenGraphThumbMixin):
                 for stream in resource['Links']:
                     if stream["Target"] == "HDS":
                         streams = hdsparse(copy.copy(self.config),
-                                           self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}), stream["Uri"])
+                                           self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}),
+                                           stream["Uri"], output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(self.config, self.http.request("get", stream["Uri"]), stream["Uri"])
+                        streams = hlsparse(self.config, self.http.request("get", stream["Uri"]), stream["Uri"], output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
                     if stream["Target"] == "Streaming":
                         self.config.set("other", "-v -y '{0}'".format(stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")))
                         rtmp = "rtmp://vod.dr.dk/cms/"
-                        yield RTMP(copy.copy(self.config), rtmp, stream['Bitrate'])
+                        yield RTMP(copy.copy(self.config), rtmp, stream['Bitrate'], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []
