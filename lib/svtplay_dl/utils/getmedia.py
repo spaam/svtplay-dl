@@ -134,7 +134,7 @@ def get_one_media(stream):
                     print(sub.url)
             else:
                 print(subs[0].url)
-        if stream.config.force_subtitle:
+        if stream.config.get("force_subtitle"):
             return
 
     def options_subs_dl(subfixes):
