@@ -35,7 +35,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         if "live" in data:
             self.config.set("live", data["live"])
 
-        self.outputfilename(data, ensure_unicode(self.get_urldata()))
+        self.outputfilename(data)
 
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
