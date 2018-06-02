@@ -50,10 +50,10 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
             query = parse_qs(parse.query)
             if i["format"] == "hls" or i["format"] == "ios":
-                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
                 if streams:
                     for n in list(streams.keys()):
                         yield streams[n]
+                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
