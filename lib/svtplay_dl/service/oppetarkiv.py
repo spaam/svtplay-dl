@@ -50,46 +50,40 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
             query = parse_qs(parse.query)
             if i["format"] == "hls" or i["format"] == "ios":
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
                 streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                for n in list(streams.keys()):
+                    yield streams[n]
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
                         streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                        if streams:
-                            for n in list(streams.keys()):
-                                yield streams[n]
+                        for n in list(streams.keys()):
+                            yield streams[n]
             if i["format"] == "hds" or i["format"] == "flash":
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
                     streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"], output=self.output)
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                    for n in list(streams.keys()):
+                        yield streams[n]
                     if "alt" in query and len(query["alt"]) > 0:
                         alt = self.http.get(query["alt"][0])
                         if alt:
                             streams = hdsparse(self.config,
                                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
                                                alt.request.url, output=self.output)
-                            if streams:
-                                for n in list(streams.keys()):
-                                    yield streams[n]
+                            for n in list(streams.keys()):
+                                yield streams[n]
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                for n in list(streams.keys()):
+                    yield streams[n]
 
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
                         streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                        if streams:
-                            for n in list(streams.keys()):
-                                yield streams[n]
+                        for n in list(streams.keys()):
+                            yield streams[n]
 
     def find_video_id(self):
         match = re.search('data-video-id="([^"]+)"', self.get_urldata())
