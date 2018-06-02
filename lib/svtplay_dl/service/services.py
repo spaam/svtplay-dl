@@ -4,7 +4,6 @@ from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
 from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
-from svtplay_dl.service.dbtv import Dbtv
 from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dplay import Dplay
 from svtplay_dl.service.dr import Dr
@@ -49,7 +48,6 @@ sites = [
     Barnkanalen,
     Bigbrother,
     Cmore,
-    Dbtv,
     Disney,
     Dplay,
     Dr,
