@@ -39,7 +39,7 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
         # Check if subtitles are available
         if data["subtitlesUrlPath"]:
-            yield subtitle(copy.copy(self.config), "tt", data["subtitlesUrlPath"])
+            yield subtitle(copy.copy(self.config), "tt", data["subtitlesUrlPath"], output=self.output)
 
         hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         data = self.http.request("get", hlsurl)
