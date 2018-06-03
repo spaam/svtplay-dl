@@ -169,7 +169,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             else:
                 yield subtitle(copy.copy(self.config), subtype, dataj["subtitles_for_hearing_impaired"], output=self.output)
 
-        if streamj["streams"]["medium"]:
+        if streamj["streams"]["medium"] and streamj["streams"]["medium"] != "[empty]":
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
                 streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}),
@@ -264,10 +264,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
         title = None
 
         if "season" in dataj["format_position"]:
-            if dataj["format_position"]["season"] > 0:
+            if dataj["format_position"]["season"] and dataj["format_position"]["season"] > 0:
                 season = dataj["format_position"]["season"]
         if season:
-            if len(dataj["format_position"]["episode"]) > 0:
+            if dataj["format_position"]["episode"] and len(dataj["format_position"]["episode"]) > 0:
                 episode = dataj["format_position"]["episode"]
             if episode:
                 try:
@@ -276,7 +276,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     title = episode
                     episode = None
             else:
-                title = filenamify(dataj["title"])
+                title = dataj["summary"].replace("{} - ".format(dataj["format_title"]), "")
+                if title[-1] == ".":
+                    title = title[:len(title) - 1]  # remove the last dot
 
         if dataj["type"] == "clip":
             # Removes the show name from the end of the filename
@@ -298,8 +300,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
                             episode = datajparent["format_position"]["episode"]
 
         self.output["title"] = program
-        self.output["season"] = int(season)
-        self.output["episode"] = int(episode)
+        self.output["season"] = season
+        self.output["episode"] = episode
         self.output["episodename"] = title
 
         return True
