@@ -60,8 +60,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 match = self._conentpage(self.get_urldata())
                 if match:  # this only happen on the program page?
                     janson2 = json.loads(match.group(1))
-                    season = janson2["formatPage"]["format"]["seasonNumber"]
-                    return janson2["formatPage"]["format"]["videos"][str(season)]["program"][0]["id"]
+                    if janson2["formatPage"]["format"]:
+                        season = janson2["formatPage"]["format"]["seasonNumber"]
+                        return janson2["formatPage"]["format"]["videos"][str(season)]["program"][0]["id"]
                 return None
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
@@ -203,7 +204,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             match = self._conentpage(self.get_urldata())
             if match:
                 janson = json.loads(match.group(1))
-                for i in janson["format"]["seasons"]:
+                for i in janson["formatPage"]["format"]["seasons"]:
                     seasons.append(i["seasonNumber"])
 
         episodes = self._grab_episodes(config, seasons)
