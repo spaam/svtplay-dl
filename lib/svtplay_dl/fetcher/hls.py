@@ -46,7 +46,7 @@ def hlsparse(config, res, url, **kwargs):
     streams = {}
 
     if not res:
-        return None
+        return streams
 
     if res.status_code > 400:
         streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
