@@ -7,17 +7,15 @@ import json
 from svtplay_dl.service import Service
 from svtplay_dl.utils.text import decode_html_entities
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 
 
 class Aftonbladettv(Service):
-    supported_domains = ['tv.aftonbladet.se', "svd.se"]
+    supported_domains = ["svd.se"]
 
     def get(self):
         data = self.get_urldata()
 
-        apiurl = None
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
             match = re.search('data-svpPlayer-video="([^"]+)"', data)
@@ -25,22 +23,13 @@ class Aftonbladettv(Service):
                 yield ServiceError("Can't find video info")
                 return
         data = json.loads(decode_html_entities(match.group(1)))
-        videoId = data["playerOptions"]["id"]
-        apiurl = data["playerOptions"]["api"]
-        vendor = data["playerOptions"]["vendor"]
-        self.config.set("live", data["live"])
-        if not self.config.get("live"):
-            dataurl = "{0}{1}/assets/{2}?appName=svp-player".format(apiurl, vendor, videoId)
-            data = self.http.request("get", dataurl).text
-            data = json.loads(data)
-
         streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
         for n in list(streams.keys()):
             yield streams[n]
 
 
 class Aftonbladet(Service):
-    supported_domains = ["aftonbladet.se"]
+    supported_domains = ["aftonbladet.se", "tv.aftonbladet.se"]
 
     def get(self):
         data = self.get_urldata()
@@ -61,31 +50,12 @@ class Aftonbladet(Service):
             yield i
 
     def _get_video(self, janson):
-        articleid = janson["article"]["currentArticleId"]
-        components = janson["articles"][articleid]["article"]["components"]
-        for i in components:
-            if "components" in i:
-                for n in i["components"]:
-                    if "type" in n and n["type"] == "video":
-                        streams = hlsparse(self.config, self.http.request("get", n["videoAsset"]["streamUrls"]["hls"]),
-                                           n["videoAsset"]["streamUrls"]["hls"], output=self.output)
-                        if streams:
-                            for key in list(streams.keys()):
-                                yield streams[key]
-
-            if "videoAsset" in i and "streamUrls" in i["videoAsset"]:
-                streams = []
-                streamUrls = i["videoAsset"]["streamUrls"]
-
-                if "hls" in streamUrls:
-                    streams.append(hlsparse(self.config, self.http.request("get", streamUrls["hls"]),
-                                            streamUrls["hls"], output=self.output))
-
-                if "hds" in streamUrls:
-                    streams.append(hdsparse(self.config, self.http.request("get", streamUrls["hds"],
-                                                                           params={"hdcore": "3.7.0"}),
-                                            streamUrls["hds"], output=self.output))
-
-                for s in streams:
-                    for key in list(s.keys()):
-                        yield s[key]
+        collections = janson["collections"]
+        for n in list(collections.keys()):
+            contents = collections[n]["contents"]["items"]
+            for i in list(contents.keys()):
+                if "type" in contents[i] and contents[i]["type"] == "video":
+                    streams = hlsparse(self.config, self.http.request("get", contents[i]["videoAsset"]["streamUrls"]["hls"]),
+                                       contents[i]["videoAsset"]["streamUrls"]["hls"], output=self.output)
+                    for key in list(streams.keys()):
+                        yield streams[key]
