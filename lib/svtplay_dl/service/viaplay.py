@@ -58,8 +58,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     season = match.group(1)
             else:
                 match = self._conentpage(self.get_urldata())
-                if match:
-                    print("printa")
+                if match:  # this only happen on the program page?
+                    janson2 = json.loads(match.group(1))
+                    season = janson2["formatPage"]["format"]["seasonNumber"]
+                    return janson2["formatPage"]["format"]["videos"][str(season)]["program"][0]["id"]
                 return None
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
