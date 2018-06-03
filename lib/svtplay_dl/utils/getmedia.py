@@ -1,6 +1,7 @@
 import os
 import sys
 import copy
+import logging
 
 
 from svtplay_dl.log import log
@@ -117,14 +118,14 @@ def get_one_media(stream):
         if stream.config.get("verbose"):
             raise
         else:
-            log.error("svtplay-dl crashed")
-            log.error("Run again and add --verbose as an argument, to get more information")
-            log.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
-            log.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
-        sys.exit(3)
+            logging.error("svtplay-dl crashed")
+            logging.error("Run again and add --verbose as an argument, to get more information")
+            logging.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
+            logging.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
+        return
 
     if stream.config.get("require_subtitle") and not subs:
-        log.info("No subtitles available")
+        logging.info("No subtitles available")
         return
 
     if stream.config.get("subtitle") and stream.config.get("get_url"):
