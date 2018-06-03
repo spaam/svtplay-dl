@@ -163,7 +163,10 @@ def _formatname(output, config, extension):
 
     # Remove all {text} we cant replace with something
     for item in re.findall("([\.\-](([^\.\-]+\w+)?\{[\w\-]+\}))", name):
-        name = name.replace(item[0], "")
+        if output["season"] and re.search("(e\{[\w\-]+\})", name):
+            name = name.replace(re.search("(e\{[\w\-]+\})", name).group(1), "")
+        else:
+            name = name.replace(item[0], "")
 
     return name
 
