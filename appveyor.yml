@@ -18,7 +18,9 @@ test_script:
 
 after_test:
   - "mkdir svtplay-dl"
+  - "mkdir svtplay-dl\\certifi"
   - "nuitka --recurse-all --output svtplay-dl bin/svtplay-dl"
+  - "copy %PYTHON%\\lib\\site-packages\\certifi\\cacert.pem svtplay-dl\\certifi"
   - "dir svtplay-dl"
   - "svtplay-dl\\svtplay-dl.exe --version"
   - "rmdir /q /s svtplay-dl\\svtplay-dl.build"

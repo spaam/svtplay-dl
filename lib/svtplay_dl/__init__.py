@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import sys
+import os
 import logging
 import yaml
 
@@ -13,6 +14,10 @@ from svtplay_dl.service.cmore import Cmore
 
 
 log = logging.getLogger('svtplay_dl')
+
+# hack to get around missing cacert.pem in nuitka
+if sys.platform == "win32" and sys.argv[0].endswith('.exe'):
+    os.environ["REQUESTS_CA_BUNDLE"] = "./certifi/cacert.pem"
 
 
 def setup_log(silent, verbose=False):
