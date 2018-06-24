@@ -34,6 +34,7 @@ from svtplay_dl.service.svt import Svt
 from svtplay_dl.service.barnkanalen import Barnkanalen
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.service.tv4play import Tv4play
+from svtplay_dl.service.tv4play import Tv4
 from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.vg import Vg
 from svtplay_dl.service.viaplay import Viaplay
@@ -74,6 +75,7 @@ sites = [
     Svt,
     Svtplay,
     OppetArkiv,
+    Tv4,
     Tv4play,
     Urplay,
     Viaplay,

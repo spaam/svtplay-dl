@@ -2,27 +2,21 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import, unicode_literals
 import re
-import xml.etree.ElementTree as ET
 import json
-import copy
 from datetime import datetime, timedelta
-from urllib.parse import urlparse, parse_qs, quote_plus
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
 
 class Tv4play(Service, OpenGraphThumbMixin):
-    supported_domains = ['tv4play.se', 'tv4.se']
+    supported_domains = ['tv4play.se']
 
     def get(self):
         parse = urlparse(self.url)
         if parse.path[:8] == "/kanaler":
-
             end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=20)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
@@ -36,216 +30,114 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield streams[n]
             return
 
-        data = self.get_urldata()
-
-        vid = findvid(self.url, data)
-        if not vid:
-            yield ServiceError("Can't find video id for {0}.".format(self.url))
+        match = self._getjson()
+        if not match:
+            yield ServiceError("Can't find json data")
             return
 
-        url = "http://prima.tv4play.se/api/web/asset/{0}/play".format(vid)
-        data = self.http.request("get", url, cookies=self.cookies)
-        if data.status_code == 401:
-            xml = ET.XML(data.content)
-            code = xml.find("code").text
-            if code == "SESSION_NOT_AUTHENTICATED":
-                yield ServiceError("Can't access premium content")
-            elif code == "ASSET_PLAYBACK_INVALID_GEO_LOCATION":
-                yield ServiceError("Can't download this video because of geoblock.")
-            else:
-                yield ServiceError("Can't find any info for that video.")
+        jansson = json.loads(match.group(1))
+        vid = None
+        for i in jansson:
+            janson2 = json.loads(i["data"])
+            json.dumps(janson2)
+            if "videoAsset" in janson2["data"]:
+                vid = janson2["data"]["videoAsset"]["id"]
+                if janson2["data"]["videoAsset"]["is_drm_protected"]:
+                    yield ServiceError("We can't download DRM protected content from this site.")
+                    return
+                if janson2["data"]["videoAsset"]["is_live"]:
+                    self.config.set("live", True)
+                if janson2["data"]["videoAsset"]["season"] > 0:
+                    self.output["season"] = janson2["data"]["videoAsset"]["season"]
+                if janson2["data"]["videoAsset"]["episode"] > 0:
+                    self.output["episode"] = janson2["data"]["videoAsset"]["episode"]
+                self.output["title"] = janson2["data"]["videoAsset"]["program"]["name"]
+                self.output["episodename"] = janson2["data"]["videoAsset"]["title"]
+                vid = str(vid)
+                self.output["id"] = str(vid)
+            if "program" in janson2["data"] and vid is None:
+                if "contentfulPanels" in janson2["data"]["program"]:
+                    match = re.search(r"[\/-](\d+)$", self.url)
+                    if match and "panels" in janson2["data"]["program"]:
+                        for n in janson2["data"]["program"]["panels"]:
+                            for z in n["videoList"]["videoAssets"]:
+                                if z["id"] == int(match.group(1)):
+                                    vid = z["id"]
+                                    self.output["id"] = str(vid)
+                                    self.output["episodename"] = z["title"]
+                                    self.output["title"] = z["program"]["name"]
+
+        if vid is None:
+            yield ServiceError("Cant find video id for the video")
             return
-        if data.status_code == 404:
-            yield ServiceError("Can't find the video api.")
-            return
-        xml = ET.XML(data.content)
-        ss = xml.find("items")
-        sa = list(ss.iter("item"))
 
-        if xml.find("live").text:
-            self.config.set("live", (xml.find("live").text != "false"))
-        if xml.find("drmProtected").text == "true":
-            yield ServiceError("We can't download DRM protected content from this site.")
-            return
-        if xml.find("playbackStatus").text == "NOT_STARTED":
-            yield ServiceError("Can't download something that is not started.")
-            return
+        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(vid)
+        res = self.http.request("get", url, cookies=self.cookies)
+        if res.json()["playbackItem"]["type"] == "hls":
+            streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
+                               res.json()["playbackItem"]["manifestUrl"], output=self.output)
+            for n in list(streams.keys()):
+                yield streams[n]
 
-        basename = self._autoname(vid)
-        if not basename:
-            yield ServiceError("Cant find vid id for autonaming.")
-            return
-
-        for i in sa:
-            if i.find("mediaFormat").text == "mp4":
-                base = urlparse(i.find("base").text)
-                parse = urlparse(i.find("url").text)
-                if "rtmp" in base.scheme:
-                    swf = "http://www.tv4play.se/flash/tv4playflashlets.swf"
-                    yield RTMP(copy.copy(self.config), i.find("base").text, i.find("bitrate").text, output=self.output,
-                               other="-W {0} -y {1}".format(swf, i.find("url").text))
-                elif parse.path[len(parse.path) - 3:len(parse.path)] == "f4m":
-                    streams = hdsparse(self.config, self.http.request("get", i.find("url").text,
-                                                                      params={"hdcore": "3.7.0"}), i.find("url").text, output=self.output)
-                    for n in list(streams.keys()):
-                        yield streams[n]
-            elif i.find("mediaFormat").text == "webvtt":
-                yield subtitle(copy.copy(self.config), "wrst", i.find("url").text, output=self.output)
-
-        url = "https://prima.tv4play.se/api/web/asset/{0}/play?protocol=hls3".format(vid)
-        data = self.http.request("get", url, cookies=self.cookies).content
-        xml = ET.XML(data)
-        ss = xml.find("items")
-        sa = list(ss.iter("item"))
-        for i in sa:
-            if i.find("mediaFormat").text == "mp4":
-                parse = urlparse(i.find("url").text)
-                if parse.path.endswith("m3u8"):
-                    streams = hlsparse(self.config, self.http.request("get", i.find("url").text), i.find("url").text, output=self.output)
-                    for n in list(streams.keys()):
-                        yield streams[n]
-
-    def _get_show_info(self):
-        show = self._get_showname()
-        live = str(self.config.get("live")).lower()
-        data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=episode&is_live={0}&"
-                                        "platform=web&node_nids={1}&per_page=99999".format(live, show)).text
-        jsondata = json.loads(data)
-        return jsondata
-
-    def _get_clip_info(self, vid):
-        show = self._get_showname()
-        page = 1
-        assets = page * 1000
-        run = True
-        live = str(self.config.get("live")).lower()
-        while run:
-            data = self.http.request("get", "http://webapi.tv4play.se/play/video_assets?type=clips&is_live={0}"
-                                            "&platform=web&node_nids={1}&per_page=1000&page={2}".format(live, show, page)).text
-            jsondata = json.loads(data)
-            for i in jsondata["results"]:
-                if vid == i["id"]:
-                    return i["title"]
-            if not run:
-                return None
-            total = jsondata["total_hits"]
-            if assets > total:
-                run = False
-            page += 1
-            assets = page * 1000
-        return None
-
-    def _get_showname(self):
-        parse = urlparse(self.url)
-        show = None
-        if parse.path.count("/") > 2:
-            match = re.search("^/([^/]+)/", parse.path)
-            if "program" == match.group(1):
-                match = re.search("^/program/([^/]+)/", parse.path)
-                if match:
-                    show = match.group(1)
-            else:
-                show = match.group(1)
-        else:
-            show = parse.path[parse.path.find("/", 1) + 1:]
-        if show and not re.search("%", show):
-            show = quote_plus(show)
-        return show
-
-    def _seasoninfo(self, data):
-        if "season" in data and data["season"]:
-            season = "{:02d}".format(data["season"])
-            if "episode" in data:
-                episode = "{:02d}".format(data["episode"])
-                if int(season) == 0 and int(episode) == 0:
-                    return False
-                self.output["season"] = season
-                self.output["episode"] = episode
-                return True
-            else:
-                self.output["season"] = season
-                return True
-        else:
-            return False
-
-    def _autoname(self, vid):
-        self.output["id"] = vid
-        jsondata = self._get_show_info()
-        for i in jsondata["results"]:
-            if vid == i["id"]:
-                season = self._seasoninfo(i)
-                if season:
-                    index = len(i["program"]["name"])
-                    self.output["title"] = i["title"][:index]
-                    self.output["episodename"] = i["title"][index + 3:]
-                    return True
-                self.output["title"] = i["title"]
-                return True
-
-        aname = self._get_clip_info(vid)
-        if aname is not None:
-            self.output["title"] = aname
-            return True
-
-        aname = self._get_showname()
-        if aname is not None:
-            self.output["title"] = aname
-            return True
-
-        return "tv4Stream"
-
-    def _getdays(self, data, text):
-        try:
-            days = int(data["availability"][text])
-        except (ValueError, TypeError):
-            days = 999
-        return days
+    def _getjson(self):
+        match = re.search(".prefetched = (\[.*\]);", self.get_urldata())
+        return match
 
     def find_all_episodes(self, config):
-        premium = False
-        jsondata = self._get_show_info()
-
         episodes = []
-        n = 1
-        for i in jsondata["results"]:
-            if premium:
-                text = "availability_group_premium"
-            else:
-                text = "availability_group_free"
+        items = []
+        show = None
+        match = self._getjson()
+        jansson = json.loads(match.group(1))
+        for i in jansson:
+            janson2 = json.loads(i["data"])
+            if "program" in janson2["data"]:
+                if "panels" in janson2["data"]["program"]:
+                    for n in janson2["data"]["program"]["panels"]:
+                        if n["assetType"] == "EPISODE":
+                            for z in n["videoList"]["videoAssets"]:
+                                show = z["program_nid"]
+                                items.append(z["id"])
+                        if n["assetType"] == "CLIP" and config.get("include_clips"):
+                            for z in n["videoList"]["videoAssets"]:
+                                show = z["program_nid"]
+                                items.append(z["id"])
 
-            days = self._getdays(i, text)
-            if premium and days == 0:
-                days = self._getdays(i, "availability_group_free")
+        items = sorted(items)
+        for item in items:
+            episodes.append("https://www.tv4play.se/program/{}/{}".format(show, item))
 
-            if days > 0:
-                video_id = i["id"]
-                url = "http://www.tv4play.se/program/{0}?video_id={1}".format(i["program"]["nid"], video_id)
-                episodes.append(url)
-                if n == config.get("all_last"):
-                    break
-                n += 1
-
+        if config.get("all_last") > 0:
+            return episodes[-config.get("all_last"):]
         return episodes
 
 
-def findvid(url, data):
-    parse = urlparse(url)
-    if "tv4play.se" in url:
-        if "video_id" in parse_qs(parse.query):
-            return parse_qs(parse.query)["video_id"][0]
-        match = re.search(r'burtVmanId: "(\d+)"', data)
-        if match:
-            return match.group(1)
-    else:
-        match = re.search(r"\"vid\":\"(\d+)\",", data)
-        if match:
-            return match.group(1)
-        match = re.search(r"-(\d+)$", url)
-        if match:
-            return match.group(1)
-        match = re.search(r"meta content='([^']+)' property='og:video'", data)
-        if match:
-            match = re.search(r"vid=(\d+)&", match.group(1))
-            if match:
-                return match.group(1)
-    return None
+class Tv4(Service, OpenGraphThumbMixin):
+    supported_domains = ['tv4.se']
+
+    def get(self):
+        match = re.search(r"[\/-](\d+)$", self.url)
+        if not match:
+            yield ServiceError("Cant find video id")
+            return
+        self.output["id"] = match.group(1)
+
+        match = re.search("data-program-format='([^']+)'", self.get_urldata())
+        if not match:
+            yield ServiceError("Cant find program name")
+            return
+        self.output["title"] = match.group(1)
+
+        match = re.search('img alt="([^"]+)" class="video-image responsive"', self.get_urldata())
+        if not match:
+            yield ServiceError("Cant find title of the video")
+            return
+        self.output["episodename"] = match.group(1)
+
+        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
+        res = self.http.request("get", url, cookies=self.cookies)
+        if res.json()["playbackItem"]["type"] == "hls":
+            streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
+                               res.json()["playbackItem"]["manifestUrl"], output=self.output)
+            for n in list(streams.keys()):
+                yield streams[n]
