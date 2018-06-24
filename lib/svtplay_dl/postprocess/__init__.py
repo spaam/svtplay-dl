@@ -3,12 +3,13 @@ from random import sample
 import os
 import platform
 import re
+from shutil import which
 from requests import post, codes, Timeout
 from re import match
 
 from svtplay_dl.log import log
 from svtplay_dl.utils.output import formatname
-from svtplay_dl.utils.proc import which, run_program
+from svtplay_dl.utils.proc import run_program
 
 
 class postprocess(object):

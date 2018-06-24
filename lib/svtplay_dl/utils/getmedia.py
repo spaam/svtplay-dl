@@ -2,6 +2,7 @@ import os
 import sys
 import copy
 import logging
+from shutil import which
 
 
 from svtplay_dl.log import log
@@ -90,7 +91,6 @@ def get_one_media(stream):
         return
 
     if stream.config.get("merge_subtitle"):
-        from svtplay_dl.utils.proc import which
         if not which('ffmpeg'):
             log.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
             log.info("https://ffmpeg.org/download.html")
