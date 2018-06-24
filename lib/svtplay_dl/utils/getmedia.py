@@ -162,9 +162,13 @@ def get_one_media(stream):
         options_subs_dl(subfixes)
 
     if not videos:
-        log.error("No videos found.")
+        errormsg = None
         for exc in error:
-            log.error(str(exc))
+            if errormsg:
+                errormsg = "{}. {}".format(errormsg, str(exc))
+            else:
+                errormsg = str(exc)
+        logging.error("No videos found. {}".format(errormsg))
     else:
         if stream.config.get("list_quality"):
             list_quality(videos)
@@ -174,8 +178,7 @@ def get_one_media(stream):
             if stream.config.get("get_url"):
                 print(stream.url)
                 return
-            log.info("Selected to download %s, bitrate: %s",
-                     stream.name, stream.bitrate)
+            logging.info("Selected to download %s, bitrate: %s", stream.name, stream.bitrate)
             stream.download()
         except UIException as e:
             if stream.config.get("verbose"):
@@ -189,8 +192,8 @@ def get_one_media(stream):
         if stream.audio and post.detect:
             post.merge()
         if stream.audio and not post.detect and stream.finished:
-            log.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
+            logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if stream.name == "hls" or stream.config.get("remux"):
             post.remux()
         if stream.config.get("silent_semi") and stream.finished:
-            log.log(25, "Download of %s was completed" % stream.options.output)
+            logging.log(25, "Download of %s was completed" % stream.options.output)
