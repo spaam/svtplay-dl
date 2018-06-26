@@ -14,7 +14,7 @@ You will need to run `brew install ffmpeg` or `brew install libav` afterwards, i
 
 ### Debian and Ubuntu
 
-svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later, which means you can install it straight away using apt. The version in their repo is often old and thus we **strongly** recommend using our own apt repo, which always include the latest version. The svtplay-dl repo for Debian / Ubuntu can be found at [apt.svtplay.se](https://apt.svtplay-dl.se/). 
+svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later, which means you can install it straight away using apt. The version in their repo is often old and thus we **strongly** recommend using our own apt repo, which always include the latest version. The svtplay-dl repo for Debian / Ubuntu can be found at [apt.svtplay-dl.se](https://apt.svtplay-dl.se/). 
 
 ##### Add the release PGP keys:
 ````    
