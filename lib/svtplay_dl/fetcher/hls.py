@@ -7,10 +7,11 @@ import copy
 import time
 from datetime import datetime, timedelta
 import binascii
-from urllib.parse import urljoin
+
 import random
 
 from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
+from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.error import UIException, ServiceError
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
@@ -26,20 +27,6 @@ class LiveHLSException(HLSException):
     def __init__(self, url):
         super(LiveHLSException, self).__init__(
             url, "This is a live HLS stream, and they are not supported.")
-
-
-def _get_full_url(url, srcurl):
-    if url[:4] == 'http':
-        return url
-    if url[0] == '/':
-        baseurl = re.search(r'^(http[s]{0,1}://[^/]+)/', srcurl)
-        return "{0}{1}".format(baseurl.group(1), url)
-
-    # remove everything after last / in the path of the URL
-    baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1/', srcurl)
-    returl = urljoin(baseurl, url)
-
-    return returl
 
 
 def hlsparse(config, res, url, **kwargs):
@@ -87,8 +74,8 @@ def hlsparse(config, res, url, **kwargs):
             elif i["TAG"] == "EXT-X-STREAM-INF":
                 bit_rate = float(i["BANDWIDTH"]) / 1000
                 if "AUDIO" in i and (i["AUDIO"] in media):
-                    audio_url = _get_full_url(media[i["AUDIO"]][0], url)
-                urls = _get_full_url(i["URI"], url)
+                    audio_url = get_full_url(media[i["AUDIO"]][0], url)
+                urls = get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
             streams[int(bit_rate)] = HLS(copy.copy(config), urls, bit_rate,
@@ -160,7 +147,7 @@ class HLS(VideoRetriever):
                 duration = i["EXTINF"]["duration"]
                 max_duration = max(max_duration, duration)
                 total_duration += duration
-            item = _get_full_url(i["URI"], url)
+            item = get_full_url(i["URI"], url)
 
             if not self.config.get("silent"):
                 if self.config.get("live"):
@@ -184,7 +171,7 @@ class HLS(VideoRetriever):
 
                 # Update key/decryptor
                 if "EXT-X-KEY" in i:
-                    keyurl = _get_full_url(i["EXT-X-KEY"]["URI"], url)
+                    keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
                     iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else random_iv()
                     decryptor = AES.new(key, AES.MODE_CBC, iv)
