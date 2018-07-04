@@ -177,7 +177,7 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
     name = formatname(output, config, extension)
 
     logging.info("Outfile: %s", name)
-    if os.path.isfile(name):
+    if os.path.isfile(name) and not config.get("force"):
         logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
         return None
     if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)):
