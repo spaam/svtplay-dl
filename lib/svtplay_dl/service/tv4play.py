@@ -75,7 +75,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         res = self.http.request("get", url, cookies=self.cookies)
         if res.json()["playbackItem"]["type"] == "hls":
             streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
-                               res.json()["playbackItem"]["manifestUrl"], output=self.output)
+                               res.json()["playbackItem"]["manifestUrl"], output=self.output, httpobject=self.http)
             for n in list(streams.keys()):
                 yield streams[n]
 

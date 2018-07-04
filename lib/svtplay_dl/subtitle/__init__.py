@@ -5,8 +5,9 @@ from io import StringIO
 
 from svtplay_dl.log import log
 from svtplay_dl.utils.text import decode_html_entities
-from svtplay_dl.utils.http import HTTP
+from svtplay_dl.utils.http import HTTP, get_full_url
 from svtplay_dl.utils.output import output
+
 
 from requests import __build__ as requests_version
 import platform
@@ -22,6 +23,7 @@ class subtitle(object):
         self.subfix = subfix
         self.bom = False
         self.output = kwargs.pop("output", None)
+        self.kwargs = kwargs
 
     def __repr__(self):
         return "<Subtitle(type={}, url={}>".format(self.subtype, self.url)
@@ -52,6 +54,8 @@ class subtitle(object):
             if "dplay" in self.url:
                 subdata.encoding = "utf-8"
             data = self.wrst(subdata)
+        if self.subtype == "wrstsegment":
+            data = self.wrstsegment(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
 
@@ -251,6 +255,57 @@ class subtitle(object):
         srt = decode_html_entities(srt)
         return srt
 
+    def wrstsegment(self, subdata):
+        time = 0
+        subs = []
+        for i in self.kwargs["m3u8"].media_segment:
+            time += i["EXTINF"]["duration"]
+            itemurl = get_full_url(i["URI"], self.url)
+            cont = self.http.get(itemurl)
+            if "cmore" in self.url:
+                cont.encoding = "utf-8"
+            text = cont.text.split("\n")
+            text = text[3:len(text) - 2]
+            if len(text) > 1:
+                itmes = []
+                for n in text:
+                    if n:
+                        itmes.append(n)
+                    else:
+                        if len(subs) > 1 and itmes[1] == subs[-1][1]:  # This will happen when  there is two sections in file
+                            ha = strdate(subs[-1][0])
+                            ha3 = strdate(itmes[0])
+                            second = str2sec(ha3.group(2)) + time
+                            subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                            itmes = []
+                        else:
+                            ha = strdate(itmes[0])
+                            first = str2sec(ha.group(1)) + time
+                            second = str2sec(ha.group(2)) + time
+                            itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
+                            subs.append(itmes)
+                            itmes = []
+                if itmes:
+                    if len(subs) > 0 and itmes[1] == subs[-1][1]:
+                        ha = strdate(subs[-1][0])
+                        ha3 = strdate(itmes[0])
+                        second = str2sec(ha3.group(2)) + time
+                        subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                    else:
+                        ha = strdate(itmes[0])
+                        first = str2sec(ha.group(1)) + time
+                        second = str2sec(ha.group(2)) + time
+                        itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
+                        subs.append(itmes)
+
+        string = ""
+        nr = 1
+        for sub in subs:
+            string += "{}\n{}\n\n".format(nr, '\n'.join(sub))
+            nr += 1
+
+        return string
+
 
 def timestr(msec):
     """
@@ -298,3 +353,18 @@ def tt_text(node, data):
             if text:
                 data += "%s\n" % text
     return data
+
+
+def strdate(datestring):
+    match = re.search("^(\d+:\d+:[\.0-9]+) --> (\d+:\d+:[\.0-9]+)", datestring)
+    return match
+
+
+def sec2str(seconds):
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return "{:02d}:{:02d}:{:06.3f}".format(int(h), int(m), s)
+
+
+def str2sec(string):
+    return sum(x * float(t) for x, t in zip([3600, 60, 1], string.split(":")))

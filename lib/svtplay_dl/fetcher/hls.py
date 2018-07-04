@@ -85,10 +85,14 @@ def hlsparse(config, res, url, **kwargs):
         if subtitles and httpobject:
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
-                    m3u8s = M3U8(httpobject.request("get", _get_full_url(n[0], url), cookies=res.cookies).text)
-                    streams[int(random.randint(1, 40))] = subtitle(copy.copy(config), "wrst",
-                                                                   _get_full_url(m3u8s.media_segment[0]["URI"], url),
-                                                                   subfix=n[1], output=copy.copy(output))
+                    m3u8s = M3U8(httpobject.request("get", get_full_url(n[0], url), cookies=res.cookies).text)
+                    if "cmore" in url:
+                        subtype = "wrstsegment"  # this have been seen in tv4play
+                    else:
+                        subtype = "wrst"
+                    streams[int(random.randint(1, 40))] = subtitle(copy.copy(config), subtype,
+                                                                   get_full_url(m3u8s.media_segment[0]["URI"], url),
+                                                                   subfix=n[1], output=copy.copy(output), m3u8=m3u8s)
 
     elif m3u8.media_segment:
         config.set("segments", False)
