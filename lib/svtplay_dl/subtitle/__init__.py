@@ -259,12 +259,14 @@ class subtitle(object):
         time = 0
         subs = []
         for i in self.kwargs["m3u8"].media_segment:
-            time += i["EXTINF"]["duration"]
             itemurl = get_full_url(i["URI"], self.url)
             cont = self.http.get(itemurl)
             if "cmore" in self.url:
                 cont.encoding = "utf-8"
             text = cont.text.split("\n")
+            for t in text:  # is in text[1] for tv4play, but this should be more future proof
+                if 'X-TIMESTAMP-MAP=MPEGTS' in t:
+                    time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1))/90000
             text = text[3:len(text) - 2]
             if len(text) > 1:
                 itmes = []
