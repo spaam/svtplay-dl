@@ -27,6 +27,11 @@ export PYTHONPATH=lib
 # nosetests3), you can remove the -3 flag.
 TEST_OPTS ?= -2 -3
 
+svtplay-dl: $(PYFILES)
+	$(MAKE) -C lib
+	mv -f lib/svtplay-dl .
+
+
 svtplay-dl.1: svtplay-dl.pod
 	rm -f $@
 	$(POD2MAN) $< $@
@@ -56,4 +61,4 @@ clean:
 	$(MAKE) -C lib clean
 	rm -f svtplay-dl
 	rm -f $(MANFILE)
-	rm -f .tox
+	rm -rf .tox
