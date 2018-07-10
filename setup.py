@@ -2,6 +2,8 @@ from setuptools import setup, find_packages
 import sys
 import os
 
+import versioneer
+
 srcdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/")
 sys.path.insert(0, srcdir)
 
@@ -21,18 +23,19 @@ deps.append("pyyaml")
 
 setup(
     name="svtplay-dl",
-    version=about['__version__'],
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(
         'lib',
         exclude=["tests", "*.tests", "*.tests.*"]),
     install_requires=deps,
     package_dir={'': 'lib'},
     scripts=['bin/svtplay-dl'],
-    author=about["__author__"],
-    author_email=about["__author_email__"],
+    author="Johan Andersson",
+    author_email="j@i19.se",
     description="Command-line program to download videos from various video on demand sites",
-    license=about["__license__"],
-    url=about["__url__"],
+    license="MIT",
+    url="https://svtplay-dl.se",
     python_requires='>=3.4',
     classifiers=["Development Status :: 5 - Production/Stable",
                  "Environment :: Console",

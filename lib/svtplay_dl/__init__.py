@@ -7,10 +7,13 @@ import os
 import logging
 import yaml
 
-from svtplay_dl.__version__ import __version__
 from svtplay_dl.utils.parser import setup_defaults, parser, parsertoconfig
 from svtplay_dl.utils.getmedia import get_media, get_multiple_media
 from svtplay_dl.service.cmore import Cmore
+
+from .__version__ import get_versions
+__version__ = get_versions()['version']
+del get_versions
 
 
 log = logging.getLogger('svtplay_dl')
