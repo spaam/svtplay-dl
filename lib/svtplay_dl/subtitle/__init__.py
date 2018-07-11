@@ -266,7 +266,7 @@ class subtitle(object):
             text = cont.text.split("\n")
             for t in text:  # is in text[1] for tv4play, but this should be more future proof
                 if 'X-TIMESTAMP-MAP=MPEGTS' in t:
-                    time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000
+                    time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
             text = text[3:len(text) - 2]
             if len(text) > 1:
                 itmes = []
