@@ -117,7 +117,7 @@ class postprocess(object):
                 log.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
 
             tempfile = u"{0}.temp".format(orig_filename)
-            arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-copyts", "-f", "mp4"]
+            arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
