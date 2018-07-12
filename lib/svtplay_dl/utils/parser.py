@@ -51,6 +51,14 @@ class Options(object):
     def set_variable(self, value):
         self.default = value
 
+    def __getattr__(self, name):
+        if "default" not in self.__dict__:
+            raise AttributeError('{}.{} is invalid.'.format(self.__class__.__name__, name))
+        if name in self.default:
+            return self.default[name]
+        else:
+            raise AttributeError('{}.{} is invalid.'.format(self.__class__.__name__, name))
+
 
 def parser(version):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
