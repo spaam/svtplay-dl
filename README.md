@@ -47,11 +47,11 @@ You can download the Windows binaries from [svtplay-dl.se](https://svtplay-dl.se
 
 If you want to build your own Windows binaries:
 
-1. Install [Visual Studio Express](https://www.visualstudio.com/vs/express/) or some other Visual Studio tool you have installed.
-2. Install [nuitka](https://nuitka.net/)
+1. Install [cx_freeze](https://anthony-tuininga.github.io/cx_Freeze/)
 3. Follow the steps listed under [From source](#from-source)
 4. cd path\to\svtplay-dl && mkdir build
-5. `nuitka --recurse-all --output build bin/svtplay-dl`
+5. `python setversion.py`  # this will change the version string to a more useful one
+5. `python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=build bin/svtplay-dl`
 6. Find binary in build folder. you need `svtplay-dl.exe` and `pythonXX.dll` from that folder to run `svtplay-dl.exe`
 
 ### Other systems with python
