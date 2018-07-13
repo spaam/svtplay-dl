@@ -28,18 +28,18 @@ artifacts:
   - path: svtplay-dl.zip
     name: svtplay-dl
 
--
-  branches:
-    only: master
-    appveyor_repo_tag: true
-    deploy:
-      provider: FTP
-      protocol: sftp
-      host: srv.svtplay-dl.se
-      username: web
-      password:
-        secure: wdvTOWRd6TXhtgfSPmYea8XOT/5sc4s3xhELbowqT58=
-      folder: /var/www/download/$(APPVEYOR_REPO_TAG_NAME)/
-      artifact: svtplay-dl.zip
+
+deploy:
+  - provider: FTP
+    protocol: sftp
+    host: srv.svtplay-dl.se
+    username: web
+    password:
+      secure: wdvTOWRd6TXhtgfSPmYea8XOT/5sc4s3xhELbowqT58=
+    folder: /var/www/download/$(APPVEYOR_REPO_TAG_NAME)
+
+    artifact: svtplay-dl.zip
+    on:
+      appveyor_repo_tag: true
 
 build: off
