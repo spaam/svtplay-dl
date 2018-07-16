@@ -17,19 +17,19 @@ from svtplay_dl.utils.text import exclude
 from svtplay_dl.error import UIException
 
 
-def get_multiple_media(urls, options):
-    if options.output and os.path.isfile(options.output):
+def get_multiple_media(urls, config):
+    if config.get("output") and os.path.isfile(config.output):
         log.error("Output must be a directory if used with multiple URLs")
         sys.exit(2)
-    elif options.output and not os.path.exists(options.output):
+    elif config.get("output") and not os.path.exists(config.get("output")):
         try:
-            os.makedirs(options.output)
+            os.makedirs(config.get("output"))
         except OSError as e:
             log.error("%s: %s", e.strerror, e.filename)
             return
 
     for url in urls:
-        get_media(url, copy.copy(options))
+        get_media(url, copy.copy(config))
 
 
 def get_media(url, options, version="Unknown"):
