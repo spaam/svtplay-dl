@@ -20,6 +20,9 @@ POD2MAN ?= pod2man --section 1 --utf8 \
                    --release "svtplay-dl $(VERSION)" \
                    --date "$(LATEST_RELEASE_DATE)"
 
+PREFIX ?= /usr/local
+BINDIR = $(PREFIX)/bin
+
 PYTHON ?= /usr/bin/env python3
 export PYTHONPATH=lib
 
@@ -42,6 +45,10 @@ svtplay-dl.1.gz: svtplay-dl.1
 
 test:
 	sh scripts/run-tests.sh $(TEST_OPTS)
+
+install: svtplay-dl
+	install -d $(DESTDIR)$(BINDIR)
+	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
 
 cover:
 	sh scripts/run-tests.sh -C
