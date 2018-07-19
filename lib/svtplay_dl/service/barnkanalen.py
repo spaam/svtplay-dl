@@ -68,7 +68,7 @@ class Barnkanalen(Svtplay):
         for i in videos:
             yield i
 
-    def find_all_episodes(self, options):
+    def find_all_episodes(self, config):
         videos = []
         match = re.search("__barnplay'] = ({.*});", self.get_urldata())
         if not match:
@@ -86,8 +86,8 @@ class Barnkanalen(Svtplay):
 
         episodes = [urljoin("http://www.svt.se", x) for x in videos]
 
-        if options.all_last > 0:
-            return episodes[-options.all_last:]
+        if config.get("all_last") > 0:
+            return episodes[-config.get("all_last"):]
         return episodes
 
     def videos_to_list(self, lvideos, videos):
