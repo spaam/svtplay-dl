@@ -174,26 +174,26 @@ def get_one_media(stream):
             list_quality(videos)
             return
         try:
-            stream = select_quality(stream.config, videos)
-            if stream.config.get("get_url"):
-                print(stream.url)
+            fstream = select_quality(stream.config, videos)
+            if fstream.config.get("get_url"):
+                print(fstream.url)
                 return
-            logging.info("Selected to download %s, bitrate: %s", stream.name, stream.bitrate)
-            stream.download()
+            logging.info("Selected to download %s, bitrate: %s", fstream.name, fstream.bitrate)
+            fstream.download()
         except UIException as e:
-            if stream.config.get("verbose"):
+            if fstream.config.get("verbose"):
                 raise e
             log.error(e)
             sys.exit(2)
 
-        if stream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
+        if fstream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
             stream.get_thumbnail(stream.config)
-        post = postprocess(stream, stream.config, subfixes)
-        if stream.audio and post.detect:
+        post = postprocess(fstream, fstream.config, subfixes)
+        if fstream.audio and post.detect:
             post.merge()
-        if stream.audio and not post.detect and stream.finished:
+        if fstream.audio and not post.detect and fstream.finished:
             logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-        if stream.name == "hls" or stream.config.get("remux"):
+        if fstream.name == "hls" or fstream.config.get("remux"):
             post.remux()
-        if stream.config.get("silent_semi") and stream.finished:
-            logging.log(25, "Download of %s was completed" % stream.options.output)
+        if fstream.config.get("silent_semi") and fstream.finished:
+            logging.log(25, "Download of %s was completed" % fstream.options.output)
