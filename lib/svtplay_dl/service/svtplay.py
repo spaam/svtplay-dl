@@ -9,7 +9,7 @@ from urllib.parse import urljoin, urlparse, parse_qs
 from operator import itemgetter
 
 from svtplay_dl.log import log
-from svtplay_dl.service import Service, OpenGraphThumbMixin
+from svtplay_dl.service import Service
 from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -271,33 +271,33 @@ class Svtplay(Service):
 
     def extrametadata(self, data):
         self.output["tvshow"] = (self.output["season"] is not None and
-                                     self.output["episode"] is not None)
+                                 self.output["episode"] is not None)
         try:
             title = data["video"]["programTitle"]
             self.output["title_nice"] = title
-        except:
+        except KeyError:
             title = data["video"]["titleSlug"]
             self.output["title_nice"] = title
         try:
             # Get the image if size/format is not specified in the URL set it to large
             url = data['state']["titleModel"]["thumbnail"].format(format="large")
             self.output["showthumbnailurl"] = url
-        except:
+        except KeyError:
             pass
         try:
             url = data["video"]["thumbnailXL"].format(format="large")
             self.output["episodethumbnailurl"] = url
-        except:
+        except KeyError:
             # Get the image if size/format is not specified in the URL set it to large
             url = data["video"]["thumbnail"].format(format="large")
             self.output["episodethumbnailurl"] = url
         try:
             self.output["showdescription"] = data['state']["titleModel"]["description"]
-        except:
+        except KeyError:
             pass
         try:
             self.output["episodedescription"] = data["video"]["description"]
-        except:
+        except KeyError:
             pass
 
     def get_thumbnail(self, options):
