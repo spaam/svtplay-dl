@@ -15,6 +15,7 @@ from svtplay_dl.postprocess import postprocess
 from svtplay_dl.utils.stream import select_quality, list_quality
 from svtplay_dl.utils.text import exclude
 from svtplay_dl.error import UIException
+from svtplay_dl.utils.nfo import write_nfo_episode, write_nfo_tvshow
 
 
 def get_multiple_media(urls, config):
@@ -188,6 +189,11 @@ def get_one_media(stream):
 
         if fstream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
             stream.get_thumbnail(stream.config)
+        if stream.config.get("nfo"):
+            # Create NFO files
+            write_nfo_episode(stream.output, stream.config)
+            write_nfo_tvshow(stream.output, stream.config)
+
         post = postprocess(fstream, fstream.config, subfixes)
         if fstream.audio and post.detect:
             post.merge()

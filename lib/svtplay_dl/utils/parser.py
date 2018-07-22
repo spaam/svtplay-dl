@@ -92,6 +92,8 @@ def parser(version):
                                                "socks5://127.0.0.1:1080/.")
     general.add_argument("-v", "--verbose", action="store_true", dest="verbose", default=False,
                          help="explain what is going on")
+    general.add_argument("--nfo", action="store_true", dest="nfo", default=False,
+                         help="create a NFO file")
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument("-q", "--quality", default=0, metavar="quality",
@@ -171,6 +173,7 @@ def setup_defaults():
     options.set("convert_subtitle_colors", False)
     options.set("preferred", None)
     options.set("verbose", False)
+    options.set("nfo", False)
     options.set("output_auto", False)
     options.set("service", None)
     options.set("cookies", None)
@@ -212,6 +215,7 @@ def parsertoconfig(config, parser):
     config.set("require_subtitle", parser.require_subtitle)
     config.set("preferred", parser.preferred)
     config.set("verbose", parser.verbose)
+    config.set("nfo", parser.nfo)
     config.set("exclude", parser.exclude)
     config.set("get_url", parser.get_url)
     config.set("ssl_verify", parser.ssl_verify)
