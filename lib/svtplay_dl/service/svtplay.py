@@ -16,11 +16,12 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
+from svtplay_dl.utils.http import download_thumbnails
 
 URL_VIDEO_API = "http://api.svt.se/videoplayer-api/video/"
 
 
-class Svtplay(Service, OpenGraphThumbMixin):
+class Svtplay(Service):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 
     def get(self):
@@ -298,3 +299,12 @@ class Svtplay(Service, OpenGraphThumbMixin):
             self.output["episodedescription"] = data["video"]["description"]
         except:
             pass
+
+    def get_thumbnail(self, options):
+        urls = []
+        if self.output["showthumbnailurl"] is not None:
+            urls.append((True, self.output["showthumbnailurl"]))
+        if self.output["episodethumbnailurl"] is not None:
+            urls.append((False, self.output["episodethumbnailurl"]))
+        if urls:
+            download_thumbnails(self.output, options, urls)

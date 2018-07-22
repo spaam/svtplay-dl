@@ -5,7 +5,8 @@ from urllib.parse import urljoin
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
+from svtplay_dl.utils.output import formatname
+from svtplay_dl.utils.parser import Options
 
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
@@ -58,6 +59,28 @@ def download_thumbnail(options, url):
     fd = open(tbn, "wb")
     fd.write(data)
     fd.close()
+
+
+def download_thumbnails(output, config, urls):
+    for show, url in urls:
+        data = Session().get(url).content
+
+        if show:
+            # Config for downloading show thumbnail
+            cconfig = Options()
+            cconfig.set("output", config.get("output"))
+            cconfig.set("path", config.get("path"))
+            cconfig.set("subfolder", config.get("subfolder"))
+            cconfig.set("filename", "{title}.tvshow.{ext}")
+        else:
+            cconfig = config
+
+        filename = formatname(output.copy(), cconfig, extension="tbn")
+        logging.info("Thumbnail: %s", filename)
+
+        fd = open(filename, "wb")
+        fd.write(data)
+        fd.close()
 
 
 def get_full_url(url, srcurl):
