@@ -57,7 +57,7 @@ def get_media(url, options, version="Unknown"):
 
 
 def get_all_episodes(stream, url):
-    name = os.path.dirname(formatname(dict(), stream.config))
+    name = os.path.dirname(formatname({"basedir": True}, stream.config))
 
     if name and os.path.isfile(name):
         log.error("Output must be a directory if used with --all-episodes")
