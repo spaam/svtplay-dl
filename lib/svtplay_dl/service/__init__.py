@@ -22,7 +22,10 @@ class Service(object):
         self.cookies = {}
         self.auto_name = None
         self.output = {"title": None, "season": None, "episode": None, "episodename": None,
-                       "id": None, "service": self.__class__.__name__.lower()}
+                       "id": None, "service": self.__class__.__name__.lower(),
+                       "tvshow": None, "title_nice": None, "showdescription": None,
+                       "episodedescription": None, "showthumbnailurl": None,
+                       "episodethumbnailurl": None}
         if not http:
             self.http = HTTP(config)
         else:
