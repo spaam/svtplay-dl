@@ -53,6 +53,7 @@ class Barnkanalen(Svtplay):
             self.config.set("live", janson["video"]["live"])
 
         self.outputfilename(janson["video"])
+        self.extrametadata(janson)
 
         if "programVersionId" in janson["video"]:
             vid = janson["video"]["programVersionId"]
