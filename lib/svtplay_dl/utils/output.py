@@ -134,7 +134,7 @@ def formatname(output, config, extension="mp4"):
         # If tvshow have not been derived by service do it by if season and episode is set
         if output.get("tvshow", None) is None:
             tvshow = (output.get("season", None) is not None and
-                      output.get("episode", None) is not None) 
+                      output.get("episode", None) is not None)
         else:
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
