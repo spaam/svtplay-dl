@@ -130,6 +130,19 @@ def filename(stream):
 
 def formatname(output, config, extension="mp4"):
     name = _formatname(output, config, extension)
+    if not output.get("basedir", False):
+        # If tvshow have not been derived by service do it by if season and episode is set
+        if output.get("tvshow", None) is None:
+            tvshow = (output.get("season", None) is not None and
+                      output.get("episode", None) is not None) 
+        else:
+            tvshow = output.get("tvshow", False)
+        if config.get("subfolder") and "title" in output and tvshow:
+            # Add subfolder with name title
+            name = os.path.join(output["title"], name)
+        elif config.get("subfolder") and not tvshow:
+            # Add subfolder with name movies
+            name = os.path.join("movies", name)
     if config.get("output") and os.path.isdir(os.path.expanduser(config.get("output"))):
         name = os.path.join(config.get("output"), name)
     elif config.get("path") and os.path.isdir(os.path.expanduser(config.get("path"))):
@@ -180,6 +193,10 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
     if os.path.isfile(name) and not config.get("force"):
         logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
         return None
+    dir = os.path.dirname(os.path.realpath(name))
+    if not os.path.isdir(dir):
+        # Create directory, needed for creating tvshow subfolder
+        os.makedirs(dir)
     if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)):
         if extension in subtitlefiles:
             if not config.get("force_subtitle"):
