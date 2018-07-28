@@ -13,14 +13,12 @@ LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http", "rtmp"]
 def sort_quality(data):
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
-    print("o: {}".format(data))
     for i in data:
         datas.append([i.bitrate, i.name])
     return datas
 
 
 def list_quality(videos):
-    print("videos: {}".format(videos))
     data = sort_quality(videos)
     logging.info("Quality\tMethod")
     for i in data:
