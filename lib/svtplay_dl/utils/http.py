@@ -49,18 +49,6 @@ class HTTP(Session):
         return dict(x.split('=') for x in headers.split(';'))
 
 
-def download_thumbnail(options, url):
-    data = Session.get(url).content
-
-    filename = re.search(r"(.*)\.[a-z0-9]{2,3}$", options.output)
-    tbn = "%s.tbn" % filename.group(1)
-    logging.info("Thumbnail: %s", tbn)
-
-    fd = open(tbn, "wb")
-    fd.write(data)
-    fd.close()
-
-
 def download_thumbnails(output, config, urls):
     for show, url in urls:
         data = Session().get(url).content
