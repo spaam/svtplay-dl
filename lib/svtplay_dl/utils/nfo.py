@@ -3,6 +3,7 @@ import logging
 import xml.etree.ElementTree as ET
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import Options
+from datetime import datetime
 
 
 def write_nfo_episode(output, config):
@@ -12,6 +13,8 @@ def write_nfo_episode(output, config):
     ET.SubElement(root, "season").text = output["season"]
     ET.SubElement(root, "episode").text = output["episode"]
     ET.SubElement(root, "plot").text = output["showdescription"]
+    if output["publishing_datetime"] is not None:
+        ET.SubElement(root, "aired").text = datetime.fromtimestamp(output["publishing_datetime"]).isoformat()
     if not config.get("thumbnail"):
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["showthumbnailurl"]
