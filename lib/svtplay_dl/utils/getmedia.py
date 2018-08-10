@@ -3,6 +3,7 @@ import sys
 import copy
 import logging
 from shutil import which
+from datetime import datetime
 
 
 from svtplay_dl.log import log
@@ -123,6 +124,23 @@ def get_one_media(stream):
             logging.error("Run again and add --verbose as an argument, to get more information")
             logging.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
             logging.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
+        return
+
+    try:
+        after_date = datetime.fromisoformat(stream.config.get("after_date"))
+    except (ValueError, TypeError, KeyError):
+        after_date = None
+    try:
+        pub_date = datetime.fromtimestamp(stream.output["publishing_datetime"])
+    except (ValueError, TypeError, KeyError):
+        pub_date = None
+    if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
+        logging.info("Video {}S{}E{} skipped since published {} before {}. ".format(
+            stream.output["title"],
+            stream.output["season"],
+            stream.output["episode"],
+            pub_date.date(),
+            after_date.date()))
         return
 
     if stream.config.get("require_subtitle") and not subs:
