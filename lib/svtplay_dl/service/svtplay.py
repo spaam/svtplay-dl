@@ -272,6 +272,10 @@ class Svtplay(Service, MetadataThumbMixin):
         self.output["tvshow"] = (self.output["season"] is not None and
                                  self.output["episode"] is not None)
         try:
+            self.output["publishing_datetime"] = data["video"]["broadcastDate"] / 1000
+        except KeyError:
+            pass
+        try:
             title = data["video"]["programTitle"]
             self.output["title_nice"] = title
         except KeyError:

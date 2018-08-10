@@ -25,7 +25,7 @@ class Service(object):
                        "id": None, "service": self.__class__.__name__.lower(),
                        "tvshow": None, "title_nice": None, "showdescription": None,
                        "episodedescription": None, "showthumbnailurl": None,
-                       "episodethumbnailurl": None}
+                       "episodethumbnailurl": None, "publishing_datetime": None}
         if not http:
             self.http = HTTP(config)
         else:
