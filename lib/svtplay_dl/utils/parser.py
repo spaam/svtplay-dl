@@ -86,6 +86,8 @@ def parser(version):
                          help="Remux from one container to mp4 using ffmpeg or avconv")
     general.add_argument("--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...",
                          help="exclude videos with the WORD(s) in the filename. comma separated.")
+    general.add_argument("--after-date", dest="after_date", default=None, metavar="yyyy-MM-dd",
+                         help="only videos published on or after this date")
     general.add_argument("--proxy", dest="proxy", default=None,
                          metavar="proxy", help="Use the specified HTTP/HTTPS/SOCKS proxy. To enable experimental "
                                                "SOCKS proxy, specify a proper scheme. For example "
@@ -178,6 +180,7 @@ def setup_defaults():
     options.set("service", None)
     options.set("cookies", None)
     options.set("exclude", None)
+    options.set("after_date", None)
     options.set("get_url", False)
     options.set("ssl_verify", True)
     options.set("http_headers", None)
@@ -217,6 +220,7 @@ def parsertoconfig(config, parser):
     config.set("verbose", parser.verbose)
     config.set("nfo", parser.nfo)
     config.set("exclude", parser.exclude)
+    config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)
     config.set("ssl_verify", parser.ssl_verify)
     config.set("http_headers", parser.http_headers)
