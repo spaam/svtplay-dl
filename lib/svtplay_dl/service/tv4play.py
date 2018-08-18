@@ -94,11 +94,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
             if "program" in janson2["data"]:
                 if "panels" in janson2["data"]["program"]:
                     for n in janson2["data"]["program"]["panels"]:
-                        if n["assetType"] == "EPISODE":
+                        if n.get("assetType", None) == "EPISODE":
                             for z in n["videoList"]["videoAssets"]:
                                 show = z["program_nid"]
                                 items.append(z["id"])
-                        if n["assetType"] == "CLIP" and config.get("include_clips"):
+                        if n.get("assetType", None) == "CLIP" and config.get("include_clips"):
                             for z in n["videoList"]["videoAssets"]:
                                 show = z["program_nid"]
                                 items.append(z["id"])
