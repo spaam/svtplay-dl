@@ -274,7 +274,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if episode:
                 try:
                     episode = int(episode)
-                except TypeError:
+                except (TypeError, ValueError):
                     title = episode
                     episode = None
             else:
