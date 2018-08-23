@@ -8,9 +8,27 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
+def findCourse(data, courseSlug):
+    for c in data["content"]["coursePages"]:
+        if c["slug"] == courseSlug:
+            return c
+    return None
+
+
+def findLesson(course, lessonSlug):
+    for l in course["lessons"]:
+        if l["slug"] == lessonSlug:
+            return l
+    return None
+
+
 class Koket(Service, OpenGraphThumbMixin):
     supported_domains = ['koket.se']
     supported_path = "/kurser"
+
+    def __init__(self, config, _url, http=None):
+        Service.__init__(self, config, _url, http)
+        self._data = None
 
     def get(self):
         urlp = urlparse(self.url)
@@ -24,26 +42,20 @@ class Koket(Service, OpenGraphThumbMixin):
             yield ServiceError("Could not login")
             return
 
-        auth_token = self._getAuthToken()
-        authDataRes = self.http.get("https://www.koket.se/kurser/api/data/{}".format(auth_token))
+        data = self._getData()
+        if data is None:
+            yield ServiceError("Could not fetch data")
+            return
 
-        authDataJson = authDataRes.json()
+        course = findCourse(data, courseSlug)
 
-        courses = authDataJson["content"]["coursePages"]
-        for c in courses:
-            if c["slug"] == courseSlug:
-                course = c
-
-        if not course:
+        if course is None:
             yield ServiceError("Could not find course")
             return
 
-        lessons = course["lessons"]
-        for l in lessons:
-            if l["slug"] == lessonSlug:
-                lesson = l
+        lesson = findLesson(course, lessonSlug)
 
-        if not lesson:
+        if lesson is None:
             yield ServiceError("Could not find lesson")
             return
 
@@ -60,20 +72,21 @@ class Koket(Service, OpenGraphThumbMixin):
                 yield streams[n]
 
     def _login(self):
-        username = self.config.get("username")
-        password = self.config.get("password")
+        if self._getAuthToken() is None:
+            username = self.config.get("username")
+            password = self.config.get("password")
 
-        if (not username) or (not password):
-            return False
+            if (not username) or (not password):
+                return False
 
-        url = "https://www.koket.se/account/login"
-        login = {
-            "username": self.config.get("username"),
-            "password": self.config.get("password")
-        }
+            url = "https://www.koket.se/account/login"
+            login = {
+                "username": self.config.get("username"),
+                "password": self.config.get("password")
+            }
 
-        self.http.get(url)
-        self.http.post(url, data=login)
+            self.http.get(url)
+            self.http.post(url, data=login)
 
         if self._getAuthToken() is None:
             return False
@@ -82,3 +95,13 @@ class Koket(Service, OpenGraphThumbMixin):
 
     def _getAuthToken(self):
         return self.http.cookies.get("authToken")
+
+    def _getData(self):
+        auth_token = self._getAuthToken()
+        if auth_token is None:
+            return None
+
+        if self._data is None:
+            self._data = self.http.get("https://www.koket.se/kurser/api/data/{}".format(auth_token)).json()
+
+        return self._data
