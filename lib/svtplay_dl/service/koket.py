@@ -52,9 +52,9 @@ class Koket(Service, OpenGraphThumbMixin):
 
         url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
 
-        videoDataRes = self.http.request("get", url, cookies=self.cookies)
+        videoDataRes = self.http.get(url)
         if videoDataRes.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(self.config, self.http.request("get", videoDataRes.json()["playbackItem"]["manifestUrl"]),
+            streams = hlsparse(self.config, self.http.get(videoDataRes.json()["playbackItem"]["manifestUrl"]),
                                videoDataRes.json()["playbackItem"]["manifestUrl"], output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]
