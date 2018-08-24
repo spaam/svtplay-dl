@@ -81,8 +81,8 @@ class Koket(Service, OpenGraphThumbMixin):
 
             url = "https://www.koket.se/account/login"
             login = {
-                "username": self.config.get("username"),
-                "password": self.config.get("password")
+                "username": username,
+                "password": password
             }
 
             self.http.get(url)
