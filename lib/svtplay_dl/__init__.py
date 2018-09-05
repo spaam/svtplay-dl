@@ -41,11 +41,6 @@ def main():
     """ Main program """
     parse, options = parser(__version__)
 
-    if options.cmoreoperatorlist:
-        c = Cmore(options, None)
-        c.operatorlist()
-        sys.exit(0)
-
     if options.flexibleq and not options.quality:
         logging.error("flexible-quality requires a quality")
 
@@ -57,6 +52,12 @@ def main():
     if len(urls) < 1:
         parse.error("Incorrect number of arguments")
     setup_log(config.get("silent"), config.get("verbose"))
+
+    if options.cmoreoperatorlist:
+        config = parsertoconfig(setup_defaults(), options)
+        c = Cmore(config, urls)
+        c.operatorlist()
+        sys.exit(0)
 
     try:
         if len(urls) == 1:
