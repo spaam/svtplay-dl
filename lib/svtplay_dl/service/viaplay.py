@@ -217,7 +217,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         baseurl = self.url
         match = re.search("(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
         if match:
-            if re.search("(avsnitt|episode)",  urlparse(baseurl).path):
+            if re.search("(avsnitt|episode)", urlparse(baseurl).path):
                 baseurl = baseurl[:baseurl.rfind("/")]
             baseurl = baseurl[:baseurl.rfind("/")]
 
