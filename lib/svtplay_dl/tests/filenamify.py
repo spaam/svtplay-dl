@@ -7,7 +7,7 @@
 
 from __future__ import absolute_import
 import unittest
-from svtplay_dl.utils import filenamify
+from svtplay_dl.utils.text import filenamify
 
 
 class filenamifyTest(unittest.TestCase):
