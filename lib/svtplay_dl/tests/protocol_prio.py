@@ -4,16 +4,14 @@
 
 from __future__ import absolute_import
 import unittest
-from svtplay_dl.utils import protocol_prio
+from svtplay_dl.utils.stream import protocol_prio
 
 
-class Stream(object):
+class VideoRetriever(object):
     def __init__(self, proto, bitrate):
         self.proto = proto
         self.bitrate = bitrate
-
-    def name(self):
-        return self.proto
+        self.name = proto
 
     def __repr__(self):
         return '%s(%d)' % (self.proto.upper(), self.bitrate)
@@ -21,11 +19,11 @@ class Stream(object):
 
 class PrioStreamsTest(unittest.TestCase):
     def _gen_proto_case(self, ordered, unordered, expected=None):
-        streams = [Stream(x, 100) for x in unordered]
+        streams = [VideoRetriever(x, 100) for x in unordered]
 
         kwargs = {}
         if expected is None:
-            expected = [str(Stream(x, 100)) for x in ordered]
+            expected = [str(VideoRetriever(x, 100)) for x in ordered]
 
         return self.assertEqual(
             [str(x) for x in protocol_prio(streams, ordered, **kwargs)],
