@@ -28,12 +28,12 @@ class progressTest(unittest.TestCase):
         self.mockfile = mockfile()
         svtplay_dl.utils.output.progress_stream = self.mockfile
 
-    @patch('svtplay_dl.output.progressbar')
+    @patch('svtplay_dl.utils.output.progressbar')
     def test_0_0(self, pbar):
         svtplay_dl.utils.output.progress(0, 0)
         self.assertFalse(pbar.called)
 
-    @patch('svtplay_dl.output.progressbar')
+    @patch('svtplay_dl.utils.output.progressbar')
     def test_0_100(self, pbar):
         svtplay_dl.utils.output.progress(0, 100)
         pbar.assert_any_call(100, 0, "")
