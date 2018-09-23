@@ -92,8 +92,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
         for i in jansson:
             janson2 = json.loads(i["data"])
             if "program" in janson2["data"]:
-                if "panels" in janson2["data"]["program"]:
-                    for n in janson2["data"]["program"]["panels"]:
+                if "programPanels" in janson2["data"]["program"]:
+                    for n in janson2["data"]["program"]["programPanels"]["panels"]:
                         if n.get("assetType", None) == "EPISODE":
                             for z in n["videoList"]["videoAssets"]:
                                 show = z["program_nid"]
