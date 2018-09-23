@@ -128,7 +128,7 @@ def get_one_media(stream):
 
     try:
         after_date = datetime.fromisoformat(stream.config.get("after_date"))
-    except (ValueError, TypeError, KeyError):
+    except (ValueError, TypeError, KeyError, AttributeError):  # gotta catch em all..
         after_date = None
     try:
         pub_date = datetime.fromtimestamp(stream.output["publishing_datetime"])
