@@ -27,7 +27,7 @@ def get_multiple_media(urls, config):
         try:
             os.makedirs(config.get("output"))
         except OSError as e:
-            log.error("%s: %s", e.strerror, e.filename)
+            logging.error("%s: %s", e.strerror, e.filename)
             return
 
     for url in urls:
@@ -39,7 +39,7 @@ def get_media(url, options, version="Unknown"):
         url = "http://%s" % url
 
     if options.get("verbose"):
-        log.debug("version: {0}".format(version))
+        logging.debug("version: {0}".format(version))
 
     stream = service_handler(sites, options, url)
     if not stream:
@@ -49,7 +49,7 @@ def get_media(url, options, version="Unknown"):
         if url.find(".f4m") > 0 or url.find(".m3u8") > 0:
             stream = Raw(options, url)
         if not stream:
-            log.error("That site is not supported. Make a ticket or send a message")
+            logging.error("That site is not supported. Make a ticket or send a message")
             sys.exit(2)
 
     if options.get("all_episodes"):
@@ -62,13 +62,13 @@ def get_all_episodes(stream, url):
     name = os.path.dirname(formatname({"basedir": True}, stream.config))
 
     if name and os.path.isfile(name):
-        log.error("Output must be a directory if used with --all-episodes")
+        logging.error("Output must be a directory if used with --all-episodes")
         sys.exit(2)
     elif name and not os.path.exists(name):
         try:
             os.makedirs(name)
         except OSError as e:
-            log.error("%s: %s", e.strerror, e.filename)
+            logging.error("%s: %s", e.strerror, e.filename)
             return
 
     episodes = stream.find_all_episodes(stream.config)
@@ -80,8 +80,8 @@ def get_all_episodes(stream, url):
         else:
             substream = service_handler(sites, copy.copy(stream.config), o)
 
-        log.info("Episode %d of %d", idx + 1, len(episodes))
-        log.info("Url: %s", o)
+        logging.info("Episode %d of %d", idx + 1, len(episodes))
+        logging.info("Url: %s", o)
 
         # get_one_media overwrites options.output...
         get_one_media(substream)
@@ -94,8 +94,8 @@ def get_one_media(stream):
 
     if stream.config.get("merge_subtitle"):
         if not which('ffmpeg'):
-            log.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
-            log.info("https://ffmpeg.org/download.html")
+            logging.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
+            logging.info("https://ffmpeg.org/download.html")
             sys.exit(2)
 
     videos = []
@@ -202,7 +202,7 @@ def get_one_media(stream):
         except UIException as e:
             if fstream.config.get("verbose"):
                 raise e
-            log.error(e)
+            logging.error(e)
             sys.exit(2)
 
         if fstream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
