@@ -274,7 +274,7 @@ class subtitle(object):
                     if n:
                         itmes.append(n)
                     else:
-                        if len(subs) > 1 and len(itmes) < 2:  #Ignore empty lines in unexpected places
+                        if len(subs) > 1 and len(itmes) < 2:  # Ignore empty lines in unexpected places
                             pass
                         elif len(subs) > 1 and itmes[1] == subs[-1][1]:  # This will happen when there are two sections in file
                             ha = strdate(subs[-1][0])
