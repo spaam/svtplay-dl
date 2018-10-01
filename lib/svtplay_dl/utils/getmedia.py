@@ -127,7 +127,7 @@ def get_one_media(stream):
         return
 
     try:
-        after_date = datetime.fromisoformat(stream.config.get("after_date"))
+        after_date = datetime.strptime(stream.config.get("after_date"), "%Y-%m-%d")
     except (ValueError, TypeError, KeyError, AttributeError):  # gotta catch em all..
         after_date = None
     try:
