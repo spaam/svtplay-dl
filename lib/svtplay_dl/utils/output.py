@@ -175,7 +175,7 @@ def _formatname(output, config, extension):
             name = name.replace("{ext}", output[key])
 
     # Remove all {text} we cant replace with something
-    for item in re.findall("([\.\-](([^\.\-]+\w+)?\{[\w\-]+\}))", name):
+    for item in re.findall("([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
         if "season" in output and output["season"] and re.search("(e\{[\w\-]+\})", name):
             name = name.replace(re.search("(e\{[\w\-]+\})", name).group(1), "")
         else:
