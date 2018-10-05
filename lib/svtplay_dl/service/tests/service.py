@@ -28,3 +28,8 @@ class service_handlerTest(unittest.TestCase):
     def test_service_handler(self):
         config = setup_defaults()
         self.assertIsNone(service_handler(sites, config, "localhost"))
+
+class service_handlerTest2(unittest.TestCase):
+    def test_service_handler(self):
+        config = setup_defaults()
+        self.assertIsInstance(service_handler(sites, config, "https://www.svtplay.se"), Service)
