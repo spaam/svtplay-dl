@@ -7,7 +7,9 @@
 
 from __future__ import absolute_import
 import unittest
-from svtplay_dl.service import Service
+from svtplay_dl.service import Service, service_handler
+from svtplay_dl.service.services import sites
+from svtplay_dl.utils.parser import setup_defaults
 
 
 class MockService(Service):
@@ -20,3 +22,9 @@ class ServiceTest(unittest.TestCase):
         self.assertTrue(MockService.handles('http://example.net/video.swf?id=1'))
         self.assertTrue(MockService.handles('http://www.example.com/video.swf?id=1'))
         self.assertTrue(MockService.handles('http://www.example.net/video.swf?id=1'))
+
+
+class service_handlerTest(unittest.TestCase):
+    def test_service_handler(self):
+        config = setup_defaults()
+        self.assertIsNone(service_handler(sites, config, "localhost"))
