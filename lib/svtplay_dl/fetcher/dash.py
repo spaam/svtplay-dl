@@ -130,10 +130,6 @@ def adaptionset(element, url, baseurl=None, offset_sec=None, duration_sec=None):
 
 def dashparse(config, res, url, output=None):
     streams = {}
-    baseurl = None
-    offset_sec = None
-    duration_sec = None
-
     if not res:
         return streams
 
@@ -143,7 +139,17 @@ def dashparse(config, res, url, output=None):
     if len(res.text) < 1:
         streams[0] = ServiceError("Can't read DASH playlist. {0}, size: {1}".format(res.status_code, len(res.text)))
         return streams
-    xml = ET.XML(res.text)
+
+    return _dashparse(config, res.text, url, output, res.cookies)
+
+
+def _dashparse(config, text, url, output, cookies):
+    streams = {}
+    baseurl = None
+    offset_sec = None
+    duration_sec = None
+
+    xml = ET.XML(text)
 
     if xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
         baseurl = xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL").text
@@ -172,7 +178,7 @@ def dashparse(config, res, url, output=None):
 
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]
-        streams[bitrate] = DASH(copy.copy(config), url, bitrate, cookies=res.cookies,
+        streams[bitrate] = DASH(copy.copy(config), url, bitrate, cookies=cookies,
                                 audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"],
                                 output=output, segments=videofiles[i]["segments"])
 
