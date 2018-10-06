@@ -186,7 +186,8 @@ def _dashparse(config, text, url, output, cookies):
 
 
 def parse_dates(date_str):
-    date_patterns = ["%Y-%m-%dT%H:%M:%S.%fZ", "PT%HH%MM%S.%fS", "PT%HH%MM%SS", "PT%MM%S.%fS", "PT%MM%SS", "PT%HH%SS", "PT%HH%S.%fS"]
+    date_patterns = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S", "PT%HH%MM%S.%fS",
+                     "PT%HH%MM%SS", "PT%MM%S.%fS", "PT%MM%SS", "PT%HH%SS", "PT%HH%S.%fS"]
     dt = None
     for pattern in date_patterns:
         try:
