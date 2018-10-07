@@ -1,0 +1,67 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" id="987" type="dynamic" profiles="urn:hbbtv:dash:profile:isoff-live:2012,urn:mpeg:dash:profile:isoff-live:2011" timeShiftBufferDepth="PT30.00S" publishTime="2017-08-22T20:11:10" minimumUpdatePeriod="PT8S" availabilityStartTime="2016-10-26T10:25:46" minBufferTime="PT30S" suggestedPresentationDelay="PT12.00S">
+  <Period id="1" start="PT0.00S">
+    <AdaptationSet mimeType="video/mp4" scanType="progressive" segmentAlignment="true" subsegmentAlignment="true" startWithSAP="1" subsegmentStartsWithSAP="1" bitstreamSwitching="true">
+      <Representation id="1" width="768" height="432" frameRate="25/1" bandwidth="891968" codecs="avc1.4D401E">
+        <SegmentTemplate initialization="987_video_0_0_init.mp4?m=1477322398" media="987_video_0_0_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="2" width="512" height="288" frameRate="25/1" bandwidth="144000" codecs="avc1.42C015">
+        <SegmentTemplate initialization="987_video_0_1_init.mp4?m=1477322398" media="987_video_0_1_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="3" width="512" height="288" frameRate="25/1" bandwidth="251968" codecs="avc1.42C016">
+        <SegmentTemplate initialization="987_video_0_2_init.mp4?m=1477322398" media="987_video_0_2_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="4" width="512" height="288" frameRate="25/1" bandwidth="360000" codecs="avc1.42C016">
+        <SegmentTemplate initialization="987_video_0_3_init.mp4?m=1477322398" media="987_video_0_3_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="5" width="512" height="288" frameRate="25/1" bandwidth="539968" codecs="avc1.42C016">
+        <SegmentTemplate initialization="987_video_0_4_init.mp4?m=1477322398" media="987_video_0_4_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="6" width="1280" height="720" frameRate="25/1" bandwidth="1584000" codecs="avc1.4D401F">
+        <SegmentTemplate initialization="987_video_0_5_init.mp4?m=1477322398" media="987_video_0_5_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="7" width="1280" height="720" frameRate="25/1" bandwidth="2699968" codecs="avc1.4D401F">
+        <SegmentTemplate initialization="987_video_0_6_init.mp4?m=1477322398" media="987_video_0_6_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116869720" d="540000" r="4"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" segmentAlignment="0">
+      <Representation id="8" audioSamplingRate="48000" bandwidth="96028" codecs="mp4a.40.2">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SegmentTemplate initialization="987_audio_0_7_init.mp4?m=1477322398" media="987_audio_0_7_$Number$.mp4?m=1477322398" startNumber="4325851" timescale="90000">
+          <SegmentTimeline>
+            <S t="2336116870560" d="539520"/>
+            <S t="2336117410080" d="541440"/>
+            <S t="2336117951520" d="539520" r="2"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

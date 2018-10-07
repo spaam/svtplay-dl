@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Unified Streaming Platform(version=1.7.25) -->
+<MPD
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="urn:mpeg:dash:schema:mpd:2011"
+  xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd"
+  type="static"
+  mediaPresentationDuration="PT20M26.280S"
+  maxSegmentDuration="PT3S"
+  minBufferTime="PT10S"
+  profiles="urn:mpeg:dash:profile:isoff-live:2011">
+  <Period
+    duration="PT20M26.280S">
+    <BaseURL>dash/</BaseURL>
+    <AdaptationSet
+      group="1"
+      contentType="audio"
+      minBandwidth="96000"
+      maxBandwidth="96000"
+      segmentAlignment="true"
+      audioSamplingRate="48000"
+      mimeType="audio/mp4"
+      codecs="mp4a.40.2">
+      <AudioChannelConfiguration
+        schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
+        value="2">
+      </AudioChannelConfiguration>
+      <SegmentTemplate
+        timescale="48000"
+        initialization="rtalangdel9-23807321(3915817_ISM)-$RepresentationID$.dash"
+        media="rtalangdel9-23807321(3915817_ISM)-$RepresentationID$-$Time$.dash">
+        <SegmentTimeline>
+          <S t="0" d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" r="2" />
+          <S d="95232" />
+          <S d="96256" />
+          <S d="11264" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation
+        id="audio=96000"
+        bandwidth="96000">
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet
+      group="2"
+      contentType="video"
+      par="16:9"
+      minBandwidth="243739"
+      maxBandwidth="3165367"
+      minWidth="384"
+      maxWidth="1280"
+      minHeight="216"
+      maxHeight="720"
+      segmentAlignment="true"
+      frameRate="25"
+      mimeType="video/mp4"
+      startWithSAP="1">
+      <SegmentTemplate
+        timescale="25"
+        initialization="rtalangdel9-23807321(3915817_ISM)-$RepresentationID$.dash"
+        media="rtalangdel9-23807321(3915817_ISM)-$RepresentationID$-$Time$.dash">
+        <SegmentTimeline>
+          <S t="0" d="75" r="407" />
+          <S d="57" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation
+        id="video=243739"
+        bandwidth="243739"
+        width="384"
+        height="216"
+        codecs="avc1.42C00D"
+        scanType="progressive">
+      </Representation>
+      <Representation
+        id="video=683549"
+        bandwidth="683549"
+        width="640"
+        height="360"
+        codecs="avc1.42C01E"
+        scanType="progressive">
+      </Representation>
+      <Representation
+        id="video=1364540"
+        bandwidth="1364540"
+        width="768"
+        height="432"
+        codecs="avc1.4D401E"
+        scanType="progressive">
+      </Representation>
+      <Representation
+        id="video=2281292"
+        bandwidth="2281292"
+        width="1024"
+        height="576"
+        codecs="avc1.4D401F"
+        scanType="progressive">
+      </Representation>
+      <Representation
+        id="video=3165367"
+        bandwidth="3165367"
+        width="1280"
+        height="720"
+        codecs="avc1.4D401F"
+        scanType="progressive">
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

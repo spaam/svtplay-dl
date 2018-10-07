@@ -1,0 +1,35 @@
+<MPD mediaPresentationDuration="PT3459.520S" minBufferTime="PT2.00S" profiles="urn:hbbtv:dash:profile:isoff-live:2012,urn:mpeg:dash:profile:isoff-live:2011" type="static" xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd">
+  <BaseURL>./</BaseURL>
+  <Period>
+    <AdaptationSet contentType="audio" mimeType="audio/mp4" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="6" />
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
+      <SegmentTemplate initialization="$RepresentationID$/$RepresentationID$_00000.m4a" media="$RepresentationID$/$RepresentationID$_$Number%05d$.m4a" startNumber="1" timescale="48000">
+        <SegmentTimeline>
+          <S d="287744" t="0" />
+          <S d="288768" r="573" />
+          <S d="16384" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" bandwidth="97334" codecs="mp4a.40.5" id="PG-1369351-001A-ABSOLUTSVENSK-02_348_3">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2" />
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet contentType="video" mimeType="video/mp4" par="16:9" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <SegmentTemplate initialization="$RepresentationID$/$RepresentationID$_00000.m4v" media="$RepresentationID$/$RepresentationID$_$Number%05d$.m4v" startNumber="1" timescale="25000">
+        <SegmentTimeline>
+          <S d="150000" t="0" />
+          <S d="150000" r="574" />
+          <S d="88000" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation bandwidth="412581" codecs="avc1.42c015" frameRate="25" height="288" id="PG-1369351-001A-ABSOLUTSVENSK-02_456_1" sar="1:1" scanType="progressive" width="512" />
+      <Representation bandwidth="3089853" codecs="avc1.64001f" frameRate="25" height="720" id="PG-1369351-001A-ABSOLUTSVENSK-02_2796_1" sar="1:1" scanType="progressive" width="1280" />
+      <Representation bandwidth="1810190" codecs="avc1.4d401f" frameRate="25" height="720" id="PG-1369351-001A-ABSOLUTSVENSK-02_1680_1" sar="1:1" scanType="progressive" width="1280" />
+      <Representation bandwidth="293658" codecs="avc1.42c015" frameRate="25" height="288" id="PG-1369351-001A-ABSOLUTSVENSK-02_348_1" sar="1:1" scanType="progressive" width="512" />
+      <Representation bandwidth="1053668" codecs="avc1.4d401e" frameRate="25" height="432" id="PG-1369351-001A-ABSOLUTSVENSK-02_988_1" sar="1:1" scanType="progressive" width="768" />
+      <Representation bandwidth="170273" codecs="avc1.42c015" frameRate="25" height="288" id="PG-1369351-001A-ABSOLUTSVENSK-02_240_1" sar="1:1" scanType="progressive" width="512" />
+      <Representation bandwidth="607832" codecs="avc1.42c015" frameRate="25" height="288" id="PG-1369351-001A-ABSOLUTSVENSK-02_636_1" sar="1:1" scanType="progressive" width="512" />
+    </AdaptationSet>
+  </Period>
+</MPD>
