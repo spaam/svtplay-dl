@@ -20,7 +20,7 @@ from svtplay_dl.utils.nfo import write_nfo_episode, write_nfo_tvshow
 
 
 def get_multiple_media(urls, config):
-    if config.get("output") and os.path.isfile(config.output):
+    if config.get("output") and os.path.isfile(config.get("output")):
         log.error("Output must be a directory if used with multiple URLs")
         sys.exit(2)
     elif config.get("output") and not os.path.exists(config.get("output")):
