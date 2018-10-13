@@ -1,12 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 import re
-import copy
 from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service
 from svtplay_dl.log import log
-from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
 
@@ -23,73 +21,34 @@ class Cmore(Service):
             yield ServiceError(message)
             return
 
-        res = self.http.get(self.url)
-        match = re.search('data-asset-id="([^"]+)"', res.text)
-        if not match:
+        vid = self._get_vid()
+        if not vid:
             yield ServiceError("Can't find video id")
             return
 
         tld = self._gettld()
-        url = "https://restapi.cmore.{0}/api/tve_web/asset/{1}/play.json?protocol=VUDASH".format(tld, match.group(1))
-        res = self.http.get(url, headers={"authorization": "Bearer {0}".format(token)})
+        self.output["id"] = vid
+
+        metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" \
+                  "&device=browser&drm=widevine&protocol=dash%2Chls".format(self.output["id"], tld)
+        res = self.http.get(metaurl)
         janson = res.json()
-        if "error" in janson:
-            yield ServiceError("This video is geoblocked")
+        self._autoname(janson)
+        if janson["metadata"]["isDrmProtected"]:
+            yield ServiceError("Can't play this because the video got drm.")
             return
 
-        basename = self._autoname(match.group(1))
-        self.output["id"] = match.group(1)
-        if basename is None:
-            yield ServiceError("Cant find vid id for autonaming")
+        url = "https://playback-api.b17g.net/media/{}?service=cmore.{}&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"], tld)
+        res = self.http.request("get", url, cookies=self.cookies, headers={"authorization": "Bearer {0}".format(token)})
+        if res.status_code > 200:
+            yield ServiceError("Can't play this because the video is geoblocked.")
             return
 
-        if "drmProtected" in janson["playback"]:
-            if janson["playback"]["drmProtected"]:
-                yield ServiceError("DRM protected. Can't do anything")
-                return
-
-        if isinstance(janson["playback"]["items"]["item"], list):
-            for i in janson["playback"]["items"]["item"]:
-                if i["mediaFormat"] == "ism":
-                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
-                if i["mediaFormat"] == "webvtt":
-                    yield subtitle(copy.copy(self.config), "wrst", i["url"])
-        else:
-            i = janson["playback"]["items"]["item"]
-            if i["mediaFormat"] == "ism":
-                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
-
-    def _autoname(self, vid):
-        url = "https://restapi.cmore.{0}/api/tve_web/asset/{1}.json?expand=metadata".format(self._gettld(), vid)
-        res = self.http.get(url)
-        janson = res.json()["asset"]["metadata"]
-        if isinstance(janson["title"], list):
-            for i in janson["title"]:
-                if self._gettld() == "se":
-                    if i["@xml:lang"] == "sv_SE":
-                        name = i["$"]
-                elif self._gettld() == "dk":
-                    if i["@xml:lang"] == "da_DK":
-                        name = i["$"]
-                elif self._gettld() == "no":
-                    if i["@xml:lang"] == "nb_NO":
-                        name = i["$"]
-                elif self._gettld() == "fi":
-                    if i["@xml:lang"] == "fi_FI":
-                        name = i["$"]
-        else:
-            name = janson["title"]["$"]
-
-        if "season" in janson:
-            self.output["season"] = int(janson["season"]["$"])
-            self.output["episode"] = int(janson["episode"]["$"])
-        self.output["title"] = name
-        return self.output["title"]
+        if res.json()["playbackItem"]["type"] == "hls":
+            streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
+                               res.json()["playbackItem"]["manifestUrl"], output=self.output)
+            for n in list(streams.keys()):
+                yield streams[n]
 
     def find_all_episodes(self, config):
         episodes = []
@@ -136,3 +95,27 @@ class Cmore(Service):
         res = self.http.get("https://tve.cmore.se/country/{0}/operator?client=cmore-web".format(self._gettld()))
         for i in res.json()["data"]["operators"]:
             print("operator: '{0}'".format(i["name"].lower()))
+
+    def _get_vid(self):
+        res = self.http.get(self.url)
+        match = re.search('data-asset-id="([^"]+)"', res.text)
+        if match:
+            return match.group(1)
+
+        parse = urlparse(self.url)
+        match = re.search(r"/(\d+)-[\w-]+$", parse.path)
+        if match:
+            return match.group(1)
+
+        return None
+
+    def _autoname(self, janson):
+        if "seriesTitle" in janson["metadata"]:
+            self.output["title"] = janson["metadata"]["seriesTitle"]
+            self.output["episodename"] = janson["metadata"]["episodeTitle"]
+
+        else:
+            self.output["title"] = janson["metadata"]["title"]
+        self.output["season"] = janson["metadata"]["seasonNumber"]
+        self.output["episode"] = janson["metadata"]["episodeNumber"]
+        self.config.set("live", janson["metadata"]["isLive"])
