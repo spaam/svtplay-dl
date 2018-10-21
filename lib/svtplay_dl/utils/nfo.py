@@ -7,15 +7,21 @@ from datetime import datetime
 
 
 def write_nfo_episode(output, config):
+    if not output["title_nice"]:
+        # If we don't even have the title, skip the NFO
+        return
     root = ET.Element("episodedetails")
     ET.SubElement(root, "title").text = output["title_nice"]
-    ET.SubElement(root, "showtitle").text = output["episodename"]
-    ET.SubElement(root, "season").text = output["season"]
-    ET.SubElement(root, "episode").text = output["episode"]
+    if output["episodename"]:
+        ET.SubElement(root, "showtitle").text = output["episodename"]
+    if output["season"]:
+        ET.SubElement(root, "season").text = str(output["season"])
+    if output["episode"]:
+        ET.SubElement(root, "episode").text = str(output["episode"])
     ET.SubElement(root, "plot").text = output["showdescription"]
     if output["publishing_datetime"] is not None:
         ET.SubElement(root, "aired").text = datetime.fromtimestamp(output["publishing_datetime"]).isoformat()
-    if not config.get("thumbnail"):
+    if not config.get("thumbnail") and output["showthumbnailurl"]:
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["showthumbnailurl"]
 
@@ -28,13 +34,17 @@ def write_nfo_episode(output, config):
 
 def write_nfo_tvshow(output, config):
     # Config for tvshow nfo file
+    if not output["title_nice"]:
+        # If we don't even have the title, skip the NFO
+        return
     root = ET.Element("tvshow")
     ET.SubElement(root, "title").text = output["title_nice"]
-    ET.SubElement(root, "plot").text = output["episodedescription"]
+    if output["episodedescription"]:
+        ET.SubElement(root, "plot").text = output["episodedescription"]
     if config.get("thumbnail"):
         # Set the thumbnail relative path to downloaded thumbnail
         ET.SubElement(root, "thumb").text = "{}.tvshow.tbn".format(output["title"])
-    else:
+    elif output["episodethumbnailurl"]:
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["episodethumbnailurl"]
 
