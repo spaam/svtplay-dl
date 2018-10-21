@@ -259,14 +259,19 @@ class Svtplay(Service, MetadataThumbMixin):
         self.output["episodename"] = other
 
     def seasoninfo(self, data):
+        season, episode = None, None
         if "season" in data and data["season"]:
             season = "{:02d}".format(data["season"])
+            if int(season) == 0:
+                season = None
+        if "episodeNumber" in data and data["episodeNumber"]:
             episode = "{:02d}".format(data["episodeNumber"])
-            if int(season) == 0 and int(episode) == 0:
-                return None, None
-            return season, episode
-        else:
-            return None, None
+            if int(episode) == 0:
+                episode = None
+        if episode is not None and season is None:
+            # Missing season, happens for some barnkanalen shows assume first and only
+            season = "01"
+        return season, episode
 
     def extrametadata(self, data):
         self.output["tvshow"] = (self.output["season"] is not None and
