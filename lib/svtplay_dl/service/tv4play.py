@@ -83,7 +83,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield streams[n]
 
     def _getjson(self):
-        match = re.search(".prefetched = (\[.*\]);", self.get_urldata())
+        match = re.search(r".prefetched = (\[.*\]);", self.get_urldata())
         return match
 
     def find_all_episodes(self, config):

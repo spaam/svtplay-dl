@@ -152,11 +152,11 @@ class Twitch(Service):
             yield streams[n]
 
     def _get_clips(self):
-        match = re.search("quality_options: (\[[^\]]+\])", self.get_urldata())
+        match = re.search(r"quality_options: (\[[^\]]+\])", self.get_urldata())
         if not match:
             yield ServiceError("Can't find the video clip")
             return
-        name = re.search('slug: "([^"]+)"', self.get_urldata()).group(1)
+        name = re.search(r'slug: "([^"]+)"', self.get_urldata()).group(1)
         brodcaster = re.search('broadcaster_login: "([^"]+)"', self.get_urldata()).group(1)
         self.output["title"] = "twitch-{0}".format(brodcaster)
         self.output["episodename"] = name

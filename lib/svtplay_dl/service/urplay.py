@@ -79,14 +79,14 @@ class Urplay(Service, OpenGraphThumbMixin):
                 if url not in episodes:
                     episodes.append(url)
         else:
-            match = re.search("/program/\d+-(\w+)-", parse.path)
+            match = re.search(r"/program/\d+-(\w+)-", parse.path)
             if not match:
                 log.error("Can't find any videos")
                 return None
             keyword = match.group(1)
             all_links = re.findall('card-link" href="([^"]+)"', self.get_urldata())
             for i in all_links:
-                match = re.search("/program/\d+-(\w+)-", i)
+                match = re.search(r"/program/\d+-(\w+)-", i)
                 if match and match.group(1) == keyword:
                     episodes.append(urljoin("https://urplay.se/", i))
 

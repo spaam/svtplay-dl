@@ -12,7 +12,7 @@ class NHL(Service, OpenGraphThumbMixin):
     supported_domains = ['nhl.com']
 
     def get(self):
-        match = re.search("var initialMedia\s+= ({[^;]+);", self.get_urldata())
+        match = re.search(r"var initialMedia\s+= ({[^;]+);", self.get_urldata())
         if not match:
             yield ServiceError("Cant find any media on that page")
             return
@@ -29,7 +29,7 @@ class NHL(Service, OpenGraphThumbMixin):
                         for n in list(streams.keys()):
                             yield streams[n]
         else:
-            match = re.search("var mediaConfig\s+= ({[^;]+);", self.get_urldata())
+            match = re.search(r"var mediaConfig\s+= ({[^;]+);", self.get_urldata())
             if not match:
                 yield ServiceError("Cant find any media on that page")
                 return

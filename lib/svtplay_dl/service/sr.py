@@ -18,7 +18,7 @@ class Sr(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        match = re.search('data-audio-type="publication" data-audio-id="(\d+)">', data)  # Nyheter
+        match = re.search(r'data-audio-type="publication" data-audio-id="(\d+)">', data)  # Nyheter
         if match:
             dataurl = "https://sverigesradio.se/sida/playerajax/" \
                       "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(match.group(1), "publication")
@@ -31,8 +31,8 @@ class Sr(Service, OpenGraphThumbMixin):
             yield HTTP(copy.copy(self.config), urljoin("https://sverigesradio.se", match.group(1)), 128)
             return
         else:
-            match = re.search('data-audio-type="episode" data-audio-id="(\d+)"', data)  # Ladda ner med musik
-            match2 = re.search('data-audio-type="secondary" data-audio-id="(\d+)"', data)  # Ladda ner utan musik
+            match = re.search(r'data-audio-type="episode" data-audio-id="(\d+)"', data)  # Ladda ner med musik
+            match2 = re.search(r'data-audio-type="secondary" data-audio-id="(\d+)"', data)  # Ladda ner utan musik
             if match:
                 aid = match.group(1)
                 type = "episode"

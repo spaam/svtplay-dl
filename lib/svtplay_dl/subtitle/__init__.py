@@ -141,7 +141,7 @@ class subtitle(object):
             try:
                 number = int(sub.attrib["SpotNumber"])
             except ValueError:
-                number = int(re.search("(\d+)", sub.attrib["SpotNumber"]).group(1))
+                number = int(re.search(r"(\d+)", sub.attrib["SpotNumber"]).group(1))
                 increase += 1
             n = number + increase
 
@@ -365,7 +365,7 @@ def tt_text(node, data):
 
 
 def strdate(datestring):
-    match = re.search("^(\d+:\d+:[\.0-9]+) --> (\d+:\d+:[\.0-9]+)", datestring)
+    match = re.search(r"^(\d+:\d+:[\.0-9]+) --> (\d+:\d+:[\.0-9]+)", datestring)
     return match
 
 

@@ -133,8 +133,7 @@ def formatname(output, config, extension="mp4"):
     if not output.get("basedir", False):
         # If tvshow have not been derived by service do it by if season and episode is set
         if output.get("tvshow", None) is None:
-            tvshow = (output.get("season", None) is not None and
-                      output.get("episode", None) is not None)
+            tvshow = (output.get("season", None) is not None and output.get("episode", None) is not None)
         else:
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
@@ -175,9 +174,9 @@ def _formatname(output, config, extension):
             name = name.replace("{ext}", output[key])
 
     # Remove all {text} we cant replace with something
-    for item in re.findall("([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
-        if "season" in output and output["season"] and re.search("(e\{[\w\-]+\})", name):
-            name = name.replace(re.search("(e\{[\w\-]+\})", name).group(1), "")
+    for item in re.findall(r"([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
+        if "season" in output and output["season"] and re.search(r"(e\{[\w\-]+\})", name):
+            name = name.replace(re.search(r"(e\{[\w\-]+\})", name).group(1), "")
         else:
             name = name.replace(item[0], "")
 

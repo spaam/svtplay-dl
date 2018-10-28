@@ -116,7 +116,7 @@ def get_one_media(stream):
                         videos.append(i)
                 if isinstance(i, subtitle):
                     subs.append(i)
-    except Exception as e:
+    except Exception:
         if stream.config.get("verbose"):
             raise
         else:

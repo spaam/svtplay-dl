@@ -53,7 +53,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             jansson = json.loads(match.group(1))
             if "seasonNumberOrVideoId" in jansson:
                 season = jansson["seasonNumberOrVideoId"]
-                match = re.search("\w-(\d+)$", season)
+                match = re.search(r"\w-(\d+)$", season)
                 if match:
                     season = match.group(1)
             else:
@@ -66,18 +66,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 return None
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
-                match = re.search('(\w+)-(\d+)', videp)
+                match = re.search(r'(\w+)-(\d+)', videp)
                 if match:
                     episodenr = match.group(2)
                 else:
                     episodenr = videp
                     clips = True
-                match = re.search('(s\w+)-(\d+)', season)
+                match = re.search(r'(s\w+)-(\d+)', season)
                 if match:
                     season = match.group(2)
             else:
                 # sometimes videoIdOrEpisodeNumber does not work.. this is a workaround
-                match = re.search('(episode|avsnitt)-(\d+)', self.url)
+                match = re.search(r'(episode|avsnitt)-(\d+)', self.url)
                 if match:
                     episodenr = match.group(2)
                 else:
@@ -197,7 +197,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, config):
         seasons = []
-        match = re.search("(sasong|sesong)-(\d+)", urlparse(self.url).path)
+        match = re.search(r"(sasong|sesong)-(\d+)", urlparse(self.url).path)
         if match:
             seasons.append(match.group(2))
         else:
@@ -215,9 +215,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def _grab_episodes(self, config, seasons):
         episodes = []
         baseurl = self.url
-        match = re.search("(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
+        match = re.search(r"(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
         if match:
-            if re.search("(avsnitt|episode)", urlparse(baseurl).path):
+            if re.search(r"(avsnitt|episode)", urlparse(baseurl).path):
                 baseurl = baseurl[:baseurl.rfind("/")]
             baseurl = baseurl[:baseurl.rfind("/")]
 
@@ -238,15 +238,15 @@ class Viaplay(Service, OpenGraphThumbMixin):
         return episodes
 
     def _isswe(self, url):
-        if re.search(".se$", urlparse(url).netloc):
+        if re.search(r".se$", urlparse(url).netloc):
             return "sasong"
-        elif re.search(".dk$", urlparse(url).netloc):
+        elif re.search(r".dk$", urlparse(url).netloc):
             return "saeson"
         else:
             return "sesong"
 
     def _conentpage(self, data):
-        return re.search('=({"sportsPlayer.*}); window.__config', data)
+        return re.search(r'=({"sportsPlayer.*}); window.__config', data)
 
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)

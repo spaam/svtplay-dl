@@ -423,7 +423,7 @@ class M3U8():
 def _get_tag_attribute(line):
     line = line[1:]
     try:
-        search_line = re.search("^([A-Z\-]*):(.*)", line)
+        search_line = re.search(r"^([A-Z\-]*):(.*)", line)
         return search_line.group(1), search_line.group(2)
     except Exception:
         return line, None
@@ -436,7 +436,7 @@ def _get_tuple_attribute(attribute):
             name, value = art_l.split("=", 1)
             name = name.strip()
             # Checks for attribute name
-            if not re.match("^[A-Z0-9\-]*$", name):
+            if not re.match(r"^[A-Z0-9\-]*$", name):
                 raise ValueError("Not a valid attribute name.")
 
             # Remove extra quotes of string

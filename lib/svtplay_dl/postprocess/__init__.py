@@ -214,7 +214,7 @@ class postprocess(object):
         os.rename(tempfile, orig_filename)
 
     def _checktracks(self, output):
-        allstuff = re.findall("Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
+        allstuff = re.findall(r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
         videotrack = 0
         audiotrack = 1
         for stream in allstuff:

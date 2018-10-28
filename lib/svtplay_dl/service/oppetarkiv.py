@@ -138,12 +138,12 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         self.seasoninfo(datat)
 
     def seasoninfo(self, data):
-        match = re.search("S.song (\d+) - Avsnitt (\d+)", data)
+        match = re.search(r"S.song (\d+) - Avsnitt (\d+)", data)
         if match:
             self.output["season"] = int(match.group(1))
             self.output["episode"] = int(match.group(2))
         else:
-            match = re.search("Avsnitt (\d+)", data)
+            match = re.search(r"Avsnitt (\d+)", data)
             if match:
                 self.output["episode"] = int(match.group(1))
 

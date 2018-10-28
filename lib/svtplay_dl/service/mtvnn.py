@@ -20,13 +20,13 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
 
         if parse.netloc.endswith("se"):
-            match = re.search('<div class="video-player" (.*)>', data)
+            match = re.search(r'<div class="video-player" (.*)>', data)
 
             if not match:
                 yield ServiceError("Can't find video info")
                 return
 
-            match_id = re.search('data-id="([0-9a-fA-F|\-]+)" ', match.group(1))
+            match_id = re.search(r'data-id="([0-9a-fA-F|\-]+)" ', match.group(1))
 
             if not match_id:
                 yield ServiceError("Can't find video info")

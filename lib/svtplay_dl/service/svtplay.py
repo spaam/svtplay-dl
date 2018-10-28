@@ -48,7 +48,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 yield i
             return
 
-        match = re.search("__svtplay'] = ({.*});", self.get_urldata())
+        match = re.search(r"__svtplay'] = ({.*});", self.get_urldata())
         if not match:
             yield ServiceError("Can't find video info.")
             return
@@ -274,8 +274,7 @@ class Svtplay(Service, MetadataThumbMixin):
         return season, episode
 
     def extrametadata(self, data):
-        self.output["tvshow"] = (self.output["season"] is not None and
-                                 self.output["episode"] is not None)
+        self.output["tvshow"] = (self.output["season"] is not None and self.output["episode"] is not None)
         try:
             self.output["publishing_datetime"] = data["video"]["broadcastDate"] / 1000
         except KeyError:

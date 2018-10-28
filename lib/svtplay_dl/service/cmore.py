@@ -73,7 +73,7 @@ class Cmore(Service):
             parse = urlparse(self.url[0])
         else:
             parse = urlparse(self.url)
-        return re.search('\.(\w{2})$', parse.netloc).group(1)
+        return re.search(r'\.(\w{2})$', parse.netloc).group(1)
 
     def _login(self):
         tld = self._gettld()
