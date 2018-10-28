@@ -134,21 +134,22 @@ class subtitle(object):
         text = subdata.text
         text = re.sub(r'&', '&amp;', text)
         tree = ET.fromstring(text)
-        subt = tree.find("Font")
+        allsubs = tree.findall(".//Subtitle")
         subs = ""
-        n = 0
-        for i in subt.getiterator():
-            if i.tag == "Subtitle":
-                n = i.attrib["SpotNumber"]
+        increase = 0
+        for sub in allsubs:
+            try:
+                number = int(sub.attrib["SpotNumber"])
+            except ValueError:
+                number = int(re.search("(\d+)", sub.attrib["SpotNumber"]).group(1))
+                increase += 1
+            n = number + increase
 
-                if i.attrib["SpotNumber"] == "1":
-                    subs += "%s\n%s --> %s\n" % (i.attrib["SpotNumber"], timecolon(i.attrib["TimeIn"]), timecolon(i.attrib["TimeOut"]))
-                else:
-                    subs += "\n%s\n%s --> %s\n" % (i.attrib["SpotNumber"], timecolon(i.attrib["TimeIn"]), timecolon(i.attrib["TimeOut"]))
-            else:
-                if int(n) > 0 and i.text:
-                    subs += "%s\n" % decode_html_entities(i.text)
-
+            texts = sub.findall(".//Text")
+            all = ""
+            for text in texts:
+                all += "{}\n".format(decode_html_entities(text.text))
+            subs += "{}\n{} --> {}\n{}\n\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
         subs = re.sub('&amp;', r'&', subs)
         return subs
 
