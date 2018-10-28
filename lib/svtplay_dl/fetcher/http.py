@@ -30,7 +30,7 @@ class HTTP(VideoRetriever):
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
-            if not self.options.get("silent"):
+            if not self.config.get("silent"):
                 eta.update(bytes_so_far)
                 progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 
