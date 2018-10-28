@@ -240,8 +240,12 @@ class subtitle(object):
                 subnr = True
             else:
                 if self.config.get("convert_subtitle_colors"):
-                    colors = {'30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00',
-                              '34': '#0000ff', '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff'}
+                    colors = {
+                        '30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff',
+                        '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff', 'c.black': '#000000', 'c.red': '#ff0000',
+                        'c.green': '#00ff00', 'c.yellow': '#ffff00', 'c.blue': '#0000ff', 'c.magneta': '#ff00ff',
+                        'c.cyan': '#00ffff', 'c.gray': '#ffffff',
+                    }
                     sub = i
                     for tag, color in colors.items():
                         regex1 = '<' + tag + '>'
