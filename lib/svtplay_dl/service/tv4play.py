@@ -74,7 +74,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(vid)
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
-            yield ServiceError("Can't play this because the video is geoblocked.")
+            yield ServiceError("Can't play this because the video is geoblocked or not available.")
             return
         if res.json()["playbackItem"]["type"] == "hls":
             streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
