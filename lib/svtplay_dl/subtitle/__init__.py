@@ -148,8 +148,11 @@ class subtitle(object):
             texts = sub.findall(".//Text")
             all = ""
             for text in texts:
-                all += "{}\n".format(decode_html_entities(text.text))
-            subs += "{}\n{} --> {}\n{}\n\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
+                line = ""
+                for txt in text.itertext():
+                    line += "{}".format(txt)
+                all += "{}\n".format(decode_html_entities(line.lstrip()))
+            subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
         subs = re.sub('&amp;', r'&', subs)
         return subs
 
