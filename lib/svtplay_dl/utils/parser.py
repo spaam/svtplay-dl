@@ -278,6 +278,9 @@ def readconfig(config, configfile, service=None, preset=None):
             data = fd.read()
             configdata = safe_load(data)
 
+    if configdata is None:
+        return config
+
     if "default" in configdata:
         config = merge(config.get_variable(), configdata["default"])
 
