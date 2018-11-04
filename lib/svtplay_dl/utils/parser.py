@@ -1,6 +1,7 @@
 import argparse
 import platform
 import os
+import logging
 
 from yaml import safe_load
 
@@ -274,9 +275,12 @@ def readconfig(config, configfile, service=None, preset=None):
     global configdata
 
     if configfile and configdata is None:
-        with open(configfile) as fd:
-            data = fd.read()
-            configdata = safe_load(data)
+        try:
+            with open(configfile) as fd:
+                data = fd.read()
+                configdata = safe_load(data)
+        except PermissionError:
+            logging.error("Permission denied while reading config: {}".format(configfile))
 
     if configdata is None:
         return config
