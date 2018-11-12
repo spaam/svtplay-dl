@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
-from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
 from svtplay_dl.service.disney import Disney
@@ -46,7 +45,6 @@ from svtplay_dl.service.youplay import Youplay
 sites = [
     Aftonbladet,
     Aftonbladettv,
-    Bambuser,
     Barnkanalen,
     Bigbrother,
     Cmore,
