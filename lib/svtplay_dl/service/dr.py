@@ -8,7 +8,6 @@ import copy
 from urllib.parse import urljoin, urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
@@ -64,10 +63,6 @@ class Dr(Service, OpenGraphThumbMixin):
                         streams = hlsparse(self.config, self.http.request("get", stream["Uri"]), stream["Uri"], output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
-                    if stream["Target"] == "Streaming":
-                        self.config.set("other", "-v -y '{0}'".format(stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")))
-                        rtmp = "rtmp://vod.dr.dk/cms/"
-                        yield RTMP(copy.copy(self.config), rtmp, stream['Bitrate'], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []
@@ -126,8 +121,3 @@ class Dr(Service, OpenGraphThumbMixin):
                 streams = hlsparse(config, self.http.request("get", i["Uri"]), i["Uri"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
-            else:
-                if i["Target"] == "Streaming":
-                    config.set("other", "-y '{0}'".format(i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")))
-                    rtmp = "rtmp://vod.dr.dk/cms/"
-                    yield RTMP(copy.copy(config), rtmp, i["Bitrate"], output=self.output)

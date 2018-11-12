@@ -6,8 +6,8 @@ from svtplay_dl import error
 
 
 # TODO: should be set as the default option in the argument parsing?
-DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http", "rtmp"]
-LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http", "rtmp"]
+DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http"]
+LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http"]
 
 
 def sort_quality(data):
@@ -68,7 +68,7 @@ def select_quality(config, streams):
         optf = (high - quality) / 2
         optq = quality + (high - quality) / 2
 
-    # Extract protocol prio, in the form of "hls,hds,http,rtmp",
+    # Extract protocol prio, in the form of "hls,hds,http",
     # we want it as a list
 
     if config.get("stream_prio"):

@@ -65,7 +65,7 @@ def parser(version):
     general.add_argument("-f", "--force", action="store_true", dest="force", default=False,
                          help="overwrite if file exists already")
     general.add_argument("-r", "--resume", action="store_true", dest="resume", default=False,
-                         help="resume a download (RTMP based ones)")
+                         help="resume a download (RTMP obsolete)")
     general.add_argument("-l", "--live", action="store_true", dest="live", default=False,
                          help="enable for live streams (RTMP based ones)")
     general.add_argument("-c", "--capture_time", default=-1, type=int, metavar="capture_time",
@@ -105,10 +105,10 @@ def parser(version):
     quality.add_argument("-Q", "--flexible-quality", default=0, metavar="amount", dest="flexibleq",
                          help="allow given quality (as above) to differ by an amount")
     quality.add_argument("-P", "--preferred", default=None, metavar="preferred",
-                         help="preferred download method (dash, hls, hds, http or rtmp)")
+                         help="preferred download method (dash, hls, hds, or http)")
     quality.add_argument("--list-quality", dest="list_quality", action="store_true", default=False,
                          help="list the quality for a video")
-    quality.add_argument("--stream-priority", dest="stream_prio", default=None, metavar="dash,hls,hds,http,rtmp",
+    quality.add_argument("--stream-priority", dest="stream_prio", default=None, metavar="dash,hls,hds,http",
                          help="If two streams have the same quality, choose the one you prefer")
 
     subtitle = parser.add_argument_group("Subtitle")
