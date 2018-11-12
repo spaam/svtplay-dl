@@ -87,7 +87,6 @@ are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
 -  [Python](https://www.python.org/) 3.4 or higher
--  [RTMPDump](https://rtmpdump.mplayerhq.hu/) 2.4 or higher to download RTMP streams.
 -  [pycryptodome](https://www.pycryptodome.org/en/latest/) to download encrypted HLS streams
 -  [PyYaml](https://github.com/yaml/pyyaml) for configure file
 -  [Requests](http://www.python-requests.org/)
