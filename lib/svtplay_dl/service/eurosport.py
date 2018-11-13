@@ -20,42 +20,45 @@ class Eurosport(Service):
             return
 
         janson = json.loads(match.group(1))
-        clientid = janson["sdk"]["clientId"]
         clientapikey = janson["sdk"]["clientApiKey"]
 
-        token = "https://global-api.svcs.eurosportplayer.com/token"
+        devices = "https://eu.edge.bamgrid.com/devices"
+        postdata = {"deviceFamily": "browser", "applicationRuntime":"firefox", "deviceProfile":"macosx", "attributes": {}}
         header = {"authorization": "Bearer {}".format(clientapikey)}
-        data = {"grant_type": "client_credentials", "latitude": 0, "longitude": 0, "platform": "browser", "token": str(uuid.uuid4())}
+        res = self.http.post(devices, headers=header, json=postdata)
+
+        assertion = res.json()["assertion"]
+
+        token = "https://eu.edge.bamgrid.com/token"
+        data = {"grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "latitude": 0, "longitude": 0,
+                "platform": "browser", "subject_token": assertion, "subject_token_type": "urn:bamtech:params:oauth:token-type:device"}
+
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
 
-        logindict = {"type": "email-password", "email": {"address": self.config.get("username")}, "password": {"value": self.config.get("password")}}
-
-        res = self.http.post("https://eu-west-1-api.svcs.eurosportplayer.com/v2/user/identity", json=logindict,
-                             headers={"authorization": access_token, "Accept": "application/vnd.identity-service+json; version=1.0"})
+        login = "https://eu.edge.bamgrid.com/idp/login"
+        header = {"authorization": "Bearer {}".format(access_token)}
+        res = self.http.post(login, headers=header, json={"email": self.config.get("username"), "password": self.config.get("password")})
         if res.status_code > 400:
             yield ServiceError("Wrong username or password")
             return
 
-        data = {"grant_type": "urn:mlbam:params:oauth:grant_type:token", "latitude": "0",
-                "longitude": "0", "platform": "browser", "token": res.json()["code"]}
-        header = {"authorization": "Bearer {}".format(clientapikey)}
-        res = self.http.post("https://global-api.svcs.eurosportplayer.com/token", headers=header, data=data)
-        refresh = res.json()["refresh_token"]
+        id_token = res.json()["id_token"]
 
-        data = {"grant_type": "refresh_token", "latitude": 0, "longitude": 0, "platform": "browser", "token": refresh}
+        grant = "https://eu.edge.bamgrid.com/accounts/grant"
+        res = self.http.post(grant, headers=header, json={"id_token": id_token})
+        assertion = res.json()["assertion"]
+
+        token = "https://eu.edge.bamgrid.com/token"
+        data = {"grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "latitude": 0, "longitude": 0,
+                "platform": "browser", "subject_token": assertion, "subject_token_type": "urn:bamtech:params:oauth:token-type:account"}
         header = {"authorization": "Bearer {}".format(clientapikey)}
-        res = self.http.post("https://global-api.svcs.eurosportplayer.com/token", headers=header, data=data)
+        res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
 
-        url = "https://bam-sdk-configs.mlbam.net/v0.1/{}/browser/v2.1/macosx/chrome/prod.json".format(clientid)
-        res = self.http.get(url)
-        janson = res.json()
-        scenario = janson["media"]["playbackScenarios"]["unlimited"]
+        query = {"preferredLanguages": ["en"], "mediaRights": ["GeoMediaRight"], "uiLang": "en", "include_images": True}
 
-        query = {"preferredLanguages": ["sv", "en"], "mediaRights": ["GeoMediaRight"], "uiLang": "sv", "include_images": True}
-
-        if parse.path[:5] == "/chan":
+        if parse.path[:11] == "/en/channel":
             pagetype = "channel"
             match = re.search('/([^/]+)$', parse.path)
             if not match:
@@ -74,7 +77,7 @@ class Eurosport(Service):
                   "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
             res = self.http.get(url, headers={"authorization": access_token})
             vid2 = res.json()["data"]["Airings"][0]["channel"]["id"]
-            url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/{}".format(vid2, scenario)
+            url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/browser".format(vid2)
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["slide"]
         else:
@@ -93,7 +96,7 @@ class Eurosport(Service):
             programid = res.json()["data"]["Airings"][0]["programId"]
             mediaid = res.json()["data"]["Airings"][0]["mediaId"]
 
-            url = "https://global-api.svcs.eurosportplayer.com/programs/{}/media/{}/scenarios/{}".format(programid, mediaid, scenario)
+            url = "https://global-api.svcs.eurosportplayer.com/programs/{}/media/{}/scenarios/browser".format(programid, mediaid)
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["complete"]
 
