@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import re
 import json
-import uuid
 from urllib.parse import urlparse, quote
 
 from svtplay_dl.service import Service
@@ -23,7 +22,7 @@ class Eurosport(Service):
         clientapikey = janson["sdk"]["clientApiKey"]
 
         devices = "https://eu.edge.bamgrid.com/devices"
-        postdata = {"deviceFamily": "browser", "applicationRuntime":"firefox", "deviceProfile":"macosx", "attributes": {}}
+        postdata = {"deviceFamily": "browser", "applicationRuntime": "firefox", "deviceProfile": "macosx", "attributes": {}}
         header = {"authorization": "Bearer {}".format(clientapikey)}
         res = self.http.post(devices, headers=header, json=postdata)
 
