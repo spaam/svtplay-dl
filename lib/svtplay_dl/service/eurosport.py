@@ -10,7 +10,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Eurosport(Service):
-    supported_domains = ['se.eurosportplayer.com']
+    supported_domains_re = [r'^([^.]+\.)*eurosportplayer.com']
 
     def get(self):
         parse = urlparse(self.url)
