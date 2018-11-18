@@ -221,7 +221,7 @@ def findexpisode(output, directory, name):
         lsname, lsext = os.path.splitext(i)
         if output["service"]:
             if orgext[1:] in subtitlefiles:
-                if name.find(output["service"]) > 0 and lsname.find(output["service"]) > 0 and \
+                if output["id"] and name.find(output["service"]) > 0 and lsname.find(output["service"]) > 0 and \
                         name.find(output["id"]) > 0 and lsname.find(output["id"]) > 0 and \
                         orgext == lsext:
                     return True
