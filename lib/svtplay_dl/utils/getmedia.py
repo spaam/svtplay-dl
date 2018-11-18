@@ -5,8 +5,6 @@ import logging
 from shutil import which
 from datetime import datetime
 
-
-from svtplay_dl.log import log
 from svtplay_dl.service import service_handler, Generic
 from svtplay_dl.service.services import sites, Raw
 from svtplay_dl.fetcher import VideoRetriever
@@ -21,7 +19,7 @@ from svtplay_dl.utils.nfo import write_nfo_episode, write_nfo_tvshow
 
 def get_multiple_media(urls, config):
     if config.get("output") and os.path.isfile(config.get("output")):
-        log.error("Output must be a directory if used with multiple URLs")
+        logging.error("Output must be a directory if used with multiple URLs")
         sys.exit(2)
     elif config.get("output") and not os.path.exists(config.get("output")):
         try:
@@ -179,7 +177,6 @@ def get_one_media(stream):
 
     if stream.config.get("merge_subtitle") and not stream.config.get("subtitle"):
         options_subs_dl(subfixes)
-
     if not videos:
         errormsg = None
         for exc in error:
@@ -187,7 +184,10 @@ def get_one_media(stream):
                 errormsg = "{}. {}".format(errormsg, str(exc))
             else:
                 errormsg = str(exc)
-        logging.error("No videos found. {}".format(errormsg))
+        if errormsg:
+            logging.error("No videos found. {}".format(errormsg))
+        else:
+            logging.error("No videos found.")
     else:
         if stream.config.get("list_quality"):
             list_quality(videos)

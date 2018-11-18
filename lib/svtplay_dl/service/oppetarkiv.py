@@ -4,11 +4,11 @@ from __future__ import absolute_import
 import re
 import copy
 import hashlib
+import logging
 from urllib.parse import urlparse, parse_qs
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.dash import dashparse
@@ -98,7 +98,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         if match is None:
             match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^/]+)/', self.url)
             if match is None:
-                log.error("Couldn't find title")
+                logging.error("Couldn't find title")
                 return
         program = match.group(1)
         episodes = []

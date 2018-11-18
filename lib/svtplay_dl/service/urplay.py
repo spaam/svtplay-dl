@@ -4,12 +4,12 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+import logging
 from urllib.parse import urljoin, urlparse
 
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.log import log
 from svtplay_dl.error import ServiceError
 from svtplay_dl.subtitle import subtitle
 
@@ -81,7 +81,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         else:
             match = re.search(r"/program/\d+-(\w+)-", parse.path)
             if not match:
-                log.error("Can't find any videos")
+                logging.error("Can't find any videos")
                 return None
             keyword = match.group(1)
             all_links = re.findall('card-link" href="([^"]+)"', self.get_urldata())

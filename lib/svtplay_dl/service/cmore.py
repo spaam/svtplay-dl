@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 import re
 from urllib.parse import urljoin, urlparse
+import logging
 
 from svtplay_dl.service import Service
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
 
@@ -55,7 +55,7 @@ class Cmore(Service):
 
         token, message = self._login()
         if not token:
-            log.error(message)
+            logging.error(message)
             return
         res = self.http.get(self.url)
         tags = re.findall('<a class="card__link" href="([^"]+)"', res.text)

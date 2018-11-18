@@ -3,11 +3,11 @@ from random import sample
 import os
 import platform
 import re
+import logging
 from shutil import which
 from requests import post, codes, Timeout
 from re import match
 
-from svtplay_dl.log import log
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
 
@@ -57,10 +57,10 @@ class postprocess(object):
                     except TypeError:
                         return 'und'
                 else:
-                    log.error("Server error appeared. Setting language as undetermined.")
+                    logging.error("Server error appeared. Setting language as undetermined.")
                     return 'und'
             except Timeout:
-                log.error("30 seconds server timeout reached. Setting language as undetermined.")
+                logging.error("30 seconds server timeout reached. Setting language as undetermined.")
                 return 'und'
 
         langs = []
@@ -70,9 +70,9 @@ class postprocess(object):
             'jiddisch': 'yid'
         }
         if self.subfixes and len(self.subfixes) >= 2:
-            log.info("Determining the languages of the subtitles.")
+            logging.info("Determining the languages of the subtitles.")
         else:
-            log.info("Determining the language of the subtitle.")
+            logging.info("Determining the language of the subtitle.")
         if self.config.get("get_all_subtitles"):
             for subfix in self.subfixes:
                 if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip('-'))]:
@@ -90,14 +90,14 @@ class postprocess(object):
                                                                    self.stream.output_extention))[0])
             langs += [query(subfile)]
         if len(langs) >= 2:
-            log.info("Language codes: " + ', '.join(langs))
+            logging.info("Language codes: " + ', '.join(langs))
         else:
-            log.info("Language code: " + langs[0])
+            logging.info("Language code: " + langs[0])
         return langs
 
     def remux(self):
         if self.detect is None:
-            log.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
+            logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
             return
         if self.stream.finished is False:
             return
@@ -112,9 +112,9 @@ class postprocess(object):
             videotrack, audiotrack = self._checktracks(stderr)
 
             if self.config.get("merge_subtitle"):
-                log.info(u"Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
+                logging.info(u"Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
             else:
-                log.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
+                logging.info(u"Muxing {0} into {1}".format(orig_filename, new_name))
 
             tempfile = u"{0}.temp".format(orig_filename)
             arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4"]
@@ -141,7 +141,7 @@ class postprocess(object):
                 return
 
             if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
-                log.info("Muxing done, removing the old files.")
+                logging.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
                         subfile = "{0}.srt".format(name + subfix)
@@ -149,13 +149,13 @@ class postprocess(object):
                 else:
                     os.remove(subfile)
             else:
-                log.info("Muxing done, removing the old file.")
+                logging.info("Muxing done, removing the old file.")
             os.remove(orig_filename)
             os.rename(tempfile, new_name)
 
     def merge(self):
         if self.detect is None:
-            log.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
+            logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
             return
         if self.stream.finished is False:
             return
@@ -167,9 +167,9 @@ class postprocess(object):
         videotrack, audiotrack = self._checktracks(stderr)
 
         if self.config.get("merge_subtitle"):
-            log.info("Merge audio, video and subtitle into {0}".format(orig_filename))
+            logging.info("Merge audio, video and subtitle into {0}".format(orig_filename))
         else:
-            log.info("Merge audio and video into {0}".format(orig_filename))
+            logging.info("Merge audio and video into {0}".format(orig_filename))
 
         tempfile = u"{0}.temp".format(orig_filename)
         name, ext = os.path.splitext(orig_filename)
@@ -201,7 +201,7 @@ class postprocess(object):
         if returncode != 0:
             return
 
-        log.info("Merging done, removing old files.")
+        logging.info("Merging done, removing old files.")
         os.remove(orig_filename)
         os.remove(audio_filename)
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):

@@ -8,10 +8,10 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+import logging
 from urllib.parse import urlparse, quote_plus
 
 from svtplay_dl.service import Service
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
@@ -93,7 +93,7 @@ class Twitch(Service):
             for n in self._get_static_video(vid):
                 yield n
         except TwitchUrlException as e:
-            log.error(str(e))
+            logging.error(str(e))
 
     def _get_access_token(self, channel, vtype="vods"):
         """

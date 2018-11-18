@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 import re
 import json
+import logging
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
-from svtplay_dl.log import log
 from svtplay_dl.fetcher.hls import hlsparse
 
 
@@ -86,13 +86,13 @@ class Mtvnn(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, config):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
         if match is None:
-            log.error("Couldn't program id")
+            logging.error("Couldn't program id")
             return
         programid = match.group(1)
         match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'",
                            self.get_urldata())
         if not match:
-            log.error("Couldn't retrieve episode list")
+            logging.error("Couldn't retrieve episode list")
             return
         episodNr = []
         for i in match:

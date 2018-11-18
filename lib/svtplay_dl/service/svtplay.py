@@ -5,10 +5,10 @@ import re
 import copy
 import json
 import hashlib
+import logging
 from urllib.parse import urljoin, urlparse, parse_qs
 from operator import itemgetter
 
-from svtplay_dl.log import log
 from svtplay_dl.service import Service, MetadataThumbMixin
 from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hds import hdsparse
@@ -173,7 +173,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if re.search("sista-chansen", parse.path):
             videos = self._last_chance(videos, 1)
         elif not match:
-            log.error("Couldn't retrieve episode list.")
+            logging.error("Couldn't retrieve episode list.")
             return
         else:
             dataj = json.loads(match.group(1))

@@ -1,9 +1,9 @@
 import xml.etree.ElementTree as ET
 import json
 import re
+import logging
 from io import StringIO
 
-from svtplay_dl.log import log
 from svtplay_dl.utils.text import decode_html_entities
 from svtplay_dl.utils.http import HTTP, get_full_url
 from svtplay_dl.utils.output import output
@@ -31,7 +31,7 @@ class subtitle(object):
     def download(self):
         subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
-            log.warning("Can't download subtitle file")
+            logging.warning("Can't download subtitle file")
             return
 
         data = None
