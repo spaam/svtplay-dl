@@ -196,7 +196,8 @@ def get_one_media(stream):
             # Create NFO files
             write_nfo_episode(stream.output, stream.config)
             write_nfo_tvshow(stream.output, stream.config)
-            if stream.config.get("force_nfo"): return
+            if stream.config.get("force_nfo"):
+                return
         try:
             fstream = select_quality(stream.config, videos)
             if fstream.config.get("get_url"):
