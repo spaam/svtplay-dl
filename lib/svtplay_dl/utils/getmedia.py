@@ -192,6 +192,11 @@ def get_one_media(stream):
         if stream.config.get("list_quality"):
             list_quality(videos)
             return
+        if stream.config.get("nfo"):
+            # Create NFO files
+            write_nfo_episode(stream.output, stream.config)
+            write_nfo_tvshow(stream.output, stream.config)
+            if stream.config.get("force_nfo"): return
         try:
             fstream = select_quality(stream.config, videos)
             if fstream.config.get("get_url"):
@@ -207,10 +212,6 @@ def get_one_media(stream):
 
         if fstream.config.get("thumbnail") and hasattr(stream, "get_thumbnail"):
             stream.get_thumbnail(stream.config)
-        if stream.config.get("nfo"):
-            # Create NFO files
-            write_nfo_episode(stream.output, stream.config)
-            write_nfo_tvshow(stream.output, stream.config)
 
         post = postprocess(fstream, fstream.config, subfixes)
         if fstream.audio and post.detect:
