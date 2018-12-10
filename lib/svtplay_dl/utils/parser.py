@@ -97,6 +97,8 @@ def parser(version):
                          help="explain what is going on")
     general.add_argument("--nfo", action="store_true", dest="nfo", default=False,
                          help="create a NFO file")
+    general.add_argument("--force-nfo", action="store_true", dest="force_nfo", default=False,
+                         help="download only NFO if used with --nfo")
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument("-q", "--quality", default=0, metavar="quality",
@@ -177,6 +179,7 @@ def setup_defaults():
     options.set("preferred", None)
     options.set("verbose", False)
     options.set("nfo", False)
+    options.set("force_nfo", False)
     options.set("output_auto", False)
     options.set("service", None)
     options.set("cookies", None)
@@ -220,6 +223,7 @@ def parsertoconfig(config, parser):
     config.set("preferred", parser.preferred)
     config.set("verbose", parser.verbose)
     config.set("nfo", parser.nfo)
+    config.set("force_nfo", parser.nfo)
     config.set("exclude", parser.exclude)
     config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)
