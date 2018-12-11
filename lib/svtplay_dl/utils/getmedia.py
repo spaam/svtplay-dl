@@ -50,7 +50,7 @@ def get_media(url, options, version="Unknown"):
             logging.error("That site is not supported. Make a ticket or send a message")
             sys.exit(2)
 
-    if options.get("all_episodes"):
+    if options.get("all_episodes") or stream.config.get("all_episodes"):
         get_all_episodes(stream, url)
     else:
         get_one_media(stream)
