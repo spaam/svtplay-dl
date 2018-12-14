@@ -1,0 +1,28 @@
+sudo: false
+language: python
+
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+  # see https://github.com/travis-ci/travis-ci/issues/9815
+  # 3.7
+
+cache: pip
+
+install:
+  - pip install -r requirements-dev.txt -r requirements.txt
+
+script:
+  - flake8 --jobs 8 lib/svtplay_dl
+  - nosetests -v --all-modules --with-doctest svtplay_dl
+
+deploy:
+  provider: pypi
+  user: spaam
+  twine_version: 1.12.1
+  password:
+    secure: YMxYmNOexO13ORBYPFPQrbt9RiLgRPmhTxHRuBVkrICXc1AXli+YGX56hF9nabCFsBT+OEEiGEux5QwSPXGDs2SoQWPKkcCS7uxD3l9QmZuA39IfwsaoDfPziU3Mr+heAmM8WdTls6rFEbUJEMG1/bNVqmijOWDBUi/k9MAC2N4=
+  on:
+    tags: true
+

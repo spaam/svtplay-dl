@@ -4,18 +4,8 @@ all: svtplay-dl
         release clean_releasedir $(RELEASE_DIR)
 
 # These variables describe the latest release:
-VERSION = 0.20
-LATEST_RELEASE_DATE = 2015.09.13
-LATEST_RELEASE = $(VERSION).$(LATEST_RELEASE_DATE)
-
-# If we build a new release, this is what it will be called:
-NEW_RELEASE_DATE = $(shell date +%Y.%m.%d)
-NEW_RELEASE = $(VERSION).$(NEW_RELEASE_DATE)
-RELEASE_DIR = svtplay-dl-$(NEW_RELEASE)
-
-PREFIX ?= /usr/local
-BINDIR = $(PREFIX)/bin
-MANDIR = $(PREFIX)/share/man/man1
+VERSION = 1.9.11
+LATEST_RELEASE = $(VERSION)
 
 # Compress the manual if MAN_GZIP is set to y,
 ifeq ($(MAN_GZIP),y)
@@ -30,22 +20,20 @@ POD2MAN ?= pod2man --section 1 --utf8 \
                    --release "svtplay-dl $(VERSION)" \
                    --date "$(LATEST_RELEASE_DATE)"
 
-PYTHON ?= /usr/bin/env python
+PREFIX ?= /usr/local
+BINDIR = $(PREFIX)/bin
+
+PYTHON ?= /usr/bin/env python3
 export PYTHONPATH=lib
 
 # If you don't have a python3 environment (e.g. mock for py3 and
 # nosetests3), you can remove the -3 flag.
 TEST_OPTS ?= -2 -3
 
-install: svtplay-dl $(MANFILE)
-	install -d $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(MANDIR)
-	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
-	install -m 644 $(MANFILE) $(DESTDIR)$(MANDIR)
-
 svtplay-dl: $(PYFILES)
 	$(MAKE) -C lib
-	mv lib/svtplay-dl .
+	mv -f lib/svtplay-dl .
+
 
 svtplay-dl.1: svtplay-dl.pod
 	rm -f $@
@@ -56,10 +44,14 @@ svtplay-dl.1.gz: svtplay-dl.1
 	gzip -9 svtplay-dl.1
 
 test:
-	sh run-tests.sh $(TEST_OPTS)
+	sh scripts/run-tests.sh $(TEST_OPTS)
+
+install: svtplay-dl
+	install -d $(DESTDIR)$(BINDIR)
+	install -m 755 svtplay-dl $(DESTDIR)$(BINDIR)
 
 cover:
-	sh run-tests.sh -C
+	sh scripts/run-tests.sh -C
 
 pylint:
 	$(MAKE) -C lib pylint
@@ -67,34 +59,13 @@ pylint:
 doctest: svtplay-dl
 	sh scripts/diff_man_help.sh
 
-$(RELEASE_DIR): clean_releasedir
-	mkdir $(RELEASE_DIR)
-	cd $(RELEASE_DIR) && git clone -b master ../ . && \
-		make svtplay-dl $(MANFILE)
-
-clean_releasedir:
-	rm -rf $(RELEASE_DIR)
-
-release: $(RELEASE_DIR) release-test
-	set -e; cd $(RELEASE_DIR) && \
-		sed -i -re 's/^(LATEST_RELEASE_DATE = ).*/\1$(NEW_RELEASE_DATE)/' Makefile;\
-		sed -i -re 's/^(__version__ = ).*/\1"$(NEW_RELEASE)"/' lib/svtplay_dl/__init__.py;\
-		make svtplay-dl; \
-		git add svtplay-dl Makefile lib/svtplay_dl/__init__.py; \
-		git commit -m "Prepare for release $(NEW_RELEASE)";
-	(cd $(RELEASE_DIR) && git format-patch --stdout HEAD^) | git am
-
+release:
 	git tag -m "New version $(NEW_RELEASE)" \
-		-m "$$(git log --oneline $(git describe --tags --abbrev=0 HEAD^)..HEAD^)" \
+		-m "$$(git log --oneline $$(git describe --tags --abbrev=0 HEAD^)..HEAD^)" \
 		$(NEW_RELEASE)
-
-	make clean_releasedir
-
-release-test: $(RELEASE_DIR)
-	make -C $(RELEASE_DIR) test
-	make -C $(RELEASE_DIR) doctest
 
 clean:
 	$(MAKE) -C lib clean
 	rm -f svtplay-dl
 	rm -f $(MANFILE)
+	rm -rf .tox

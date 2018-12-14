@@ -2,175 +2,320 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 import re
-import os
-import xml.etree.ElementTree as ET
 import copy
-from  svtplay_dl.log import log
-from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify, ensure_unicode
-from svtplay_dl.utils.urllib import urlparse, urljoin
+import json
+import hashlib
+import logging
+from urllib.parse import urljoin, urlparse, parse_qs
+from operator import itemgetter
+
+from svtplay_dl.service import Service, MetadataThumbMixin
+from svtplay_dl.utils.text import filenamify
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
-from svtplay_dl.fetcher.rtmp import RTMP
-from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.error import ServiceError
 
+URL_VIDEO_API = "http://api.svt.se/videoplayer-api/video/"
 
-class Svtplay(Service, OpenGraphThumbMixin):
+
+class Svtplay(Service, MetadataThumbMixin):
     supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
 
-    def __init__(self, url):
-        Service.__init__(self, url)
-        self.subtitle = None
-
-    def get(self, options):
-        if re.findall("svt.se", self.url):
-            data = self.get_urldata()
-            match = re.search(r"data-json-href=\"(.*)\"", data)
-            if match:
-                filename = match.group(1).replace("&amp;", "&").replace("&format=json", "")
-                url = "http://www.svt.se%s" % filename
-            else:
-                yield ServiceError("Can't find video file for: %s" % self.url)
+    def get(self):
+        parse = urlparse(self.url)
+        if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
+            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp" and parse.path[:8] != "/kanaler":
+                yield ServiceError("This mode is not supported anymore. Need the url with the video.")
                 return
-        else:
-            url = self.url
 
-        pos = url.find("?")
-        if pos < 0:
-            if "svt.se" in url:
-                dataurl = "%s?format=json" % url
-            else:
-                dataurl = "%s?output=json" % url
-        else:
-            if "svt.se" in url:
-                dataurl = "%s&format=json" % url
-            else:
-                dataurl = "%s&output=json" % url
-        data = self.http.request("get", dataurl)
-        if data.status_code == 404:
-            yield ServiceError("Can't get the json file for %s" % self.json)
-            return
-        data = data.json()
-        if "live" in data["video"]:
-            options.live = data["video"]["live"]
+        query = parse_qs(parse.query)
+        self.access = None
+        if "accessService" in query:
+            self.access = query["accessService"]
 
-        if options.output_auto:
-            options.service = "svtplay"
-            options.output = outputfilename(data, options.output, ensure_unicode(self.get_urldata()))
-
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
-
-        if data["video"]["subtitleReferences"]:
+        if parse.path[:8] == "/kanaler":
+            res = self.http.get(URL_VIDEO_API + "ch-{0}".format(parse.path[9:]))
             try:
-                suburl = data["video"]["subtitleReferences"][0]["url"]
-            except KeyError:
-                pass
-            if suburl and len(suburl) > 0:
-                yield subtitle(copy.copy(options), "wrst", suburl)
-
-        if options.force_subtitle:
+                janson = res.json()
+            except json.decoder.JSONDecodeError:
+                yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+                return
+            videos = self._get_video(janson)
+            self.config.set("live", True)
+            for i in videos:
+                yield i
             return
 
-        for i in data["video"]["videoReferences"]:
-            parse = urlparse(i["url"])
+        match = re.search(r"__svtplay'] = ({.*});", self.get_urldata())
+        if not match:
+            yield ServiceError("Can't find video info.")
+            return
+        janson = json.loads(match.group(1))["videoPage"]
 
-            if parse.path.find("m3u8") > 0:
-                streams = hlsparse(i["url"], self.http.request("get", i["url"]).text)
+        if "programTitle" not in janson["video"]:
+            yield ServiceError("Can't find any video on that page.")
+            return
+
+        if self.access:
+            for i in janson["video"]["versions"]:
+                if i["accessService"] == self.access:
+                    url = urljoin("http://www.svtplay.se", i["contentUrl"])
+                    res = self.http.get(url)
+                    match = re.search("__svtplay'] = ({.*});", res.text)
+                    if not match:
+                        yield ServiceError("Can't find video info.")
+                        return
+                    janson = json.loads(match.group(1))["videoPage"]
+
+        self.outputfilename(janson["video"])
+        self.extrametadata(janson)
+
+        if "programVersionId" in janson["video"]:
+            vid = janson["video"]["programVersionId"]
+        else:
+            vid = janson["video"]["id"]
+        res = self.http.get(URL_VIDEO_API + vid)
+        try:
+            janson = res.json()
+        except json.decoder.JSONDecodeError:
+            yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+            return
+        videos = self._get_video(janson)
+        for i in videos:
+            yield i
+
+    def _get_video(self, janson):
+        if "subtitleReferences" in janson:
+            for i in janson["subtitleReferences"]:
+                if i["format"] == "websrt" and "url" in i:
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
+
+        if "videoReferences" in janson:
+            if len(janson["videoReferences"]) == 0:
+                yield ServiceError("Media doesn't have any associated videos.")
+                return
+
+            for i in janson["videoReferences"]:
+                streams = None
+                alt_streams = None
+                alt = None
+                query = parse_qs(urlparse(i["url"]).query)
+                if "alt" in query and len(query["alt"]) > 0:
+                    alt = self.http.get(query["alt"][0])
+
+                if i["format"] == "hls":
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    if alt:
+                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
+
+                elif i["format"] == "hds":
+                    match = re.search(r"\/se\/secure\/", i["url"])
+                    if not match:
+                        streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
+                                           i["url"], output=self.output)
+                        if alt:
+                            alt_streams = hdsparse(self.config, self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
+                                                   alt.request.url, output=self.output)
+                elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
+                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    if alt:
+                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url),
+                                                alt.request.url, output=self.output)
+
                 if streams:
                     for n in list(streams.keys()):
-                        yield HLS(copy.copy(options), streams[n], n)
-            elif parse.path.find("f4m") > 0:
-                match = re.search(r"\/se\/secure\/", i["url"])
-                if not match:
-                    res = self.http.request("get", i["url"], params={"hdcore": "3.7.0"})
-                    streams = hdsparse(copy.copy(options), res.text, i["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
-            elif parse.scheme == "rtmp":
-                embedurl = "%s?type=embed" % url
-                data = self.http.request("get", embedurl).text
-                match = re.search(r"value=\"(/(public)?(statiskt)?/swf(/video)?/svtplayer-[0-9\.a-f]+swf)\"", data)
-                swf = "http://www.svtplay.se%s" % match.group(1)
-                options.other = "-W %s" % swf
-                yield RTMP(copy.copy(options), i["url"], i["bitrate"])
+                        yield streams[n]
+                if alt_streams:
+                    for n in list(alt_streams.keys()):
+                        yield alt_streams[n]
+
+    def _last_chance(self, videos, page, maxpage=2):
+        if page > maxpage:
+            return videos
+
+        res = self.http.get("http://www.svtplay.se/sista-chansen?sida={}".format(page))
+        match = re.search("__svtplay'] = ({.*});", res.text)
+        if not match:
+            return videos
+
+        dataj = json.loads(match.group(1))
+        pages = dataj["gridPage"]["pagination"]["totalPages"]
+
+        for i in dataj["gridPage"]["content"]:
+            videos.append(i["contentUrl"])
+        page += 1
+        self._last_chance(videos, page, pages)
+        return videos
+
+    def _genre(self, jansson):
+        videos = []
+        parse = urlparse(self._url)
+        dataj = jansson["clusterPage"]
+        tab = re.search("tab=(.+)", parse.query)
+        if tab:
+            tab = tab.group(1)
+            for i in dataj["tabs"]:
+                if i["slug"] == tab:
+                    videos = self.videos_to_list(i["content"], videos)
+        else:
+            videos = self.videos_to_list(dataj["clips"], videos)
+
+        return videos
+
+    def find_all_episodes(self, config):
+        parse = urlparse(self._url)
+
+        videos = []
+        tab = None
+        match = re.search("__svtplay'] = ({.*});", self.get_urldata())
+        if re.search("sista-chansen", parse.path):
+            videos = self._last_chance(videos, 1)
+        elif not match:
+            logging.error("Couldn't retrieve episode list.")
+            return
+        else:
+            dataj = json.loads(match.group(1))
+            if re.search("/genre", parse.path):
+                videos = self._genre(dataj)
             else:
-                yield HTTP(copy.copy(options), i["url"], "0")
+                if parse.query:
+                    query = parse_qs(parse.query)
+                    if "tab" in query:
+                        tab = query["tab"][0]
 
-    def find_all_episodes(self, options):
-        match = re.search(r'<link rel="alternate" type="application/rss\+xml" [^>]*href="([^"]+)"',
-                          self.get_urldata())
-        if match is None:
-            match = re.findall(r'a class="play[^"]+"\s+href="(/video[^"]+)"', self.get_urldata())
-            if not match:
-                log.error("Couldn't retrieve episode list")
-                return
-            episodes = [urljoin("http://www.svtplay.se", x) for x in match]
+                if dataj["relatedVideoContent"]:
+                    items = dataj["relatedVideoContent"]["relatedVideosAccordion"]
+                    for i in items:
+                        if tab:
+                            if i["slug"] == tab:
+                                videos = self.videos_to_list(i["videos"], videos)
+                        else:
+                            if "klipp" not in i["slug"] and "kommande" not in i["slug"]:
+                                videos = self.videos_to_list(i["videos"], videos)
+                        if self.config.get("include_clips"):
+                            if i["slug"] == "klipp":
+                                videos = self.videos_to_list(i["videos"], videos)
+
+        episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
+
+        if config.get("all_last") > 0:
+            return episodes[-config.get("all_last"):]
+        return episodes
+
+    def videos_to_list(self, lvideos, videos):
+        if "episodeNumber" in lvideos[0] and lvideos[0]["episodeNumber"]:
+            lvideos = sorted(lvideos, key=itemgetter('episodeNumber'))
+        for n in lvideos:
+            parse = urlparse(n["contentUrl"])
+            if parse.path not in videos:
+                videos.append(parse.path)
+            if "versions" in n:
+                for i in n["versions"]:
+                    parse = urlparse(i["contentUrl"])
+                    if parse.path not in videos:
+                        videos.append(parse.path)
+
+        return videos
+
+    def outputfilename(self, data):
+        name = None
+        desc = None
+        if "programTitle" in data and data["programTitle"]:
+            name = filenamify(data["programTitle"])
+        elif "titleSlug" in data and data["titleSlug"]:
+            name = filenamify(data["titleSlug"])
+        other = data["title"]
+
+        if "programVersionId" in data:
+            vid = str(data["programVersionId"])
         else:
-            data = self.http.request("get", match.group(1)).content
-            xml = ET.XML(data)
+            vid = str(data["id"])
+        id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
-            episodes = [x.text for x in xml.findall(".//item/link")]
-        episodes_new = []
-        n = 1
-        for i in episodes:
-            episodes_new.append(i)
-            if n == options.all_last:
-                break
-            n += 1
-        return sorted(episodes_new)
+        if name == other:
+            other = None
+        elif name is None:
+            name = other
+            other = None
 
+        season, episode = self.seasoninfo(data)
+        if "accessService" in data:
+            if data["accessService"] == "audioDescription":
+                desc = "syntolkat"
+            if data["accessService"] == "signInterpretation":
+                desc = "teckentolkat"
 
-def outputfilename(data, filename, raw):
-    directory = os.path.dirname(filename)
-    name = data["statistics"]["folderStructure"]
-    if name.find(".") > 0:
-        name = name[:name.find(".")]
-    match = re.search("^arkiv-", name)
-    if match:
-        name = name.replace("arkiv-", "")
-    name = name.replace("-", ".")
-    season = seasoninfo(raw)
-    other = filenamify(data["context"]["title"])
-    if season:
-        title = "%s.%s.%s-%s-svtplay" % (name, season, other, data["videoId"])
-    else:
-        title = "%s.%s-%s-svtplay" % (name, other, data["videoId"])
-    title = filenamify(title)
-    if len(directory):
-        output = os.path.join(directory, title)
-    else:
-        output = title
-    return output
+        if not other:
+            other = desc
+        elif desc:
+            other += "-{}".format(desc)
 
+        self.output["title"] = name
+        self.output["id"] = id
+        self.output["season"] = season
+        self.output["episode"] = episode
+        self.output["episodename"] = other
 
-def seasoninfo(data):
-    match = re.search(r'play_video-area-aside__sub-title">([^<]+)<span', data)
-    if match:
-        line = match.group(1)
-    else:
-        match = re.search(r'data-title="([^"]+)"', data)
-        if match:
-            line = match.group(1)
-        else:
-            return None
+    def seasoninfo(self, data):
+        season, episode = None, None
+        if "season" in data and data["season"]:
+            season = "{:02d}".format(data["season"])
+            if int(season) == 0:
+                season = None
+        if "episodeNumber" in data and data["episodeNumber"]:
+            episode = "{:02d}".format(data["episodeNumber"])
+            if int(episode) == 0:
+                episode = None
+        if episode is not None and season is None:
+            # Missing season, happens for some barnkanalen shows assume first and only
+            season = "01"
+        return season, episode
 
-    line = re.sub(" +", "", match.group(1)).replace('\n', '')
-    match = re.search(r"(song(\d+)-)?Avsnitt(\d+)", line)
-    if match:
-        if match.group(2) is None:
-            season = 1
-        else:
-            season = int(match.group(2))
-        if season < 10:
-            season = "0%s" % season
-        episode = int(match.group(3))
-        if episode < 10:
-            episode = "0%s" % episode
-        return "S%sE%s" % (season, episode)
-    else:
-        return None
+    def extrametadata(self, data):
+        self.output["tvshow"] = (self.output["season"] is not None and self.output["episode"] is not None)
+        try:
+            self.output["publishing_datetime"] = data["video"]["broadcastDate"] / 1000
+        except KeyError:
+            pass
+        try:
+            title = data["video"]["programTitle"]
+            self.output["title_nice"] = title
+        except KeyError:
+            title = data["video"]["titleSlug"]
+            self.output["title_nice"] = title
+
+        try:
+            t = data['state']["titleModel"]["thumbnail"]
+        except KeyError:
+            t = ""
+        if isinstance(t, dict):
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            self.output["showthumbnailurl"] = url
+        elif t:
+            # Get the image if size/format is not specified in the URL set it to large
+            url = t.format(format="large")
+            self.output["showthumbnailurl"] = url
+        try:
+            t = data["video"]["thumbnailXL"]
+        except KeyError:
+            try:
+                t = data["video"]["thumbnail"]
+            except KeyError:
+                t = ""
+        if isinstance(t, dict):
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            self.output["episodethumbnailurl"] = url
+        elif t:
+            # Get the image if size/format is not specified in the URL set it to large
+            url = t.format(format="large")
+            self.output["episodethumbnailurl"] = url
+        try:
+            self.output["showdescription"] = data['state']["titleModel"]["description"]
+        except KeyError:
+            pass
+        try:
+            self.output["episodedescription"] = data["video"]["description"]
+        except KeyError:
+            pass

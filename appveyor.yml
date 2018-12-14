@@ -1,0 +1,45 @@
+environment:
+  PYTHON: "C:\\Python35"
+  PYTHON_VERSION: 3.5
+  PYTHON_ARCH: "32"
+
+init:
+  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
+
+install:
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python -m pip install -U pip setuptools"
+  - "pip install -r requirements-dev.txt -r requirements.txt"
+  - "pip install cx_freeze"
+  - "git describe --tags --dirty --always"
+
+test_script:
+  - "pip install -e ."
+
+
+after_test:
+  - "mkdir svtplay-dl"
+  - "python setversion.py"
+  - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
+  - "svtplay-dl\\svtplay-dl.exe --version"
+  - "7z.exe a -tzip svtplay-dl.zip svtplay-dl"
+
+artifacts:
+  - path: svtplay-dl.zip
+    name: svtplay-dl
+
+
+deploy:
+  - provider: FTP
+    protocol: sftp
+    host: srv.svtplay-dl.se
+    username: web
+    password:
+      secure: wdvTOWRd6TXhtgfSPmYea8XOT/5sc4s3xhELbowqT58=
+    folder: /var/www/download/$(APPVEYOR_REPO_TAG_NAME)
+
+    artifact: svtplay-dl.zip
+    on:
+      appveyor_repo_tag: true
+
+build: off

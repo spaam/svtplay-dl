@@ -47,6 +47,10 @@ Enable support for live streams. (rtmp based ones)
 
 Be less verbose.
 
+=head3 --silent-semi
+
+only show a message when the file is downloaded
+
 =head3 --verbose  -v
 
 Explain what is going on, including HTTP requests and other useful
@@ -65,17 +69,33 @@ Allow given quality (as above) to differ by an amount.
 
 List the available qualities for a video.
 
-=head3 --hls  -H
-
-Use HTTP Live Streaming when downloading.
-
 =head3 --subtitle  -S
 
 Download subtitle with the media if available.
 
+=head3 --merge-subtitle
+
+Merge subtitle with video/audio file with -M
+
 =head3 --force-subtitle
 
 Download only subtitle if its used with -S.
+
+=head3 --require-subtitle
+
+Download only if a subtitle is available
+
+=head3 --all-subtitles
+
+Download all available subtitles for the video
+
+=head3 --raw-subtitles
+
+also download the subtitles in their native format
+
+=head3 --convert-subtitle-colors
+
+converts the color information in subtitles, to <font color=""> tags
 
 =head3 --username=USERNAME  -u USERNAME
 
@@ -85,11 +105,11 @@ Username, if the service requires authentication.
 
 Password, if the serivce requires authentication.
 
-=head3 -t, --thumbnail
+=head3 --thumbnail, -t
 
 Download thumbnail from the site if available.
 
-=head3 -A, --all-episodes
+=head3 --all-episodes, -A
 
 Try to download all episodes.
 
@@ -98,7 +118,7 @@ Try to download all episodes.
 Get last NN episodes instead of all episodes, when used with
 --all-episodes.
 
-=head3 -P preferred, --preferred=preferred
+=head3 --preferred=preferred, -P preferred
 
 Preferred download method.
 
@@ -109,6 +129,22 @@ Exclude videos with the WORD(s) in the filename. Comma separated.
 =head3 --get-url -g
 
 Do not download any video, but instead print the URL.
+
+=head3 --dont-verify-ssl-cert
+
+Don't attempt to verify SSL certificates.
+
+=head3 --http-header=header1=value;header2=value2
+
+A header to add to each HTTP request.
+
+=head3 --stream-priority=dash,hls,hds,http,rtmp
+
+If two streams have the same quality, choose the one you prefer
+
+=head3 --remux
+
+Remux from one container to mp4 using ffmpeg or avconv
 
 =head1 SUPPORTED SERVICES
 
@@ -134,9 +170,13 @@ Do not download any video, but instead print the URL.
 
 =item * Aftonbladet: L<http://www.aftonbladet.se/>
 
+=item * Comedycentral.se: L<http://www.comedycentral.se>
+
 =item * Dagens Industri: L<http://di.se/>
 
 =item * Dagens Nyheter: L<http://dn.se/>
+
+=item * Dplay: L<http://www.dplay.se/>
 
 =item * DR: L<http://dr.dk/>
 
@@ -144,11 +184,11 @@ Do not download any video, but instead print the URL.
 
 =item * Expressen: L<http://expressen.se/>
 
-=item * Kanal5 Play: L<http://kanal5play.se/>
-
 =item * Kanal9 Play: L<http://kanal9play.se/>
 
 =item * Öppet Arkiv: L<http://oppetarkiv.se/>
+
+=item * Svenska kennelklubben play: L<http://www.skkplay.se/>
 
 =item * Svenska Dagbladet: L<http://svd.se/>
 

@@ -1,7 +1,5 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-# pylint has issues with urlparse: "some types could not be inferred"
-# pylint: disable=E1103
 
 from __future__ import absolute_import
 import re
@@ -16,18 +14,14 @@ from svtplay_dl.error import ServiceError
 class Radioplay(Service):
     supported_domains = ['radioplay.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
-
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
 
         match = re.search(r"RP.vcdData = ({.*});</script>", data)
         if match:
             data = json.loads(match.group(1))
             for i in list(data["station"]["streams"].keys()):
-                yield HTTP(copy.copy(options), data["station"]["streams"][i], i)
+                yield HTTP(copy.copy(self.config), data["station"]["streams"][i], i)
         else:
             yield ServiceError("Can't find stream info")
             return

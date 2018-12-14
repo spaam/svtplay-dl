@@ -5,28 +5,21 @@ from __future__ import absolute_import
 import json
 import re
 import copy
-import os
+from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils import filenamify
-from svtplay_dl.utils.urllib import urlparse
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
 
 class Disney(Service, OpenGraphThumbMixin):
-    supported_domains = ['disney.se', 'video.disney.se']
+    supported_domains = ['disney.se', 'video.disney.se', 'disneyjunior.disney.se']
 
-    def get(self, options):
+    def get(self):
         parse = urlparse(self.url)
-        if parse.hostname == "video.disney.se":
+        if parse.hostname == "video.disney.se" or parse.hostname == "disneyjunior.disney.se":
             data = self.get_urldata()
-
-            if self.exclude(options):
-                yield ServiceError("Excluding video")
-                return
-
             match = re.search(r"Grill.burger=({.*}):", data)
             if not match:
                 yield ServiceError("Can't find video info")
@@ -38,7 +31,10 @@ class Disney(Service, OpenGraphThumbMixin):
                         if "flavors" in x:
                             for i in x["flavors"]:
                                 if i["format"] == "mp4":
-                                    yield HTTP(copy.copy(options), i["url"], i["bitrate"])
+                                    res = self.http.get(i["url"])
+                                    match = re.search('button primary" href="([^"]+)"', res.text)
+                                    if match:
+                                        yield HTTP(copy.copy(self.config), match.group(1), i["bitrate"], output=self.output)
         else:
             data = self.get_urldata()
             match = re.search(r"uniqueId : '([^']+)'", data)
@@ -57,52 +53,33 @@ class Disney(Service, OpenGraphThumbMixin):
             jsondata = json.loads(match.group(1))
             parse = urlparse(self.url)
             if len(parse.fragment) > 0:
-                entry = parse.fragment[parse.fragment.rindex("/")+1:]
+                entry = parse.fragment[parse.fragment.rindex("/") + 1:]
                 if entry in jsondata["idlist"]:
                     entryid = jsondata["idlist"][entry]
                 else:
                     yield ServiceError("Cant find video info")
                     return
-            if options.output_auto:
-                for i in jsondata["playlists"][0]["playlist"]:
-                    if entryid in i["id"]:
-                        title = i["longId"]
-                        break
+            for i in jsondata["playlists"][0]["playlist"]:
+                if entryid in i["id"]:
+                    title = i["longId"]
+                    break
+            self.output["title"] = title
 
-                directory = os.path.dirname(options.output)
-                options.service = "disney"
-                title = "%s-%s" % (title, options.service)
-                title = filenamify(title)
-                if len(directory):
-                    options.output = os.path.join(directory, title)
-                else:
-                    options.output = title
-
-            if self.exclude(options):
-                return
-
-            url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid=%s&uiconf_id=%s&entry_id=%s&playerId=%s&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi" % \
-            (partnerid, uiconfid, entryid, uniq)
-            data = self.http.request("get", url).content
+            url = "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid={0}&uiconf_id={1}&entry_id={2}" \
+                  "&playerId={3}&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi".format(partnerid, uiconfid, entryid, uniq)
+            data = self.http.request("get", url).text
             match = re.search(r"mwi\(({.*})\);", data)
             jsondata = json.loads(match.group(1))
             data = jsondata["content"]
             match = re.search(r"window.kalturaIframePackageData = ({.*});", data)
             jsondata = json.loads(match.group(1))
             ks = jsondata["enviornmentConfig"]["ks"]
-            if options.output_auto:
-                name = jsondata["entryResult"]["meta"]["name"]
-                directory = os.path.dirname(options.output)
-                options.service = "disney"
-                title = "%s-%s" % (name, options.service)
-                title = filenamify(title)
-                if len(directory):
-                    options.output = os.path.join(directory, title)
-                else:
-                    options.output = title
+            name = jsondata["entryResult"]["meta"]["name"]
+            self.output["title"] = name
 
-            url = "http://cdnapi.kaltura.com/p/%s/sp/%s00/playManifest/entryId/%s/format/applehttp/protocol/http/a.m3u8?ks=%s&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&" % (partnerid[1:], partnerid[1:], entryid, ks)
+            url = "http://cdnapi.kaltura.com/p/{0}/sp/{1}00/playManifest/entryId/{2}/format/applehttp/protocol/http/a.m3u8" \
+                  "?ks={3}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(redirect, self.http.request("get", redirect).text)
+            streams = hlsparse(self.config, self.http.request("get", redirect), redirect, output=self.output)
             for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+                yield streams[n]

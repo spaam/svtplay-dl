@@ -1,18 +1,19 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import time
 
-from svtplay_dl.output import progress, output # FIXME use progressbar() instead
+from svtplay_dl.utils.output import ETA, progressbar, output
 from svtplay_dl.fetcher import VideoRetriever
 
 
 class HTTP(VideoRetriever):
+    @property
     def name(self):
         return "http"
 
     def download(self):
         """ Get the stream from HTTP """
+        self.output_extention = "mp4"  # this might be wrong..
         data = self.http.request("get", self.url, stream=True)
         try:
             total_size = data.headers['content-length']
@@ -21,19 +22,17 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.options, "mp4")
-        if hasattr(file_d, "read") is False:
+        file_d = output(self.output, self.config, "mp4")
+        if file_d is None:
             return
 
-        lastprogress = 0
+        eta = ETA(total_size)
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
             file_d.write(i)
-            if self.options.output != "-":
-                now = time.time()
-                if lastprogress + 1 < now:
-                    lastprogress = now
-                    progress(bytes_so_far, total_size)
+            if not self.config.get("silent"):
+                eta.update(bytes_so_far)
+                progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
 
-        if self.options.output != "-":
-            file_d.close()
+        file_d.close()
+        self.finished = True

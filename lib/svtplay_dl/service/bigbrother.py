@@ -8,18 +8,15 @@ import copy
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import hlsparse, HLS
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.http import HTTP
 
 
 class Bigbrother(Service, OpenGraphThumbMixin):
     supported_domains = ["bigbrother.se"]
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
-
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
 
         match = re.search(r'id="(bcPl[^"]+)"', data)
         if not match:
@@ -45,7 +42,8 @@ class Bigbrother(Service, OpenGraphThumbMixin):
             return
         videoplayer = match.group(1)
 
-        dataurl = "http://c.brightcove.com/services/viewer/htmlFederated?flashID=%s&playerID=%s&playerKey=%s&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer=%s" % (flashid, playerid, playerkey, videoplayer)
+        dataurl = "http://c.brightcove.com/services/viewer/htmlFederated?flashID={0}&playerID={1}&playerKey={2}" \
+                  "&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer={3}".format(flashid, playerid, playerkey, videoplayer)
         data = self.http.request("get", dataurl).content
         match = re.search(r'experienceJSON = ({.*});', data)
         if not match:
@@ -53,14 +51,22 @@ class Bigbrother(Service, OpenGraphThumbMixin):
             return
         jsondata = json.loads(match.group(1))
         renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
+
+        if jsondata["data"]["publisherType"] == "PREMIUM":
+            yield ServiceError("Premium content")
+            return
+
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
-                streams = hdsparse(copy.copy(options), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}).text, i["defaultURL"])
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                streams = hdsparse(copy.copy(self.config),
+                                   self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}), i["defaultURL"], output=self.output)
+                for n in list(streams.keys()):
+                    yield streams[n]
 
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(i["defaultURL"], self.http.request("get", i["defaultURL"]).text)
+                streams = hlsparse(self.config, self.http.request("get", i["defaultURL"]), i["defaultURL"], output=self.output)
                 for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+                    yield streams[n]
+
+            if i["defaultURL"].endswith("mp4"):
+                yield HTTP(copy.copy(self.config), i["defaultURL"], i["encodingRate"] / 1024, output=self.output)

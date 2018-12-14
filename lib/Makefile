@@ -1,5 +1,3 @@
-PYLINT_OPTS = --report=no -d I -d C -d R -d W0511
-
 all: svtplay-dl
 
 clean:
@@ -13,10 +11,13 @@ export PACKAGES = svtplay_dl \
                  svtplay_dl.fetcher \
                  svtplay_dl.utils \
                  svtplay_dl.service \
-                 svtplay_dl.subtitle
+                 svtplay_dl.subtitle \
+                 svtplay_dl.postprocess
 export PYFILES = $(sort $(addsuffix /*.py,$(subst .,/,$(PACKAGES))))
 
-PYTHON ?= /usr/bin/env python
+PYTHON ?= /usr/bin/env python3
+
+VERSION = $(shell git describe 2>/dev/null || echo $(LATEST_RELEASE)-unknown)
 
 svtplay-dl: $(PYFILES)
 	@# Verify that there's no .build already \
@@ -31,6 +32,10 @@ svtplay-dl: $(PYFILES)
 		install -d ".build/$${py%/*}"; \
 		install $$py .build/$$py; \
 	done
+
+	# Add git version info to __version__, seen in --version
+	sed -i -e 's/^__version__ = \(.*\)$$/__version__ = "$(VERSION)"/' \
+		.build/svtplay_dl/__init__.py
 
 	@# reset timestamps, to avoid non-determinism in zip file
 	find .build/ -exec touch -m -t 198001010000 {} \;

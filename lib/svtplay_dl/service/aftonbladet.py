@@ -3,69 +3,59 @@
 from __future__ import absolute_import
 import re
 import json
-import copy
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import decode_html_entities
+from svtplay_dl.utils.text import decode_html_entities
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.hls import HLS, hlsparse
+from svtplay_dl.fetcher.hls import hlsparse
 
 
-class Aftonbladet(Service):
-    supported_domains = ['tv.aftonbladet.se']
+class Aftonbladettv(Service):
+    supported_domains = ["svd.se"]
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
-
-        match = re.search('data-aptomaId="([-0-9a-z]+)"', data)
+        match = re.search('data-player-config="([^"]+)"', data)
         if not match:
-            match = re.search('data-player-config="([^"]+)"', data)
+            match = re.search('data-svpPlayer-video="([^"]+)"', data)
             if not match:
                 yield ServiceError("Can't find video info")
                 return
-            janson = json.loads(decode_html_entities(match.group(1)))
-            videoId = janson["videoId"]
-        else:
-            videoId = match.group(1)
-            match = re.search(r'data-isLive="(\w+)"', data)
-            if not match:
-                yield ServiceError("Can't find live info")
-                return
-            if match.group(1) == "true":
-                options.live = True
+        data = json.loads(decode_html_entities(match.group(1)))
+        streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
+        for n in list(streams.keys()):
+            yield streams[n]
 
-        if not options.live:
-            dataurl = "http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/%s.json" % videoId
-            data = self.http.request("get", dataurl).text
-            data = json.loads(data)
-            videoId = data["videoId"]
 
-        streamsurl = "http://aftonbladet-play-static-ext.cdn.drvideo.aptoma.no/actions/video/?id=%s&formats&callback=" % videoId
-        data = self.http.request("get", streamsurl).text
-        streams = json.loads(data)
-        hlsstreams = streams["formats"]["hls"]
-        if "level3" in hlsstreams.keys():
-            hls = hlsstreams["level3"]
-        else:
-            hls = hlsstreams["akamai"]
-        if "csmil" in hls.keys():
-            hls = hls["csmil"][0]
-        else:
-            hls = hls["m3u8"][0]
-        address = hls["address"]
-        path = hls["path"]
+class Aftonbladet(Service):
+    supported_domains = ["aftonbladet.se", "tv.aftonbladet.se"]
 
-        for i in hls["files"]:
-            if "filename" in i.keys():
-                plist = "http://%s/%s/%s/master.m3u8" % (address, path, i["filename"])
-            else:
-                plist = "http://%s/%s/%s" % (address, path, hls["filename"])
+    def get(self):
+        data = self.get_urldata()
 
-            streams = hlsparse(plist, self.http.request("get", plist).text)
-            if streams:
-                for n in list(streams.keys()):
-                    yield HLS(copy.copy(options), streams[n], n)
+        match = re.search('window.FLUX_STATE = ({.*})</script>', data)
+        if not match:
+            yield ServiceError("Can't find video info")
+            return
+
+        try:
+            janson = json.loads(match.group(1))
+        except json.decoder.JSONDecodeError:
+            yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
+            return
+
+        videos = self._get_video(janson)
+        for i in videos:
+            yield i
+
+    def _get_video(self, janson):
+        collections = janson["collections"]
+        for n in list(collections.keys()):
+            contents = collections[n]["contents"]["items"]
+            for i in list(contents.keys()):
+                if "type" in contents[i] and contents[i]["type"] == "video":
+                    streams = hlsparse(self.config, self.http.request("get", contents[i]["videoAsset"]["streamUrls"]["hls"]),
+                                       contents[i]["videoAsset"]["streamUrls"]["hls"], output=self.output)
+                    for key in list(streams.keys()):
+                        yield streams[key]

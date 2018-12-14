@@ -1,41 +1,30 @@
 from __future__ import absolute_import
-import copy
 import os
+import re
 
 from svtplay_dl.service import Service
 from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.fetcher.hls import hlsparse, HLS
-from svtplay_dl.log import log
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.dash import dashparse
 
 
 class Raw(Service):
-    def get(self, options):
-        data = self.get_urldata()
+    def get(self):
+        filename = os.path.basename(self.url[:self.url.rfind("/")])
+        self.output["title"] = filename
 
-        if self.exclude(options):
-            return
+        streams = []
+        if re.search(".f4m", self.url):
+            self.output["ext"] = "flv"
+            streams.append(hdsparse(self.config, self.http.request("get", self.url, params={"hdcore": "3.7.0"}), self.url, output=self.output))
 
-        extention = False
-        filename = os.path.basename(self.url[:self.url.rfind("/")-1])
-        if options.output and os.path.isdir(options.output):
-            options.output = os.path.join(os.path.dirname(options.output), filename)
-            extention = True
-        elif options.output is None:
-            options.output = "%s" % filename
-            extention = True
+        if re.search(".m3u8", self.url):
+            streams.append(hlsparse(self.config, self.http.request("get", self.url), self.url, output=self.output))
 
-        if self.url.find(".f4m") > 0:
-            if extention:
-                options.output = "%s.flv" % options.output
+        if re.search(".mpd", self.url):
+            streams.append(dashparse(self.config, self.http.request("get", self.url), self.url, output=self.output))
 
-            streams = hdsparse(copy.copy(options), self.http.request("get", self.url, params={"hdcore": "3.7.0"}).text, self.url)
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
-        if self.url.find(".m3u8") > 0:
-            streams = hlsparse(self.url, self.http.request("get", self.url).text)
-            if extention:
-                options.output = "%s.ts" % options.output
-
-            for n in list(streams.keys()):
-                yield HLS(copy.copy(options), streams[n], n)
+        for stream in streams:
+            if stream:
+                for n in list(stream.keys()):
+                    yield stream[n]

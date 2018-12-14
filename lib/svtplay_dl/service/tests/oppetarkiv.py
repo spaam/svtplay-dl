@@ -21,4 +21,3 @@ class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
             "http://www.svtplay.se/video/1090393/del-9"
         ]
     }
-

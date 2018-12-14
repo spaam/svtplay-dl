@@ -6,7 +6,6 @@ import copy
 import xml.etree.ElementTree as ET
 
 from svtplay_dl.service import Service
-from svtplay_dl.utils import is_py2_old
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
@@ -14,7 +13,7 @@ from svtplay_dl.error import ServiceError
 class Mtvservices(Service):
     supported_domains = ['colbertnation.com', 'thedailyshow.com']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
 
         match = re.search(r"mgid=\"(mgid.*[0-9]+)\" data-wi", data)
@@ -27,16 +26,9 @@ class Mtvservices(Service):
         data = data[start:]
         xml = ET.XML(data)
         ss = xml.find("video").find("item")
-        if is_py2_old:
-            sa = list(ss.getiterator("rendition"))
-        else:
-            sa = list(ss.iter("rendition"))
-
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
+        sa = list(ss.iter("rendition"))
 
         for i in sa:
             temp = i.find("src").text.index("gsp.comedystor")
-            url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/%s" % i.find("src").text[temp:]
-            yield HTTP(copy.copy(options), url, i.attrib["height"])
+            url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/{0}".format(i.find("src").text[temp:])
+            yield HTTP(copy.copy(self.config), url, i.attrib["height"], output=self.output)

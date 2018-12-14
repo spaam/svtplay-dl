@@ -4,9 +4,9 @@ from __future__ import absolute_import
 import re
 import json
 import copy
+from urllib.parse import unquote_plus
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.utils.urllib import unquote_plus
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
 
@@ -14,19 +14,14 @@ from svtplay_dl.error import ServiceError
 class Youplay(Service, OpenGraphThumbMixin):
     supported_domains = ['www.affarsvarlden.se']
 
-    def get(self, options):
+    def get(self):
         data = self.get_urldata()
-
-        if self.exclude(options):
-            yield ServiceError("Excluding video")
-            return
-
         match = re.search(r'script async defer src="(//content.youplay.se[^"]+)"', data)
         if not match:
-            yield ServiceError("Cant find video info for %s" % self.url)
+            yield ServiceError("Cant find video info for {0}".format(self.url))
             return
 
-        data = self.http.request("get", "http:%s" % match.group(1)).content
+        data = self.http.request("get", "http:{0}".format(match.group(1)).content)
         match = re.search(r'decodeURIComponent\("([^"]+)"\)\)', data)
         if not match:
             yield ServiceError("Can't decode video info")
@@ -34,7 +29,7 @@ class Youplay(Service, OpenGraphThumbMixin):
         data = unquote_plus(match.group(1))
         match = re.search(r"videoData = ({[^;]+});", data)
         if not match:
-            yield ServiceError("Cant find video info for %s" % self.url)
+            yield ServiceError("Cant find video info for {0}".format(self.url))
             return
         # fix broken json.
         regex = re.compile(r"\s(\w+):")
@@ -47,4 +42,4 @@ class Youplay(Service, OpenGraphThumbMixin):
         for i in jsondata["episode"]["sources"]:
             match = re.search(r"mp4_(\d+)", i)
             if match:
-                yield HTTP(copy.copy(options), jsondata["episode"]["sources"][i], match.group(1))
+                yield HTTP(copy.copy(self.config), jsondata["episode"]["sources"][i], match.group(1), output=self.output)

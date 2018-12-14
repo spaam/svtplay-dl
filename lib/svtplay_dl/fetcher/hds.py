@@ -3,30 +3,20 @@
 from __future__ import absolute_import
 import base64
 import struct
-import logging
 import binascii
+import copy
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 
-from svtplay_dl.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils import is_py2_old, is_py2, is_py3
-from svtplay_dl.utils.urllib import urlparse
+from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.error import ServiceError
 
-log = logging.getLogger('svtplay_dl')
 
-if is_py2:
-    def bytes(string=None, encoding="ascii"):
-        if string is None:
-            return ""
-        return string
+def _chr(temp):
+    return chr(temp)
 
-    def _chr(temp):
-        return temp
-
-if is_py3:
-    def _chr(temp):
-        return chr(temp)
 
 class HDSException(UIException):
     def __init__(self, url, message):
@@ -40,21 +30,26 @@ class LiveHDSException(HDSException):
             url, "This is a live HDS stream, and they are not supported.")
 
 
-def hdsparse(options, data, manifest):
+def hdsparse(config, res, manifest, output=None):
     streams = {}
     bootstrap = {}
+
+    if not res:
+        return streams
+
+    if res.status_code >= 400:
+        streams[0] = ServiceError("Can't read HDS playlist. {0}".format(res.status_code))
+        return streams
+    data = res.text
+
     xml = ET.XML(data)
 
-    if is_py2_old:
-        bootstrapIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.getiterator("{http://ns.adobe.com/f4m/1.0}media")
-    else:
-        bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
-        mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
+    bootstrapIter = xml.iter("{http://ns.adobe.com/f4m/1.0}bootstrapInfo")
+    mediaIter = xml.iter("{http://ns.adobe.com/f4m/1.0}media")
 
     if xml.find("{http://ns.adobe.com/f4m/1.0}drmAdditionalHeader") is not None:
-        log.error("HDS DRM protected content.")
-        return
+        streams[0] = ServiceError("HDS DRM protected content.")
+        return streams
     for i in bootstrapIter:
         if "id" in i.attrib:
             bootstrap[i.attrib["id"]] = i.text
@@ -62,34 +57,37 @@ def hdsparse(options, data, manifest):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
+    url = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
-        if len(bootstrap) == 1:
-            bootstrapid = bootstrap["0"]
-        else:
-            bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
-        streams[int(i.attrib["bitrate"])] = HDS(options, i.attrib["url"], i.attrib["bitrate"], manifest=manifest, bootstrap=bootstrapid,
-                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text, querystring=querystring)
+        bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
+        streams[int(i.attrib["bitrate"])] = HDS(copy.copy(config), url, i.attrib["bitrate"], url_id=i.attrib["url"],
+                                                bootstrap=bootstrapid,
+                                                metadata=i.find("{http://ns.adobe.com/f4m/1.0}metadata").text,
+                                                querystring=querystring, cookies=res.cookies, output=output)
     return streams
 
 
 class HDS(VideoRetriever):
+    @property
     def name(self):
         return "hds"
 
     def download(self):
-        if self.options.live and not self.options.force:
+        self.output_extention = "flv"
+        if self.config.get("live") and not self.config.get("force"):
             raise LiveHDSException(self.url)
 
         querystring = self.kwargs["querystring"]
+        cookies = self.kwargs["cookies"]
         bootstrap = base64.b64decode(self.kwargs["bootstrap"])
         box = readboxtype(bootstrap, 0)
         antal = None
         if box[2] == b"abst":
             antal = readbox(bootstrap, box[0])
-        baseurl = self.kwargs["manifest"][0:self.kwargs["manifest"].rfind("/")]
+        baseurl = self.url[0:self.url.rfind("/")]
 
-        file_d = output(self.options, "flv")
-        if hasattr(file_d, "read") is False:
+        file_d = output(self.output, self.config, "flv")
+        if file_d is None:
             return
 
         metasize = struct.pack(">L", len(base64.b64decode(self.kwargs["metadata"])))[1:]
@@ -103,11 +101,11 @@ class HDS(VideoRetriever):
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "%s/%sSeg1-Frag%s?%s" % (baseurl, self.url, start, querystring)
-            if self.options.output != "-":
+            url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.kwargs["url_id"], start, querystring)
+            if not self.config.get("silent"):
                 eta.update(i)
                 progressbar(total, i, ''.join(["ETA: ", str(eta)]))
-            data = self.http.request("get", url)
+            data = self.http.request("get", url, cookies=cookies)
             if data.status_code == 404:
                 break
             data = data.content
@@ -116,9 +114,10 @@ class HDS(VideoRetriever):
             i += 1
             start += 1
 
-        if self.options.output != "-":
-            file_d.close()
+        file_d.close()
+        if not self.config.get("silent"):
             progress_stream.write('\n')
+        self.finished = True
 
 
 def readbyte(data, pos):
@@ -322,4 +321,3 @@ def decode_f4f(fragID, fragData):
         tagLen &= 0x00ffffff
         start += tagLen + 11 + 4
     return start
-
