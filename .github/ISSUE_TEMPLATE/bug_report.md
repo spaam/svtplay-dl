@@ -6,7 +6,7 @@ about: Create a report (only one bug per report)
 
 <!-- BUG TEMPLATE -->
 
-### svtplay-dl versions:
+### svtplay-dl version:
 
 Run `svtplay-dl --version`
 
