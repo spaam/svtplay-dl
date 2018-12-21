@@ -181,11 +181,11 @@ class postprocess(object):
             audio_filename = u"{0}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
+        arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
         if self.config.get("merge_subtitle"):
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
-                arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack),
-                              "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
+                arguments += ["-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
                               "-metadata:s:s:" + str(stream_num - 2), "language=" + language]
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
