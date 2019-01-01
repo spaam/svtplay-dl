@@ -85,7 +85,7 @@ def parser(version):
                          help="A header to add to each HTTP request.")
     general.add_argument("--remux", dest="remux", default=False, action="store_true",
                          help="Remux from one container to mp4 using ffmpeg or avconv")
-    general.add_argument("--output-format", dest="output_format", default='mp4', choices=['mp4','mkv'],
+    general.add_argument("--output-format", dest="output_format", default='mp4', choices=['mp4', 'mkv'],
                          help="format you want resulting file in (mkv or mp4), mkv will automatically invoke --remux")
     general.add_argument("--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...",
                          help="exclude videos with the WORD(s) in the filename. comma separated.")

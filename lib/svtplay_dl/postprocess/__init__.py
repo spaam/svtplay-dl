@@ -115,19 +115,20 @@ class postprocess(object):
             lang_codes = set([l['lang'] for l in langs])
             logging.info("Language codes: " + ', '.join(lang_codes))
         else:
-            logging.info("Language code: " +langs[0]['lang'])
+            logging.info("Language code: " + langs[0]['lang'])
         return langs
-    # TODO go through this
+
     def remux_mkv(self):
         # remux to mkv, mkvmerge prefered over ffmpeg
         # todo better error message/checking
-        if self.detect_mkvmerge: # and not self.config.get('prefered_mkv_tool', 'mkvmerge') == 'ffmpeg': # todo add something similar to this to allow config to overwrite priority
+        if self.detect_mkvmerge:
+            #  TODO add something similar to this to allow config to overwrite priority
+            #  and not self.config.get('prefered_mkv_tool', 'mkvmerge') == 'ffmpeg':
             self.remux_mkv_mkvmerge()
         else:
             logging.debug("Can't detect mkvmerge, using ffmpeg/avconv instead")
             self.remux_mkv_ffmpeg()  # no check needed here as the function will throw an error if ffmpeg/avconv not found
 
-    # TODO go through this
     def remux_mkv_ffmpeg(self):
         # mux to mkv with ffmpeg
         if self.detect_ffmpeg is None:
@@ -194,9 +195,6 @@ class postprocess(object):
             os.remove(orig_filename)
             os.rename(tempfile, new_name)
 
-
-
-    #TODO go through this
     def remux_mkv_mkvmerge(self):
         if self.detect_mkvmerge is None:  # this check will probably never be False  if called by remux()
             logging.error("Cant detect mkvmerge. Can't mux into matroska file without it.")

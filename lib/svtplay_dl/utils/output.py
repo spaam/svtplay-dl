@@ -118,6 +118,7 @@ def progressbar(total, pos, msg=""):
 def filename(stream):
     if stream.output["title"] is None:
         data = ensure_unicode(stream.get_urldata())
+
         if data is None:
             return False
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
