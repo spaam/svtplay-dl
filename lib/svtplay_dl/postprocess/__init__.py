@@ -462,11 +462,12 @@ class postprocess(object):
 
         cmd = [self.detect_ffmpeg, "-i", orig_filename, "-i", audio_filename]
         arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
+
         if self.config.get("merge_subtitle") and not self.mkv:
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
-                arguments +=  "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "copy",
-                              "-metadata:s:s:" + str(stream_num - 2), "language=" + language['lang']
+                arguments += ["-map", str(stream_num), "-c:s:" + str(stream_num - 2), "copy",
+                              "-metadata:s:s:" + str(stream_num - 2), "language=" + language['lang']]
                 if language['title']:
                     arguments += ["-metadata:s:s:" + str(stream_num), "title=" + language['title']]
                 cmd += ['-i', language['sub_file']]
