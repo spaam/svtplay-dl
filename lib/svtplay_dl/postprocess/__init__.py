@@ -324,18 +324,20 @@ class postprocess(object):
         tempfile = u"{0}.temp".format(orig_filename)
         name, ext = os.path.splitext(orig_filename)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
+
         if ext == ".ts":
             audio_filename = u"{0}.audio.ts".format(name)
             arguments += ["-bsf:a", "aac_adtstoasc"]
         else:
             audio_filename = u"{0}.m4a".format(name)
+
         cmd = [self.detect_ffmpeg, "-i", orig_filename, "-i", audio_filename]
+        arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
 
         if self.config.get("merge_subtitle") and not self.mkv:
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
-                arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack),
-                              "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
+                arguments += ["-map", str(stream_num), "-c:s:" + str(stream_num - 2), "mov_text",
                               "-metadata:s:s:" + str(stream_num - 2), "language=" + language['lang']]
 
                 cmd += ["-i", language['sub_file']]
@@ -459,13 +461,12 @@ class postprocess(object):
             audio_filename = u"{0}.m4a".format(name)
 
         cmd = [self.detect_ffmpeg, "-i", orig_filename, "-i", audio_filename]
-
+        arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
         if self.config.get("merge_subtitle") and not self.mkv:
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
-                arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack), "-map", str(stream_num),
-                              "-c:s:" + str(stream_num - 2), "copy",
-                              "-metadata:s:s:" + str(stream_num - 2), "language=" + language['lang']]
+                arguments +=  "-map", str(stream_num), "-c:s:" + str(stream_num - 2), "copy",
+                              "-metadata:s:s:" + str(stream_num - 2), "language=" + language['lang']
                 if language['title']:
                     arguments += ["-metadata:s:s:" + str(stream_num), "title=" + language['title']]
                 cmd += ['-i', language['sub_file']]
