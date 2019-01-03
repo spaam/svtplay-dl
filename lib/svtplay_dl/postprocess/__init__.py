@@ -186,7 +186,7 @@ class postprocess(object):
             if returncode != 0:
                 return
 
-            if self.config.get("merge_subtitle") and not self.config.get("external_subtitle"):
+            if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
                 logging.info("Muxing done, removing subtitle files.")
                 for lang in langs:
                     os.remove(lang['sub_file'])
@@ -243,7 +243,7 @@ class postprocess(object):
         if returncode != 0:
             return
 
-        if self.config.get("merge_subtitle") and not self.config.get("external_subtitle"):
+        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             logging.info("Muxing done, removing subtitle files.")
             for lang in langs:
                 os.remove(lang['sub_file'])
@@ -419,7 +419,7 @@ class postprocess(object):
         if returncode != 0:
             return
 
-        if self.config.get("merge_subtitle") and not self.config.get("external_subtitle"):
+        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             logging.info("Muxing done, removing subtitle files.")
             for lang in langs:
                 os.remove(lang['sub_file'])
@@ -482,7 +482,7 @@ class postprocess(object):
         logging.info("Merging done, removing old files.")
         os.remove(orig_filename)
         os.remove(audio_filename)
-        if self.config.get("merge_subtitle") and not self.config.get("external_subtitle") and not self.mkv:
+        if self.config.get("merge_subtitle") and not self.config.get("subtitle") and not self.mkv:
             for lang in langs:
                 os.remove(lang['sub_file'])
         os.rename(tempfile, new_filename)
