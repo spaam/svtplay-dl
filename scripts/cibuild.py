@@ -26,6 +26,7 @@ docker_username = os.environ.get("DOCKER_USERNAME")
 docker_password = os.environ.get("DOCKER_PASSWORD")
 aws_creds = os.environ.get("AWS_ACCESS_KEY_ID")
 
+travis = os.environ.get("TRAVIS", "")
 travis_tag = os.environ.get("TRAVIS_TAG", "")
 travis_branch = os.environ.get("TRAVIS_BRANCH", "")
 appveyor_tag = os.environ.get("APPVEYOR_REPO_TAG_NAME", "")
@@ -113,7 +114,8 @@ if branch() != "master":
 
 
 build_package()
-build_docker()
+if travis:
+    build_docker()
 aws_upload()
 
 if tag():
