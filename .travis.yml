@@ -15,6 +15,7 @@ cache: pip
 install:
 - pip install -r requirements-dev.txt -r requirements.txt awscli
 script:
+- python --version
 - flake8 --jobs 8 lib/svtplay_dl
 - nosetests -v --all-modules --with-doctest svtplay_dl
 - make
@@ -25,7 +26,7 @@ script:
   fi
 
 env:
-  matrix:
+  global:
   - secure: NqhAYBLkalelOFcSNdTaBuqXtQ2r0m9Lt5/V2tDZdtqPjur0H12DLsDIjt/X0jID6ci6LmdbXNZ97wz3D3KjBBeAuw5VRKiiZMPZTuOB5GdFRP/H6PmZYazGPHU2idFJLwG9JUhy+LMyzhpwyw/hruV1a2Udd7VT5fiPkf2hZ7A=
   - secure: bmNNj7iM/SFKROFVh6s9q877a2z+VtieCkmtdV8SzYfR1KwG27TwxRckSx9JKWfKMri+PvcF9jz9SFt7IMP3SJxM22pYVKKPJa164ze0IuQLAlhsrdNISe2CPOMJrXAq2SP6RTn/YfZnyv3vjxuLJDuG4IPD1Yosln+gBZgCvjk=
   - secure: AVwpii9rbPfEZ2HpanR9DMRf+0ica2BMui454XL4sgdXkfzkocOvw46ztT+XNpb25fpcfTC/hDOtyFeobNFH8E2DreM8h8kn7pqFCJeGAS8OkbDESAS2HApe1VqJj8xMQCKdZz/B25Ye1Lannqamxrt5Nai6lgQaaBeaXifb6/Q=
