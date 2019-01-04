@@ -22,7 +22,7 @@ install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install -U pip setuptools"
   - "pip install -r requirements-dev.txt -r requirements.txt"
-  - "pip install cx_freeze awscli"
+  - "pip install cx_freeze awscli backports-datetime-fromisoformat"
   - "git describe --tags --dirty --always"
 
 test_script:
