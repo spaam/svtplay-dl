@@ -7,6 +7,10 @@ import logging
 import sys
 import glob
 from datetime import datetime
+if sys.version_info[0] == 3 and sys.version_info[1] < 7:
+    from backports.datetime_fromisoformat import MonkeyPatch
+    MonkeyPatch.patch_fromisoformat()
+
 
 root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 logging.basicConfig(level=logging.INFO)
