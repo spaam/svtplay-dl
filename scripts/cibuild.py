@@ -108,7 +108,7 @@ def pypi_upload():
     subprocess.check_call(["twine", "upload", sdist])
 
 
-if branch() is not "master":
+if branch() != "master":
     sys.exit(0)
 
 
