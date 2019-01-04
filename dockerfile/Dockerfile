@@ -2,6 +2,9 @@
 # using testing repo to get pycryptodome
 FROM alpine:edge
 MAINTAINER spaam
+
+COPY dist/*.whl .
+
 RUN set -xe \
 	&& echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories  \
     && apk add --no-cache \
@@ -11,7 +14,8 @@ RUN set -xe \
         rtmpdump \
         py3-pycryptodome \
         ffmpeg \
-    && pip3 install svtplay-dl
+    && python3 -m pip install *.whl \
+    && rm -f *.whl
 
 WORKDIR /data
 
