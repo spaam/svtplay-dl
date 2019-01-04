@@ -64,7 +64,7 @@ def build_docker():
 def build_package():
     logger.info("Building python package")
     subprocess.check_output([
-        "python3", "setup.py", "-q", "sdist", "bdist_wheel"
+        "python", "setup.py", "-q", "sdist", "bdist_wheel"
     ])
 
 
