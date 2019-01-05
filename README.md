@@ -1,5 +1,6 @@
 # svtplay-dl
-
+[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)
+[![Build Status Travis](https://travis-ci.org/spaam/svtplay-dl.svg)](https://travis-ci.org/spaam/svtplay-dl/)
 
 ## Installation
 
