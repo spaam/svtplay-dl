@@ -20,7 +20,7 @@ script:
 - nosetests -v --all-modules --with-doctest svtplay_dl
 - make
 - |
-  if [[ $CIBUILD == "1" ]]
+  if [[ "$CIBUILD" == "1" && "$TRAVIS_PULL_REQUEST" == "false" ]]
   then
       python scripts/cibuild.py
   fi
