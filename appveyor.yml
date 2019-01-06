@@ -35,7 +35,7 @@ after_test:
   - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
   - "svtplay-dl\\svtplay-dl.exe --version"
   - "7z.exe a -tzip svtplay-dl.zip svtplay-dl"
-  - 'IF "%APPVEYOR_PULL_REQUEST_NUMBER%"="" python scripts/cibuild.py'
+  - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" python scripts/cibuild.py
 
 artifacts:
   - path: svtplay-dl.zip
