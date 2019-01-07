@@ -171,7 +171,6 @@ class postprocess(object):
                     arguments += ["-metadata:s:s:" + str(stream_num), "title=" + language['title']]
                 cmd += ['-i', language['sub_file']]
 
-
         arguments += ["-y", tempfile]
         cmd += arguments
 
@@ -505,7 +504,7 @@ class postprocess(object):
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         videotrack, audiotrack = self._checktracks(stderr)
 
-        arguments = ["-map","0:{}".format(audiotrack), "-c", "copy", "-f", "mp4", "-bsf:a", "aac_adtstoasc"]
+        arguments = ["-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4", "-bsf:a", "aac_adtstoasc"]
 
         logging.debug('Fixing bitstream for %s', audio_filename)
         cmd = [self.detect_ffmpeg, "-i", audio_filename]
