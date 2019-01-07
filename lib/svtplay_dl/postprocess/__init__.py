@@ -25,7 +25,6 @@ class postprocess(object):
             if self.detect_ffmpeg:
                 break
         self.detect_mkvmerge = which('mkvmerge')
-        # if not self.detect_mkvmerge()
 
     def sublanguage(self):
         # parse() function partly borrowed from a guy on github. /thanks!
@@ -92,7 +91,7 @@ class postprocess(object):
                         subfix1 = subfix.strip('-').split('.')[0]
                     else:
                         subfix1 = subfix.strip('-')
-                    # langs += [exceptions[subfix]]
+
                     lang['lang'] = exceptions[subfix1]
                     lang['sub_file'] = subfile
                     langs.append(lang)
@@ -130,7 +129,6 @@ class postprocess(object):
             self.remux_mkv_ffmpeg()  # no check needed here as the function will throw an error if ffmpeg/avconv not found
 
     def remux_mkv_ffmpeg(self):
-        # mux to mkv with ffmpeg
         if self.detect_ffmpeg is None:
             logging.error("Cant detect ffmpeg or avconv. Can't mux files without it.")
             return
@@ -139,19 +137,13 @@ class postprocess(object):
 
         self.mkv = True
         langs = []
+
         orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
         name, ext = os.path.splitext(orig_filename)
         new_name = orig_filename
         if formatname(self.stream.output, self.config, self.stream.output_extention).endswith('.mkv') is False:
             new_name = u"{0}.mkv".format(name)
 
-        # First remux to mp4 if .ts file to change bitstream of audio tracks
-        # this is technically only needed if we do not have a new version of ffmpeg it works with >3.0 at least.
-        # TODO figure out which version and add check to only run this if needed
-        if ext == '.ts':
-            logging.info('Changing bitstream for TS audio by muxing to MP4')
-            self.remux_mp4()
-            orig_filename = u"{0}.mp4".format(name)
         cmd = [self.detect_ffmpeg, "-i", orig_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         videotrack, audiotrack = self._checktracks(stderr)
@@ -179,21 +171,24 @@ class postprocess(object):
                     arguments += ["-metadata:s:s:" + str(stream_num), "title=" + language['title']]
                 cmd += ['-i', language['sub_file']]
 
-            arguments += ["-y", tempfile]
-            cmd += arguments
-            logging.debug('executing: %s', ' '.join(cmd))
-            returncode, stdout, stderr = run_program(cmd)
-            if returncode != 0:
-                return
 
-            if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
-                logging.info("Muxing done, removing subtitle files.")
-                for lang in langs:
-                    os.remove(lang['sub_file'])
+        arguments += ["-y", tempfile]
+        cmd += arguments
 
-            logging.info("Muxing done, removing the old video and audio files.")
-            os.remove(orig_filename)
-            os.rename(tempfile, new_name)
+        logging.debug('executing: %s', ' '.join(cmd))
+
+        returncode, stdout, stderr = run_program(cmd)
+        if returncode != 0:
+            return
+
+        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
+            logging.info("Muxing done, removing subtitle files.")
+            for lang in langs:
+                os.remove(lang['sub_file'])
+
+        logging.info("Muxing done, removing the old video and audio files.")
+        os.remove(orig_filename)
+        os.rename(tempfile, new_name)
 
     def remux_mkv_mkvmerge(self):
         if self.detect_mkvmerge is None:  # this check will probably never be False  if called by remux()
@@ -209,11 +204,6 @@ class postprocess(object):
         new_name = orig_filename
         if formatname(self.stream.output, self.config, self.stream.output_extention).endswith('.mkv') is False:
             new_name = u"{0}.mkv".format(name)
-
-        if ext == '.ts':
-            logging.info('Changing bitstream for TS audio by muxing to MP4 first')
-            self.remux_mp4()
-            orig_filename = u"{0}.mp4".format(name)
 
         cmd = [self.detect_mkvmerge, orig_filename]
         tempfile = u"{0}.temp".format(name)
@@ -383,10 +373,9 @@ class postprocess(object):
             new_name = u"{0}.mkv".format(name)
 
         tempfile = u"{0}.temp".format(orig_filename)
-        # new_name = u"{0}.mkv".format(name)
 
         if ext == '.ts':
-            logging.info('Chaning bitstream for TS audio with ffmpeg/avconv')
+            logging.debug('changing bitstream for TS audio with ffmpeg/avconv')
             self._clean_ts_audio()
             audio_filename = u"{0}.audio.mp4".format(name)
         else:
@@ -508,14 +497,17 @@ class postprocess(object):
 
         orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
         name, ext = os.path.splitext(orig_filename)
+        audio_filename = u"{0}.audio.ts".format(name)
         tempfile = u"{0}.temp".format(name)
-        arguments = ["-c:a", "copy", "-f", "mp4", "-bsf:a", "aac_adtstoasc"]
-        audio_filename = u"{0}.audio.mp4".format(name)
+        new_audio_filename = u"{0}.audio.mp4".format(name)
+
         cmd = [self.detect_ffmpeg, "-i", audio_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         videotrack, audiotrack = self._checktracks(stderr)
 
-        logging.info('Fixing bitstream for %s', audio_filename)
+        arguments = ["-map","0:{}".format(audiotrack), "-c", "copy", "-f", "mp4", "-bsf:a", "aac_adtstoasc"]
+
+        logging.debug('Fixing bitstream for %s', audio_filename)
         cmd = [self.detect_ffmpeg, "-i", audio_filename]
 
         arguments += ["-y", tempfile]
@@ -527,4 +519,4 @@ class postprocess(object):
 
         logging.info("Audio cleaning done, removing old files.")
         os.remove(audio_filename)
-        os.rename(tempfile, audio_filename)
+        os.rename(tempfile, new_audio_filename)
