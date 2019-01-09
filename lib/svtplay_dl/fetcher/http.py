@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+import os
 
 from svtplay_dl.utils.output import ETA, progressbar, output
 from svtplay_dl.fetcher import VideoRetriever
@@ -13,7 +14,11 @@ class HTTP(VideoRetriever):
 
     def download(self):
         """ Get the stream from HTTP """
-        self.output_extention = "mp4"  # this might be wrong..
+        _, ext = os.path.splitext(self.url)
+        if ext == ".mp3":
+            self.output_extention = "mp3"
+        else:
+            self.output_extention = "mp4"  # this might be wrong..
         data = self.http.request("get", self.url, stream=True)
         try:
             total_size = data.headers['content-length']
@@ -22,7 +27,7 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.output, self.config, "mp4")
+        file_d = output(self.output, self.config, self.output_extention)
         if file_d is None:
             return
 
