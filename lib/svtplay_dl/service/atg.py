@@ -41,4 +41,4 @@ class Atg(Service):
                     stream = hlsparse(self.config, self.http.request("get", janson["urls"]["m3u"]), janson["urls"]["m3u"], output=self.output)
 
                     for key in list(stream.keys()):
-                            yield stream[key]
+                        yield stream[key]

@@ -141,7 +141,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
 
                     hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                     stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
-                    if stream:
 
+                    if stream:
                         for key in list(stream.keys()):
-                                yield stream[key]
+                            yield stream[key]
