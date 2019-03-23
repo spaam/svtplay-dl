@@ -127,14 +127,11 @@ class HLS(VideoRetriever):
         key = None
 
         if m3u8.encrypted:
-            from Crypto.Cipher import AES
+            from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+            from cryptography.hazmat.backends import default_backend
 
         def random_iv():
-            try:
-                from Crypto import Random
-                return Random.new().read(AES.block_size)
-            except ImportError:
-                return os.urandom(16)
+            return os.urandom(16)
         file_d = output(file_name[0], self.config, file_name[1])
         if file_d is None:
             return
@@ -180,10 +177,12 @@ class HLS(VideoRetriever):
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
                     iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else random_iv()
-                    decryptor = AES.new(key, AES.MODE_CBC, iv)
+                    backend = default_backend()
+                    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+                    decryptor = cipher.decryptor()
 
                 if decryptor:
-                    data = decryptor.decrypt(data)
+                    data = decryptor.update(data) + decryptor.finalize()
                 else:
                     raise ValueError("No decryptor found for encrypted hls steam.")
 
