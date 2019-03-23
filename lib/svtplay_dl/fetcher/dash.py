@@ -168,11 +168,11 @@ def _dashparse(config, text, url, output, cookies):
             duration_sec = (parse_dates(mediaPresentationDuration) - datetime(1900, 1, 1)).total_seconds()
 
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
-    if len(temp) is 0:
+    if len(temp) == 0:
         temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="audio"]')
     audiofiles = adaptionset(temp, url, baseurl, offset_sec, duration_sec)
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
-    if len(temp) is 0:
+    if len(temp) == 0:
         temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="video"]')
     videofiles = adaptionset(temp, url, baseurl, offset_sec, duration_sec)
 
