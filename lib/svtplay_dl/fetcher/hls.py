@@ -182,7 +182,7 @@ class HLS(VideoRetriever):
                     decryptor = cipher.decryptor()
 
                 if decryptor:
-                    data = decryptor.update(data) + decryptor.finalize()
+                    data = decryptor.update(data)
                 else:
                     raise ValueError("No decryptor found for encrypted hls steam.")
 
