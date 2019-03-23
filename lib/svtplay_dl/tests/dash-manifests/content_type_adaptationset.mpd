@@ -1,0 +1,81 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="static" mediaPresentationDuration="PT28M32S" minBufferTime="PT2S">
+  <Period id="0">
+    <AdaptationSet id="0" contentType="video" segmentAlignment="true" frameRate="90000/3600" par="16:9" maxWidth="1280" maxHeight="720">
+      <Representation id="0" bandwidth="161408" width="512" height="288" codecs="avc1.42c015" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video3/cmaf-video3-init.mp4" media="cmaf-video3/cmaf-video3-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="1" bandwidth="281207" width="512" height="288" codecs="avc1.42c016" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video1/cmaf-video1-init.mp4" media="cmaf-video1/cmaf-video1-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="2" bandwidth="603959" width="512" height="288" codecs="avc1.42c016" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video0/cmaf-video0-init.mp4" media="cmaf-video0/cmaf-video0-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="3" bandwidth="1054454" width="768" height="432" codecs="avc1.4d401e" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video2/cmaf-video2-init.mp4" media="cmaf-video2/cmaf-video2-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="4" bandwidth="1861345" width="1280" height="720" codecs="avc1.4d401f" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video4/cmaf-video4-init.mp4" media="cmaf-video4/cmaf-video4-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="5" bandwidth="3171622" width="1280" height="720" codecs="avc1.4d401f" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video5/cmaf-video5-init.mp4" media="cmaf-video5/cmaf-video5-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="7" bandwidth="402165" width="512" height="288" codecs="avc1.42c016" sar="1:1" mimeType="video/mp4">
+        <SegmentTemplate initialization="cmaf-video6/cmaf-video6-init.mp4" media="cmaf-video6/cmaf-video6-$Number$.mp4" startNumber="1" timescale="90000">
+          <SegmentTimeline>
+            <S t="0" d="576000" r="266"/>
+            <S t="153792000" d="288000"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio" segmentAlignment="true" lang="sv">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <Representation id="6" bandwidth="97279" codecs="mp4a.40.2" audioSamplingRate="48000" mimeType="audio/mp4">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SegmentTemplate initialization="cmaf-audio0/cmaf-audio0-init.mp4" media="cmaf-audio0/cmaf-audio0-$Number$.mp4" startNumber="1" timescale="48000">
+          <SegmentTimeline>
+            <S t="0" d="307200" r="266"/>
+            <S t="82022400" d="153168"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="2" contentType="text" mimeType="text/vtt" lang="sv">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="subtitle"/>
+      <Representation id="8" bandwidth="0">
+        <BaseURL>text/closed.vtt</BaseURL>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
+
