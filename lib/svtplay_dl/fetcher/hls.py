@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 import binascii
 
 import random
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.utils.http import get_full_url
@@ -125,10 +127,6 @@ class HLS(VideoRetriever):
         start_time = time.time()
         m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
         key = None
-
-        if m3u8.encrypted:
-            from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-            from cryptography.hazmat.backends import default_backend
 
         def random_iv():
             return os.urandom(16)
