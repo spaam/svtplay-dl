@@ -52,7 +52,7 @@ If you want to build your own Windows binaries:
 3. Follow the steps listed under [From source](#from-source)
 4. cd path\to\svtplay-dl && mkdir build
 5. `python setversion.py`  # this will change the version string to a more useful one
-5. `python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=build bin/svtplay-dl`
+5. `python %PYTHON%\\Scripts\\cxfreeze --include-modules=cffi,queue,idna.idnadata --target-dir=build bin/svtplay-dl`
 6. Find binary in build folder. you need `svtplay-dl.exe` and `pythonXX.dll` from that folder to run `svtplay-dl.exe`
 
 ### Other systems with python

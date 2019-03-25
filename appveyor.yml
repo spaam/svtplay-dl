@@ -32,7 +32,7 @@ test_script:
 after_test:
   - "mkdir svtplay-dl"
   - "python setversion.py"
-  - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
+  - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=cffi,queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
   - "svtplay-dl\\svtplay-dl.exe --version"
   - "7z.exe a -tzip svtplay-dl.zip svtplay-dl"
   - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" python scripts/cibuild.py
