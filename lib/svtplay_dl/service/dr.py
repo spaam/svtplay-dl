@@ -143,4 +143,3 @@ class Dr(Service, OpenGraphThumbMixin):
         decryptor = cipher.decryptor()
         decrypted = decryptor.update(data)
         return decrypted[:-decrypted[-1]].decode('utf-8')
-
