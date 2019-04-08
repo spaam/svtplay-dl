@@ -276,40 +276,39 @@ class subtitle(object):
                 if 'X-TIMESTAMP-MAP=MPEGTS' in t:
                     time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
             text = text[3:len(text) - 2]
+            itmes = []
             if len(text) > 1:
-                itmes = []
                 for n in text:
-                    if n:
+                    if n:  # don't get the empty lines.
                         itmes.append(n)
-                    else:
-                        if len(subs) > 1 and len(itmes) < 2:  # Ignore empty lines in unexpected places
-                            pass
-                        elif len(subs) > 1 and itmes[1] == subs[-1][1]:  # This will happen when there are two sections in file
-                            ha = strdate(subs[-1][0])
-                            ha3 = strdate(itmes[0])
-                            second = str2sec(ha3.group(2)) + time
-                            subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
-                            itmes = []
-                        else:
-                            ha = strdate(itmes[0])
-                            first = str2sec(ha.group(1)) + time
-                            second = str2sec(ha.group(2)) + time
-                            itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
-                            subs.append(itmes)
-                            itmes = []
-                if itmes:
-                    if len(subs) > 0 and itmes[1] == subs[-1][1]:
-                        ha = strdate(subs[-1][0])
-                        ha3 = strdate(itmes[0])
-                        second = str2sec(ha3.group(2)) + time
-                        subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
-                    else:
-                        ha = strdate(itmes[0])
-                        first = str2sec(ha.group(1)) + time
-                        second = str2sec(ha.group(2)) + time
-                        itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
-                        subs.append(itmes)
 
+            itemsn = 0
+            several_items = False
+            sub = []
+
+            for x in range(len(itmes)):
+                item = itmes[itemsn]
+                if strdate(item) and len(subs) > 0 and itmes[itemsn + 1] == subs[-1][1]:
+                    ha = strdate(subs[-1][0])
+                    ha3 = strdate(item)
+                    second = str2sec(ha3.group(2)) + time
+                    subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                    continue
+                else:
+                    has_date = strdate(item)
+                    if has_date:
+                        if several_items:
+                            subs.append(sub)
+                            sub = []
+                        first = str2sec(has_date.group(1)) + time
+                        second = str2sec(has_date.group(2)) + time
+                        sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
+                        several_items = True
+                    elif has_date is None:
+                        sub.append(item)
+                itemsn += 1
+            if sub:
+                subs.append(sub)
         string = ""
         nr = 1
         for sub in subs:
