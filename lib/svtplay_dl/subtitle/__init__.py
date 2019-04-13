@@ -282,31 +282,32 @@ class subtitle(object):
                     if n:  # don't get the empty lines.
                         itmes.append(n)
 
-            itemsn = 0
             several_items = False
+            skip = False
             sub = []
 
             for x in range(len(itmes)):
-                item = itmes[itemsn]
-                if strdate(item) and len(subs) > 0 and itmes[itemsn + 1] == subs[-1][1]:
+                item = itmes[x]
+                if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
                     ha = strdate(subs[-1][0])
                     ha3 = strdate(item)
                     second = str2sec(ha3.group(2)) + time
                     subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                    skip = True
                     continue
-                else:
-                    has_date = strdate(item)
-                    if has_date:
-                        if several_items:
-                            subs.append(sub)
-                            sub = []
-                        first = str2sec(has_date.group(1)) + time
-                        second = str2sec(has_date.group(2)) + time
-                        sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
-                        several_items = True
-                    elif has_date is None:
-                        sub.append(item)
-                itemsn += 1
+                has_date = strdate(item)
+                if has_date:
+                    if several_items:
+                        subs.append(sub)
+                        sub = []
+                    skip = False
+                    first = str2sec(has_date.group(1)) + time
+                    second = str2sec(has_date.group(2)) + time
+                    sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
+                    several_items = True
+                elif has_date is None and skip is False:
+                    sub.append(item)
+
             if sub:
                 subs.append(sub)
         string = ""
