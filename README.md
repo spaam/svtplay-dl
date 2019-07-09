@@ -87,12 +87,12 @@ svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
--  [Python](https://www.python.org/) 3.4 or higher
--  [cryptography](https://cryptography.io/en/latest/) to download encrypted HLS streams
+-  [Python](https://www.python.org) 3.4 or higher
+-  [cryptography](https://cryptography.io/en/latest) to download encrypted HLS streams
 -  [PyYaml](https://github.com/yaml/pyyaml) for configure file
--  [Requests](http://www.python-requests.org/)
+-  [Requests](https://2.python-requests.org)
 -  [PySocks](https://github.com/Anorov/PySocks) to enable proxy support
--  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org/) for postprocessing and/or for DASH streams
+-  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org) for postprocessing and/or for DASH streams ([ffmpeg](https://ffmpeg.zeranoe.com) for Windows)
 
 ##### To install it, run:
 
