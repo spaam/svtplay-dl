@@ -55,7 +55,7 @@ def get_media(url, options, version="Unknown"):
     else:
         get_one_media(stream)
 
-		
+
 def get_all_episodes(stream, url, options):
     name = os.path.dirname(formatname({"basedir": True}, stream.config))
 
