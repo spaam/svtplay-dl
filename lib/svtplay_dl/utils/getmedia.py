@@ -51,12 +51,12 @@ def get_media(url, options, version="Unknown"):
             sys.exit(2)
 
     if options.get("all_episodes") or stream.config.get("all_episodes"):
-        get_all_episodes(stream, url)
+        get_all_episodes(stream, url, options)
     else:
         get_one_media(stream)
 
-
-def get_all_episodes(stream, url):
+		
+def get_all_episodes(stream, url, options):
     name = os.path.dirname(formatname({"basedir": True}, stream.config))
 
     if name and os.path.isfile(name):
@@ -81,8 +81,9 @@ def get_all_episodes(stream, url):
         logging.info("Episode %d of %d", idx + 1, len(episodes))
         logging.info("Url: %s", o)
 
-        # get_one_media overwrites options.output...
-        get_one_media(substream)
+        if not (options.get("get_url") and options.get("get_only_episode_url")):
+            # get_one_media overwrites options.output...
+            get_one_media(substream)
 
 
 def get_one_media(stream):

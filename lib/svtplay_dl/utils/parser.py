@@ -79,6 +79,9 @@ def parser(version):
                          help="download thumbnail from the site if available")
     general.add_argument("-g", "--get-url", action="store_true", dest="get_url", default=False,
                          help="do not download any video, but instead print the URL.")
+    general.add_argument("--get-only-episode-url",
+                         action="store_true", dest="get_only_episode_url", default=False,
+                         help="do not get video URLs, only print the episode URL.")
     general.add_argument("--dont-verify-ssl-cert", action="store_false", dest="ssl_verify", default=True,
                          help="Don't attempt to verify SSL certificates.")
     general.add_argument("--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2",
@@ -186,6 +189,7 @@ def setup_defaults():
     options.set("exclude", None)
     options.set("after_date", None)
     options.set("get_url", False)
+    options.set("get_only_episode_url", False)
     options.set("ssl_verify", True)
     options.set("http_headers", None)
     options.set("stream_prio", None)
@@ -227,6 +231,7 @@ def parsertoconfig(config, parser):
     config.set("exclude", parser.exclude)
     config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)
+    config.set("get_only_episode_url", parser.get_only_episode_url)
     config.set("ssl_verify", parser.ssl_verify)
     config.set("http_headers", parser.http_headers)
     config.set("stream_prio", parser.stream_prio)
