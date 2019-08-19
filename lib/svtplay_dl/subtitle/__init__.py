@@ -49,10 +49,8 @@ class subtitle(object):
             data = self.smi(subdata)
         if self.subtype == "wrst":
             if "tv4play" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
-                subdata.encoding = "utf-8"
                 self.bom = True
-            if "dplay" in self.url:
-                subdata.encoding = "utf-8"
+            subdata.encoding = subdata.apparent_encoding
             data = self.wrst(subdata)
         if self.subtype == "wrstsegment":
             data = self.wrstsegment(subdata)
@@ -73,10 +71,7 @@ class subtitle(object):
         self.save_file(data, "srt")
 
     def save_file(self, data, subtype):
-        if platform.system() == "Windows":
-            file_d = output(self.output, self.config, subtype, mode="wt", encoding="utf-8")
-        else:
-            file_d = output(self.output, self.config, subtype, mode="wt")
+        file_d = output(self.output, self.config, subtype, mode="w", encoding="utf-8")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
