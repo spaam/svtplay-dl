@@ -10,7 +10,6 @@ from svtplay_dl.utils.output import output
 
 
 from requests import __build__ as requests_version
-import platform
 
 
 class subtitle(object):
