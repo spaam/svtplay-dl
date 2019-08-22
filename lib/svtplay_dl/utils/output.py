@@ -118,6 +118,7 @@ def progressbar(total, pos, msg=""):
 def filename(stream):
     if stream.output["title"] is None:
         data = ensure_unicode(stream.get_urldata())
+
         if data is None:
             return False
         match = re.search(r"(?i)<title[^>]*>\s*(.*?)\s*</title>", data, re.S)
@@ -196,7 +197,7 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
     if not os.path.isdir(dir):
         # Create directory, needed for creating tvshow subfolder
         os.makedirs(dir)
-    if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)):
+    if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name), config.get('filename')):
         if extension in subtitlefiles:
             if not config.get("force_subtitle"):
                 if not (config.get("silent") or config.get("silent_semi")):
@@ -211,7 +212,7 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
     return file_d
 
 
-def findexpisode(output, directory, name):
+def findexpisode(output, directory, name, filename_format):
     subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
 
     orgname, orgext = os.path.splitext(name)
@@ -220,14 +221,25 @@ def findexpisode(output, directory, name):
     for i in files:
         lsname, lsext = os.path.splitext(i)
         if output["service"]:
+            # TODO Add check here if we do not include id and service in filename
+            # (but might not be needed as check if file exist should cover that)
             if orgext[1:] in subtitlefiles:
                 if output["id"] and name.find(output["service"]) > 0 and lsname.find(output["service"]) > 0 and \
                         name.find(output["id"]) > 0 and lsname.find(output["id"]) > 0 and \
                         orgext == lsext:
                     return True
             elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
-                if output["id"] and output["service"]:
-                    if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
+                # todo remove duplicated code here
+                # if we include service and id in filename match for that.
+                if filename_format.find('{id}') > 0 and filename_format.find('{service}') > 0 \
+                        and output["id"] and output["service"]:
+                    if lsname.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
+                        if lsext == ".ts" and orgext == lsext and lsname.find(".audio") > 0:
+                            return False
+                        return True
+                else:
+                    # If id and service not included in filename, compare plain filename without extension
+                    if lsname == orgname:
                         if lsext == ".ts" and orgext == lsext and lsname.find(".audio"):
                             return False
                         return True

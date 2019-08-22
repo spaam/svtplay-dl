@@ -85,6 +85,8 @@ def parser(version):
                          help="A header to add to each HTTP request.")
     general.add_argument("--remux", dest="remux", default=False, action="store_true",
                          help="Remux from one container to mp4 using ffmpeg or avconv")
+    general.add_argument("--output-format", dest="output_format", default='mp4', choices=['mp4', 'mkv'],
+                         help="format you want resulting file in (mkv or mp4), mkv will automatically invoke --remux")
     general.add_argument("--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...",
                          help="exclude videos with the WORD(s) in the filename. comma separated.")
     general.add_argument("--after-date", dest="after_date", default=None, metavar="yyyy-MM-dd",
@@ -153,6 +155,7 @@ def parser(version):
 def setup_defaults():
     options = Options()
     options.set("output", None)
+    options.set("output_format", 'mp4')
     options.set("subfolder", False)
     options.set("configfile", CONFIGFILE)
     options.set("resume", False)
@@ -231,6 +234,7 @@ def parsertoconfig(config, parser):
     config.set("http_headers", parser.http_headers)
     config.set("stream_prio", parser.stream_prio)
     config.set("remux", parser.remux)
+    config.set("output_format", parser.output_format)
     config.set("get_all_subtitles", parser.get_all_subtitles)
     config.set("get_raw_subtitles", parser.get_raw_subtitles)
     config.set("convert_subtitle_colors", parser.convert_subtitle_colors)
@@ -249,7 +253,8 @@ def _special_settings(config):
             config.set("subtitle", True)
     if config.get("merge_subtitle"):
         config.set("remux", True)
-
+    if config.get('output_format') == 'mkv':
+        config.set('remux', True)
     if config.get("silent_semi"):
         config.set("silent", True)
 

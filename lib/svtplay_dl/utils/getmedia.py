@@ -215,11 +215,18 @@ def get_one_media(stream):
             stream.get_thumbnail(stream.config)
 
         post = postprocess(fstream, fstream.config, subfixes)
-        if fstream.audio and post.detect:
-            post.merge()
-        if fstream.audio and not post.detect and fstream.finished:
+        if fstream.audio and (post.detect_ffmpeg or post.detect_mkvmerge):  # TODO improve this (might break if ffmpeg not exist)
+            if stream.config.get("output_format") == 'mkv':
+                post.merge_mkv()
+            else:
+                post.merge_mp4()
+
+        if fstream.audio and not post.detect_ffmpeg and fstream.finished:  # TODO add some mkvmerge check here as well.
             logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-        if fstream.name == "hls" or fstream.config.get("remux"):
-            post.remux()
+        if fstream.name == "hls" or fstream.config.get("remux") and not fstream.audio:
+            if stream.config.get("output_format") == 'mkv':
+                post.remux_mkv()
+            else:
+                post.remux_mp4()
         if fstream.config.get("silent_semi") and fstream.finished:
             logging.log(25, "Download of %s was completed" % fstream.options.output)
