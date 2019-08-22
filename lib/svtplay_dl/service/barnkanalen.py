@@ -43,6 +43,10 @@ class Barnkanalen(Svtplay):
             return
 
         janson = json.loads(match.group(1))["context"]["dispatcher"]["stores"]["ApplicationStateStore"]["data"]
+        if "episodeModel" not in janson["categoryStateCache"]["karaktarer"]:
+            yield ServiceError("No videos found")
+            return
+
         janson["video"] = janson["categoryStateCache"]["karaktarer"]["episodeModel"]
 
         if "title" not in janson["video"]:
