@@ -36,36 +36,27 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         jansson = json.loads(match.group(1))
-        vid = None
-        for i in jansson:
-            janson2 = json.loads(i["data"])
-            json.dumps(janson2)
-            if "videoAsset" in janson2["data"]:
-                vid = janson2["data"]["videoAsset"]["id"]
-                if janson2["data"]["videoAsset"]["is_drm_protected"]:
-                    yield ServiceError("We can't download DRM protected content from this site.")
-                    return
-                if janson2["data"]["videoAsset"]["is_live"]:
-                    self.config.set("live", True)
-                if janson2["data"]["videoAsset"]["season"] > 0:
-                    self.output["season"] = janson2["data"]["videoAsset"]["season"]
-                if janson2["data"]["videoAsset"]["episode"] > 0:
-                    self.output["episode"] = janson2["data"]["videoAsset"]["episode"]
-                self.output["title"] = janson2["data"]["videoAsset"]["program"]["name"]
-                self.output["episodename"] = janson2["data"]["videoAsset"]["title"]
-                vid = str(vid)
-                self.output["id"] = str(vid)
-            if "program" in janson2["data"] and vid is None:
-                if "contentfulPanels" in janson2["data"]["program"]:
-                    match = re.search(r"[\/-](\d+)$", self.url)
-                    if match and "panels" in janson2["data"]["program"]:
-                        for n in janson2["data"]["program"]["panels"]:
-                            for z in n["videoList"]["videoAssets"]:
-                                if z["id"] == int(match.group(1)):
-                                    vid = z["id"]
-                                    self.output["id"] = str(vid)
-                                    self.output["episodename"] = z["title"]
-                                    self.output["title"] = z["program"]["name"]
+        if "assetId" not in jansson["props"]["pageProps"]:
+            yield ServiceError("Cant find video id for the video")
+            return
+
+        vid = jansson["props"]["pageProps"]["assetId"]
+        janson2 = jansson["props"]["apolloState"]
+        item = janson2["VideoAsset:{}".format(vid)]
+
+        if item["is_drm_protected"]:
+            yield ServiceError("We can't download DRM protected content from this site.")
+            return
+
+        if item["live"]:
+            self.config.set("live", True)
+        if item["season"] > 0:
+            self.output["season"] = item["season"]
+        if item["episode"] > 0:
+            self.output["episode"] = item["episode"]
+        self.output["title"] = item["program_nid"]
+        self.output["episodename"] = item["title"]
+        self.output["id"] = str(vid)
 
         if vid is None:
             yield ServiceError("Cant find video id for the video")
@@ -83,7 +74,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield streams[n]
 
     def _getjson(self):
-        match = re.search(r".prefetched = (\[.*\]);", self.get_urldata())
+        match = re.search(r"application\/json\">(.*\}\})<\/script><script ", self.get_urldata())
         return match
 
     def find_all_episodes(self, config):
@@ -92,19 +83,15 @@ class Tv4play(Service, OpenGraphThumbMixin):
         show = None
         match = self._getjson()
         jansson = json.loads(match.group(1))
-        for i in jansson:
-            janson2 = json.loads(i["data"])
-            if "program" in janson2["data"]:
-                if "programPanels" in janson2["data"]["program"]:
-                    for n in janson2["data"]["program"]["programPanels"]["panels"]:
-                        if n.get("assetType", None) == "EPISODE":
-                            for z in n["videoList"]["videoAssets"]:
-                                show = z["program_nid"]
-                                items.append(z["id"])
-                        if n.get("assetType", None) == "CLIP" and config.get("include_clips"):
-                            for z in n["videoList"]["videoAssets"]:
-                                show = z["program_nid"]
-                                items.append(z["id"])
+        janson2 = jansson["props"]["apolloState"]
+        for i in janson2:
+            if "VideoAsset:" in i:
+                if janson2[i]["clip"] and config.get("include_clips"):
+                    show = janson2[i]["program_nid"]
+                    items.append(janson2[i]["id"])
+                elif janson2[i]["clip"] is False:
+                    show = janson2[i]["program_nid"]
+                    items.append(janson2[i]["id"])
 
         items = sorted(items)
         for item in items:

@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 import base64
 import struct
-import logging
 import binascii
 import copy
 import xml.etree.ElementTree as ET
@@ -13,9 +12,6 @@ from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.error import ServiceError
-
-
-log = logging.getLogger('svtplay_dl')
 
 
 def _chr(temp):

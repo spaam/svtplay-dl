@@ -32,19 +32,19 @@ class PrioStreamsTest(unittest.TestCase):
 
     def test_custom_order(self):
         return self._gen_proto_case(
-            ['http', 'rtmp', 'hds', 'hls'],
-            ['rtmp', 'hds', 'hls', 'http'],
+            ['http', 'hds', 'hls'],
+            ['hds', 'hls', 'http'],
         )
 
     def test_custom_order_1(self):
         return self._gen_proto_case(
             ['http'],
-            ['rtmp', 'hds', 'hls', 'http'],
+            ['hds', 'hls', 'http'],
         )
 
     def test_proto_unavail(self):
         return self._gen_proto_case(
-            ['http', 'rtmp'],
-            ['hds', 'hls', 'https'],
+            ['http', 'hds'],
+            ['hls', 'https'],
             expected=[],
         )

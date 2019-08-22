@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 import re
 import json
+import logging
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
-from svtplay_dl.log import log
-from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
 
 
@@ -65,21 +64,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         mrssxmlurl = match.group(1)
         data = self.http.request("get", mrssxmlurl).content
         xml = ET.XML(data)
-        mediagen = xml.find("channel").find("item").find("{http://search.yahoo.com/mrss/}group")
         title = xml.find("channel").find("item").find("title").text
         self.output["title"] = title
-
-        swfurl = mediagen.find("{http://search.yahoo.com/mrss/}player").attrib["url"]
-        other = "-W {0}".format(self.http.check_redirect(swfurl))
-
-        contenturl = mediagen.find("{http://search.yahoo.com/mrss/}content").attrib["url"]
-        content = self.http.request("get", contenturl).content
-        xml = ET.XML(content)
-        ss = xml.find("video").find("item")
-        sa = list(ss.iter("rendition"))
-
-        for i in sa:
-            yield RTMP(self.config, i.find("src").text, i.attrib["bitrate"], other=other, output=self.output)
 
         match = re.search("gon.viacom_config=([^;]+);", self.get_urldata())
         if match:
@@ -100,13 +86,13 @@ class Mtvnn(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, config):
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
         if match is None:
-            log.error("Couldn't program id")
+            logging.error("Couldn't program id")
             return
         programid = match.group(1)
         match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'",
                            self.get_urldata())
         if not match:
-            log.error("Couldn't retrieve episode list")
+            logging.error("Couldn't retrieve episode list")
             return
         episodNr = []
         for i in match:
@@ -155,7 +141,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
 
                     hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                     stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
-                    if stream:
 
+                    if stream:
                         for key in list(stream.keys()):
-                                yield stream[key]
+                            yield stream[key]

@@ -1,18 +1,17 @@
 from __future__ import absolute_import
 
 from svtplay_dl.service.aftonbladet import Aftonbladet, Aftonbladettv
-from svtplay_dl.service.bambuser import Bambuser
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
 from svtplay_dl.service.disney import Disney
 from svtplay_dl.service.dplay import Dplay
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.efn import Efn
+from svtplay_dl.service.eurosport import Eurosport
 from svtplay_dl.service.expressen import Expressen
 from svtplay_dl.service.facebook import Facebook
 from svtplay_dl.service.filmarkivet import Filmarkivet
 from svtplay_dl.service.flowonline import Flowonline
-from svtplay_dl.service.hbo import Hbo
 from svtplay_dl.service.koket import Koket
 from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.lemonwhale import Lemonwhale
@@ -23,7 +22,6 @@ from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.picsearch import Picsearch
 from svtplay_dl.service.pokemon import Pokemon
-from svtplay_dl.service.qbrick import Qbrick
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.riksdagen import Riksdagen
 from svtplay_dl.service.ruv import Ruv
@@ -46,7 +44,6 @@ from svtplay_dl.service.youplay import Youplay
 sites = [
     Aftonbladet,
     Aftonbladettv,
-    Bambuser,
     Barnkanalen,
     Bigbrother,
     Cmore,
@@ -54,11 +51,11 @@ sites = [
     Dplay,
     Dr,
     Efn,
+    Eurosport,
     Expressen,
     Facebook,
     Filmarkivet,
     Flowonline,
-    Hbo,
     Koket,
     Twitch,
     Lemonwhale,
@@ -66,7 +63,6 @@ sites = [
     Mtvnn,
     NHL,
     Nrk,
-    Qbrick,
     Picsearch,
     Pokemon,
     Ruv,

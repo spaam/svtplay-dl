@@ -1,16 +1,15 @@
 import xml.etree.ElementTree as ET
 import json
 import re
+import logging
 from io import StringIO
 
-from svtplay_dl.log import log
 from svtplay_dl.utils.text import decode_html_entities
 from svtplay_dl.utils.http import HTTP, get_full_url
 from svtplay_dl.utils.output import output
 
 
 from requests import __build__ as requests_version
-import platform
 
 
 class subtitle(object):
@@ -31,7 +30,7 @@ class subtitle(object):
     def download(self):
         subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
-            log.warning("Can't download subtitle file")
+            logging.warning("Can't download subtitle file")
             return
 
         data = None
@@ -49,10 +48,8 @@ class subtitle(object):
             data = self.smi(subdata)
         if self.subtype == "wrst":
             if "tv4play" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
-                subdata.encoding = "utf-8"
                 self.bom = True
-            if "dplay" in self.url:
-                subdata.encoding = "utf-8"
+            subdata.encoding = subdata.apparent_encoding
             data = self.wrst(subdata)
         if self.subtype == "wrstsegment":
             data = self.wrstsegment(subdata)
@@ -73,10 +70,7 @@ class subtitle(object):
         self.save_file(data, "srt")
 
     def save_file(self, data, subtype):
-        if platform.system() == "Windows":
-            file_d = output(self.output, self.config, subtype, mode="wt", encoding="utf-8")
-        else:
-            file_d = output(self.output, self.config, subtype, mode="wt")
+        file_d = output(self.output, self.config, subtype, mode="w", encoding="utf-8")
         if hasattr(file_d, "read") is False:
             return
         file_d.write(data)
@@ -198,8 +192,7 @@ class subtitle(object):
         number = 0
         block = 0
         subnr = False
-        if self.bom:
-            ssubdata.read(1)
+
         for i in ssubdata.readlines():
             match = re.search(r"^[\r\n]+", i)
             match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
@@ -276,40 +269,40 @@ class subtitle(object):
                 if 'X-TIMESTAMP-MAP=MPEGTS' in t:
                     time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
             text = text[3:len(text) - 2]
+            itmes = []
             if len(text) > 1:
-                itmes = []
                 for n in text:
-                    if n:
+                    if n:  # don't get the empty lines.
                         itmes.append(n)
-                    else:
-                        if len(subs) > 1 and len(itmes) < 2:  # Ignore empty lines in unexpected places
-                            pass
-                        elif len(subs) > 1 and itmes[1] == subs[-1][1]:  # This will happen when there are two sections in file
-                            ha = strdate(subs[-1][0])
-                            ha3 = strdate(itmes[0])
-                            second = str2sec(ha3.group(2)) + time
-                            subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
-                            itmes = []
-                        else:
-                            ha = strdate(itmes[0])
-                            first = str2sec(ha.group(1)) + time
-                            second = str2sec(ha.group(2)) + time
-                            itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
-                            subs.append(itmes)
-                            itmes = []
-                if itmes:
-                    if len(subs) > 0 and itmes[1] == subs[-1][1]:
-                        ha = strdate(subs[-1][0])
-                        ha3 = strdate(itmes[0])
-                        second = str2sec(ha3.group(2)) + time
-                        subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
-                    else:
-                        ha = strdate(itmes[0])
-                        first = str2sec(ha.group(1)) + time
-                        second = str2sec(ha.group(2)) + time
-                        itmes[0] = "{} --> {}".format(sec2str(first), sec2str(second))
-                        subs.append(itmes)
 
+            several_items = False
+            skip = False
+            sub = []
+
+            for x in range(len(itmes)):
+                item = itmes[x]
+                if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
+                    ha = strdate(subs[-1][0])
+                    ha3 = strdate(item)
+                    second = str2sec(ha3.group(2)) + time
+                    subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                    skip = True
+                    continue
+                has_date = strdate(item)
+                if has_date:
+                    if several_items:
+                        subs.append(sub)
+                        sub = []
+                    skip = False
+                    first = str2sec(has_date.group(1)) + time
+                    second = str2sec(has_date.group(2)) + time
+                    sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
+                    several_items = True
+                elif has_date is None and skip is False:
+                    sub.append(item)
+
+            if sub:
+                subs.append(sub)
         string = ""
         nr = 1
         for sub in subs:

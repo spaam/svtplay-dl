@@ -18,7 +18,7 @@ with open(os.path.join(srcdir, 'svtplay_dl', '__version__.py'), 'r') as f:
 deps = []
 deps.append("requests>=2.0.0")
 deps.append("PySocks")
-deps.append("pycryptodome")
+deps.append("cryptography")
 deps.append("pyyaml")
 
 setup(

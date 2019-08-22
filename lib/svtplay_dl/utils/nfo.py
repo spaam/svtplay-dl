@@ -5,12 +5,15 @@ from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import Options
 from datetime import datetime
 
+# https://kodi.wiki/view/NFO_files/TV_shows#nfo_Tags
+
 
 def write_nfo_episode(output, config):
     if not output["title_nice"]:
         # If we don't even have the title, skip the NFO
         return
-    root = ET.Element("episodedetails")
+    root = ET.Element("episodedetails"
+    ET.SubElement(root, "showtitle").text = output["title_nice"]
     if output["episodename"]:
         ET.SubElement(root, "title").text = output["episodename"]
     if output["season"]:

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
 import os
-from svtplay_dl.fetcher.dash import _dashparse
+from svtplay_dl.fetcher.dash import _dashparse, parse_duration
 from svtplay_dl.utils.parser import setup_defaults
 
 
@@ -16,7 +16,7 @@ class dashtest(unittest.TestCase):
     def test_parse_cmore(self):
         data = parse("cmore.mpd")
         self.assertEquals(len(data[3261.367].files), 410)
-        self.assertEqual(len(data[3261.367].audio), 309)
+        self.assertEqual(len(data[3261.367].audio), 615)
         self.assertTrue(data[3261.367].segments)
 
     def test_parse_fff(self):
@@ -36,3 +36,16 @@ class dashtest(unittest.TestCase):
         self.assertEquals(len(data[2795.9959999999996].files), 6)
         self.assertEqual(len(data[2795.9959999999996].audio), 6)
         self.assertTrue(data[2795.9959999999996].segments)
+
+    def test_parse_live2(self):
+        data = parse("svtplay-live2.mpd")
+        self.assertEquals(len(data[2892.0].files), 11)
+        self.assertEqual(len(data[2892.0].audio), 11)
+        self.assertTrue(data[2892.0].segments)
+
+    def test_parse_duration(self):
+        self.assertEquals(parse_duration("PT3459.520S"), 3459.52)
+        self.assertEquals(parse_duration("PT2.00S"), 2.0)
+        self.assertEquals(parse_duration("PT1H0M30.000S"), 3630.0)
+        self.assertEquals(parse_duration("P1Y1M1DT1H0M30.000S"), 34218030.0)
+        self.assertEquals(parse_duration("PWroNG"), 0)

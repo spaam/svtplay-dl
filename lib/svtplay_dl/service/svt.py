@@ -1,7 +1,9 @@
 import re
+import copy
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.subtitle import subtitle
 
 
 class Svt(Svtplay):
@@ -21,6 +23,11 @@ class Svt(Svtplay):
 
         res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(id))
         janson = res.json()
+        if "subtitleReferences" in janson:
+            for i in janson["subtitleReferences"]:
+                if i["format"] == "websrt" and "url" in i:
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
+
         videos = self._get_video(janson)
         for i in videos:
             yield i

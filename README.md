@@ -1,5 +1,6 @@
 # svtplay-dl
-
+[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)
+[![Build Status Travis](https://travis-ci.org/spaam/svtplay-dl.svg)](https://travis-ci.org/spaam/svtplay-dl/)
 
 ## Installation
 
@@ -51,7 +52,7 @@ If you want to build your own Windows binaries:
 3. Follow the steps listed under [From source](#from-source)
 4. cd path\to\svtplay-dl && mkdir build
 5. `python setversion.py`  # this will change the version string to a more useful one
-5. `python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=build bin/svtplay-dl`
+5. `python %PYTHON%\\Scripts\\cxfreeze --include-modules=cffi,queue,idna.idnadata --target-dir=build bin/svtplay-dl`
 6. Find binary in build folder. you need `svtplay-dl.exe` and `pythonXX.dll` from that folder to run `svtplay-dl.exe`
 
 ### Other systems with python
@@ -86,13 +87,12 @@ svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
--  [Python](https://www.python.org/) 3.4 or higher
--  [RTMPDump](https://rtmpdump.mplayerhq.hu/) 2.4 or higher to download RTMP streams.
--  [pycryptodome](https://www.pycryptodome.org/en/latest/) to download encrypted HLS streams
+-  [Python](https://www.python.org) 3.4 or higher
+-  [cryptography](https://cryptography.io/en/latest) to download encrypted HLS streams
 -  [PyYaml](https://github.com/yaml/pyyaml) for configure file
--  [Requests](http://www.python-requests.org/)
+-  [Requests](https://2.python-requests.org)
 -  [PySocks](https://github.com/Anorov/PySocks) to enable proxy support
--  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org/) for postprocessing and/or for DASH streams
+-  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org) for postprocessing and/or for DASH streams ([ffmpeg](https://ffmpeg.zeranoe.com) for Windows)
 
 ##### To install it, run:
 

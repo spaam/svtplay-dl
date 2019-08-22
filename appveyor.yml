@@ -2,6 +2,18 @@ environment:
   PYTHON: "C:\\Python35"
   PYTHON_VERSION: 3.5
   PYTHON_ARCH: "32"
+  TWINE_USERNAME:
+    secure: yig0ualP0M39xIahEXhxZA==
+  TWINE_PASSWORD:
+    secure: 79wxWyPcqzj6131wKAuWBg==
+  DOCKER_USERNAME:
+    secure: yig0ualP0M39xIahEXhxZA==
+  DOCKER_PASSWORD:
+    secure: uiu9FbvYYz89WrBtF6BN0w==
+  AWS_ACCESS_KEY_ID:
+    secure: ED96t0LSsl1VnMu5CEQddJYdsIwIdsomF6gmY7r49w8=
+  AWS_SECRET_ACCESS_KEY:
+    secure: r/GpKgKWeTtq2k2J+Wy4qwOvLa8auzCgSYvEb88NqzenKZh04wUiWyxwXk6xc7UV
 
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
@@ -10,7 +22,7 @@ install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install -U pip setuptools"
   - "pip install -r requirements-dev.txt -r requirements.txt"
-  - "pip install cx_freeze"
+  - "pip install cx_freeze awscli backports-datetime-fromisoformat"
   - "git describe --tags --dirty --always"
 
 test_script:
@@ -20,26 +32,13 @@ test_script:
 after_test:
   - "mkdir svtplay-dl"
   - "python setversion.py"
-  - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
+  - "python %PYTHON%\\Scripts\\cxfreeze --include-modules=cffi,queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
   - "svtplay-dl\\svtplay-dl.exe --version"
   - "7z.exe a -tzip svtplay-dl.zip svtplay-dl"
+  - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" python scripts/cibuild.py
 
 artifacts:
   - path: svtplay-dl.zip
     name: svtplay-dl
-
-
-deploy:
-  - provider: FTP
-    protocol: sftp
-    host: srv.svtplay-dl.se
-    username: web
-    password:
-      secure: wdvTOWRd6TXhtgfSPmYea8XOT/5sc4s3xhELbowqT58=
-    folder: /var/www/download/$(APPVEYOR_REPO_TAG_NAME)
-
-    artifact: svtplay-dl.zip
-    on:
-      appveyor_repo_tag: true
 
 build: off

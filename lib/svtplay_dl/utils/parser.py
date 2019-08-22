@@ -1,6 +1,7 @@
 import argparse
 import platform
 import os
+import logging
 
 from yaml import safe_load
 
@@ -64,7 +65,7 @@ def parser(version):
     general.add_argument("-f", "--force", action="store_true", dest="force", default=False,
                          help="overwrite if file exists already")
     general.add_argument("-r", "--resume", action="store_true", dest="resume", default=False,
-                         help="resume a download (RTMP based ones)")
+                         help="resume a download (RTMP obsolete)")
     general.add_argument("-l", "--live", action="store_true", dest="live", default=False,
                          help="enable for live streams (RTMP based ones)")
     general.add_argument("-c", "--capture_time", default=-1, type=int, metavar="capture_time",
@@ -96,6 +97,8 @@ def parser(version):
                          help="explain what is going on")
     general.add_argument("--nfo", action="store_true", dest="nfo", default=False,
                          help="create a NFO file")
+    general.add_argument("--force-nfo", action="store_true", dest="force_nfo", default=False,
+                         help="download only NFO if used with --nfo")
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument("-q", "--quality", default=0, metavar="quality",
@@ -104,10 +107,10 @@ def parser(version):
     quality.add_argument("-Q", "--flexible-quality", default=0, metavar="amount", dest="flexibleq",
                          help="allow given quality (as above) to differ by an amount")
     quality.add_argument("-P", "--preferred", default=None, metavar="preferred",
-                         help="preferred download method (dash, hls, hds, http or rtmp)")
+                         help="preferred download method (dash, hls, hds, or http)")
     quality.add_argument("--list-quality", dest="list_quality", action="store_true", default=False,
                          help="list the quality for a video")
-    quality.add_argument("--stream-priority", dest="stream_prio", default=None, metavar="dash,hls,hds,http,rtmp",
+    quality.add_argument("--stream-priority", dest="stream_prio", default=None, metavar="dash,hls,hds,http",
                          help="If two streams have the same quality, choose the one you prefer")
 
     subtitle = parser.add_argument_group("Subtitle")
@@ -176,6 +179,7 @@ def setup_defaults():
     options.set("preferred", None)
     options.set("verbose", False)
     options.set("nfo", False)
+    options.set("force_nfo", False)
     options.set("output_auto", False)
     options.set("service", None)
     options.set("cookies", None)
@@ -219,6 +223,7 @@ def parsertoconfig(config, parser):
     config.set("preferred", parser.preferred)
     config.set("verbose", parser.verbose)
     config.set("nfo", parser.nfo)
+    config.set("force_nfo", parser.force_nfo)
     config.set("exclude", parser.exclude)
     config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)
@@ -274,9 +279,15 @@ def readconfig(config, configfile, service=None, preset=None):
     global configdata
 
     if configfile and configdata is None:
-        with open(configfile) as fd:
-            data = fd.read()
-            configdata = safe_load(data)
+        try:
+            with open(configfile) as fd:
+                data = fd.read()
+                configdata = safe_load(data)
+        except PermissionError:
+            logging.error("Permission denied while reading config: {}".format(configfile))
+
+    if configdata is None:
+        return config
 
     if "default" in configdata:
         config = merge(config.get_variable(), configdata["default"])

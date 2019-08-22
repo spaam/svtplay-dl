@@ -5,7 +5,7 @@ import re
 import json
 
 from svtplay_dl.service import Service
-from svtplay_dl.log import log
+from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.utils.text import decode_html_entities
 
@@ -16,26 +16,14 @@ class Expressen(Service):
     def get(self):
         data = self.get_urldata()
 
-        match = re.search('="(https://www.expressen.se/tvspelare[^"]+)"', data)
+        match = re.search('data-article-data="([^"]+)"', data)
         if not match:
-            log.error("Can't find video id")
+            yield ServiceError("Cant find video file info")
             return
-        url = decode_html_entities(match.group(1))
-        data = self.http.request("get", url)
+        data = decode_html_entities(match.group(1))
+        janson = json.loads(data)
+        self.config.set("live", janson["isLive"])
 
-        match = re.search("window.Player.settings = ({.*});", data.text)
-        if not match:
-            log.error("Can't find json info.")
-
-        dataj = json.loads(match.group(1))
-        if "streams" in dataj:
-            if "iPad" in dataj["streams"]:
-                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["iPad"]),
-                                   dataj["streams"]["iPad"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
-            if "hashHls" in dataj["streams"]:
-                streams = hlsparse(self.config, self.http.request("get", dataj["streams"]["hashHls"]),
-                                   dataj["streams"]["hashHls"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+        streams = hlsparse(self.config, self.http.request("get", janson["stream"]), janson["stream"], output=self.output)
+        for n in list(streams.keys()):
+            yield streams[n]

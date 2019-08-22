@@ -5,10 +5,14 @@ import base64
 import re
 import json
 import copy
+import binascii
+import hashlib
 from urllib.parse import urljoin, urlparse
 
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
 from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.rtmp import RTMP
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.subtitle import subtitle
@@ -53,21 +57,21 @@ class Dr(Service, OpenGraphThumbMixin):
                     yield i
             else:
                 for stream in resource['Links']:
+                    uri = stream["Uri"]
+                    if uri is None:
+                        uri = self._decrypt(stream["EncryptedUri"])
+
                     if stream["Target"] == "HDS":
                         streams = hdsparse(copy.copy(self.config),
-                                           self.http.request("get", stream["Uri"], params={"hdcore": "3.7.0"}),
-                                           stream["Uri"], output=self.output)
+                                           self.http.request("get", uri, params={"hdcore": "3.7.0"}),
+                                           uri, output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(self.config, self.http.request("get", stream["Uri"]), stream["Uri"], output=self.output)
+                        streams = hlsparse(self.config, self.http.request("get", uri), uri, output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
-                    if stream["Target"] == "Streaming":
-                        self.config.set("other", "-v -y '{0}'".format(stream['Uri'].replace("rtmp://vod.dr.dk/cms/", "")))
-                        rtmp = "rtmp://vod.dr.dk/cms/"
-                        yield RTMP(copy.copy(self.config), rtmp, stream['Bitrate'], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []
@@ -126,8 +130,16 @@ class Dr(Service, OpenGraphThumbMixin):
                 streams = hlsparse(config, self.http.request("get", i["Uri"]), i["Uri"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
-            else:
-                if i["Target"] == "Streaming":
-                    config.set("other", "-y '{0}'".format(i["Uri"].replace("rtmp://vod.dr.dk/cms/", "")))
-                    rtmp = "rtmp://vod.dr.dk/cms/"
-                    yield RTMP(copy.copy(config), rtmp, i["Bitrate"], output=self.output)
+
+    def _decrypt(self, url):
+        n = int(url[2:10], 16)
+        iv_hex = url[10 + n:]
+        data = binascii.a2b_hex(url[10:10 + n].encode('ascii'))
+        key = hashlib.sha256(('%s:sRBzYNXBzkKgnjj8pGtkACch' % iv_hex).encode('utf-8')).digest()
+        iv = bytes.fromhex(iv_hex)
+
+        backend = default_backend()
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        decryptor = cipher.decryptor()
+        decrypted = decryptor.update(data)
+        return decrypted[:-decrypted[-1]].decode('utf-8')

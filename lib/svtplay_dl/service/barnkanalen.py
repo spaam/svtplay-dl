@@ -3,10 +3,10 @@
 from __future__ import absolute_import
 import re
 import json
+import logging
 from urllib.parse import urljoin, urlparse, parse_qs
 
 
-from svtplay_dl.log import log
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.error import ServiceError
 
@@ -43,6 +43,10 @@ class Barnkanalen(Svtplay):
             return
 
         janson = json.loads(match.group(1))["context"]["dispatcher"]["stores"]["ApplicationStateStore"]["data"]
+        if "episodeModel" not in janson["categoryStateCache"]["karaktarer"]:
+            yield ServiceError("No videos found")
+            return
+
         janson["video"] = janson["categoryStateCache"]["karaktarer"]["episodeModel"]
 
         if "title" not in janson["video"]:
@@ -73,7 +77,7 @@ class Barnkanalen(Svtplay):
         videos = []
         match = re.search("__barnplay'] = ({.*});", self.get_urldata())
         if not match:
-            log.error("Couldn't retrieve episode list.")
+            logging.error("Couldn't retrieve episode list.")
             return
         else:
             dataj = json.loads(match.group(1))

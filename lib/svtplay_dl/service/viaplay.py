@@ -44,6 +44,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r'data-videoid="([0-9]+)', html_data)
         if match:
             return match.group(1)
+        match = re.search(r'"mediaGuid":"([0-9]+)"', html_data)
+        if match:
+            return match.group(1)
 
         clips = False
         slug = None

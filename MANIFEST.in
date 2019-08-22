@@ -1,4 +1,4 @@
-include README.rst
+include README.md
 include LICENSE
 include versioneer.py
 include lib/svtplay_dl/__version__.py
