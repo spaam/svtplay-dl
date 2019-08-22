@@ -45,18 +45,16 @@ def branch():
     return travis_branch or appveyor_branch
 
 
-def docker_name():
+def docker_name(version="dev"):
     if tag():
-        ver = tag()
-    else:
-        ver = "dev"
-    return "spaam/svtplay-dl:{}".format(ver)
+        version = tag()
+    return "spaam/svtplay-dl:{}".format(version)
 
 
 def build_docker():
     logger.info("Building docker")
     subprocess.check_output([
-        "docker", "build", "-f", "dockerfile/Dockerfile", "-t", docker_name(), "."
+            "docker", "build", "-f", "dockerfile/Dockerfile", "-t", docker_name(), "."
     ])
     subprocess.check_call([
         "docker", "login", "-u", docker_username, "-p", docker_password
@@ -64,6 +62,14 @@ def build_docker():
     subprocess.check_call([
         "docker", "push", docker_name()
     ])
+
+    if tag():
+        subprocess.check_output([
+            "docker", "tag", docker_name(), docker_name("latest")
+        ])
+        subprocess.check_call([
+            "docker", "push", docker_name("latest")
+        ])
 
 
 def build_package():
