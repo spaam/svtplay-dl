@@ -223,7 +223,7 @@ def parsertoconfig(config, parser):
     config.set("preferred", parser.preferred)
     config.set("verbose", parser.verbose)
     config.set("nfo", parser.nfo)
-    config.set("force_nfo", parser.nfo)
+    config.set("force_nfo", parser.force_nfo)
     config.set("exclude", parser.exclude)
     config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)
