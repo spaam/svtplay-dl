@@ -192,8 +192,7 @@ class subtitle(object):
         number = 0
         block = 0
         subnr = False
-        if self.bom:
-            ssubdata.read(1)
+
         for i in ssubdata.readlines():
             match = re.search(r"^[\r\n]+", i)
             match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
