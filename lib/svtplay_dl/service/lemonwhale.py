@@ -12,7 +12,7 @@ from svtplay_dl.utils.text import decode_html_entities
 
 class Lemonwhale(Service):
     # lemonwhale.com is just bogus for generic
-    supported_domains = ['vk.se', 'lemonwhale.com']
+    supported_domains = ["vk.se", "lemonwhale.com"]
 
     def get(self):
         vid = self.get_vid()
@@ -42,7 +42,7 @@ class Lemonwhale(Service):
         if match:
             return match.group(1)
 
-        match = re.search(r'__INITIAL_STATE__ = ({.*})</script>', self.get_urldata())
+        match = re.search(r"__INITIAL_STATE__ = ({.*})</script>", self.get_urldata())
         if match:
             janson = json.loads(match.group(1))
             vid = janson["content"]["current"]["data"]["templateData"]["pageData"]["video"]["id"]

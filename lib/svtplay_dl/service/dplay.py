@@ -17,7 +17,7 @@ country = {"sv": ".se", "da": ".dk", "no": ".no"}
 
 
 class Dplay(Service):
-    supported_domains = ['dplay.se', 'dplay.dk', "dplay.no"]
+    supported_domains = ["dplay.se", "dplay.dk", "dplay.no"]
 
     def get(self):
         parse = urlparse(self.url)
@@ -44,8 +44,10 @@ class Dplay(Service):
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
             programid = res.json()["data"]["id"]
-            qyerystring = "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&" \
-                          "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
+            qyerystring = (
+                "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&"
+                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
+            )
             res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
             janson = res.json()
             vid = 0
@@ -83,8 +85,13 @@ class Dplay(Service):
         if res.status_code > 400:
             yield ServiceError("You dont have permission to watch this")
             return
-        streams = hlsparse(self.config, self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
-                           res.json()["data"]["attributes"]["streaming"]["hls"]["url"], httpobject=self.http, output=self.output)
+        streams = hlsparse(
+            self.config,
+            self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
+            res.json()["data"]["attributes"]["streaming"]["hls"]["url"],
+            httpobject=self.http,
+            output=self.output,
+        )
         for n in list(streams.keys()):
             if isinstance(streams[n], subtitle):  # we get the subtitles from the hls playlist.
                 if self.config.get("get_all_subtitles"):
@@ -96,7 +103,7 @@ class Dplay(Service):
                 yield streams[n]
 
     def _autoname(self, jsondata):
-        match = re.search('^([^/]+)/', jsondata["data"]["attributes"]["path"])
+        match = re.search("^([^/]+)/", jsondata["data"]["attributes"]["path"])
         self.output["title"] = match.group(1)
         self.output["season"] = int(jsondata["data"]["attributes"]["seasonNumber"])
         self.output["episode"] = int(jsondata["data"]["attributes"]["episodeNumber"])
@@ -127,8 +134,10 @@ class Dplay(Service):
         seasons = res.json()["data"]["attributes"]["seasonNumbers"]
         episodes = []
         for season in seasons:
-            qyerystring = "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&filter[seasonNumber]={}&" \
-                          "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid, season)
+            qyerystring = (
+                "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&filter[seasonNumber]={}&"
+                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid, season)
+            )
             res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
             janson = res.json()
             for i in janson["data"]:
@@ -138,7 +147,7 @@ class Dplay(Service):
         if len(episodes) == 0:
             logging.error("Cant find any playable files")
         if config.get("all_last") > 0:
-            return episodes[:config.get("all_last")]
+            return episodes[: config.get("all_last")]
         return episodes
 
     def _login(self):

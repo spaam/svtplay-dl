@@ -38,8 +38,7 @@ def protocol_prio(streams, priolist):
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
-    prioritized = [(s.bitrate, proto_score[s.name], s) for
-                   s in streams if s.name in proto_score]
+    prioritized = [(s.bitrate, proto_score[s.name], s) for s in streams if s.name in proto_score]
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
@@ -72,7 +71,7 @@ def select_quality(config, streams):
     # we want it as a list
 
     if config.get("stream_prio"):
-        proto_prio = config.get("stream_prio").split(',')
+        proto_prio = config.get("stream_prio").split(",")
     elif config.get("live") or streams[0].config.get("live"):
         proto_prio = LIVE_PROTOCOL_PRIO
     else:
@@ -83,10 +82,7 @@ def select_quality(config, streams):
     streams = protocol_prio(streams, proto_prio)
 
     if len(streams) == 0:
-        raise error.NoRequestedProtocols(
-            requested=proto_prio,
-            found=list(set([s.name for s in streams]))
-        )
+        raise error.NoRequestedProtocols(requested=proto_prio, found=list(set([s.name for s in streams])))
 
     # Build a dict indexed by bitrate, where each value
     # is the stream with the highest priority protocol.
@@ -112,8 +108,7 @@ def select_quality(config, streams):
     if len(wanted) == 0:
         data = sort_quality(streams)
         quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
-        raise error.UIException("Can't find that quality. Try one of: %s (or "
-                                "try --flexible-quality)" % quality)
+        raise error.UIException("Can't find that quality. Try one of: %s (or " "try --flexible-quality)" % quality)
 
     http = HTTP(config)
     # Test if the wanted stream is available. If not try with the second best and so on.

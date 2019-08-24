@@ -20,7 +20,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Dr(Service, OpenGraphThumbMixin):
-    supported_domains = ['dr.dk']
+    supported_domains = ["dr.dk"]
 
     def get(self):
         data = self.get_urldata()
@@ -56,15 +56,13 @@ class Dr(Service, OpenGraphThumbMixin):
                 for i in streams:
                     yield i
             else:
-                for stream in resource['Links']:
+                for stream in resource["Links"]:
                     uri = stream["Uri"]
                     if uri is None:
                         uri = self._decrypt(stream["EncryptedUri"])
 
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(self.config),
-                                           self.http.request("get", uri, params={"hdcore": "3.7.0"}),
-                                           uri, output=self.output)
+                        streams = hdsparse(copy.copy(self.config), self.http.request("get", uri, params={"hdcore": "3.7.0"}), uri, output=self.output)
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
@@ -75,55 +73,51 @@ class Dr(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, config):
         episodes = []
-        matches = re.findall(r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"',
-                             self.get_urldata())
+        matches = re.findall(r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"', self.get_urldata())
         for encpath, enccomp in matches:
-            newstyle = '_' in encpath
+            newstyle = "_" in encpath
             if newstyle:
-                encbasepath = encpath.split('_')[0]
-                path = base64.b64decode(encbasepath + '===').decode('latin1')
+                encbasepath = encpath.split("_")[0]
+                path = base64.b64decode(encbasepath + "===").decode("latin1")
             else:
-                path = base64.b64decode(encpath + '===').decode('latin1')
+                path = base64.b64decode(encpath + "===").decode("latin1")
 
-            if '/view/' in path:
+            if "/view/" in path:
                 continue
 
-            params = 'offset=0&limit=1000'
+            params = "offset=0&limit=1000"
             if newstyle:
-                encparams = base64.b64encode(params.encode('latin1')).decode('latin1').rstrip('=')
-                encpath = '{0}_{1}'.format(encbasepath, encparams)
+                encparams = base64.b64encode(params.encode("latin1")).decode("latin1").rstrip("=")
+                encpath = "{0}_{1}".format(encbasepath, encparams)
             else:
-                path = '{0}?{1}'.format(urlparse(path).path, params)
-                encpath = base64.b64encode(path.encode('latin1')).decode('latin1').rstrip('=')
+                path = "{0}?{1}".format(urlparse(path).path, params)
+                encpath = base64.b64encode(path.encode("latin1")).decode("latin1").rstrip("=")
 
-            url = urljoin('https://www.dr.dk/tv/partial/',
-                          '{0}/{1}'.format(enccomp, encpath))
-            data = self.http.request('get', url).content.decode('latin1')
+            url = urljoin("https://www.dr.dk/tv/partial/", "{0}/{1}".format(enccomp, encpath))
+            data = self.http.request("get", url).content.decode("latin1")
 
             matches = re.findall(r'"program-link" href="([^"]+)">', data)
-            episodes = [urljoin('https://www.dr.dk/', url) for url in matches]
+            episodes = [urljoin("https://www.dr.dk/", url) for url in matches]
             break
 
         if not episodes:
-            prefix = '/'.join(urlparse(self.url).path.rstrip('/').split('/')[:-1])
+            prefix = "/".join(urlparse(self.url).path.rstrip("/").split("/")[:-1])
             matches = re.findall(r'"program-link" href="([^"]+)">', self.get_urldata())
-            episodes = [urljoin('https://www.dr.dk/', url)
-                        for url in matches
-                        if url.startswith(prefix)]
+            episodes = [urljoin("https://www.dr.dk/", url) for url in matches if url.startswith(prefix)]
 
         if config.get("all_last") != -1:
-            episodes = episodes[:config.get("all_last")]
+            episodes = episodes[: config.get("all_last")]
         else:
             episodes.reverse()
 
         return episodes
 
     def find_stream(self, config, resource):
-        tempresource = resource['Data'][0]['Assets']
+        tempresource = resource["Data"][0]["Assets"]
         # To find the VideoResource, they have Images as well
         for resources in tempresource:
-            if resources['Kind'] == 'VideoResource':
-                links = resources['Links']
+            if resources["Kind"] == "VideoResource":
+                links = resources["Links"]
                 break
         for i in links:
             if i["Target"] == "Ios" or i["Target"] == "HLS":
@@ -133,13 +127,13 @@ class Dr(Service, OpenGraphThumbMixin):
 
     def _decrypt(self, url):
         n = int(url[2:10], 16)
-        iv_hex = url[10 + n:]
-        data = binascii.a2b_hex(url[10:10 + n].encode('ascii'))
-        key = hashlib.sha256(('%s:sRBzYNXBzkKgnjj8pGtkACch' % iv_hex).encode('utf-8')).digest()
+        iv_hex = url[10 + n :]
+        data = binascii.a2b_hex(url[10 : 10 + n].encode("ascii"))
+        key = hashlib.sha256(("%s:sRBzYNXBzkKgnjj8pGtkACch" % iv_hex).encode("utf-8")).digest()
         iv = bytes.fromhex(iv_hex)
 
         backend = default_backend()
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
         decryptor = cipher.decryptor()
         decrypted = decryptor.update(data)
-        return decrypted[:-decrypted[-1]].decode('utf-8')
+        return decrypted[: -decrypted[-1]].decode("utf-8")

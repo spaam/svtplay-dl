@@ -12,7 +12,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Ruv(Service):
-    supported_domains = ['ruv.is']
+    supported_domains = ["ruv.is"]
 
     def get(self):
         data = self.get_urldata()
@@ -20,7 +20,7 @@ class Ruv(Service):
         match = re.search(r'"([^"]+geo.php)"', data)
         if match:
             data = self.http.request("get", match.group(1)).content
-            match = re.search(r'punktur=\(([^ ]+)\)', data)
+            match = re.search(r"punktur=\(([^ ]+)\)", data)
             if match:
                 janson = json.loads(match.group(1))
                 self.config.get("live", checklive(janson["result"][1]))

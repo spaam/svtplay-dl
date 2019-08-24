@@ -27,27 +27,24 @@ class TwitchUrlException(TwitchException):
 
       TwitchUrlException('video', 'http://twitch.tv/example')
     """
+
     def __init__(self, media_type, url):
-        super(TwitchUrlException, self).__init__(
-            "'{0}' is not recognized as a {1} URL".format(url, media_type)
-        )
+        super(TwitchUrlException, self).__init__("'{0}' is not recognized as a {1} URL".format(url, media_type))
 
 
 class Twitch(Service):
     # Twitch uses language subdomains, e.g. en.www.twitch.tv. They
     # are usually two characters, but may have a country suffix as well (e.g.
     # zh-tw, zh-cn and pt-br.
-    supported_domains_re = [
-        r'^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.|clips\.)?twitch\.tv$',
-    ]
+    supported_domains_re = [r"^(?:(?:[a-z]{2}-)?[a-z]{2}\.)?(www\.|clips\.)?twitch\.tv$"]
 
-    api_base_url = 'https://api.twitch.tv'
-    hls_base_url = 'http://usher.justin.tv/api/channel/hls'
+    api_base_url = "https://api.twitch.tv"
+    hls_base_url = "http://usher.justin.tv/api/channel/hls"
 
     def get(self):
         urlp = urlparse(self.url)
 
-        match = re.match(r'/(\w+)/([bcv])/(\d+)', urlp.path)
+        match = re.match(r"/(\w+)/([bcv])/(\d+)", urlp.path)
         if not match:
             if re.search("clips.twitch.tv", urlp.netloc):
                 data = self._get_clips()
@@ -77,7 +74,7 @@ class Twitch(Service):
         self.output["episodename"] = info["title"]
 
         if "token" not in access:
-            raise TwitchUrlException('video', self.url)
+            raise TwitchUrlException("video", self.url)
         nauth = quote_plus(str(access["token"]))
         authsig = access["sig"]
 
@@ -110,15 +107,15 @@ class Twitch(Service):
         Both `sig` and `token` should be added to the HLS URI, and the
         token should, of course, be URI encoded.
         """
-        return self._ajax_get('/api/{0}/{1}/access_token'.format(vtype, channel))
+        return self._ajax_get("/api/{0}/{1}/access_token".format(vtype, channel))
 
     def _ajax_get(self, method):
         url = "{0}/{1}".format(self.api_base_url, method)
 
         # Logic found in Twitch's global.js. Prepend /kraken/ to url
         # path unless the API method already is absolute.
-        if method[0] != '/':
-            method = '/kraken/{0}'.format(method)
+        if method[0] != "/":
+            method = "/kraken/{0}".format(method)
 
         payload = self.http.request("get", url)
         return json.loads(payload.text)
@@ -126,14 +123,14 @@ class Twitch(Service):
     def _get_hls_url(self, channel):
         access = self._get_access_token(channel, "channels")
 
-        query = "token={0}&sig={1}&allow_source=true&allow_spectre=true".format(quote_plus(access['token']), access['sig'])
+        query = "token={0}&sig={1}&allow_source=true&allow_spectre=true".format(quote_plus(access["token"]), access["sig"])
         return "{0}/{1}.m3u8?{2}".format(self.hls_base_url, channel, query)
 
     def _get_channel(self, urlp):
-        match = re.match(r'/(\w+)', urlp.path)
+        match = re.match(r"/(\w+)", urlp.path)
 
         if not match:
-            raise TwitchUrlException('channel', urlp.geturl())
+            raise TwitchUrlException("channel", urlp.geturl())
 
         channel = match.group(1)
 

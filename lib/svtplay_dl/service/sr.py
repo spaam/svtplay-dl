@@ -12,7 +12,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Sr(Service, OpenGraphThumbMixin):
-    supported_domains = ['sverigesradio.se']
+    supported_domains = ["sverigesradio.se"]
 
     def get(self):
         data = self.get_urldata()
@@ -26,8 +26,7 @@ class Sr(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find audio info")
             return
 
-        dataurl = "https://sverigesradio.se/sida/playerajax/" \
-                  "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
+        dataurl = "https://sverigesradio.se/sida/playerajax/" "getaudiourl?id={0}&type={1}&quality=high&format=iis".format(aid, type)
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
         yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output)

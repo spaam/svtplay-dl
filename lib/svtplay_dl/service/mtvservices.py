@@ -11,7 +11,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Mtvservices(Service):
-    supported_domains = ['colbertnation.com', 'thedailyshow.com']
+    supported_domains = ["colbertnation.com", "thedailyshow.com"]
 
     def get(self):
         data = self.get_urldata()

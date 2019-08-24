@@ -27,7 +27,7 @@ class Npo(Service):
 
         # Get prid
         prid_src = self.http.request("get", "http://e.omroep.nl/metadata/{0}".format(video_id))
-        prid_raw = prid_src.text.split('(', 1)[-1].split(')', 1)[0]
+        prid_raw = prid_src.text.split("(", 1)[-1].split(")", 1)[0]
 
         try:
             janson = json.loads(prid_raw)

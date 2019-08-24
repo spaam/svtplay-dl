@@ -7,8 +7,10 @@ import logging
 import sys
 import glob
 from datetime import datetime
+
 if sys.version_info[0] == 3 and sys.version_info[1] < 7:
     from backports.datetime_fromisoformat import MonkeyPatch
+
     MonkeyPatch.patch_fromisoformat()
 
 
@@ -56,30 +58,19 @@ def build_docker():
     else:
         version = "dev"
 
-    subprocess.check_output([
-            "docker", "build", "-f", "dockerfile/Dockerfile", "-t", docker_name(version), "."
-    ])
-    subprocess.check_call([
-        "docker", "login", "-u", docker_username, "-p", docker_password
-    ])
-    subprocess.check_call([
-        "docker", "push", docker_name(version)
-    ])
+    subprocess.check_output(["docker", "build", "-f", "dockerfile/Dockerfile", "-t", docker_name(version), "."])
+    subprocess.check_call(["docker", "login", "-u", docker_username, "-p", docker_password])
+    subprocess.check_call(["docker", "push", docker_name(version)])
 
     if tag():
-        subprocess.check_output([
-            "docker", "tag", docker_name(version), docker_name("latest")
-        ])
-        subprocess.check_call([
-            "docker", "push", docker_name("latest")
-        ])
+        subprocess.check_output(["docker", "tag", docker_name(version), docker_name("latest")])
+        subprocess.check_call(["docker", "push", docker_name("latest")])
 
 
 def build_package():
     logger.info("Building python package")
-    subprocess.check_output([
-        "python", "setup.py", "sdist", "bdist_wheel"
-    ])
+
+    subprocess.check_output(["python", "setup.py", "sdist", "bdist_wheel"])
 
 
 def snapshot_folder():
@@ -90,12 +81,12 @@ def snapshot_folder():
     try:
         stdout = subprocess.check_output(["git", "show", "-s", "--format=%cI", "HEAD"])
     except subprocess.CalledProcessError as e:
-        logger.error("Error: {}".format(e.output.decode('ascii', 'ignore').strip()))
+        logger.error("Error: {}".format(e.output.decode("ascii", "ignore").strip()))
         sys.exit(2)
     except FileNotFoundError as e:
         logger.error("Error: {}".format(e))
         sys.exit(2)
-    ds = stdout.decode('ascii', 'ignore').strip()
+    ds = stdout.decode("ascii", "ignore").strip()
     dt = datetime.fromisoformat(ds)
     utc = dt - dt.utcoffset()
     return utc.strftime("%Y%m%d_%H%M%S")
@@ -111,14 +102,12 @@ def aws_upload():
     logger.info("Upload to aws {}/{}".format(folder, version))
     for file in ["svtplay-dl", "svtplay-dl.zip"]:
         if os.path.isfile(file):
-            subprocess.check_call([
-                "aws", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)
-            ])
+            subprocess.check_call(["aws", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)])
 
 
 def pypi_upload():
     logger.info("Uploading to pypi")
-    sdist = glob.glob(os.path.join("dist/", 'svtplay_dl-*.tar.gz'))
+    sdist = glob.glob(os.path.join("dist/", "svtplay_dl-*.tar.gz"))
     if sdist:
         subprocess.check_call(["twine", "upload", sdist[0]])
     else:

@@ -13,15 +13,15 @@ from svtplay_dl.utils.parser import setup_defaults
 
 
 class MockService(Service):
-    supported_domains = ['example.com', 'example.net']
+    supported_domains = ["example.com", "example.net"]
 
 
 class ServiceTest(unittest.TestCase):
     def test_supports(self):
-        self.assertTrue(MockService.handles('http://example.com/video.swf?id=1'))
-        self.assertTrue(MockService.handles('http://example.net/video.swf?id=1'))
-        self.assertTrue(MockService.handles('http://www.example.com/video.swf?id=1'))
-        self.assertTrue(MockService.handles('http://www.example.net/video.swf?id=1'))
+        self.assertTrue(MockService.handles("http://example.com/video.swf?id=1"))
+        self.assertTrue(MockService.handles("http://example.net/video.swf?id=1"))
+        self.assertTrue(MockService.handles("http://www.example.com/video.swf?id=1"))
+        self.assertTrue(MockService.handles("http://www.example.net/video.swf?id=1"))
 
 
 class service_handlerTest(unittest.TestCase):

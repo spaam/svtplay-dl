@@ -34,7 +34,7 @@ class Aftonbladet(Service):
     def get(self):
         data = self.get_urldata()
 
-        match = re.search('window.FLUX_STATE = ({.*})</script>', data)
+        match = re.search("window.FLUX_STATE = ({.*})</script>", data)
         if not match:
             yield ServiceError("Can't find video info")
             return
@@ -55,7 +55,11 @@ class Aftonbladet(Service):
             contents = collections[n]["contents"]["items"]
             for i in list(contents.keys()):
                 if "type" in contents[i] and contents[i]["type"] == "video":
-                    streams = hlsparse(self.config, self.http.request("get", contents[i]["videoAsset"]["streamUrls"]["hls"]),
-                                       contents[i]["videoAsset"]["streamUrls"]["hls"], output=self.output)
+                    streams = hlsparse(
+                        self.config,
+                        self.http.request("get", contents[i]["videoAsset"]["streamUrls"]["hls"]),
+                        contents[i]["videoAsset"]["streamUrls"]["hls"],
+                        output=self.output,
+                    )
                     for key in list(streams.keys()):
                         yield streams[key]

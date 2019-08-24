@@ -10,7 +10,7 @@ from svtplay_dl.fetcher.dash import dashparse
 
 class Raw(Service):
     def get(self):
-        filename = os.path.basename(self.url[:self.url.rfind("/")])
+        filename = os.path.basename(self.url[: self.url.rfind("/")])
         self.output["title"] = filename
 
         streams = []

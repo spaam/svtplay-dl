@@ -12,7 +12,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Radioplay(Service):
-    supported_domains = ['radioplay.se']
+    supported_domains = ["radioplay.se"]
 
     def get(self):
         data = self.get_urldata()

@@ -9,13 +9,13 @@ from svtplay_dl.error import ServiceError
 
 
 class Pokemon(Service, OpenGraphThumbMixin):
-    supported_domains = ['pokemon.com']
+    supported_domains = ["pokemon.com"]
 
     def get(self):
         data = self.get_urldata()
 
         parse = urlparse(self.url)
-        match = re.search(r'^/([a-z]{2})/', parse.path)
+        match = re.search(r"^/([a-z]{2})/", parse.path)
         if not match:
             yield ServiceError("Cant county code")
             return

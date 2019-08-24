@@ -18,7 +18,5 @@ class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
             "http://dn.se/valet-2014/sa-var-peter-wolodarskis-samtal-med-fredrik-reinfeldt/",
             "http://mobil.dn.se/valet-2014/sa-var-peter-wolodarskis-samtal-med-fredrik-reinfeldt/",
         ],
-        "bad": [
-            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1",
-        ]
+        "bad": ["http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1"],
     }

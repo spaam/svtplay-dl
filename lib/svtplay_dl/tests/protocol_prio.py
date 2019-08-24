@@ -14,7 +14,7 @@ class VideoRetriever(object):
         self.name = proto
 
     def __repr__(self):
-        return '%s(%d)' % (self.proto.upper(), self.bitrate)
+        return "%s(%d)" % (self.proto.upper(), self.bitrate)
 
 
 class PrioStreamsTest(unittest.TestCase):
@@ -25,26 +25,13 @@ class PrioStreamsTest(unittest.TestCase):
         if expected is None:
             expected = [str(VideoRetriever(x, 100)) for x in ordered]
 
-        return self.assertEqual(
-            [str(x) for x in protocol_prio(streams, ordered, **kwargs)],
-            expected
-        )
+        return self.assertEqual([str(x) for x in protocol_prio(streams, ordered, **kwargs)], expected)
 
     def test_custom_order(self):
-        return self._gen_proto_case(
-            ['http', 'hds', 'hls'],
-            ['hds', 'hls', 'http'],
-        )
+        return self._gen_proto_case(["http", "hds", "hls"], ["hds", "hls", "http"])
 
     def test_custom_order_1(self):
-        return self._gen_proto_case(
-            ['http'],
-            ['hds', 'hls', 'http'],
-        )
+        return self._gen_proto_case(["http"], ["hds", "hls", "http"])
 
     def test_proto_unavail(self):
-        return self._gen_proto_case(
-            ['http', 'hds'],
-            ['hls', 'https'],
-            expected=[],
-        )
+        return self._gen_proto_case(["http", "hds"], ["hls", "https"], expected=[])

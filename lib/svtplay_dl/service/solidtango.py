@@ -11,8 +11,8 @@ from svtplay_dl.error import ServiceError
 
 
 class Solidtango(Service):
-    supported_domains_re = [r'^([^.]+\.)*solidtango.com']
-    supported_domains = ['mm-resource-service.herokuapp.com', 'solidtango.com']
+    supported_domains_re = [r"^([^.]+\.)*solidtango.com"]
+    supported_domains = ["mm-resource-service.herokuapp.com", "solidtango.com"]
 
     def get(self):
         data = self.get_urldata()
@@ -23,14 +23,14 @@ class Solidtango(Service):
             match = re.search('src="(https://[^"]+solidtango[^"]+)" ', data)
             if match:
                 data = self.http.request("get", match.group(1)).text
-        match = re.search(r'<title>(http[^<]+)</title>', data)
+        match = re.search(r"<title>(http[^<]+)</title>", data)
         if match:
             data = self.http.request("get", match.group(1)).text
 
-        match = re.search('is_livestream: true', data)
+        match = re.search("is_livestream: true", data)
         if match:
             self.config.set("live", True)
-        match = re.search('isLivestream: true', data)
+        match = re.search("isLivestream: true", data)
         if match:
             self.config.set("live", True)
         match = re.search('html5_source: "([^"]+)"', data)
@@ -45,7 +45,7 @@ class Solidtango(Service):
                 yield streams[n]
         else:
             parse = urlparse(self.url)
-            url2 = "https://{0}/api/v1/play/{1}.xml".format(parse.netloc, parse.path[parse.path.rfind("/") + 1:])
+            url2 = "https://{0}/api/v1/play/{1}.xml".format(parse.netloc, parse.path[parse.path.rfind("/") + 1 :])
             data = self.http.request("get", url2)
             if data.status_code != 200:
                 yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")

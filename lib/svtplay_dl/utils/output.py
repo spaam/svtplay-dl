@@ -81,7 +81,7 @@ def progress(byte, total, extra=""):
     """ Print some info about how much we have downloaded """
     if total == 0:
         progresstr = "Downloaded %dkB bytes" % (byte >> 10)
-        progress_stream.write(progresstr + '\r')
+        progress_stream.write(progresstr + "\r")
         return
     progressbar(total, byte, extra)
 
@@ -105,7 +105,7 @@ def progressbar(total, pos, msg=""):
     """
     width = get_terminal_size()[0] - 40
     rel_pos = int(float(pos) / total * width)
-    bar = ''.join(["=" * rel_pos, "." * (width - rel_pos)])
+    bar = "".join(["=" * rel_pos, "." * (width - rel_pos)])
 
     # Determine how many digits in total (base 10)
     digits_total = len(str(total))
@@ -133,7 +133,7 @@ def formatname(output, config, extension="mp4"):
     if not output.get("basedir", False):
         # If tvshow have not been derived by service do it by if season and episode is set
         if output.get("tvshow", None) is None:
-            tvshow = (output.get("season", None) is not None and output.get("episode", None) is not None)
+            tvshow = output.get("season", None) is not None and output.get("episode", None) is not None
         else:
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
@@ -221,9 +221,14 @@ def findexpisode(output, directory, name):
         lsname, lsext = os.path.splitext(i)
         if output["service"]:
             if orgext[1:] in subtitlefiles:
-                if output["id"] and name.find(output["service"]) > 0 and lsname.find(output["service"]) > 0 and \
-                        name.find(output["id"]) > 0 and lsname.find(output["id"]) > 0 and \
-                        orgext == lsext:
+                if (
+                    output["id"]
+                    and name.find(output["service"]) > 0
+                    and lsname.find(output["service"]) > 0
+                    and name.find(output["id"]) > 0
+                    and lsname.find(output["id"]) > 0
+                    and orgext == lsext
+                ):
                     return True
             elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
                 if output["id"] and output["service"]:

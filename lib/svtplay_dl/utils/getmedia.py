@@ -92,7 +92,7 @@ def get_one_media(stream):
         return
 
     if stream.config.get("merge_subtitle"):
-        if not which('ffmpeg'):
+        if not which("ffmpeg"):
             logging.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
             logging.info("https://ffmpeg.org/download.html")
             sys.exit(2)
@@ -134,12 +134,11 @@ def get_one_media(stream):
     except (ValueError, TypeError, KeyError):
         pub_date = None
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
-        logging.info("Video {}S{}E{} skipped since published {} before {}. ".format(
-            stream.output["title"],
-            stream.output["season"],
-            stream.output["episode"],
-            pub_date.date(),
-            after_date.date()))
+        logging.info(
+            "Video {}S{}E{} skipped since published {} before {}. ".format(
+                stream.output["title"], stream.output["season"], stream.output["episode"], pub_date.date(), after_date.date()
+            )
+        )
         return
 
     if stream.config.get("require_subtitle") and not subs:

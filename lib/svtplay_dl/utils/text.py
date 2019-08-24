@@ -10,7 +10,7 @@ def ensure_unicode(s):
     utf-8 and decodes it to a unicode string.
     """
     if isinstance(s, bytes):
-        s = s.decode('utf-8', 'replace')
+        s = s.decode("utf-8", "replace")
     return s
 
 
@@ -25,7 +25,8 @@ def decode_html_entities(s):
 
     def unesc(m):
         return parser.unescape(m.group())
-    return re.sub(r'(&[^;]+;)', unesc, ensure_unicode(s))
+
+    return re.sub(r"(&[^;]+;)", unesc, ensure_unicode(s))
 
 
 def filenamify(title):
@@ -40,16 +41,16 @@ def filenamify(title):
 
     # NFD decomposes chars into base char and diacritical mark, which
     # means that we will get base char when we strip out non-ascii.
-    title = unicodedata.normalize('NFD', title)
+    title = unicodedata.normalize("NFD", title)
 
     # Convert to lowercase
     # Drop any non ascii letters/digits
     # Drop any leading/trailing whitespace that may have appeared
-    title = re.sub(r'[^a-z0-9 .-]', '', title.lower().strip())
+    title = re.sub(r"[^a-z0-9 .-]", "", title.lower().strip())
 
     # Replace whitespace with dot
-    title = re.sub(r'\s+', '.', title)
-    title = re.sub(r'\.-\.', '-', title)
+    title = re.sub(r"\s+", ".", title)
+    title = re.sub(r"\.-\.", "-", title)
 
     return title
 

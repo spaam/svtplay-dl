@@ -13,13 +13,13 @@ from svtplay_dl.fetcher.hls import hlsparse
 
 
 class Vimeo(Service, OpenGraphThumbMixin):
-    supported_domains = ['vimeo.com']
+    supported_domains = ["vimeo.com"]
 
     def get(self):
         data = self.get_urldata()
 
         match_cfg_url = re.search('data-config-url="([^"]+)" data-fallback-url', data)
-        match_clip_page_cfg = re.search(r'vimeo\.clip_page_config\s*=\s*({.+?});', data)
+        match_clip_page_cfg = re.search(r"vimeo\.clip_page_config\s*=\s*({.+?});", data)
 
         if match_cfg_url:
             player_url = match_cfg_url.group(1).replace("&amp;", "&")

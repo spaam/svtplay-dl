@@ -3,9 +3,9 @@
 from __future__ import absolute_import
 import re
 import copy
-import json
-import hashlib
 import datetime
+import hashlib
+import json
 import logging
 from urllib.parse import urljoin, urlparse, parse_qs
 from operator import itemgetter
@@ -21,7 +21,7 @@ URL_VIDEO_API = "https://api.svt.se/video/"
 
 
 class Svtplay(Service, MetadataThumbMixin):
-    supported_domains = ['svtplay.se', 'svt.se', 'beta.svtplay.se', 'svtflow.se']
+    supported_domains = ["svtplay.se", "svt.se", "beta.svtplay.se", "svtflow.se"]
 
     def get(self):
         parse = urlparse(self.url)
@@ -38,7 +38,7 @@ class Svtplay(Service, MetadataThumbMixin):
         urldata = self.get_urldata()
 
         if parse.path[:8] == "/kanaler":
-            match = re.search("data-video-id=\"([\\w-]+)\"", urldata)
+            match = re.search('data-video-id="([\\w-]+)"', urldata)
 
             if not match:
                 yield ServiceError("Can't find video info.")
@@ -63,7 +63,7 @@ class Svtplay(Service, MetadataThumbMixin):
             return
         janson = json.loads(match.group(1))["videoPage"]
 
-        self.visibleid = list(janson['visible'].keys())[0]
+        self.visibleid = list(janson["visible"].keys())[0]
         match = re.search(r"__svtplay_apollo'] = ({.*});", urldata)
         if not match:
             yield ServiceError("Can't find video info.")
@@ -114,12 +114,10 @@ class Svtplay(Service, MetadataThumbMixin):
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
                         alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-
                 elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
                     streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url),
-                                                alt.request.url, output=self.output)
+                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
 
                 if streams:
                     for n in list(streams.keys()):
@@ -179,14 +177,14 @@ class Svtplay(Service, MetadataThumbMixin):
                 logging.error("Can't find video info.")
                 return videos
             janson = json.loads(match.group(1))["videoPage"]
-            self.visibleid = list(janson['visible'].keys())[0]
+            self.visibleid = list(janson["visible"].keys())[0]
             match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
             if not match:
                 logging.error("Can't find video info.")
                 return videos
             janson = json.loads(match.group(1))
             episode = janson["Variant:{}".format(self.visibleid)]
-            associatedContent = episode["associatedContent({\"include\":[\"season\",\"productionPeriod\",\"clips\",\"upcoming\"]})"]
+            associatedContent = episode['associatedContent({"include":["season","productionPeriod","clips","upcoming"]})']
 
             keys = []
             videos = []
@@ -217,12 +215,12 @@ class Svtplay(Service, MetadataThumbMixin):
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
         if config.get("all_last") > 0:
-            return episodes[-config.get("all_last"):]
+            return episodes[-config.get("all_last") :]
         return episodes
 
     def videos_to_list(self, lvideos, videos):
         if "episodeNumber" in lvideos[0] and lvideos[0]["episodeNumber"]:
-            lvideos = sorted(lvideos, key=itemgetter('episodeNumber'))
+            lvideos = sorted(lvideos, key=itemgetter("episodeNumber"))
         for n in lvideos:
             parse = urlparse(n["contentUrl"])
             if parse.path not in videos:
@@ -291,9 +289,9 @@ class Svtplay(Service, MetadataThumbMixin):
     def extrametadata(self, data, type_name, visibleid):
         episode = data["{}:{}".format(type_name, visibleid)]
 
-        self.output["tvshow"] = (self.output["season"] is not None and self.output["episode"] is not None)
+        self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
-            self.output["publishing_datetime"] = int(datetime.datetime.strptime(episode["validFrom"], "%Y-%m-%dT%H:%M:%S%z").strftime('%s'))
+            self.output["publishing_datetime"] = int(datetime.datetime.strptime(episode["validFrom"], "%Y-%m-%dT%H:%M:%S%z").strftime("%s"))
 
         self.output["title_nice"] = data[data["{}:{}".format(type_name, visibleid)]["parent"]["id"]]["name"]
 

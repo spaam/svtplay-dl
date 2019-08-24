@@ -9,15 +9,9 @@ from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import Options
 
 # Used for UA spoofing in get_http_data()
-FIREFOX_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3'
+FIREFOX_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"
 
-retry = Retry(
-    total=5,
-    read=5,
-    connect=5,
-    backoff_factor=0.3,
-    status_forcelist=(500, 502, 504)
-)
+retry = Retry(total=5, read=5, connect=5, backoff_factor=0.3, status_forcelist=(500, 502, 504))
 
 
 class HTTP(Session):
@@ -25,8 +19,8 @@ class HTTP(Session):
         Session.__init__(self, *args, **kwargs)
         adapter = HTTPAdapter(max_retries=retry)
 
-        self.mount('http://', adapter)
-        self.mount('https://', adapter)
+        self.mount("http://", adapter)
+        self.mount("https://", adapter)
         self.verify = config.get("ssl_verify")
         self.proxy = config.get("proxy")
         if config.get("http_headers"):
@@ -46,7 +40,7 @@ class HTTP(Session):
         return res
 
     def split_header(self, headers):
-        return dict(x.split('=') for x in headers.split(';'))
+        return dict(x.split("=") for x in headers.split(";"))
 
 
 def download_thumbnails(output, config, urls):
@@ -72,14 +66,14 @@ def download_thumbnails(output, config, urls):
 
 
 def get_full_url(url, srcurl):
-    if url[:4] == 'http':
+    if url[:4] == "http":
         return url
-    if url[0] == '/':
-        baseurl = re.search(r'^(http[s]{0,1}://[^/]+)/', srcurl)
+    if url[0] == "/":
+        baseurl = re.search(r"^(http[s]{0,1}://[^/]+)/", srcurl)
         return "{0}{1}".format(baseurl.group(1), url)
 
     # remove everything after last / in the path of the URL
-    baseurl = re.sub(r'^([^\?]+)/[^/]*(\?.*)?$', r'\1/', srcurl)
+    baseurl = re.sub(r"^([^\?]+)/[^/]*(\?.*)?$", r"\1/", srcurl)
     returl = urljoin(baseurl, url)
 
     return returl

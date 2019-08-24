@@ -9,11 +9,11 @@ from svtplay_dl.error import ServiceError
 
 
 class Eurosport(Service):
-    supported_domains_re = [r'^([^.]+\.)*eurosportplayer.com']
+    supported_domains_re = [r"^([^.]+\.)*eurosportplayer.com"]
 
     def get(self):
         parse = urlparse(self.url)
-        match = re.search('window.server_path = ({.*});', self.get_urldata())
+        match = re.search("window.server_path = ({.*});", self.get_urldata())
         if not match:
             yield ServiceError("Cant find api key")
             return
@@ -29,8 +29,14 @@ class Eurosport(Service):
         assertion = res.json()["assertion"]
 
         token = "https://eu.edge.bamgrid.com/token"
-        data = {"grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "latitude": 0, "longitude": 0,
-                "platform": "browser", "subject_token": assertion, "subject_token_type": "urn:bamtech:params:oauth:token-type:device"}
+        data = {
+            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+            "latitude": 0,
+            "longitude": 0,
+            "platform": "browser",
+            "subject_token": assertion,
+            "subject_token_type": "urn:bamtech:params:oauth:token-type:device",
+        }
 
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
@@ -49,8 +55,14 @@ class Eurosport(Service):
         assertion = res.json()["assertion"]
 
         token = "https://eu.edge.bamgrid.com/token"
-        data = {"grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "latitude": 0, "longitude": 0,
-                "platform": "browser", "subject_token": assertion, "subject_token_type": "urn:bamtech:params:oauth:token-type:account"}
+        data = {
+            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+            "latitude": 0,
+            "longitude": 0,
+            "platform": "browser",
+            "subject_token": assertion,
+            "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
+        }
         header = {"authorization": "Bearer {}".format(clientapikey)}
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
@@ -59,7 +71,7 @@ class Eurosport(Service):
 
         if parse.path[:11] == "/en/channel":
             pagetype = "channel"
-            match = re.search('/([^/]+)$', parse.path)
+            match = re.search("/([^/]+)$", parse.path)
             if not match:
                 yield ServiceError("Cant find channel")
                 return
@@ -72,8 +84,10 @@ class Eurosport(Service):
 
             self.config.set("live", True)  # lets override to true
 
-            url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/" \
-                  "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
+            url = (
+                "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/"
+                "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
+            )
             res = self.http.get(url, headers={"authorization": access_token})
             vid2 = res.json()["data"]["Airings"][0]["channel"]["id"]
             url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/browser".format(vid2)
@@ -81,7 +95,7 @@ class Eurosport(Service):
             hls_url = res.json()["stream"]["slide"]
         else:
             pagetype = "event"
-            match = re.search('/([^/]+)/([^/]+)$', parse.path)
+            match = re.search("/([^/]+)/([^/]+)$", parse.path)
             if not match:
                 yield ServiceError("Cant fint event id")
                 return
@@ -89,8 +103,9 @@ class Eurosport(Service):
             query["title"], query["contentId"] = match.groups()
             query["pageType"] = pagetype
 
-            url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" \
-                  "persisted/query/eurosport/Airings?variables={}".format(quote(json.dumps(query)))
+            url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" "persisted/query/eurosport/Airings?variables={}".format(
+                quote(json.dumps(query))
+            )
             res = self.http.get(url, headers={"authorization": access_token})
             programid = res.json()["data"]["Airings"][0]["programId"]
             mediaid = res.json()["data"]["Airings"][0]["mediaId"]

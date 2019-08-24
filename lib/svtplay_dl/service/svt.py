@@ -7,12 +7,12 @@ from svtplay_dl.subtitle import subtitle
 
 
 class Svt(Svtplay):
-    supported_domains = ['svt.se', 'www.svt.se']
+    supported_domains = ["svt.se", "www.svt.se"]
 
     def get(self):
 
         data = self.get_urldata()
-        match_data_video_id = re.search("data-video-id=\"(.+?)\"", data)
+        match_data_video_id = re.search('data-video-id="(.+?)"', data)
 
         if match_data_video_id:
             id = match_data_video_id.group(1)

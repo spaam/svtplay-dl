@@ -19,11 +19,27 @@ from svtplay_dl.error import ServiceError
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
-        'tv3play.se', 'tv6play.se', 'tv8play.se', 'tv10play.se',
-        'tv3play.no', 'tv3play.dk', 'tv6play.no', 'viasat4play.no',
-        'tv3play.ee', 'tv3play.lv', 'tv3play.lt', 'tvplay.lv', 'viagame.com',
-        'juicyplay.se', 'viafree.se', 'viafree.dk', 'viafree.no', 'viafree.fi',
-        'play.tv3.lt', 'tv3play.tv3.ee', 'tvplay.skaties.lv'
+        "tv3play.se",
+        "tv6play.se",
+        "tv8play.se",
+        "tv10play.se",
+        "tv3play.no",
+        "tv3play.dk",
+        "tv6play.no",
+        "viasat4play.no",
+        "tv3play.ee",
+        "tv3play.lv",
+        "tv3play.lt",
+        "tvplay.lv",
+        "viagame.com",
+        "juicyplay.se",
+        "viafree.se",
+        "viafree.dk",
+        "viafree.no",
+        "viafree.fi",
+        "play.tv3.lt",
+        "tv3play.tv3.ee",
+        "tvplay.skaties.lv",
     ]
 
     def _get_video_id(self, url=None):
@@ -68,18 +84,18 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 return None
             if "videoIdOrEpisodeNumber" in jansson:
                 videp = jansson["videoIdOrEpisodeNumber"]
-                match = re.search(r'(\w+)-(\d+)', videp)
+                match = re.search(r"(\w+)-(\d+)", videp)
                 if match:
                     episodenr = match.group(2)
                 else:
                     episodenr = videp
                     clips = True
-                match = re.search(r'(s\w+)-(\d+)', season)
+                match = re.search(r"(s\w+)-(\d+)", season)
                 if match:
                     season = match.group(2)
             else:
                 # sometimes videoIdOrEpisodeNumber does not work.. this is a workaround
-                match = re.search(r'(episode|avsnitt)-(\d+)', self.url)
+                match = re.search(r"(episode|avsnitt)-(\d+)", self.url)
                 if match:
                     episodenr = match.group(2)
                 else:
@@ -103,7 +119,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                                     return episodenr
 
         parse = urlparse(self.url)
-        match = re.search(r'/\w+/(\d+)', parse.path)
+        match = re.search(r"/\w+/(\d+)", parse.path)
         if match:
             return match.group(1)
         match = re.search(r'iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
@@ -176,14 +192,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if streamj["streams"]["medium"] and streamj["streams"]["medium"][:7] != "[empty]":
             filename = streamj["streams"]["medium"]
             if ".f4m" in filename:
-                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}),
-                                   filename, output=self.output)
+                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename, output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
 
         if streamj["streams"]["hls"]:
-            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]),
-                               streamj["streams"]["hls"], output=self.output)
+            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"], output=self.output)
             for n in list(streams.keys()):
                 yield streams[n]
 
@@ -201,7 +215,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
         episodes = self._grab_episodes(config, seasons)
         if config.get("all_last") > 0:
-            return episodes[-config.get("all_last"):]
+            return episodes[-config.get("all_last") :]
         return sorted(episodes)
 
     def _grab_episodes(self, config, seasons):
@@ -210,8 +224,8 @@ class Viaplay(Service, OpenGraphThumbMixin):
         match = re.search(r"(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
         if match:
             if re.search(r"(avsnitt|episode)", urlparse(baseurl).path):
-                baseurl = baseurl[:baseurl.rfind("/")]
-            baseurl = baseurl[:baseurl.rfind("/")]
+                baseurl = baseurl[: baseurl.rfind("/")]
+            baseurl = baseurl[: baseurl.rfind("/")]
 
         for i in seasons:
             url = "{0}/{1}-{2}".format(baseurl, self._isswe(self.url), i)
@@ -273,12 +287,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
             else:
                 title = dataj["summary"].replace("{} - ".format(dataj["format_title"]), "")
                 if title[-1] == ".":
-                    title = title[:len(title) - 1]  # remove the last dot
+                    title = title[: len(title) - 1]  # remove the last dot
 
         if dataj["type"] == "clip":
             # Removes the show name from the end of the filename
             # e.g. Showname.S0X.title instead of Showname.S07.title-showname
-            match = re.search(r'(.+)-', dataj["title"])
+            match = re.search(r"(.+)-", dataj["title"])
             if match:
                 title = match.group(1)
             else:
@@ -320,8 +334,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             return
 
         for i in res.json()["embedded"]["prioritizedStreams"]:
-            streams = hlsparse(self.config, self.http.request("get", i["links"]["stream"]["href"]),
-                               i["links"]["stream"]["href"], output=self.output)
+            streams = hlsparse(self.config, self.http.request("get", i["links"]["stream"]["href"]), i["links"]["stream"]["href"], output=self.output)
             if streams:
                 for n in list(streams.keys()):
                     yield streams[n]

@@ -21,7 +21,7 @@ class HTTP(VideoRetriever):
             self.output_extention = "mp4"  # this might be wrong..
         data = self.http.request("get", self.url, stream=True)
         try:
-            total_size = data.headers['content-length']
+            total_size = data.headers["content-length"]
         except KeyError:
             total_size = 0
         total_size = int(total_size)
@@ -37,7 +37,7 @@ class HTTP(VideoRetriever):
             file_d.write(i)
             if not self.config.get("silent"):
                 eta.update(bytes_so_far)
-                progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
+                progressbar(total_size, bytes_so_far, "".join(["ETA: ", str(eta)]))
 
         file_d.close()
         self.finished = True

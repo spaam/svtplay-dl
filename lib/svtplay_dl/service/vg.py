@@ -12,14 +12,14 @@ from svtplay_dl.error import ServiceError
 
 
 class Vg(Service, OpenGraphThumbMixin):
-    supported_domains = ['vg.no', 'vgtv.no']
+    supported_domains = ["vg.no", "vgtv.no"]
 
     def get(self):
         data = self.get_urldata()
         match = re.search(r'data-videoid="([^"]+)"', data)
         if not match:
             parse = urlparse(self.url)
-            match = re.search(r'video/(\d+)/', parse.fragment)
+            match = re.search(r"video/(\d+)/", parse.fragment)
             if not match:
                 yield ServiceError("Can't find video file for: {0}".format(self.url))
                 return
@@ -29,13 +29,18 @@ class Vg(Service, OpenGraphThumbMixin):
         self.output["title"] = jsondata["title"]
 
         if "hds" in jsondata["streamUrls"]:
-            streams = hdsparse(self.config, self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}),
-                               jsondata["streamUrls"]["hds"], output=self.output)
+            streams = hdsparse(
+                self.config,
+                self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}),
+                jsondata["streamUrls"]["hds"],
+                output=self.output,
+            )
             for n in list(streams.keys()):
                 yield streams[n]
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(self.config, self.http.request("get", jsondata["streamUrls"]["hls"]),
-                               jsondata["streamUrls"]["hls"], output=self.output)
+            streams = hlsparse(
+                self.config, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"], output=self.output
+            )
             for n in list(streams.keys()):
                 yield streams[n]
         if "mp4" in jsondata["streamUrls"]:

@@ -12,7 +12,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Barnkanalen(Svtplay):
-    supported_domains = ['svt.se']
+    supported_domains = ["svt.se"]
     supported_path = "/barnkanalen"
 
     @classmethod
@@ -24,7 +24,7 @@ class Barnkanalen(Svtplay):
             return True
 
         # For every listed domain, try with www. subdomain as well.
-        if urlp.netloc in ['www.' + x for x in cls.supported_domains] and correctpath:
+        if urlp.netloc in ["www." + x for x in cls.supported_domains] and correctpath:
             return True
 
         return False
@@ -92,7 +92,7 @@ class Barnkanalen(Svtplay):
         episodes = [urljoin("http://www.svt.se", x) for x in videos]
 
         if config.get("all_last") > 0:
-            return episodes[-config.get("all_last"):]
+            return episodes[-config.get("all_last") :]
         return episodes
 
     def videos_to_list(self, lvideos, videos):

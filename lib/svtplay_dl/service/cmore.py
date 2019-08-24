@@ -9,7 +9,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Cmore(Service):
-    supported_domains = ['www.cmore.se', 'www.cmore.dk', 'www.cmore.no', 'www.cmore.fi']
+    supported_domains = ["www.cmore.se", "www.cmore.dk", "www.cmore.no", "www.cmore.fi"]
 
     def get(self):
         if not self.config.get("username") or not self.config.get("password"):
@@ -29,8 +29,9 @@ class Cmore(Service):
         tld = self._gettld()
         self.output["id"] = vid
 
-        metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" \
-                  "&device=browser&drm=widevine&protocol=dash%2Chls".format(self.output["id"], tld)
+        metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" "&device=browser&drm=widevine&protocol=dash%2Chls".format(
+            self.output["id"], tld
+        )
         res = self.http.get(metaurl)
         janson = res.json()
         self._autoname(janson)
@@ -45,8 +46,12 @@ class Cmore(Service):
             return
 
         if res.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(self.config, self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
-                               res.json()["playbackItem"]["manifestUrl"], output=self.output)
+            streams = hlsparse(
+                self.config,
+                self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
+                res.json()["playbackItem"]["manifestUrl"],
+                output=self.output,
+            )
             for n in list(streams.keys()):
                 yield streams[n]
 
@@ -65,7 +70,7 @@ class Cmore(Service):
                 episodes.append(url)
 
         if config.get("all_last") > 0:
-            return sorted(episodes[-config.get("all_last"):])
+            return sorted(episodes[-config.get("all_last") :])
         return sorted(episodes)
 
     def _gettld(self):
@@ -73,15 +78,19 @@ class Cmore(Service):
             parse = urlparse(self.url[0])
         else:
             parse = urlparse(self.url)
-        return re.search(r'\.(\w{2})$', parse.netloc).group(1)
+        return re.search(r"\.(\w{2})$", parse.netloc).group(1)
 
     def _login(self):
         tld = self._gettld()
         url = "https://www.cmore.{}/login".format(tld)
         res = self.http.get(url, cookies=self.cookies)
         if self.config.get("cmoreoperator"):
-            post = {"username": self.config.get("username"), "password": self.config.get("password"),
-                    "operator": self.config.get("cmoreoperator"), "country_code": tld}
+            post = {
+                "username": self.config.get("username"),
+                "password": self.config.get("password"),
+                "operator": self.config.get("cmoreoperator"),
+                "country_code": tld,
+            }
         else:
             post = {"username": self.config.get("username"), "password": self.config.get("password")}
         res = self.http.post("https://account.cmore.{}/session?client=cmore-web-prod".format(tld), json=post, cookies=self.cookies)

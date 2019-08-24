@@ -23,8 +23,7 @@ class DASHException(UIException):
 
 class LiveDASHException(DASHException):
     def __init__(self, url):
-        super(LiveDASHException, self).__init__(
-            url, "This is a live DASH stream, and they are not supported.")
+        super(LiveDASHException, self).__init__(url, "This is a live DASH stream, and they are not supported.")
 
 
 class DASHattibutes(object):
@@ -74,7 +73,7 @@ def templateelemt(attributes, element, filename, idnumber):
             end = start + len(segments) + count
             number = start + len(segments)
             while number < end:
-                segments.append({"number": number, "duration": math.ceil(duration / attributes.get("timescale")), "time": t, })
+                segments.append({"number": number, "duration": math.ceil(duration / attributes.get("timescale")), "time": t})
                 t += duration
                 number += 1
     else:  # Saw this on dynamic live content
@@ -84,7 +83,9 @@ def templateelemt(attributes, element, filename, idnumber):
         periodEndWC = now + attributes.get("minimumUpdatePeriod")
         periodDuration = periodEndWC - periodStartWC
         segmentCount = math.ceil(periodDuration * attributes.get("timescale") / attributes.get("duration"))
-        availableStart = math.floor((now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration"))
+        availableStart = math.floor(
+            (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration")
+        )
         availableEnd = math.floor((now - periodStartWC) * attributes.get("timescale") / attributes.get("duration"))
         start = max(0, availableStart)
         end = min(segmentCount, availableEnd)
@@ -197,9 +198,16 @@ def _dashparse(config, text, url, output, cookies):
 
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]
-        streams[bitrate] = DASH(copy.copy(config), url, bitrate, cookies=cookies,
-                                audio=audiofiles[list(audiofiles.keys())[0]]["files"], files=videofiles[i]["files"],
-                                output=output, segments=videofiles[i]["segments"])
+        streams[bitrate] = DASH(
+            copy.copy(config),
+            url,
+            bitrate,
+            cookies=cookies,
+            audio=audiofiles[list(audiofiles.keys())[0]]["files"],
+            files=videofiles[i]["files"],
+            output=output,
+            segments=videofiles[i]["segments"],
+        )
 
     return streams
 
@@ -265,7 +273,7 @@ class DASH(VideoRetriever):
         for i in files:
             if not self.config.get("silent"):
                 eta.increment()
-                progressbar(len(files), n, ''.join(['ETA: ', str(eta)]))
+                progressbar(len(files), n, "".join(["ETA: ", str(eta)]))
                 n += 1
             data = self.http.request("get", i, cookies=cookies)
 
@@ -276,5 +284,5 @@ class DASH(VideoRetriever):
 
         file_d.close()
         if not self.config.get("silent"):
-            progress_stream.write('\n')
+            progress_stream.write("\n")
         self.finished = True

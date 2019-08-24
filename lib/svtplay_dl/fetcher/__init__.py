@@ -30,11 +30,11 @@ class VideoRetriever(object):
 
     def _download_url(self, url, audio=False, total_size=None):
         cookies = self.kwargs["cookies"]
-        data = self.http.request("get", url, cookies=cookies, headers={'Range': 'bytes=0-8192'})
+        data = self.http.request("get", url, cookies=cookies, headers={"Range": "bytes=0-8192"})
         if not total_size:
             try:
-                total_size = data.headers['Content-Range']
-                total_size = total_size[total_size.find("/") + 1:]
+                total_size = data.headers["Content-Range"]
+                total_size = total_size[total_size.find("/") + 1 :]
                 total_size = int(total_size)
             except KeyError:
                 raise KeyError("Can't get the total size.")
@@ -53,14 +53,14 @@ class VideoRetriever(object):
 
             if not self.config.get("silent"):
                 eta.update(bytes_so_far)
-                progressbar(total_size, bytes_so_far, ''.join(["ETA: ", str(eta)]))
+                progressbar(total_size, bytes_so_far, "".join(["ETA: ", str(eta)]))
 
             old = bytes_so_far + 1
             bytes_so_far = total_size
 
             bytes_range = "bytes={0}-{1}".format(old, bytes_so_far)
 
-            data = self.http.request("get", url, cookies=cookies, headers={'Range': bytes_range})
+            data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
             file_d.write(data.content)
 
         file_d.close()

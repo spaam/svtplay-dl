@@ -14,20 +14,20 @@ from svtplay_dl.service.twitch import Twitch
 class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
     service = Twitch
     urls = {
-        'ok': [
+        "ok": [
             "http://twitch.tv/foo/c/123456",
             "http://www.twitch.tv/foo/c/123456",
             "http://en.www.twitch.tv/foo/c/123456",
             "http://en.twitch.tv/foo/c/123456",
             "http://pt-br.twitch.tv/foo/c/123456",
-            "http://pt-br.www.twitch.tv/foo/c/123456"
+            "http://pt-br.www.twitch.tv/foo/c/123456",
         ],
-        'bad': [
+        "bad": [
             "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla",
             "http://pxt-br.www.twitch.tv/foo/c/123456",
             "http://pxt-bxr.www.twitch.tv/foo/c/123456",
             "http://p-r.www.twitch.tv/foo/c/123456",
             "http://pxx.www.twitch.tv/foo/c/123456",
-            "http://en.wwww.twitch.tv/foo/c/123456"
-        ]
+            "http://en.wwww.twitch.tv/foo/c/123456",
+        ],
     }

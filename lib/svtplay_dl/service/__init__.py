@@ -21,11 +21,21 @@ class Service(object):
         self.subtitle = None
         self.cookies = {}
         self.auto_name = None
-        self.output = {"title": None, "season": None, "episode": None, "episodename": None,
-                       "id": None, "service": self.__class__.__name__.lower(),
-                       "tvshow": None, "title_nice": None, "showdescription": None,
-                       "episodedescription": None, "showthumbnailurl": None,
-                       "episodethumbnailurl": None, "publishing_datetime": None}
+        self.output = {
+            "title": None,
+            "season": None,
+            "episode": None,
+            "episodename": None,
+            "id": None,
+            "service": self.__class__.__name__.lower(),
+            "tvshow": None,
+            "title_nice": None,
+            "showdescription": None,
+            "episodedescription": None,
+            "showthumbnailurl": None,
+            "episodethumbnailurl": None,
+            "publishing_datetime": None,
+        }
         if not http:
             self.http = HTTP(config)
         else:
@@ -33,8 +43,9 @@ class Service(object):
 
         #  Config
         if config.get("configfile") and os.path.isfile(config.get("configfile")):
-            self.config = merge(readconfig(setup_defaults(), config.get("configfile"),
-                                           service=self.__class__.__name__.lower()).get_variable(), config.get_variable())
+            self.config = merge(
+                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(), config.get_variable()
+            )
         else:
             self.config = config
         logging.debug("service: {}".format(self.__class__.__name__.lower()))
@@ -63,7 +74,7 @@ class Service(object):
             return True
 
         # For every listed domain, try with www.subdomain as well.
-        if urlp.netloc in ['www.' + x for x in cls.supported_domains]:
+        if urlp.netloc in ["www." + x for x in cls.supported_domains]:
             return True
 
         return False
@@ -102,6 +113,7 @@ class OpenGraphThumbMixin(object):
     """
     Mix this into the service class to grab thumbnail from OpenGraph properties.
     """
+
     def get_thumbnail(self, options):
         url = opengraph_get(self.get_urldata(), "image")
         if url is None:
@@ -113,6 +125,7 @@ class MetadataThumbMixin(object):
     """
     Mix this into the service class to grab thumbnail from extracted metadata.
     """
+
     def get_thumbnail(self, options):
         urls = []
         if self.output["showthumbnailurl"] is not None:
@@ -124,7 +137,8 @@ class MetadataThumbMixin(object):
 
 
 class Generic(Service):
-    ''' Videos embed in sites '''
+    """ Videos embed in sites """
+
     def get(self, sites):
         data = self.http.request("get", self.url).text
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
@@ -185,7 +199,7 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, url)
-        match = re.search('(lemonwhale|lwcdn.com)', data)
+        match = re.search("(lemonwhale|lwcdn.com)", data)
         if match:
             url = "http://lemonwhale.com"
             for i in sites:
@@ -197,7 +211,7 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
-        match = re.search('(picsearch_ajax_auth|screen9-ajax-auth)', data)
+        match = re.search("(picsearch_ajax_auth|screen9-ajax-auth)", data)
         if match:
             url = "http://csp.picsearch.com"
             for i in sites:

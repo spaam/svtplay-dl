@@ -82,4 +82,5 @@ sites = [
     Vg,
     Youplay,
     Riksdagen,
-    Raw]
+    Raw,
+]

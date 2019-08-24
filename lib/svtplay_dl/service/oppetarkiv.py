@@ -17,7 +17,7 @@ from svtplay_dl.subtitle import subtitle
 
 
 class OppetArkiv(Service, OpenGraphThumbMixin):
-    supported_domains = ['oppetarkiv.se']
+    supported_domains = ["oppetarkiv.se"]
 
     def get(self):
         vid = self.find_video_id()
@@ -68,9 +68,12 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                     if "alt" in query and len(query["alt"]) > 0:
                         alt = self.http.get(query["alt"][0])
                         if alt:
-                            streams = hdsparse(self.config,
-                                               self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
-                                               alt.request.url, output=self.output)
+                            streams = hdsparse(
+                                self.config,
+                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
+                                alt.request.url,
+                                output=self.output,
+                            )
                             for n in list(streams.keys()):
                                 yield streams[n]
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
@@ -149,10 +152,10 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
     def name(selfs, data):
         if data.find(" - S.song") > 0:
-            title = data[:data.find(" - S.song")]
+            title = data[: data.find(" - S.song")]
         else:
             if data.find(" - Avsnitt") > 0:
-                title = data[:data.find(" - Avsnitt")]
+                title = data[: data.find(" - Avsnitt")]
             else:
                 title = data
         return title

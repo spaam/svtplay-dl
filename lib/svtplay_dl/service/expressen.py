@@ -11,7 +11,7 @@ from svtplay_dl.utils.text import decode_html_entities
 
 
 class Expressen(Service):
-    supported_domains = ['expressen.se']
+    supported_domains = ["expressen.se"]
 
     def get(self):
         data = self.get_urldata()

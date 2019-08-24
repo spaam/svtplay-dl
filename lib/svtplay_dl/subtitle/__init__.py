@@ -84,7 +84,7 @@ class subtitle(object):
         data = ""
         subs = subdata.text
 
-        subdata = re.sub(' xmlns="[^"]+"', '', subs, count=1)
+        subdata = re.sub(' xmlns="[^"]+"', "", subs, count=1)
         tree = ET.XML(subdata)
         xml = tree.find("body").find("div")
         plist = list(xml.findall("p"))
@@ -106,7 +106,7 @@ class subtitle(object):
                     end = "%02d:%02d:%06.3f" % (int(begin2[0]), int(begin2[1]), sec)
                 else:
                     end = node.attrib["end"]
-                data += '%s\n%s --> %s\n' % (i, begin.replace(".", ","), end.replace(".", ","))
+                data += "%s\n%s --> %s\n" % (i, begin.replace(".", ","), end.replace(".", ","))
                 data = tt_text(node, data)
                 data += "\n"
                 i += 1
@@ -126,7 +126,7 @@ class subtitle(object):
 
     def sami(self, subdata):
         text = subdata.text
-        text = re.sub(r'&', '&amp;', text)
+        text = re.sub(r"&", "&amp;", text)
         tree = ET.fromstring(text)
         allsubs = tree.findall(".//Subtitle")
         subs = ""
@@ -147,7 +147,7 @@ class subtitle(object):
                     line += "{}".format(txt)
                 all += "{}\n".format(decode_html_entities(line.lstrip()))
             subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
-        subs = re.sub('&amp;', r'&', subs)
+        subs = re.sub("&amp;", r"&", subs)
         return subs
 
     def smi(self, subdata):
@@ -161,8 +161,8 @@ class subtitle(object):
         number = 1
         data = None
         subs = ""
-        TAG_RE = re.compile(r'<(?!\/?i).*?>')
-        bad_char = re.compile(r'\x96')
+        TAG_RE = re.compile(r"<(?!\/?i).*?>")
+        bad_char = re.compile(r"\x96")
         for i in ssubdata.readlines():
             i = i.rstrip()
             sync = re.search(r"<SYNC Start=(\d+)>", i)
@@ -170,7 +170,7 @@ class subtitle(object):
                 if int(sync.group(1)) != int(timea):
                     if data and data != "&nbsp;":
                         subs += "%s\n%s --> %s\n" % (number, timestr(timea), timestr(sync.group(1)))
-                        text = "%s\n" % TAG_RE.sub('', data.replace("<br>", "\n"))
+                        text = "%s\n" % TAG_RE.sub("", data.replace("<br>", "\n"))
                         text = decode_html_entities(text)
                         if text[len(text) - 2] != "\n":
                             text += "\n"
@@ -180,8 +180,8 @@ class subtitle(object):
             text = re.search("<P Class=SVCC>(.*)", i)
             if text:
                 data = text.group(1)
-        recomp = re.compile(r'\r')
-        text = bad_char.sub('-', recomp.sub('', subs))
+        recomp = re.compile(r"\r")
+        text = bad_char.sub("-", recomp.sub("", subs))
         return text
 
     def wrst(self, subdata):
@@ -209,7 +209,7 @@ class subtitle(object):
             elif match2:
                 if not subnr:
                     srt += "%s\n" % number_b
-                matchx = re.search(r'(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)', i)
+                matchx = re.search(r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                 if matchx:
                     hour1 = int(matchx.group("h1"))
                     hour2 = int(matchx.group("h2"))
@@ -220,11 +220,12 @@ class subtitle(object):
                         hour1 -= 10
                         hour2 -= 10
                 else:
-                    matchx = re.search(r'(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)', i)
+                    matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                     hour1 = 0
                     hour2 = 0
-                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","),
-                                                                      hour2, matchx.group("m2"), matchx.group("s2").replace(".", ","))
+                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(
+                    hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ",")
+                )
                 srt += time
                 block = 1
                 subnr = False
@@ -237,20 +238,32 @@ class subtitle(object):
             else:
                 if self.config.get("convert_subtitle_colors"):
                     colors = {
-                        '30': '#000000', '31': '#ff0000', '32': '#00ff00', '33': '#ffff00', '34': '#0000ff',
-                        '35': '#ff00ff', '36': '#00ffff', '37': '#ffffff', 'c.black': '#000000', 'c.red': '#ff0000',
-                        'c.green': '#00ff00', 'c.yellow': '#ffff00', 'c.blue': '#0000ff', 'c.magneta': '#ff00ff',
-                        'c.cyan': '#00ffff', 'c.gray': '#ffffff',
+                        "30": "#000000",
+                        "31": "#ff0000",
+                        "32": "#00ff00",
+                        "33": "#ffff00",
+                        "34": "#0000ff",
+                        "35": "#ff00ff",
+                        "36": "#00ffff",
+                        "37": "#ffffff",
+                        "c.black": "#000000",
+                        "c.red": "#ff0000",
+                        "c.green": "#00ff00",
+                        "c.yellow": "#ffff00",
+                        "c.blue": "#0000ff",
+                        "c.magneta": "#ff00ff",
+                        "c.cyan": "#00ffff",
+                        "c.gray": "#ffffff",
                     }
                     sub = i
                     for tag, color in colors.items():
-                        regex1 = '<' + tag + '>'
+                        regex1 = "<" + tag + ">"
                         replace = '<font color="' + color + '">'
                         sub = re.sub(regex1, replace, sub)
 
-                    sub = re.sub('</.+>', '</font>', sub)
+                    sub = re.sub("</.+>", "</font>", sub)
                 else:
-                    sub = re.sub('<[^>]*>', '', i)
+                    sub = re.sub("<[^>]*>", "", i)
                 srt += sub.strip()
                 srt += "\n"
         srt = decode_html_entities(srt)
@@ -266,9 +279,9 @@ class subtitle(object):
                 cont.encoding = "utf-8"
             text = cont.text.split("\n")
             for t in text:  # is in text[1] for tv4play, but this should be more future proof
-                if 'X-TIMESTAMP-MAP=MPEGTS' in t:
+                if "X-TIMESTAMP-MAP=MPEGTS" in t:
                     time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
-            text = text[3:len(text) - 2]
+            text = text[3 : len(text) - 2]
             itmes = []
             if len(text) > 1:
                 for n in text:
@@ -306,7 +319,7 @@ class subtitle(object):
         string = ""
         nr = 1
         for sub in subs:
-            string += "{}\n{}\n\n".format(nr, '\n'.join(sub))
+            string += "{}\n{}\n\n".format(nr, "\n".join(sub))
             nr += 1
 
         return string
@@ -349,12 +362,12 @@ def norm(name):
 
 def tt_text(node, data):
     if node.text:
-        data += "%s\n" % node.text.strip(' \t\n\r')
+        data += "%s\n" % node.text.strip(" \t\n\r")
     for i in node:
         if i.text:
-            data += "%s\n" % i.text.strip(' \t\n\r')
+            data += "%s\n" % i.text.strip(" \t\n\r")
         if i.tail:
-            text = i.tail.strip(' \t\n\r')
+            text = i.tail.strip(" \t\n\r")
             if text:
                 data += "%s\n" % text
     return data

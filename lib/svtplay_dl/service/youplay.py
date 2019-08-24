@@ -12,7 +12,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Youplay(Service, OpenGraphThumbMixin):
-    supported_domains = ['www.affarsvarlden.se']
+    supported_domains = ["www.affarsvarlden.se"]
 
     def get(self):
         data = self.get_urldata()
@@ -34,7 +34,7 @@ class Youplay(Service, OpenGraphThumbMixin):
         # fix broken json.
         regex = re.compile(r"\s(\w+):")
         data = regex.sub(r"'\1':", match.group(1))
-        data = data.replace("'", "\"")
+        data = data.replace("'", '"')
         j = re.sub(r"{\s*(\w)", r'{"\1', data)
         j = j.replace("\n", "")
         j = re.sub(r'",\s*}', '"}', j)

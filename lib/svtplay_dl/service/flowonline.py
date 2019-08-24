@@ -12,9 +12,7 @@ from svtplay_dl.subtitle import subtitle
 
 
 class Flowonline(Service, OpenGraphThumbMixin):
-    supported_domains_re = [
-        r'^([a-z]{1,4}\.|www\.)?flowonline\.tv$',
-    ]
+    supported_domains_re = [r"^([a-z]{1,4}\.|www\.)?flowonline\.tv$"]
 
     def get(self):
         match = re.search('iframe src="(/embed/[^"]+)"', self.get_urldata())

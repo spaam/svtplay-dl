@@ -10,7 +10,7 @@ from svtplay_dl.error import ServiceError
 
 
 class Sportlib(Service, OpenGraphThumbMixin):
-    supported_domains = ['sportlib.se']
+    supported_domains = ["sportlib.se"]
 
     def get(self):
         data = self.http.get("https://www.sportlib.se/sportlib/login").text
@@ -35,8 +35,13 @@ class Sportlib(Service, OpenGraphThumbMixin):
         janson = res.json()
         sid = janson["data"][0]["id"]
 
-        data = {"client_id": cid, "client_secret": cs, "grant_type": "password",
-                "username": self.config.get("username"), "password": self.config.get("password")}
+        data = {
+            "client_id": cid,
+            "client_secret": cs,
+            "grant_type": "password",
+            "username": self.config.get("username"),
+            "password": self.config.get("password"),
+        }
         res = self.http.post("https://core.oz.com/oauth2/token?channelId={}".format(sid), data=data)
         if res.status_code > 200:
             yield ServiceError("Wrong username / password?")

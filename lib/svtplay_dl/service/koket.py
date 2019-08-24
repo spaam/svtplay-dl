@@ -23,7 +23,7 @@ def findLesson(course, lessonSlug):
 
 
 class Koket(Service, OpenGraphThumbMixin):
-    supported_domains = ['koket.se']
+    supported_domains = ["koket.se"]
     supported_path = "/kurser"
 
     def __init__(self, config, _url, http=None):
@@ -32,7 +32,7 @@ class Koket(Service, OpenGraphThumbMixin):
 
     def get(self):
         urlp = urlparse(self.url)
-        slugs = urlp.path.split('/')
+        slugs = urlp.path.split("/")
 
         courseSlug = slugs[2]
         lessonSlug = slugs[3]
@@ -66,8 +66,12 @@ class Koket(Service, OpenGraphThumbMixin):
 
         videoDataRes = self.http.get(url)
         if videoDataRes.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(self.config, self.http.get(videoDataRes.json()["playbackItem"]["manifestUrl"]),
-                               videoDataRes.json()["playbackItem"]["manifestUrl"], output=self.output)
+            streams = hlsparse(
+                self.config,
+                self.http.get(videoDataRes.json()["playbackItem"]["manifestUrl"]),
+                videoDataRes.json()["playbackItem"]["manifestUrl"],
+                output=self.output,
+            )
             for n in list(streams.keys()):
                 yield streams[n]
 
@@ -80,10 +84,7 @@ class Koket(Service, OpenGraphThumbMixin):
                 return False
 
             url = "https://www.koket.se/account/login"
-            login = {
-                "username": username,
-                "password": password
-            }
+            login = {"username": username, "password": password}
 
             self.http.get(url)
             self.http.post(url, data=login)
