@@ -1,13 +1,15 @@
-from json import dumps
-from random import sample
+import logging
 import os
 import platform
 import re
-import logging
-from shutil import which
-from requests import post, codes, Timeout
+from json import dumps
+from random import sample
 from re import match
+from shutil import which
 
+from requests import codes
+from requests import post
+from requests import Timeout
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
 

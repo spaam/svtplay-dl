@@ -1,10 +1,13 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+
 import os
 
-from svtplay_dl.utils.output import ETA, progressbar, output
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import progressbar
 
 
 class HTTP(VideoRetriever):

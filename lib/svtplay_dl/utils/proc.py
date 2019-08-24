@@ -1,5 +1,5 @@
-import subprocess
 import logging
+import subprocess
 
 
 def run_program(cmd, show=True):

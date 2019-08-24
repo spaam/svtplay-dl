@@ -1,20 +1,20 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 # pylint has issues with urlparse: "some types could not be inferred"
 # pylint: disable=E1103
-
 from __future__ import absolute_import
-import re
-import json
+
 import copy
+import json
+import re
 from urllib.parse import urlparse
 
-from svtplay_dl.service import Service, OpenGraphThumbMixin
+from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
-from svtplay_dl.error import ServiceError
 
 
 class Viaplay(Service, OpenGraphThumbMixin):

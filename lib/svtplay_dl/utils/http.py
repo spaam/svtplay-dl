@@ -1,5 +1,5 @@
-import re
 import logging
+import re
 from urllib.parse import urljoin
 
 from requests import Session

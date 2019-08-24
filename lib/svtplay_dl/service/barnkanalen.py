@@ -1,14 +1,16 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import re
+
 import json
 import logging
-from urllib.parse import urljoin, urlparse, parse_qs
+import re
+from urllib.parse import parse_qs
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 
-
-from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.error import ServiceError
+from svtplay_dl.service.svtplay import Svtplay
 
 
 class Barnkanalen(Svtplay):

@@ -1,18 +1,23 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+
 import copy
-import xml.etree.ElementTree as ET
+import math
 import os
 import re
+import time
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from urllib.parse import urljoin
-import time
-import math
 
-from svtplay_dl.utils.output import output, progress_stream, ETA, progressbar
-from svtplay_dl.error import UIException, ServiceError
+from svtplay_dl.error import ServiceError
+from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import progress_stream
+from svtplay_dl.utils.output import progressbar
 
 
 class DASHException(UIException):

@@ -1,17 +1,21 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+
 import base64
-import struct
 import binascii
 import copy
+import struct
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
-from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
+from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.error import ServiceError
+from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import progress_stream
+from svtplay_dl.utils.output import progressbar
 
 
 def _chr(temp):

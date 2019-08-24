@@ -1,11 +1,13 @@
 from __future__ import absolute_import
-import re
-import json
-from urllib.parse import urlparse, quote
 
-from svtplay_dl.service import Service
-from svtplay_dl.fetcher.hls import hlsparse
+import json
+import re
+from urllib.parse import quote
+from urllib.parse import urlparse
+
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import Service
 
 
 class Eurosport(Service):

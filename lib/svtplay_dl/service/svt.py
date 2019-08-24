@@ -1,5 +1,5 @@
-import re
 import copy
+import re
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay

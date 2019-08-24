@@ -1,20 +1,25 @@
-import os
-import sys
 import copy
 import logging
-from shutil import which
+import os
+import sys
 from datetime import datetime
+from shutil import which
 
-from svtplay_dl.service import service_handler, Generic
-from svtplay_dl.service.services import sites, Raw
-from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.output import filename, formatname
-from svtplay_dl.postprocess import postprocess
-from svtplay_dl.utils.stream import select_quality, list_quality
-from svtplay_dl.utils.text import exclude
 from svtplay_dl.error import UIException
-from svtplay_dl.utils.nfo import write_nfo_episode, write_nfo_tvshow
+from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.postprocess import postprocess
+from svtplay_dl.service import Generic
+from svtplay_dl.service import service_handler
+from svtplay_dl.service.services import Raw
+from svtplay_dl.service.services import sites
+from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils.nfo import write_nfo_episode
+from svtplay_dl.utils.nfo import write_nfo_tvshow
+from svtplay_dl.utils.output import filename
+from svtplay_dl.utils.output import formatname
+from svtplay_dl.utils.stream import list_quality
+from svtplay_dl.utils.stream import select_quality
+from svtplay_dl.utils.text import exclude
 
 
 def get_multiple_media(urls, config):

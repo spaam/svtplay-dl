@@ -1,22 +1,26 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
+
 import base64
-import re
-import json
-import copy
 import binascii
+import copy
 import hashlib
-from urllib.parse import urljoin, urlparse
+import json
+import re
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-
-from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.fetcher.hds import hdsparse
-from svtplay_dl.subtitle import subtitle
+from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers import modes
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.hds import hdsparse
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
+from svtplay_dl.subtitle import subtitle
 
 
 class Dr(Service, OpenGraphThumbMixin):

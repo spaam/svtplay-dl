@@ -1,12 +1,14 @@
 from __future__ import absolute_import
-import re
-import json
+
 import copy
+import json
+import re
 from urllib.parse import unquote_plus
 
-from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
 
 
 class Facebook(Service, OpenGraphThumbMixin):

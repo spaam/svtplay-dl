@@ -1,8 +1,8 @@
 import logging
 from operator import itemgetter
 
-from svtplay_dl.utils.http import HTTP
 from svtplay_dl import error
+from svtplay_dl.utils.http import HTTP
 
 
 # TODO: should be set as the default option in the argument parsing?

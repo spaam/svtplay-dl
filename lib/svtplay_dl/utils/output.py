@@ -1,15 +1,16 @@
 from __future__ import absolute_import
 
-import re
-import os
 import logging
+import os
+import re
 import sys
 import time
 from datetime import timedelta
 
-
-from svtplay_dl.utils.text import filenamify, decode_html_entities, ensure_unicode
 from svtplay_dl.utils.terminal import get_terminal_size
+from svtplay_dl.utils.text import decode_html_entities
+from svtplay_dl.utils.text import ensure_unicode
+from svtplay_dl.utils.text import filenamify
 
 progress_stream = sys.stderr
 

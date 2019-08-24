@@ -1,14 +1,18 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
-import sys
 import logging
-import yaml
+import sys
 
-from svtplay_dl.utils.parser import setup_defaults, parser, parsertoconfig
-from svtplay_dl.utils.getmedia import get_media, get_multiple_media
+import yaml
 from svtplay_dl.service.cmore import Cmore
+from svtplay_dl.utils.getmedia import get_media
+from svtplay_dl.utils.getmedia import get_multiple_media
+from svtplay_dl.utils.parser import parser
+from svtplay_dl.utils.parser import parsertoconfig
+from svtplay_dl.utils.parser import setup_defaults
 
 from .__version__ import get_versions
 

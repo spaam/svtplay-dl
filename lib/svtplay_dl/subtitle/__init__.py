@@ -1,15 +1,14 @@
-import xml.etree.ElementTree as ET
 import json
-import re
 import logging
+import re
+import xml.etree.ElementTree as ET
 from io import StringIO
 
-from svtplay_dl.utils.text import decode_html_entities
-from svtplay_dl.utils.http import HTTP, get_full_url
-from svtplay_dl.utils.output import output
-
-
 from requests import __build__ as requests_version
+from svtplay_dl.utils.http import get_full_url
+from svtplay_dl.utils.http import HTTP
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.text import decode_html_entities
 
 
 class subtitle:

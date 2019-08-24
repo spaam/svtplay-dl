@@ -1,13 +1,15 @@
 from __future__ import absolute_import
-import re
+
 import json
 import logging
+import re
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
-from svtplay_dl.service import Service, OpenGraphThumbMixin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
 
 
 # This is _very_ similar to mtvservices..

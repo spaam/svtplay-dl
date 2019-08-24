@@ -1,22 +1,29 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import os
-import re
-import copy
-import time
-from datetime import datetime, timedelta
+
 import binascii
-
+import copy
+import os
 import random
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+import re
+import time
+from datetime import datetime
+from datetime import timedelta
 
-from svtplay_dl.utils.output import progressbar, progress_stream, ETA, output
-from svtplay_dl.utils.http import get_full_url
-from svtplay_dl.error import UIException, ServiceError
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers import modes
+from svtplay_dl.error import ServiceError
+from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils.http import get_full_url
+from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import progress_stream
+from svtplay_dl.utils.output import progressbar
 
 
 class HLSException(UIException):

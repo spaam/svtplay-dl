@@ -1,13 +1,14 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import re
+
 import copy
+import re
 import xml.etree.ElementTree as ET
 
-from svtplay_dl.service import Service
-from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.http import HTTP
+from svtplay_dl.service import Service
 
 
 class Mtvservices(Service):

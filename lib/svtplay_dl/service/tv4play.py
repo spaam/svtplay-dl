@@ -1,14 +1,18 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-from __future__ import absolute_import, unicode_literals
-import re
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import json
-from datetime import datetime, timedelta
+import re
+from datetime import datetime
+from datetime import timedelta
 from urllib.parse import urlparse
 
-from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
 
 
 class Tv4play(Service, OpenGraphThumbMixin):

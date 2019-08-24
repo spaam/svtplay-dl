@@ -1,7 +1,7 @@
 import argparse
-import platform
-import os
 import logging
+import os
+import platform
 
 from yaml import safe_load
 

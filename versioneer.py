@@ -1,5 +1,4 @@
 # Version: 0.18
-
 """The Versioneer - like a rocketeer, but for versions.
 
 The Versioneer
@@ -274,7 +273,6 @@ Dedication" license (CC0-1.0), as described in
 https://creativecommons.org/publicdomain/zero/1.0/ .
 
 """
-
 from __future__ import print_function
 
 try:

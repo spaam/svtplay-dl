@@ -1,15 +1,16 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import re
+
 import hashlib
-import random
 import logging
+import random
+import re
 from urllib.parse import urlparse
 
-from svtplay_dl.service import Service
-from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
 
 

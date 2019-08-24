@@ -1,7 +1,7 @@
 import os
+import platform
 import shlex
 import struct
-import platform
 import subprocess
 
 

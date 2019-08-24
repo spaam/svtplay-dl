@@ -1,8 +1,9 @@
 from __future__ import absolute_import
+
 import unittest
 
-from svtplay_dl.utils.output import _formatname
 from svtplay_dl.service import Service
+from svtplay_dl.utils.output import _formatname
 from svtplay_dl.utils.parser import setup_defaults
 
 

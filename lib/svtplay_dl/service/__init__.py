@@ -1,13 +1,17 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
-import re
+
 import logging
 import os
+import re
 from urllib.parse import urlparse
-from svtplay_dl.utils.parser import readconfig, setup_defaults, merge
 
-from svtplay_dl.utils.http import download_thumbnails, HTTP
+from svtplay_dl.utils.http import download_thumbnails
+from svtplay_dl.utils.http import HTTP
+from svtplay_dl.utils.parser import merge
+from svtplay_dl.utils.parser import readconfig
+from svtplay_dl.utils.parser import setup_defaults
 
 
 class Service:

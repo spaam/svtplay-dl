@@ -1,8 +1,11 @@
 from __future__ import absolute_import
+
 import copy
 
-from svtplay_dl.utils.output import output, ETA, progressbar
 from svtplay_dl.utils.http import HTTP
+from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import progressbar
 
 
 class VideoRetriever:

@@ -1,7 +1,10 @@
 from __future__ import absolute_import
-import unittest
+
 import os
-from svtplay_dl.fetcher.dash import _dashparse, parse_duration
+import unittest
+
+from svtplay_dl.fetcher.dash import _dashparse
+from svtplay_dl.fetcher.dash import parse_duration
 from svtplay_dl.utils.parser import setup_defaults
 
 

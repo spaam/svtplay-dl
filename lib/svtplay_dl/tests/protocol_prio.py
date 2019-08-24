@@ -1,9 +1,10 @@
 #!/usr/bin/python
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil; coding: utf-8 -*-
 # ex:ts=4:sw=4:sts=4:et:fenc=utf-8
-
 from __future__ import absolute_import
+
 import unittest
+
 from svtplay_dl.utils.stream import protocol_prio
 
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
-import subprocess
 import argparse
-import os
-import logging
-import sys
 import glob
+import logging
+import os
+import subprocess
+import sys
 from datetime import datetime
 
 if sys.version_info[0] == 3 and sys.version_info[1] < 7:

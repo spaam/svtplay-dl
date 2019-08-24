@@ -1,11 +1,13 @@
 from __future__ import absolute_import
-import re
+
 import json
+import re
 from urllib.parse import urljoin
 
-from svtplay_dl.service import Service, OpenGraphThumbMixin
-from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.service import OpenGraphThumbMixin
+from svtplay_dl.service import Service
 
 
 class NHL(Service, OpenGraphThumbMixin):

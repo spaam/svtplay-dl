@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 import unittest
+
 from svtplay_dl.utils.http import get_full_url
 
 
