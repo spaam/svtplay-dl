@@ -31,15 +31,14 @@ class Dr(Service, OpenGraphThumbMixin):
             resource_data = self.http.request("get", resource_url).content
             resource = json.loads(resource_data)
             streams = self.find_stream(self.config, resource)
-            for i in streams:
-                yield i
+            yield from streams
         else:
             match = re.search(r'resource="([^"]*)"', data)
             if not match:
                 yield ServiceError("Cant find resource info for this video")
                 return
             if match.group(1)[:4] != "http":
-                resource_url = "http:{0}".format(match.group(1))
+                resource_url = "http:{}".format(match.group(1))
             else:
                 resource_url = match.group(1)
             resource_data = self.http.request("get", resource_url).text
@@ -53,8 +52,7 @@ class Dr(Service, OpenGraphThumbMixin):
                 yield subtitle(copy.copy(self.config), "wrst", suburl, output=self.output)
             if "Data" in resource:
                 streams = self.find_stream(self.config, resource)
-                for i in streams:
-                    yield i
+                yield from streams
             else:
                 for stream in resource["Links"]:
                     uri = stream["Uri"]
@@ -88,12 +86,12 @@ class Dr(Service, OpenGraphThumbMixin):
             params = "offset=0&limit=1000"
             if newstyle:
                 encparams = base64.b64encode(params.encode("latin1")).decode("latin1").rstrip("=")
-                encpath = "{0}_{1}".format(encbasepath, encparams)
+                encpath = "{}_{}".format(encbasepath, encparams)
             else:
-                path = "{0}?{1}".format(urlparse(path).path, params)
+                path = "{}?{}".format(urlparse(path).path, params)
                 encpath = base64.b64encode(path.encode("latin1")).decode("latin1").rstrip("=")
 
-            url = urljoin("https://www.dr.dk/tv/partial/", "{0}/{1}".format(enccomp, encpath))
+            url = urljoin("https://www.dr.dk/tv/partial/", "{}/{}".format(enccomp, encpath))
             data = self.http.request("get", url).content.decode("latin1")
 
             matches = re.findall(r'"program-link" href="([^"]+)">', data)

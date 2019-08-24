@@ -63,15 +63,14 @@ class Barnkanalen(Svtplay):
             vid = janson["video"]["programVersionId"]
         else:
             vid = janson["video"]["id"]
-        res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(vid))
+        res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(vid))
         try:
             janson = res.json()
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+            yield ServiceError("Can't decode api request: {}".format(res.request.url))
             return
         videos = self._get_video(janson)
-        for i in videos:
-            yield i
+        yield from videos
 
     def find_all_episodes(self, config):
         videos = []

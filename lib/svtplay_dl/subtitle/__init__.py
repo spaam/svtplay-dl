@@ -12,7 +12,7 @@ from svtplay_dl.utils.output import output
 from requests import __build__ as requests_version
 
 
-class subtitle(object):
+class subtitle:
     def __init__(self, config, subtype, url, subfix=None, **kwargs):
         self.url = url
         self.subtitle = None
@@ -106,7 +106,7 @@ class subtitle(object):
                     end = "%02d:%02d:%06.3f" % (int(begin2[0]), int(begin2[1]), sec)
                 else:
                     end = node.attrib["end"]
-                data += "%s\n%s --> %s\n" % (i, begin.replace(".", ","), end.replace(".", ","))
+                data += "{}\n{} --> {}\n".format(i, begin.replace(".", ","), end.replace(".", ","))
                 data = tt_text(node, data)
                 data += "\n"
                 i += 1
@@ -118,7 +118,7 @@ class subtitle(object):
         number = 1
         subs = ""
         for i in data:
-            subs += "%s\n%s --> %s\n" % (number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
+            subs += "{}\n{} --> {}\n".format(number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
             subs += "%s\n\n" % i["text"]
             number += 1
 
@@ -169,7 +169,7 @@ class subtitle(object):
             if sync:
                 if int(sync.group(1)) != int(timea):
                     if data and data != "&nbsp;":
-                        subs += "%s\n%s --> %s\n" % (number, timestr(timea), timestr(sync.group(1)))
+                        subs += "{}\n{} --> {}\n".format(number, timestr(timea), timestr(sync.group(1)))
                         text = "%s\n" % TAG_RE.sub("", data.replace("<br>", "\n"))
                         text = decode_html_entities(text)
                         if text[len(text) - 2] != "\n":
@@ -223,7 +223,7 @@ class subtitle(object):
                     matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                     hour1 = 0
                     hour2 = 0
-                time = "{0:02d}:{1}:{2} --> {3:02d}:{4}:{5}\n".format(
+                time = "{:02d}:{}:{} --> {:02d}:{}:{}\n".format(
                     hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ",")
                 )
                 srt += time
@@ -349,7 +349,7 @@ def timestr(msec):
 
 def timecolon(data):
     match = re.search(r"(\d+:\d+:\d+):(\d+)", data)
-    return "%s,%s" % (match.group(1), match.group(2))
+    return "{},{}".format(match.group(1), match.group(2))
 
 
 def norm(name):

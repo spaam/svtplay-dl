@@ -12,7 +12,7 @@ from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
 
 
-class postprocess(object):
+class postprocess:
     def __init__(self, stream, config, subfixes=None):
         self.stream = stream
         self.config = config
@@ -77,10 +77,10 @@ class postprocess(object):
                         subfix = subfix.strip("-")
                     langs += [exceptions[subfix]]
                     continue
-                subfile = "{0}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0] + subfix)
+                subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0] + subfix)
                 langs += [query(subfile)]
         else:
-            subfile = "{0}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0])
+            subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0])
             langs += [query(subfile)]
         if len(langs) >= 2:
             logging.info("Language codes: " + ", ".join(langs))
@@ -98,18 +98,18 @@ class postprocess(object):
         if formatname(self.stream.output, self.config, self.stream.output_extention).endswith(".mp4") is False:
             orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
             name, ext = os.path.splitext(orig_filename)
-            new_name = "{0}.mp4".format(name)
+            new_name = "{}.mp4".format(name)
 
             cmd = [self.detect, "-i", orig_filename]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
             videotrack, audiotrack = self._checktracks(stderr)
 
             if self.config.get("merge_subtitle"):
-                logging.info("Muxing {0} and merging its subtitle into {1}".format(orig_filename, new_name))
+                logging.info("Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
             else:
-                logging.info("Muxing {0} into {1}".format(orig_filename, new_name))
+                logging.info("Muxing {} into {}".format(orig_filename, new_name))
 
-            tempfile = "{0}.temp".format(orig_filename)
+            tempfile = "{}.temp".format(orig_filename)
             arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4"]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -127,10 +127,10 @@ class postprocess(object):
                     ]
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{0}.srt".format(name + subfix)
+                        subfile = "{}.srt".format(name + subfix)
                         cmd += ["-i", subfile]
                 else:
-                    subfile = "{0}.srt".format(name)
+                    subfile = "{}.srt".format(name)
                     cmd += ["-i", subfile]
 
             arguments += ["-y", tempfile]
@@ -143,7 +143,7 @@ class postprocess(object):
                 logging.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{0}.srt".format(name + subfix)
+                        subfile = "{}.srt".format(name + subfix)
                         os.remove(subfile)
                 else:
                     os.remove(subfile)
@@ -166,18 +166,18 @@ class postprocess(object):
         videotrack, audiotrack = self._checktracks(stderr)
 
         if self.config.get("merge_subtitle"):
-            logging.info("Merge audio, video and subtitle into {0}".format(orig_filename))
+            logging.info("Merge audio, video and subtitle into {}".format(orig_filename))
         else:
-            logging.info("Merge audio and video into {0}".format(orig_filename))
+            logging.info("Merge audio and video into {}".format(orig_filename))
 
-        tempfile = "{0}.temp".format(orig_filename)
+        tempfile = "{}.temp".format(orig_filename)
         name, ext = os.path.splitext(orig_filename)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
-            audio_filename = "{0}.audio.ts".format(name)
+            audio_filename = "{}.audio.ts".format(name)
             arguments += ["-bsf:a", "aac_adtstoasc"]
         else:
-            audio_filename = "{0}.m4a".format(name)
+            audio_filename = "{}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
         arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
@@ -194,10 +194,10 @@ class postprocess(object):
                 ]
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{0}.srt".format(name + subfix)
+                    subfile = "{}.srt".format(name + subfix)
                     cmd += ["-i", subfile]
             else:
-                subfile = "{0}.srt".format(name)
+                subfile = "{}.srt".format(name)
                 cmd += ["-i", subfile]
 
         arguments += ["-y", tempfile]
@@ -212,7 +212,7 @@ class postprocess(object):
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{0}.srt".format(name + subfix)
+                    subfile = "{}.srt".format(name + subfix)
                     os.remove(subfile)
             else:
                 os.remove(subfile)

@@ -33,7 +33,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
             wanted_id = match_id.group(1)
             url_service = (
-                "http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{0}"
+                "http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{}"
                 "&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c".format(wanted_id)
             )
             service_asset = self.http.request("get", url_service)
@@ -44,7 +44,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 return
 
             hls_url = (
-                "https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{0}?arcStage=staging&accountOverride=intl.mtvi.com&"
+                "https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{}?arcStage=staging&accountOverride=intl.mtvi.com&"
                 "billingSection=intl&ep=a9cc543c&acceptMethods=hls".format(match_guid.group(1))
             )
             hls_asset = self.http.request("get", hls_url)
@@ -81,7 +81,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             match = re.search("mtvnn.com:([^&]+)", mrssxmlurl)
             if match:
                 urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists")  # it use playlists dunno from where it gets it
-                hlsapi = "http://api.mtvnn.com/v2/{0}/{1}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
+                hlsapi = "http://api.mtvnn.com/v2/{}/{}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
                 data = self.http.request("get", hlsapi).text
 
                 dataj = json.loads(data)
@@ -108,7 +108,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         for i in sorted(episodNr):
             if n == config.get("all_last"):
                 break
-            episodes.append("http://www.nickelodeon.se/serier/{0}-something/videos/{1}-something".format(programid, i))
+            episodes.append("http://www.nickelodeon.se/serier/{}-something/videos/{}-something".format(programid, i))
             n += 1
         return episodes
 
@@ -127,7 +127,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
         try:
             janson = json.loads(match.group(1))
         except Exception:
-            yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
+            yield ServiceError("Can't decode api request: {}".format(match.group(1)))
             return
 
         parse = urlparse(self.url)
@@ -136,7 +136,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
         for n in janson:
             if wanted_id == str(n["id"]):
 
-                mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{0}?acceptMethods=hls".format(
+                mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
                     n["video_token"]
                 )
                 hls_asset = self.http.request("get", mrssxmlurl)

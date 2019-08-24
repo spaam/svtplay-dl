@@ -48,13 +48,13 @@ class Urplay(Service, OpenGraphThumbMixin):
             lbjson = self.http.request("get", url).text
             lbjson = json.loads(lbjson)
             basedomain = lbjson["redirect"]
-        http = "https://{0}/{1}".format(basedomain, jsondata["file_http"])
+        http = "https://{}/{}".format(basedomain, jsondata["file_http"])
         hd = None
         if len(jsondata["file_http_hd"]) > 0:
-            http_hd = "https://{0}/{1}".format(basedomain, jsondata["file_http_hd"])
-            hls_hd = "{0}{1}".format(http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
+            http_hd = "https://{}/{}".format(basedomain, jsondata["file_http_hd"])
+            hls_hd = "{}{}".format(http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
             hd = True
-        hls = "{0}{1}".format(http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
+        hls = "{}{}".format(http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
         streams = hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

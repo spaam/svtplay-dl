@@ -29,7 +29,7 @@ class Lemonwhale(Service):
                 for n in list(streams.keys()):
                     yield streams[n]
 
-        url = "http://ljsp.lwcdn.com/web/public/video.json?id={0}&delivery=hls".format(decode_html_entities(vid))
+        url = "http://ljsp.lwcdn.com/web/public/video.json?id={}&delivery=hls".format(decode_html_entities(vid))
         data = self.http.request("get", url).text
         jdata = json.loads(data)
         if "videos" in jdata:
@@ -57,6 +57,6 @@ class Lemonwhale(Service):
         videos = janson["videos"][0]["media"]["streams"]
         for i in videos:
             if i["name"] == "auto":
-                hls = "{0}{1}".format(janson["videos"][0]["media"]["base"], i["url"])
+                hls = "{}{}".format(janson["videos"][0]["media"]["base"], i["url"])
         streams = hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)
         return streams

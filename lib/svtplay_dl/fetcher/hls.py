@@ -22,12 +22,12 @@ from svtplay_dl.subtitle import subtitle
 class HLSException(UIException):
     def __init__(self, url, message):
         self.url = url
-        super(HLSException, self).__init__(message)
+        super().__init__(message)
 
 
 class LiveHLSException(HLSException):
     def __init__(self, url):
-        super(LiveHLSException, self).__init__(url, "This is a live HLS stream, and they are not supported.")
+        super().__init__(url, "This is a live HLS stream, and they are not supported.")
 
 
 def hlsparse(config, res, url, **kwargs):
@@ -37,7 +37,7 @@ def hlsparse(config, res, url, **kwargs):
         return streams
 
     if res.status_code > 400:
-        streams[0] = ServiceError("Can't read HLS playlist. {0}".format(res.status_code))
+        streams[0] = ServiceError("Can't read HLS playlist. {}".format(res.status_code))
         return streams
     m3u8 = M3U8(res.text)
 
@@ -220,7 +220,7 @@ class HLS(VideoRetriever):
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
-                        url = "{0}.m3u8?in={1}&out={2}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        url = "{}.m3u8?in={}&out={}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
 
                     new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:
@@ -270,7 +270,7 @@ class M3U8:
         self.parse_m3u(data)
 
     def __str__(self):
-        return "Version: {0}\nMedia Segment: {1}\nMedia Playlist: {2}\nMaster Playlist: {3}\nEncrypted: {4}\tIndependent_segments: {5}".format(
+        return "Version: {}\nMedia Segment: {}\nMedia Playlist: {}\nMaster Playlist: {}\nEncrypted: {}\tIndependent_segments: {}".format(
             self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.independent_segments
         )
 

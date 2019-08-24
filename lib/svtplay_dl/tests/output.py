@@ -12,7 +12,7 @@ from mock import patch
 
 
 # FIXME: use mock framework instead of this hack
-class mockfile(object):
+class mockfile:
     def __init__(self):
         self.content = []
 

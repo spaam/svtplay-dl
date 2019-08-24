@@ -29,9 +29,7 @@ class NoRequestedProtocols(UIException):
         self.requested = requested
         self.found = found
 
-        super(NoRequestedProtocols, self).__init__(
-            "None of the provided protocols (%s) are in " "the current list of accepted protocols (%s)" % (self.found, self.requested)
-        )
+        super().__init__("None of the provided protocols (%s) are in " "the current list of accepted protocols (%s)" % (self.found, self.requested))
 
     def __repr__(self):
-        return "NoRequestedProtocols(requested=%s, found=%s)" % (self.requested, self.found)
+        return "NoRequestedProtocols(requested={}, found={})".format(self.requested, self.found)

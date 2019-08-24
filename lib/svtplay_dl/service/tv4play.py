@@ -20,7 +20,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=20)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-            url = "https://bbr-l2v.akamaized.net/live/{0}/master.m3u8?in={1}&out={2}?".format(
+            url = "https://bbr-l2v.akamaized.net/live/{}/master.m3u8?in={}&out={}?".format(
                 parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat()
             )
 

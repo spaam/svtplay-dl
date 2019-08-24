@@ -66,8 +66,8 @@ class Disney(Service, OpenGraphThumbMixin):
             self.output["title"] = title
 
             url = (
-                "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid={0}&uiconf_id={1}&entry_id={2}"
-                "&playerId={3}&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi".format(partnerid, uiconfid, entryid, uniq)
+                "http://cdnapi.kaltura.com/html5/html5lib/v1.9.7.6/mwEmbedFrame.php?&wid={}&uiconf_id={}&entry_id={}"
+                "&playerId={}&forceMobileHTML5=true&urid=1.9.7.6&callback=mwi".format(partnerid, uiconfid, entryid, uniq)
             )
             data = self.http.request("get", url).text
             match = re.search(r"mwi\(({.*})\);", data)
@@ -80,8 +80,8 @@ class Disney(Service, OpenGraphThumbMixin):
             self.output["title"] = name
 
             url = (
-                "http://cdnapi.kaltura.com/p/{0}/sp/{1}00/playManifest/entryId/{2}/format/applehttp/protocol/http/a.m3u8"
-                "?ks={3}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
+                "http://cdnapi.kaltura.com/p/{}/sp/{}00/playManifest/entryId/{}/format/applehttp/protocol/http/a.m3u8"
+                "?ks={}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             )
             redirect = self.http.check_redirect(url)
             streams = hlsparse(self.config, self.http.request("get", redirect), redirect, output=self.output)

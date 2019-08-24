@@ -21,7 +21,7 @@ class Svt(Svtplay):
             yield ServiceError("Cant find video info.")
             return
 
-        res = self.http.get("http://api.svt.se/videoplayer-api/video/{0}".format(id))
+        res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(id))
         janson = res.json()
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
@@ -29,5 +29,4 @@ class Svt(Svtplay):
                     yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         videos = self._get_video(janson)
-        for i in videos:
-            yield i
+        yield from videos

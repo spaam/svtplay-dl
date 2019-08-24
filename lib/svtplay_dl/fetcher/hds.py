@@ -21,12 +21,12 @@ def _chr(temp):
 class HDSException(UIException):
     def __init__(self, url, message):
         self.url = url
-        super(HDSException, self).__init__(message)
+        super().__init__(message)
 
 
 class LiveHDSException(HDSException):
     def __init__(self, url):
-        super(LiveHDSException, self).__init__(url, "This is a live HDS stream, and they are not supported.")
+        super().__init__(url, "This is a live HDS stream, and they are not supported.")
 
 
 def hdsparse(config, res, manifest, output=None):
@@ -37,7 +37,7 @@ def hdsparse(config, res, manifest, output=None):
         return streams
 
     if res.status_code >= 400:
-        streams[0] = ServiceError("Can't read HDS playlist. {0}".format(res.status_code))
+        streams[0] = ServiceError("Can't read HDS playlist. {}".format(res.status_code))
         return streams
     data = res.text
 
@@ -56,7 +56,7 @@ def hdsparse(config, res, manifest, output=None):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
-    url = "{0}://{1}{2}".format(parse.scheme, parse.netloc, parse.path)
+    url = "{}://{}{}".format(parse.scheme, parse.netloc, parse.path)
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
         streams[int(i.attrib["bitrate"])] = HDS(
@@ -107,7 +107,7 @@ class HDS(VideoRetriever):
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "{0}/{1}Seg1-Frag{2}?{3}".format(baseurl, self.kwargs["url_id"], start, querystring)
+            url = "{}/{}Seg1-Frag{}?{}".format(baseurl, self.kwargs["url_id"], start, querystring)
             if not self.config.get("silent"):
                 eta.update(i)
                 progressbar(total, i, "".join(["ETA: ", str(eta)]))

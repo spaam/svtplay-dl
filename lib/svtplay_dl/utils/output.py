@@ -14,7 +14,7 @@ from svtplay_dl.utils.terminal import get_terminal_size
 progress_stream = sys.stderr
 
 
-class ETA(object):
+class ETA:
     """
     An ETA class, used to calculate how long it takes to process
     an arbitrary set of items. By initiating the object with the
@@ -159,10 +159,10 @@ def _formatname(output, config, extension):
         if key == "title" and output[key]:
             name = name.replace("{title}", filenamify(output[key]))
         if key == "season" and output[key]:
-            number = "{0:02d}".format(int(output[key]))
+            number = "{:02d}".format(int(output[key]))
             name = name.replace("{season}", number)
         if key == "episode" and output[key]:
-            number = "{0:02d}".format(int(output[key]))
+            number = "{:02d}".format(int(output[key]))
             name = name.replace("{episode}", number)
         if key == "episodename" and output[key]:
             name = name.replace("{episodename}", filenamify(output[key]))

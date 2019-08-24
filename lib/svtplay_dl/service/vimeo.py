@@ -27,7 +27,7 @@ class Vimeo(Service, OpenGraphThumbMixin):
             page_config = json.loads(match_clip_page_cfg.group(1))
             player_url = page_config["player"]["config_url"]
         else:
-            yield ServiceError("Can't find video file for: {0}".format(self.url))
+            yield ServiceError("Can't find video file for: {}".format(self.url))
             return
 
         player_data = self.http.request("get", player_url).text

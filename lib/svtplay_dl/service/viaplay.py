@@ -138,11 +138,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if vid is None:
             if parse.path[:6] == "/sport":
                 result = self._sport()
-                for i in result:
-                    yield i
+                yield from result
                 return
             else:
-                yield ServiceError("Can't find video file for: {0}".format(self.url))
+                yield ServiceError("Can't find video file for: {}".format(self.url))
                 return
 
         data = self._get_video_data(vid)
@@ -161,7 +160,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         self.output["id"] = vid
         self._autoname(dataj)
 
-        streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/{0}".format(vid))
+        streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/{}".format(vid))
         if streams.status_code == 403:
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
@@ -228,7 +227,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             baseurl = baseurl[: baseurl.rfind("/")]
 
         for i in seasons:
-            url = "{0}/{1}-{2}".format(baseurl, self._isswe(self.url), i)
+            url = "{}/{}-{}".format(baseurl, self._isswe(self.url), i)
             res = self.http.get(url)
             if res:
                 match = self._conentpage(res.text)
@@ -262,7 +261,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
         return episodes
 
     def _get_video_data(self, vid):
-        url = "http://playapi.mtgx.tv/v3/videos/{0}".format(vid)
+        url = "http://playapi.mtgx.tv/v3/videos/{}".format(vid)
         data = self.http.request("get", url)
         return data
 
@@ -300,7 +299,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if "derived_from_id" in dataj:
                 if dataj["derived_from_id"]:
                     parent_id = dataj["derived_from_id"]
-                    parent_episode = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/{0}".format(parent_id))
+                    parent_episode = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/{}".format(parent_id))
                     if parent_episode.status_code != 403:  # if not geoblocked
                         datajparent = json.loads(parent_episode.text)
                         if not season and datajparent["format_position"]["season"] > 0:
@@ -318,12 +317,12 @@ class Viaplay(Service, OpenGraphThumbMixin):
     def _sport(self):
         content = self._conentpage(self.get_urldata())
         if not content:
-            yield ServiceError("Can't find video file for: {0}".format(self.url))
+            yield ServiceError("Can't find video file for: {}".format(self.url))
             return
 
         janson = json.loads(content.group(1))
         if not janson["sportsPlayer"]["currentVideo"]:
-            yield ServiceError("Can't find video file for: {0}".format(self.url))
+            yield ServiceError("Can't find video file for: {}".format(self.url))
             return
 
         self.output["title"] = janson["sportsPlayer"]["currentVideo"]["title"]

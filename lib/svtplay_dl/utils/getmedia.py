@@ -37,7 +37,7 @@ def get_media(url, options, version="Unknown"):
         url = "http://%s" % url
 
     if options.get("verbose"):
-        logging.debug("version: {0}".format(version))
+        logging.debug("version: {}".format(version))
 
     stream = service_handler(sites, options, url)
     if not stream:

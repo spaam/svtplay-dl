@@ -10,7 +10,7 @@ from svtplay_dl.utils.parser import readconfig, setup_defaults, merge
 from svtplay_dl.utils.http import download_thumbnails, HTTP
 
 
-class Service(object):
+class Service:
     supported_domains = []
     supported_domains_re = []
 
@@ -109,7 +109,7 @@ def opengraph_get(html, prop):
     return match.group(1)
 
 
-class OpenGraphThumbMixin(object):
+class OpenGraphThumbMixin:
     """
     Mix this into the service class to grab thumbnail from OpenGraph properties.
     """
@@ -121,7 +121,7 @@ class OpenGraphThumbMixin(object):
         download_thumbnails(options, [(False, url)])
 
 
-class MetadataThumbMixin(object):
+class MetadataThumbMixin:
     """
     Mix this into the service class to grab thumbnail from extracted metadata.
     """

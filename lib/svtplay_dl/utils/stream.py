@@ -82,7 +82,7 @@ def select_quality(config, streams):
     streams = protocol_prio(streams, proto_prio)
 
     if len(streams) == 0:
-        raise error.NoRequestedProtocols(requested=proto_prio, found=list(set([s.name for s in streams])))
+        raise error.NoRequestedProtocols(requested=proto_prio, found=list({s.name for s in streams}))
 
     # Build a dict indexed by bitrate, where each value
     # is the stream with the highest priority protocol.
@@ -107,7 +107,7 @@ def select_quality(config, streams):
     # If none remains, the bitrate filtering was too tight.
     if len(wanted) == 0:
         data = sort_quality(streams)
-        quality = ", ".join("%s (%s)" % (str(x), str(y)) for x, y in data)
+        quality = ", ".join("{} ({})".format(str(x), str(y)) for x, y in data)
         raise error.UIException("Can't find that quality. Try one of: %s (or " "try --flexible-quality)" % quality)
 
     http = HTTP(config)

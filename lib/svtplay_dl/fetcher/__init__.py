@@ -5,7 +5,7 @@ from svtplay_dl.utils.output import output, ETA, progressbar
 from svtplay_dl.utils.http import HTTP
 
 
-class VideoRetriever(object):
+class VideoRetriever:
     def __init__(self, config, url, bitrate=0, **kwargs):
         self.config = config
         self.url = url
@@ -58,7 +58,7 @@ class VideoRetriever(object):
             old = bytes_so_far + 1
             bytes_so_far = total_size
 
-            bytes_range = "bytes={0}-{1}".format(old, bytes_so_far)
+            bytes_range = "bytes={}-{}".format(old, bytes_so_far)
 
             data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
             file_d.write(data.content)

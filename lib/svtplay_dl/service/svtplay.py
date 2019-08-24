@@ -49,12 +49,11 @@ class Svtplay(Service, MetadataThumbMixin):
             try:
                 janson = res.json()
             except json.decoder.JSONDecodeError:
-                yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+                yield ServiceError("Can't decode api request: {}".format(res.request.url))
                 return
             videos = self._get_video(janson)
             self.config.set("live", True)
-            for i in videos:
-                yield i
+            yield from videos
             return
 
         match = re.search(r"__svtplay'] = ({.*});", urldata)
@@ -85,11 +84,10 @@ class Svtplay(Service, MetadataThumbMixin):
         try:
             janson = res.json()
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {0}".format(res.request.url))
+            yield ServiceError("Can't decode api request: {}".format(res.request.url))
             return
         videos = self._get_video(janson)
-        for i in videos:
-            yield i
+        yield from videos
 
     def _get_video(self, janson):
         if "subtitleReferences" in janson:

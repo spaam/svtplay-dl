@@ -18,15 +18,15 @@ from svtplay_dl.fetcher import VideoRetriever
 class DASHException(UIException):
     def __init__(self, url, message):
         self.url = url
-        super(DASHException, self).__init__(message)
+        super().__init__(message)
 
 
 class LiveDASHException(DASHException):
     def __init__(self, url):
-        super(LiveDASHException, self).__init__(url, "This is a live DASH stream, and they are not supported.")
+        super().__init__(url, "This is a live DASH stream, and they are not supported.")
 
 
-class DASHattibutes(object):
+class DASHattibutes:
     def __init__(self):
         self.default = {}
 
@@ -152,10 +152,10 @@ def dashparse(config, res, url, output=None):
         return streams
 
     if res.status_code >= 400:
-        streams[0] = ServiceError("Can't read DASH playlist. {0}".format(res.status_code))
+        streams[0] = ServiceError("Can't read DASH playlist. {}".format(res.status_code))
         return streams
     if len(res.text) < 1:
-        streams[0] = ServiceError("Can't read DASH playlist. {0}, size: {1}".format(res.status_code, len(res.text)))
+        streams[0] = ServiceError("Can't read DASH playlist. {}, size: {}".format(res.status_code, len(res.text)))
         return streams
 
     return _dashparse(config, res.text, url, output, res.cookies)
@@ -235,7 +235,7 @@ def parse_dates(date_str):
         except Exception:
             pass
     if not dt:
-        raise ValueError("Can't parse date format: {0}".format(date_str))
+        raise ValueError("Can't parse date format: {}".format(date_str))
 
     return dt
 

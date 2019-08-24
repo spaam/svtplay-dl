@@ -42,12 +42,11 @@ class Aftonbladet(Service):
         try:
             janson = json.loads(match.group(1))
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {0}".format(match.group(1)))
+            yield ServiceError("Can't decode api request: {}".format(match.group(1)))
             return
 
         videos = self._get_video(janson)
-        for i in videos:
-            yield i
+        yield from videos
 
     def _get_video(self, janson):
         collections = janson["collections"]

@@ -14,7 +14,7 @@ else:
     CONFIGFILE = os.path.expanduser("~/.svtplay-dl.yaml")
 
 
-class Options(object):
+class Options:
     """
     Options used when invoking the script from another Python script.
 
@@ -57,7 +57,7 @@ def parser(version):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
     general = parser.add_argument_group()
 
-    general.add_argument("--version", action="version", version="%(prog)s {0}".format(version))
+    general.add_argument("--version", action="version", version="%(prog)s {}".format(version))
     general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
     general.add_argument(
         "--subfolder", action="store_true", default=False, help="Create a subfolder titled as the show, non-series gets in folder movies"

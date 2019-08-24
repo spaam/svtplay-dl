@@ -23,13 +23,13 @@ class Atg(Service):
         wanted_id = parse.path[7:]
         current_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
 
-        api_url = "https://www.atgplay.se/api/{0}/video/{1}".format(current_time, wanted_id)
+        api_url = "https://www.atgplay.se/api/{}/video/{}".format(current_time, wanted_id)
         video_assets = self.http.request("get", api_url)
 
         try:
             janson = json.loads(video_assets.text)
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {0}".format(video_assets.text))
+            yield ServiceError("Can't decode api request: {}".format(video_assets.text))
             return
 
         if "title" in janson:

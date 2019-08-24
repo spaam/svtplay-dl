@@ -18,3 +18,8 @@ repos:
     rev: v1.2.3
     hooks:
     - id: flake8
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v1.22.1
+    hooks:
+    - id: pyupgrade
+      args: [--py3-plus]

@@ -7,7 +7,7 @@ import unittest
 from svtplay_dl.utils.stream import protocol_prio
 
 
-class VideoRetriever(object):
+class VideoRetriever:
     def __init__(self, proto, bitrate):
         self.proto = proto
         self.bitrate = bitrate
