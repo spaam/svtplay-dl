@@ -1,5 +1,5 @@
 # svtplay-dl
-[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)
+[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl?svg=true)](https://ci.appveyor.com/project/spaam/svtplay-dl)
 [![Build Status Travis](https://travis-ci.org/spaam/svtplay-dl.svg)](https://travis-ci.org/spaam/svtplay-dl/)
 
 ## Installation
@@ -36,7 +36,7 @@ svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later
 
 ### Solus
 
-svtplay-dl is avaliable in the stable repository of [Solus](https://solus-project.com/) and can be installed by running:
+svtplay-dl is avaliable in the [Solus](https://getsol.us.com/) repository and can be installed by simply running:
 
 ```
 sudo eopkg it svtplay-dl
