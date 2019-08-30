@@ -22,4 +22,4 @@ class HttpTest(unittest.TestCase):
             # with query parameters
             {"srcurl": "http://example.com/bar?baz=qux", "segment": "foo.ts", "expected": "http://example.com/foo.ts"},
         ]:
-            self.assertEqual(get_full_url(test["segment"], test["srcurl"]), test["expected"])
+            assert get_full_url(test["segment"], test["srcurl"]) == test["expected"]

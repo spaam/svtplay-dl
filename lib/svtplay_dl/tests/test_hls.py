@@ -75,4 +75,4 @@ class HlsTest(unittest.TestCase):
             }
             # More examples can be found on "https://developer.apple.com/streaming/examples/"
         ]:
-            self.assertEqual(M3U8(test["playlist"]).master_playlist, test["expected"])
+            assert M3U8(test["playlist"]).master_playlist == test["expected"]

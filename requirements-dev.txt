@@ -3,3 +3,5 @@ nose
 mock
 wheel
 pre-commit
+pytest
+pytest-cov

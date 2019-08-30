@@ -31,7 +31,7 @@ class progressTest(unittest.TestCase):
     @patch("svtplay_dl.utils.output.progressbar")
     def test_0_0(self, pbar):
         svtplay_dl.utils.output.progress(0, 0)
-        self.assertFalse(pbar.called)
+        assert not pbar.called
 
     @patch("svtplay_dl.utils.output.progressbar")
     def test_0_100(self, pbar):
@@ -52,32 +52,32 @@ class progressbarTest(unittest.TestCase):
 
     def test_0_100(self):
         svtplay_dl.utils.output.progressbar(100, 0)
-        self.assertEqual(self.mockfile.read(), "\r[000/100][..........] ")
+        assert self.mockfile.read() == "\r[000/100][..........] "
 
     def test_progress_1_100(self):
         svtplay_dl.utils.output.progressbar(100, 1)
-        self.assertEqual(self.mockfile.read(), "\r[001/100][..........] ")
+        assert self.mockfile.read() == "\r[001/100][..........] "
 
     def test_progress_2_100(self):
         svtplay_dl.utils.output.progressbar(100, 2)
-        self.assertEqual(self.mockfile.read(), "\r[002/100][..........] ")
+        assert self.mockfile.read() == "\r[002/100][..........] "
 
     def test_progress_50_100(self):
         svtplay_dl.utils.output.progressbar(100, 50)
-        self.assertEqual(self.mockfile.read(), "\r[050/100][=====.....] ")
+        assert self.mockfile.read() == "\r[050/100][=====.....] "
 
     def test_progress_100_100(self):
         svtplay_dl.utils.output.progressbar(100, 100)
-        self.assertEqual(self.mockfile.read(), "\r[100/100][==========] ")
+        assert self.mockfile.read() == "\r[100/100][==========] "
 
     def test_progress_20_100_msg(self):
         svtplay_dl.utils.output.progressbar(100, 20, "msg")
-        self.assertEqual(self.mockfile.read(), "\r[020/100][==........] msg")
+        assert self.mockfile.read() == "\r[020/100][==........] msg"
 
     def test_progress_20_100_termwidth(self):
         svtplay_dl.utils.output.get_terminal_size = lambda: (75, 25)
         svtplay_dl.utils.output.progressbar(100, 20)
-        self.assertEqual(self.mockfile.read(), "\r[020/100][=======............................] ")
+        assert self.mockfile.read() == "\r[020/100][=======............................] "
 
 
 class EtaTest(unittest.TestCase):
@@ -89,25 +89,25 @@ class EtaTest(unittest.TestCase):
         # processes one item per second, and make the size be
         # 100.
         eta = svtplay_dl.utils.output.ETA(100)
-        self.assertEqual(eta.left, 100)  # no progress yet
-        self.assertEqual(str(eta), "(unknown)")  # no progress yet
+        assert eta.left == 100  # no progress yet
+        assert str(eta) == "(unknown)"  # no progress yet
 
         mock_time.return_value = float(10)  # sleep(10)
         eta.update(10)
-        self.assertEqual(eta.left, 90)
-        self.assertEqual(str(eta), "0:01:30")  # 90 items left, 90s left
+        assert eta.left == 90
+        assert str(eta) == "0:01:30"  # 90 items left, 90s left
 
         mock_time.return_value += 1
         eta.increment()  # another item completed in one second!
-        self.assertEqual(eta.left, 89)
-        self.assertEqual(str(eta), "0:01:29")
+        assert eta.left == 89
+        assert str(eta) == "0:01:29"
 
         mock_time.return_value += 9
         eta.increment(9)  # another item completed in one second!
-        self.assertEqual(eta.left, 80)
-        self.assertEqual(str(eta), "0:01:20")
+        assert eta.left == 80
+        assert str(eta) == "0:01:20"
 
         mock_time.return_value = float(90)  # sleep(79)
         eta.update(90)
-        self.assertEqual(eta.left, 10)
-        self.assertEqual(str(eta), "0:00:10")
+        assert eta.left == 10
+        assert str(eta) == "0:00:10"

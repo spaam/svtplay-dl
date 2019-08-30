@@ -303,4 +303,4 @@ class formatnameTest(unittest.TestCase):
             config.set("filename", item[0])
             service = Service(config, "localhost")
             service.output.update(item[1])
-            self.assertEqual(_formatname(service.output, config, "mp4"), item[2])
+            assert _formatname(service.output, config, "mp4") == item[2]

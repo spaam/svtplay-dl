@@ -6,6 +6,8 @@ from __future__ import absolute_import
 
 import unittest
 
+from svtplay_dl.utils.parser import setup_defaults
+from svtplay_dl.utils.text import exclude
 from svtplay_dl.utils.text import filenamify
 
 
@@ -22,4 +24,18 @@ class filenamifyTest(unittest.TestCase):
 
     def test(self):
         for inp, ref in self.test_values:
-            self.assertEqual(filenamify(inp), ref)
+            assert filenamify(inp) == ref
+
+    def test_exclude_true(self):
+        config = setup_defaults()
+        config.set("exclude", "hej")
+        assert exclude(config, "hejsanhoppsan")
+
+    def test_exclude_false(self):
+        config = setup_defaults()
+        config.set("exclude", "hej")
+        assert not exclude(config, "hoppsan")
+
+    def test_exlude_default(self):
+        config = setup_defaults()
+        assert not exclude(config, "hoppsan")

@@ -1,0 +1,6 @@
+[run]
+branch = true
+include = lib/svtplay_dl/*
+omit =
+  lib/svtplay_dl/__version__.py
+  */tests/*

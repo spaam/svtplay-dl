@@ -16,8 +16,7 @@ install:
 - pip install -r requirements-dev.txt -r requirements.txt awscli
 script:
 - python --version
-- flake8 --jobs 8 lib/svtplay_dl
-- nosetests -v --all-modules --with-doctest svtplay_dl
+- pytest --cov
 - make
 - |
   if [[ "$CIBUILD" == "1" && "$TRAVIS_PULL_REQUEST" == "false" ]]
