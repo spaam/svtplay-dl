@@ -51,5 +51,4 @@ setup(
         "Topic :: Multimedia :: Video",
         "Topic :: Utilities",
     ],
-    extras_require={"dev": ["flake8>=3.5, <3.6", "tox>=2.3, <3", "rstcheck>=2.2, <4.0"]},
 )
