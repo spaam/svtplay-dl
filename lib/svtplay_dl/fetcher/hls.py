@@ -120,6 +120,8 @@ class HLS(VideoRetriever):
             self._download(self.url, file_name=(self.output, "ts"))
 
         else:
+            # Ignore audio
+            self.audio = None
             self._download(self.url, file_name=(self.output, "ts"))
 
     def _download(self, url, file_name):

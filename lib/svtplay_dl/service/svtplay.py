@@ -35,8 +35,17 @@ class Svtplay(Service, MetadataThumbMixin):
         if "accessService" in query:
             self.access = query["accessService"]
 
+        urldata = self.get_urldata()
+
         if parse.path[:8] == "/kanaler":
-            res = self.http.get(URL_VIDEO_API + "ch-{0}".format(parse.path[9:]))
+            match = re.search("data-video-id=\"([\\w-]+)\"", urldata)
+
+            if not match:
+                yield ServiceError("Can't find video info.")
+                return
+
+            _url = urljoin(URL_VIDEO_API, match.group(1))
+            res = self.http.get(_url)
             try:
                 janson = res.json()
             except json.decoder.JSONDecodeError:
@@ -48,7 +57,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 yield i
             return
 
-        match = re.search(r"__svtplay'] = ({.*});", self.get_urldata())
+        match = re.search(r"__svtplay'] = ({.*});", urldata)
         if not match:
             yield ServiceError("Can't find video info.")
             return
