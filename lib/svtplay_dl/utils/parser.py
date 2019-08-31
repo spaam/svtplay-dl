@@ -261,6 +261,10 @@ def _special_settings(config):
     if config.get("proxy"):
         config.set("proxy", config.get("proxy").replace("socks5", "socks5h", 1))
         config.set("proxy", dict(http=config.get("proxy"), https=config.get("proxy")))
+
+    if config.get("get_only_episode_url"):
+        config.set("get_url", True)
+
     return config
 
 
