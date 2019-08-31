@@ -19,11 +19,10 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils import retriever_multi
 from svtplay_dl.utils.http import get_full_url
-from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import output
 from svtplay_dl.utils.output import progress_stream
-from svtplay_dl.utils.output import progressbar
 
 
 class HLSException(UIException):
@@ -161,10 +160,13 @@ class HLS(VideoRetriever):
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
         decryptor = None
         size_media = len(m3u8.media_segment)
-        eta = ETA(size_media)
+        last_size_media = 0
         total_duration = 0
-        duration = 0
         max_duration = 0
+
+        items = []
+        decryptors = []
+
         for index, i in enumerate(m3u8.media_segment):
             if "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
@@ -172,17 +174,6 @@ class HLS(VideoRetriever):
                 total_duration += duration
             item = get_full_url(i["URI"], url)
 
-            if not self.config.get("silent"):
-                if self.config.get("live"):
-                    progressbar(size_media, index + 1, "".join(["DU: ", str(timedelta(seconds=int(total_duration)))]))
-                else:
-                    eta.increment()
-                    progressbar(size_media, index + 1, "".join(["ETA: ", str(eta)]))
-
-            data = self.http.request("get", item, cookies=cookies)
-            if data.status_code == 404:
-                break
-            data = data.content
             if m3u8.encrypted:
                 headers = {}
                 if self.keycookie:
@@ -203,15 +194,22 @@ class HLS(VideoRetriever):
                     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                     decryptor = cipher.decryptor()
 
-                if decryptor:
-                    data = decryptor.update(data)
-                else:
-                    raise ValueError("No decryptor found for encrypted hls steam.")
-
-            file_d.write(data)
+            items.append(item)
+            decryptors.append(decryptor)
 
             if self.config.get("capture_time") > 0 and total_duration >= self.config.get("capture_time") * 60:
                 break
+
+            if size_media == (index + 1):
+                datas = retriever_multi.get(items, cookies=cookies, config=self.config, total_duration=total_duration, tot_urls=last_size_media)
+
+                for data, decryptor in zip(datas, decryptors):
+                    if decryptor:
+                        data = decryptor.update(data)
+                    file_d.write(data)
+                items = []
+                decryptors = []
+                last_size_media = size_media
 
             if (size_media == (index + 1)) and self.config.get("live"):
                 sleep_int = (start_time + max_duration * 2) - time.time()

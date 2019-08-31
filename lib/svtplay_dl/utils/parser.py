@@ -109,6 +109,7 @@ def parser(version):
     general.add_argument("-v", "--verbose", action="store_true", dest="verbose", default=False, help="explain what is going on")
     general.add_argument("--nfo", action="store_true", dest="nfo", default=False, help="create a NFO file")
     general.add_argument("--force-nfo", action="store_true", dest="force_nfo", default=False, help="download only NFO if used with --nfo")
+    general.add_argument("-j", "--jobs", default=0, type=int, metavar="jobs", help="Allow N download jobs at once. Default automatic thread usage.")
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
         "-q",
@@ -208,6 +209,7 @@ def setup_defaults():
     options.set("verbose", False)
     options.set("nfo", False)
     options.set("force_nfo", False)
+    options.set("jobs", 0)
     options.set("output_auto", False)
     options.set("service", None)
     options.set("cookies", None)
@@ -253,6 +255,7 @@ def parsertoconfig(config, parser):
     config.set("verbose", parser.verbose)
     config.set("nfo", parser.nfo)
     config.set("force_nfo", parser.force_nfo)
+    config.set("jobs", parser.jobs)
     config.set("exclude", parser.exclude)
     config.set("after_date", parser.after_date)
     config.set("get_url", parser.get_url)

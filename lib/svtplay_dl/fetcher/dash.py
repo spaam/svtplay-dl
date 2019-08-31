@@ -14,10 +14,9 @@ from urllib.parse import urljoin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils import retriever_multi
 from svtplay_dl.utils.output import output
 from svtplay_dl.utils.output import progress_stream
-from svtplay_dl.utils.output import progressbar
 
 
 class DASHException(UIException):
@@ -273,18 +272,10 @@ class DASH(VideoRetriever):
             file_d = output(self.output, self.config, extension="mp4")
         if file_d is None:
             return
-        eta = ETA(len(files))
-        n = 1
-        for i in files:
-            if not self.config.get("silent"):
-                eta.increment()
-                progressbar(len(files), n, "".join(["ETA: ", str(eta)]))
-                n += 1
-            data = self.http.request("get", i, cookies=cookies)
 
-            if data.status_code == 404:
-                break
-            data = data.content
+        datas = retriever_multi.get(files, cookies=cookies, config=self.config)
+
+        for data in datas:
             file_d.write(data)
 
         file_d.close()

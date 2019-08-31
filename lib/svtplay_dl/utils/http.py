@@ -24,7 +24,7 @@ class HTTP(Session):
         self.verify = config.get("ssl_verify")
         self.proxy = config.get("proxy")
         if config.get("http_headers"):
-            self.headers.update(self.split_header(config.get("http_headers")))
+            self.headers.update(split_header(config.get("http_headers")))
         self.headers.update({"User-Agent": FIREFOX_UA})
 
     def check_redirect(self, url):
@@ -39,8 +39,9 @@ class HTTP(Session):
         res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, *args, **kwargs)
         return res
 
-    def split_header(self, headers):
-        return dict(x.split("=") for x in headers.split(";"))
+
+def split_header(headers):
+    return dict(x.split("=") for x in headers.split(";"))
 
 
 def download_thumbnails(output, config, urls):
