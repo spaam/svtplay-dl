@@ -16,7 +16,8 @@ install:
 - pip install -r requirements-dev.txt -r requirements.txt awscli
 script:
 - python --version
-- pytest --cov
+- pre-commit run --all-files --show-diff-on-failure
+- pytest -v --cov
 - make
 - |
   if [[ "$CIBUILD" == "1" && "$TRAVIS_PULL_REQUEST" == "false" ]]
