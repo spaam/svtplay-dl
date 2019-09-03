@@ -118,8 +118,10 @@ def pypi_upload():
     sdist = glob.glob(os.path.join("dist/", 'svtplay_dl-*.tar.gz'))[0]
     subprocess.check_call(["twine", "upload", sdist])
 
+logger.info("Branch: {}".format(branch()))
+logger.info("Tag: {}".format(tag()))
 
-if branch() != "master":
+if not tag() and branch() != "master":
     sys.exit(0)
 
 
