@@ -25,7 +25,9 @@ class VideoRetriever:
         self.output_extention = None
 
     def __repr__(self):
-        return "<Video(fetcher={}, bitrate={}>".format(self.__class__.__name__, self.bitrate)
+        return "<Video(fetcher={}, bitrate={}>".format(
+            self.__class__.__name__, self.bitrate
+        )
 
     @property
     def name(self):
@@ -33,7 +35,9 @@ class VideoRetriever:
 
     def _download_url(self, url, audio=False, total_size=None):
         cookies = self.kwargs["cookies"]
-        data = self.http.request("get", url, cookies=cookies, headers={"Range": "bytes=0-8192"})
+        data = self.http.request(
+            "get", url, cookies=cookies, headers={"Range": "bytes=0-8192"}
+        )
         if not total_size:
             try:
                 total_size = data.headers["Content-Range"]
@@ -63,7 +67,9 @@ class VideoRetriever:
 
             bytes_range = "bytes={}-{}".format(old, bytes_so_far)
 
-            data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
+            data = self.http.request(
+                "get", url, cookies=cookies, headers={"Range": bytes_range}
+            )
             file_d.write(data.content)
 
         file_d.close()

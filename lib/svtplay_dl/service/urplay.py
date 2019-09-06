@@ -37,9 +37,17 @@ class Urplay(Service, OpenGraphThumbMixin):
                     else:
                         subtype = "tt"
                     if self.config.get("get_all_subtitles"):
-                        yield subtitle(copy.copy(self.config), subtype, absurl, sub["label"], output=self.output)
+                        yield subtitle(
+                            copy.copy(self.config),
+                            subtype,
+                            absurl,
+                            sub["label"],
+                            output=self.output,
+                        )
                     else:
-                        yield subtitle(copy.copy(self.config), subtype, absurl, output=self.output)
+                        yield subtitle(
+                            copy.copy(self.config), subtype, absurl, output=self.output
+                        )
 
         if "streamer" in jsondata["streaming_config"]:
             basedomain = jsondata["streaming_config"]["streamer"]["redirect"]
@@ -54,14 +62,25 @@ class Urplay(Service, OpenGraphThumbMixin):
         hd = None
         if len(jsondata["file_http_hd"]) > 0:
             http_hd = "https://{}/{}".format(basedomain, jsondata["file_http_hd"])
-            hls_hd = "{}{}".format(http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"])
+            hls_hd = "{}{}".format(
+                http_hd, jsondata["streaming_config"]["http_streaming"]["hls_file"]
+            )
             hd = True
-        hls = "{}{}".format(http, jsondata["streaming_config"]["http_streaming"]["hls_file"])
-        streams = hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)
+        hls = "{}{}".format(
+            http, jsondata["streaming_config"]["http_streaming"]["hls_file"]
+        )
+        streams = hlsparse(
+            self.config, self.http.request("get", hls), hls, output=self.output
+        )
         for n in list(streams.keys()):
             yield streams[n]
         if hd:
-            streams = hlsparse(self.config, self.http.request("get", hls_hd), hls_hd, output=self.output)
+            streams = hlsparse(
+                self.config,
+                self.http.request("get", hls_hd),
+                hls_hd,
+                output=self.output,
+            )
             for n in list(streams.keys()):
                 yield streams[n]
 
@@ -75,7 +94,9 @@ class Urplay(Service, OpenGraphThumbMixin):
             if match:
                 res = self.http.get(urljoin("https://urskola.se", match.group(1)))
                 data = res.text
-            tags = re.findall('<a class="puff program tv video" title="[^"]+" href="([^"]+)"', data)
+            tags = re.findall(
+                '<a class="puff program tv video" title="[^"]+" href="([^"]+)"', data
+            )
             for i in tags:
                 url = urljoin("https://urskola.se/", i)
                 if url not in episodes:

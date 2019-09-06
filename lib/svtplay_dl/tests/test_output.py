@@ -77,7 +77,9 @@ class progressbarTest(unittest.TestCase):
     def test_progress_20_100_termwidth(self):
         svtplay_dl.utils.output.get_terminal_size = lambda: (75, 25)
         svtplay_dl.utils.output.progressbar(100, 20)
-        assert self.mockfile.read() == "\r[020/100][=======............................] "
+        assert (
+            self.mockfile.read() == "\r[020/100][=======............................] "
+        )
 
 
 class EtaTest(unittest.TestCase):

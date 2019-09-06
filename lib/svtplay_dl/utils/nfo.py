@@ -22,7 +22,9 @@ def write_nfo_episode(output, config):
         ET.SubElement(root, "episode").text = str(output["episode"])
     ET.SubElement(root, "plot").text = output["episodedescription"]
     if output["publishing_datetime"] is not None:
-        ET.SubElement(root, "aired").text = datetime.fromtimestamp(output["publishing_datetime"]).isoformat()
+        ET.SubElement(root, "aired").text = datetime.fromtimestamp(
+            output["publishing_datetime"]
+        ).isoformat()
     if not config.get("thumbnail") and output["showthumbnailurl"]:
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["episodethumbnailurl"]
@@ -40,7 +42,9 @@ def write_nfo_tvshow(output, config):
         # If we don't even have the title, skip the NFO
         return
     root = ET.Element("tvshow")
-    ET.SubElement(root, "title").text = output["title_nice"] if not None else output["title"]
+    ET.SubElement(root, "title").text = (
+        output["title_nice"] if not None else output["title"]
+    )
     if output["showdescription"]:
         ET.SubElement(root, "plot").text = output["showdescription"]
     if config.get("thumbnail"):

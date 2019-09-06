@@ -102,7 +102,11 @@ def hlsparse(config, res, url, **kwargs):
         if subtitles and httpobject:
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
-                    m3u8s = M3U8(httpobject.request("get", get_full_url(n[0], url), cookies=res.cookies).text)
+                    m3u8s = M3U8(
+                        httpobject.request(
+                            "get", get_full_url(n[0], url), cookies=res.cookies
+                        ).text
+                    )
                     if "cmore" in url:
                         subtype = "wrstsegment"  # this have been seen in tv4play
                     else:
@@ -119,7 +123,14 @@ def hlsparse(config, res, url, **kwargs):
     elif m3u8.media_segment:
         config.set("segments", False)
         streams[0] = HLS(
-            copy.copy(config), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization, output=output, segments=False
+            copy.copy(config),
+            url,
+            0,
+            cookies=res.cookies,
+            keycookie=keycookie,
+            authorization=authorization,
+            output=output,
+            segments=False,
         )
 
     else:
@@ -137,7 +148,9 @@ class HLS(VideoRetriever):
         self.output_extention = "ts"
         if self.segments:
             if self.audio:
-                self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
+                self._download(
+                    self.audio, file_name=(copy.copy(self.output), "audio.ts")
+                )
             self._download(self.url, file_name=(self.output, "ts"))
 
         else:
@@ -174,7 +187,11 @@ class HLS(VideoRetriever):
 
             if not self.config.get("silent"):
                 if self.config.get("live"):
-                    progressbar(size_media, index + 1, "".join(["DU: ", str(timedelta(seconds=int(total_duration)))]))
+                    progressbar(
+                        size_media,
+                        index + 1,
+                        "".join(["DU: ", str(timedelta(seconds=int(total_duration)))]),
+                    )
                 else:
                     eta.increment()
                     progressbar(size_media, index + 1, "".join(["ETA: ", str(eta)]))
@@ -197,8 +214,14 @@ class HLS(VideoRetriever):
                     keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
                     if keyurl and keyurl[:4] == "skd:":
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
-                    key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
-                    iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else random_iv()
+                    key = self.http.request(
+                        "get", keyurl, cookies=keycookies, headers=headers
+                    ).content
+                    iv = (
+                        binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32))
+                        if "IV" in i["EXT-X-KEY"]
+                        else random_iv()
+                    )
                     backend = default_backend()
                     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                     decryptor = cipher.decryptor()
@@ -210,7 +233,10 @@ class HLS(VideoRetriever):
 
             file_d.write(data)
 
-            if self.config.get("capture_time") > 0 and total_duration >= self.config.get("capture_time") * 60:
+            if (
+                self.config.get("capture_time") > 0
+                and total_duration >= self.config.get("capture_time") * 60
+            ):
                 break
 
             if (size_media == (index + 1)) and self.config.get("live"):
@@ -223,15 +249,24 @@ class HLS(VideoRetriever):
                     start_time = time.time()
 
                     if hls_time_stamp:
-                        end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=max_duration * 2)).replace(microsecond=0)
+                        end_time_stamp = (
+                            datetime.utcnow()
+                            - timedelta(minutes=1, seconds=max_duration * 2)
+                        ).replace(microsecond=0)
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
-                        url = "{}.m3u8?in={}&out={}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        url = "{}.m3u8?in={}&out={}?".format(
+                            base_url,
+                            start_time_stamp.isoformat(),
+                            end_time_stamp.isoformat(),
+                        )
 
                     new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:
-                        if not any(d["URI"] == n_m3u["URI"] for d in m3u8.media_segment):
+                        if not any(
+                            d["URI"] == n_m3u["URI"] for d in m3u8.media_segment
+                        ):
                             m3u8.media_segment.append(n_m3u)
 
                     size_media = len(m3u8.media_segment)
@@ -249,7 +284,15 @@ class M3U8:
     # Created for hls version <=7
     # https://tools.ietf.org/html/rfc8216
 
-    MEDIA_SEGMENT_TAGS = ("EXTINF", "EXT-X-BYTERANGE", "EXT-X-DISCONTINUITY", "EXT-X-KEY", "EXT-X-MAP", "EXT-X-PROGRAM-DATE-TIME", "EXT-X-DATERANGE")
+    MEDIA_SEGMENT_TAGS = (
+        "EXTINF",
+        "EXT-X-BYTERANGE",
+        "EXT-X-DISCONTINUITY",
+        "EXT-X-KEY",
+        "EXT-X-MAP",
+        "EXT-X-PROGRAM-DATE-TIME",
+        "EXT-X-DATERANGE",
+    )
     MEDIA_PLAYLIST_TAGS = (
         "EXT-X-TARGETDURATION",
         "EXT-X-MEDIA-SEQUENCE",
@@ -258,7 +301,13 @@ class M3U8:
         "EXT-X-PLAYLIST-TYPE",
         "EXT-X-I-FRAMES-ONLY",
     )
-    MASTER_PLAYLIST_TAGS = ("EXT-X-MEDIA", "EXT-X-STREAM-INF", "EXT-X-I-FRAME-STREAM-INF", "EXT-X-SESSION-DATA", "EXT-X-SESSION-KEY")
+    MASTER_PLAYLIST_TAGS = (
+        "EXT-X-MEDIA",
+        "EXT-X-STREAM-INF",
+        "EXT-X-I-FRAME-STREAM-INF",
+        "EXT-X-SESSION-DATA",
+        "EXT-X-SESSION-KEY",
+    )
     MEDIA_OR_MASTER_PLAYLIST_TAGS = ("EXT-X-INDEPENDENT-SEGMENTS", "EXT-X-START")
 
     TAG_TYPES = {"MEDIA_SEGMENT": 0, "MEDIA_PLAYLIST": 1, "MASTER_PLAYLIST": 2}
@@ -278,7 +327,12 @@ class M3U8:
 
     def __str__(self):
         return "Version: {}\nMedia Segment: {}\nMedia Playlist: {}\nMaster Playlist: {}\nEncrypted: {}\tIndependent_segments: {}".format(
-            self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.independent_segments
+            self.version,
+            self.media_segment,
+            self.media_playlist,
+            self.master_playlist,
+            self.encrypted,
+            self.independent_segments,
         )
 
     def parse_m3u(self, data):
@@ -391,7 +445,9 @@ class M3U8:
                     elif tag == "EXT-X-STREAM-INF":
                         info = _get_tuple_attribute(attr)
                         if "BANDWIDTH" not in info:
-                            raise ValueError("Can't find 'BANDWIDTH' in 'EXT-X-STREAM-INF'")
+                            raise ValueError(
+                                "Can't find 'BANDWIDTH' in 'EXT-X-STREAM-INF'"
+                            )
                         info["URI"] = lines[index + 1]
 
                     # 4.3.4.3.  EXT-X-I-FRAME-STREAM-INF
@@ -442,7 +498,9 @@ class M3U8:
             last_tag_type = tag_type
 
             if self.media_segment and self.master_playlist:
-                raise ValueError("This 'M3U8' file contains data for both 'Media Segment' and 'Master Playlist'. This is not allowed.")
+                raise ValueError(
+                    "This 'M3U8' file contains data for both 'Media Segment' and 'Master Playlist'. This is not allowed."
+                )
 
 
 def _get_tag_attribute(line):

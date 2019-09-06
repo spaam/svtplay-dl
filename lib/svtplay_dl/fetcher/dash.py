@@ -63,7 +63,9 @@ def templateelemt(attributes, element, filename, idnumber):
         attributes.set("duration", float(element.attrib["duration"]))
 
     segments = []
-    timeline = element.findall("{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline/{urn:mpeg:dash:schema:mpd:2011}S")
+    timeline = element.findall(
+        "{urn:mpeg:dash:schema:mpd:2011}SegmentTimeline/{urn:mpeg:dash:schema:mpd:2011}S"
+    )
     if timeline:
         t = -1
         for s in timeline:
@@ -78,27 +80,59 @@ def templateelemt(attributes, element, filename, idnumber):
             end = start + len(segments) + count
             number = start + len(segments)
             while number < end:
-                segments.append({"number": number, "duration": math.ceil(duration / attributes.get("timescale")), "time": t})
+                segments.append(
+                    {
+                        "number": number,
+                        "duration": math.ceil(duration / attributes.get("timescale")),
+                        "time": t,
+                    }
+                )
                 t += duration
                 number += 1
     else:  # Saw this on dynamic live content
         start = 0
         now = time.time()
-        periodStartWC = time.mktime(attributes.get("availabilityStartTime").timetuple()) + start
+        periodStartWC = (
+            time.mktime(attributes.get("availabilityStartTime").timetuple()) + start
+        )
         periodEndWC = now + attributes.get("minimumUpdatePeriod")
         periodDuration = periodEndWC - periodStartWC
-        segmentCount = math.ceil(periodDuration * attributes.get("timescale") / attributes.get("duration"))
-        availableStart = math.floor(
-            (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration")
+        segmentCount = math.ceil(
+            periodDuration * attributes.get("timescale") / attributes.get("duration")
         )
-        availableEnd = math.floor((now - periodStartWC) * attributes.get("timescale") / attributes.get("duration"))
+        availableStart = math.floor(
+            (now - periodStartWC - attributes.get("timeShiftBufferDepth"))
+            * attributes.get("timescale")
+            / attributes.get("duration")
+        )
+        availableEnd = math.floor(
+            (now - periodStartWC)
+            * attributes.get("timescale")
+            / attributes.get("duration")
+        )
         start = max(0, availableStart)
         end = min(segmentCount, availableEnd)
         for number in range(start, end):
-            segments.append({"number": number, "duration": int(attributes.get("duration") / attributes.get("timescale"))})
+            segments.append(
+                {
+                    "number": number,
+                    "duration": int(
+                        attributes.get("duration") / attributes.get("timescale")
+                    ),
+                }
+            )
 
-    name = media.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth"))
-    files.append(urljoin(filename, init.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth"))))
+    name = media.replace("$RepresentationID$", idnumber).replace(
+        "$Bandwidth$", attributes.get("bandwidth")
+    )
+    files.append(
+        urljoin(
+            filename,
+            init.replace("$RepresentationID$", idnumber).replace(
+                "$Bandwidth$", attributes.get("bandwidth")
+            ),
+        )
+    )
     for segment in segments:
         if "$Time$" in media:
             new = name.replace("$Time$", str(segment["time"]))
@@ -122,7 +156,9 @@ def adaptionset(attributes, element, url, baseurl=None):
         dirname = urljoin(dirname, baseurl)
 
     template = element[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    represtation = element[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
+    represtation = element[0].findall(
+        ".//{urn:mpeg:dash:schema:mpd:2011}Representation"
+    )
 
     for i in represtation:
         files = []
@@ -133,7 +169,9 @@ def adaptionset(attributes, element, url, baseurl=None):
         idnumber = i.attrib["id"]
 
         if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
-            filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
+            filename = urljoin(
+                filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text
+            )
 
         if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
             segments = True
@@ -143,7 +181,12 @@ def adaptionset(attributes, element, url, baseurl=None):
             files = templateelemt(attributes, template, filename, idnumber)
         elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
             segments = True
-            files = templateelemt(attributes, i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
+            files = templateelemt(
+                attributes,
+                i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"),
+                filename,
+                idnumber,
+            )
 
         if files:
             streams[bitrate] = {"segments": segments, "files": files}
@@ -157,10 +200,16 @@ def dashparse(config, res, url, output=None):
         return streams
 
     if res.status_code >= 400:
-        streams[0] = ServiceError("Can't read DASH playlist. {}".format(res.status_code))
+        streams[0] = ServiceError(
+            "Can't read DASH playlist. {}".format(res.status_code)
+        )
         return streams
     if len(res.text) < 1:
-        streams[0] = ServiceError("Can't read DASH playlist. {}, size: {}".format(res.status_code, len(res.text)))
+        streams[0] = ServiceError(
+            "Can't read DASH playlist. {}, size: {}".format(
+                res.status_code, len(res.text)
+            )
+        )
         return streams
 
     return _dashparse(config, res.text, url, output, res.cookies)
@@ -177,24 +226,41 @@ def _dashparse(config, text, url, output, cookies):
         baseurl = xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL").text
 
     if "availabilityStartTime" in xml.attrib:
-        attributes.set("availabilityStartTime", parse_dates(xml.attrib["availabilityStartTime"]))
+        attributes.set(
+            "availabilityStartTime", parse_dates(xml.attrib["availabilityStartTime"])
+        )
         attributes.set("publishTime", parse_dates(xml.attrib["publishTime"]))
 
     if "mediaPresentationDuration" in xml.attrib:
-        attributes.set("mediaPresentationDuration", parse_duration(xml.attrib["mediaPresentationDuration"]))
+        attributes.set(
+            "mediaPresentationDuration",
+            parse_duration(xml.attrib["mediaPresentationDuration"]),
+        )
     if "timeShiftBufferDepth" in xml.attrib:
-        attributes.set("timeShiftBufferDepth", parse_duration(xml.attrib["timeShiftBufferDepth"]))
+        attributes.set(
+            "timeShiftBufferDepth", parse_duration(xml.attrib["timeShiftBufferDepth"])
+        )
     if "minimumUpdatePeriod" in xml.attrib:
-        attributes.set("minimumUpdatePeriod", parse_duration(xml.attrib["minimumUpdatePeriod"]))
+        attributes.set(
+            "minimumUpdatePeriod", parse_duration(xml.attrib["minimumUpdatePeriod"])
+        )
 
     attributes.set("type", xml.attrib["type"])
-    temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]')
+    temp = xml.findall(
+        './/{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="audio/mp4"]'
+    )
     if len(temp) == 0:
-        temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="audio"]')
+        temp = xml.findall(
+            './/{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="audio"]'
+        )
     audiofiles = adaptionset(attributes, temp, url, baseurl)
-    temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]')
+    temp = xml.findall(
+        './/{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="video/mp4"]'
+    )
     if len(temp) == 0:
-        temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="video"]')
+        temp = xml.findall(
+            './/{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="video"]'
+        )
     videofiles = adaptionset(attributes, temp, url, baseurl)
 
     if not audiofiles or not videofiles:
@@ -218,7 +284,10 @@ def _dashparse(config, text, url, output, cookies):
 
 
 def parse_duration(duration):
-    match = re.search(r"P(?:(\d*)Y)?(?:(\d*)M)?(?:(\d*)D)?(?:T(?:(\d*)H)?(?:(\d*)M)?(?:([\d.]*)S)?)?", duration)
+    match = re.search(
+        r"P(?:(\d*)Y)?(?:(\d*)M)?(?:(\d*)D)?(?:T(?:(\d*)H)?(?:(\d*)M)?(?:([\d.]*)S)?)?",
+        duration,
+    )
     if not match:
         return 0
     year = int(match.group(1)) * 365 * 24 * 60 * 60 if match.group(1) else 0

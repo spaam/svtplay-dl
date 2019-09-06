@@ -46,7 +46,9 @@ class Bigbrother(Service, OpenGraphThumbMixin):
 
         dataurl = (
             "http://c.brightcove.com/services/viewer/htmlFederated?flashID={}&playerID={}&playerKey={}"
-            "&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer={}".format(flashid, playerid, playerkey, videoplayer)
+            "&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer={}".format(
+                flashid, playerid, playerkey, videoplayer
+            )
         )
         data = self.http.request("get", dataurl).content
         match = re.search(r"experienceJSON = ({.*});", data)
@@ -54,7 +56,9 @@ class Bigbrother(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find json data")
             return
         jsondata = json.loads(match.group(1))
-        renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"]["renditions"]
+        renditions = jsondata["data"]["programmedContent"]["videoPlayer"]["mediaDTO"][
+            "renditions"
+        ]
 
         if jsondata["data"]["publisherType"] == "PREMIUM":
             yield ServiceError("Premium content")
@@ -63,15 +67,30 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         for i in renditions:
             if i["defaultURL"].endswith("f4m"):
                 streams = hdsparse(
-                    copy.copy(self.config), self.http.request("get", i["defaultURL"], params={"hdcore": "3.7.0"}), i["defaultURL"], output=self.output
+                    copy.copy(self.config),
+                    self.http.request(
+                        "get", i["defaultURL"], params={"hdcore": "3.7.0"}
+                    ),
+                    i["defaultURL"],
+                    output=self.output,
                 )
                 for n in list(streams.keys()):
                     yield streams[n]
 
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(self.config, self.http.request("get", i["defaultURL"]), i["defaultURL"], output=self.output)
+                streams = hlsparse(
+                    self.config,
+                    self.http.request("get", i["defaultURL"]),
+                    i["defaultURL"],
+                    output=self.output,
+                )
                 for n in list(streams.keys()):
                     yield streams[n]
 
             if i["defaultURL"].endswith("mp4"):
-                yield HTTP(copy.copy(self.config), i["defaultURL"], i["encodingRate"] / 1024, output=self.output)
+                yield HTTP(
+                    copy.copy(self.config),
+                    i["defaultURL"],
+                    i["encodingRate"] / 1024,
+                    output=self.output,
+                )

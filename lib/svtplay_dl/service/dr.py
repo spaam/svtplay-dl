@@ -53,7 +53,9 @@ class Dr(Service, OpenGraphThumbMixin):
                 return
             if "SubtitlesList" in resource and len(resource["SubtitlesList"]) > 0:
                 suburl = resource["SubtitlesList"][0]["Uri"]
-                yield subtitle(copy.copy(self.config), "wrst", suburl, output=self.output)
+                yield subtitle(
+                    copy.copy(self.config), "wrst", suburl, output=self.output
+                )
             if "Data" in resource:
                 streams = self.find_stream(self.config, resource)
                 yield from streams
@@ -64,18 +66,31 @@ class Dr(Service, OpenGraphThumbMixin):
                         uri = self._decrypt(stream["EncryptedUri"])
 
                     if stream["Target"] == "HDS":
-                        streams = hdsparse(copy.copy(self.config), self.http.request("get", uri, params={"hdcore": "3.7.0"}), uri, output=self.output)
+                        streams = hdsparse(
+                            copy.copy(self.config),
+                            self.http.request("get", uri, params={"hdcore": "3.7.0"}),
+                            uri,
+                            output=self.output,
+                        )
                         if streams:
                             for n in list(streams.keys()):
                                 yield streams[n]
                     if stream["Target"] == "HLS":
-                        streams = hlsparse(self.config, self.http.request("get", uri), uri, output=self.output)
+                        streams = hlsparse(
+                            self.config,
+                            self.http.request("get", uri),
+                            uri,
+                            output=self.output,
+                        )
                         for n in list(streams.keys()):
                             yield streams[n]
 
     def find_all_episodes(self, config):
         episodes = []
-        matches = re.findall(r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"', self.get_urldata())
+        matches = re.findall(
+            r'<button class="show-more" data-url="([^"]+)" data-partial="([^"]+)"',
+            self.get_urldata(),
+        )
         for encpath, enccomp in matches:
             newstyle = "_" in encpath
             if newstyle:
@@ -89,13 +104,21 @@ class Dr(Service, OpenGraphThumbMixin):
 
             params = "offset=0&limit=1000"
             if newstyle:
-                encparams = base64.b64encode(params.encode("latin1")).decode("latin1").rstrip("=")
+                encparams = (
+                    base64.b64encode(params.encode("latin1"))
+                    .decode("latin1")
+                    .rstrip("=")
+                )
                 encpath = "{}_{}".format(encbasepath, encparams)
             else:
                 path = "{}?{}".format(urlparse(path).path, params)
-                encpath = base64.b64encode(path.encode("latin1")).decode("latin1").rstrip("=")
+                encpath = (
+                    base64.b64encode(path.encode("latin1")).decode("latin1").rstrip("=")
+                )
 
-            url = urljoin("https://www.dr.dk/tv/partial/", "{}/{}".format(enccomp, encpath))
+            url = urljoin(
+                "https://www.dr.dk/tv/partial/", "{}/{}".format(enccomp, encpath)
+            )
             data = self.http.request("get", url).content.decode("latin1")
 
             matches = re.findall(r'"program-link" href="([^"]+)">', data)
@@ -105,7 +128,11 @@ class Dr(Service, OpenGraphThumbMixin):
         if not episodes:
             prefix = "/".join(urlparse(self.url).path.rstrip("/").split("/")[:-1])
             matches = re.findall(r'"program-link" href="([^"]+)">', self.get_urldata())
-            episodes = [urljoin("https://www.dr.dk/", url) for url in matches if url.startswith(prefix)]
+            episodes = [
+                urljoin("https://www.dr.dk/", url)
+                for url in matches
+                if url.startswith(prefix)
+            ]
 
         if config.get("all_last") != -1:
             episodes = episodes[: config.get("all_last")]
@@ -123,7 +150,12 @@ class Dr(Service, OpenGraphThumbMixin):
                 break
         for i in links:
             if i["Target"] == "Ios" or i["Target"] == "HLS":
-                streams = hlsparse(config, self.http.request("get", i["Uri"]), i["Uri"], output=self.output)
+                streams = hlsparse(
+                    config,
+                    self.http.request("get", i["Uri"]),
+                    i["Uri"],
+                    output=self.output,
+                )
                 for n in list(streams.keys()):
                     yield streams[n]
 
@@ -131,7 +163,9 @@ class Dr(Service, OpenGraphThumbMixin):
         n = int(url[2:10], 16)
         iv_hex = url[10 + n :]
         data = binascii.a2b_hex(url[10 : 10 + n].encode("ascii"))
-        key = hashlib.sha256(("%s:sRBzYNXBzkKgnjj8pGtkACch" % iv_hex).encode("utf-8")).digest()
+        key = hashlib.sha256(
+            ("%s:sRBzYNXBzkKgnjj8pGtkACch" % iv_hex).encode("utf-8")
+        ).digest()
         iv = bytes.fromhex(iv_hex)
 
         backend = default_backend()

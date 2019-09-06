@@ -26,7 +26,9 @@ class NHL(Service, OpenGraphThumbMixin):
         if "playbacks" in janson["metaData"]:
             for i in janson["metaData"]["playbacks"]:
                 if "CLOUD" in i["name"]:
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
+                    streams = hlsparse(
+                        self.config, self.http.request("get", i["url"]), i["url"]
+                    )
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
@@ -41,13 +43,23 @@ class NHL(Service, OpenGraphThumbMixin):
             except KeyError:
                 yield ServiceError("Can't find api url")
                 return
-            filename = "{}?contentId={}&playbackScenario=HTTP_CLOUD_WIRED_WEB&format=json&platform=WEB_MEDIAPLAYER" "&_=1487455224334".format(
-                janson["vpm"]["mediaFramework"]["mediaFrameworkEndPoint"], vid
+            filename = (
+                "{}?contentId={}&playbackScenario=HTTP_CLOUD_WIRED_WEB&format=json&platform=WEB_MEDIAPLAYER"
+                "&_=1487455224334".format(
+                    janson["vpm"]["mediaFramework"]["mediaFrameworkEndPoint"], vid
+                )
             )
             url = urljoin(apiurl, filename)
             res = self.http.get(url)
             janson = res.json()
-            for i in janson["user_verified_event"][0]["user_verified_content"][0]["user_verified_media_item"]:
-                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+            for i in janson["user_verified_event"][0]["user_verified_content"][0][
+                "user_verified_media_item"
+            ]:
+                streams = hlsparse(
+                    self.config,
+                    self.http.request("get", i["url"]),
+                    i["url"],
+                    output=self.output,
+                )
                 for n in list(streams.keys()):
                     yield streams[n]

@@ -26,14 +26,21 @@ class Vg(Service, OpenGraphThumbMixin):
                 yield ServiceError("Can't find video file for: {}".format(self.url))
                 return
         videoid = match.group(1)
-        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/{}?appName=vgtv-website".format(videoid)).text
+        data = self.http.request(
+            "get",
+            "http://svp.vg.no/svp/api/v1/vgtv/assets/{}?appName=vgtv-website".format(
+                videoid
+            ),
+        ).text
         jsondata = json.loads(data)
         self.output["title"] = jsondata["title"]
 
         if "hds" in jsondata["streamUrls"]:
             streams = hdsparse(
                 self.config,
-                self.http.request("get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}),
+                self.http.request(
+                    "get", jsondata["streamUrls"]["hds"], params={"hdcore": "3.7.0"}
+                ),
                 jsondata["streamUrls"]["hds"],
                 output=self.output,
             )
@@ -41,9 +48,16 @@ class Vg(Service, OpenGraphThumbMixin):
                 yield streams[n]
         if "hls" in jsondata["streamUrls"]:
             streams = hlsparse(
-                self.config, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"], output=self.output
+                self.config,
+                self.http.request("get", jsondata["streamUrls"]["hls"]),
+                jsondata["streamUrls"]["hls"],
+                output=self.output,
             )
             for n in list(streams.keys()):
                 yield streams[n]
         if "mp4" in jsondata["streamUrls"]:
-            yield HTTP(copy.copy(self.config), jsondata["streamUrls"]["mp4"], output=self.output)
+            yield HTTP(
+                copy.copy(self.config),
+                jsondata["streamUrls"]["mp4"],
+                output=self.output,
+            )

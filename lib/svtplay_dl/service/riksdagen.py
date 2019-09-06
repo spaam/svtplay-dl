@@ -32,9 +32,19 @@ class Riksdagen(Service, OpenGraphThumbMixin):
         for i in janson:
             if i["mimetype"] == "application/x-mpegurl":
                 data2 = self.http.get(i["url"]).json()
-                streams = hlsparse(self.config, self.http.request("get", data2["url"]), data2["url"], output=self.output)
+                streams = hlsparse(
+                    self.config,
+                    self.http.request("get", data2["url"]),
+                    data2["url"],
+                    output=self.output,
+                )
                 for n in list(streams.keys()):
                     yield streams[n]
             if i["mimetype"] == "video/mp4":
                 for n in i["bandwidth"]:
-                    yield HTTP(copy.copy(self.config), n["url"], n["quality"], output=self.output)
+                    yield HTTP(
+                        copy.copy(self.config),
+                        n["url"],
+                        n["quality"],
+                        output=self.output,
+                    )

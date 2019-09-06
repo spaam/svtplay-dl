@@ -27,7 +27,9 @@ class Npo(Service):
             return
 
         # Get prid
-        prid_src = self.http.request("get", "http://e.omroep.nl/metadata/{}".format(video_id))
+        prid_src = self.http.request(
+            "get", "http://e.omroep.nl/metadata/{}".format(video_id)
+        )
         prid_raw = prid_src.text.split("(", 1)[-1].split(")", 1)[0]
 
         try:
@@ -41,7 +43,9 @@ class Npo(Service):
             return
 
         # Get token
-        token_src = self.http.request("get", "http://ida.omroep.nl/app.php/auth/{}".format(prid))
+        token_src = self.http.request(
+            "get", "http://ida.omroep.nl/app.php/auth/{}".format(prid)
+        )
 
         try:
             janson = json.loads(token_src.text)
@@ -52,7 +56,9 @@ class Npo(Service):
             return
 
         # Get super api
-        api_url = self.http.request("get", "http://ida.omroep.nl/app.php/{}?token={}".format(prid, token))
+        api_url = self.http.request(
+            "get", "http://ida.omroep.nl/app.php/{}?token={}".format(prid, token)
+        )
 
         try:
             janson = json.loads(api_url.text)
@@ -70,7 +76,9 @@ class Npo(Service):
                 raw_url = re.search(r'"url":"(.+?)"', api).group(1)
                 url = json.loads('"{}"'.format(raw_url))
 
-                stream = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
+                stream = hlsparse(
+                    self.config, self.http.request("get", url), url, output=self.output
+                )
 
             if stream:
                 for key in list(stream.keys()):

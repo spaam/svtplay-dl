@@ -14,7 +14,13 @@ from svtplay_dl.service import Service
 
 # This is _very_ similar to mtvservices..
 class Mtvnn(Service, OpenGraphThumbMixin):
-    supported_domains = ["nickelodeon.se", "nickelodeon.nl", "nickelodeon.no", "www.comedycentral.se", "nickelodeon.dk"]
+    supported_domains = [
+        "nickelodeon.se",
+        "nickelodeon.nl",
+        "nickelodeon.no",
+        "www.comedycentral.se",
+        "nickelodeon.dk",
+    ]
 
     def get(self):
         data = self.get_urldata()
@@ -36,10 +42,14 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             wanted_id = match_id.group(1)
             url_service = (
                 "http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{}"
-                "&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c".format(wanted_id)
+                "&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c".format(
+                    wanted_id
+                )
             )
             service_asset = self.http.request("get", url_service)
-            match_guid = re.search('<guid isPermaLink="false">(.*)</guid>', service_asset.text)
+            match_guid = re.search(
+                '<guid isPermaLink="false">(.*)</guid>', service_asset.text
+            )
 
             if not match_guid:
                 yield ServiceError("Can't find video info")
@@ -47,7 +57,9 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
             hls_url = (
                 "https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{}?arcStage=staging&accountOverride=intl.mtvi.com&"
-                "billingSection=intl&ep=a9cc543c&acceptMethods=hls".format(match_guid.group(1))
+                "billingSection=intl&ep=a9cc543c&acceptMethods=hls".format(
+                    match_guid.group(1)
+                )
             )
             hls_asset = self.http.request("get", hls_url)
             xml = ET.XML(hls_asset.text)
@@ -56,16 +68,27 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 xml.find("./video") is not None
                 and xml.find("./video").find("item") is not None
                 and xml.find("./video").find("item").find("rendition") is not None
-                and xml.find("./video").find("item").find("rendition").find("src") is not None
+                and xml.find("./video").find("item").find("rendition").find("src")
+                is not None
             ):
 
-                hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
+                hls_url = (
+                    xml.find("./video").find("item").find("rendition").find("src").text
+                )
+                stream = hlsparse(
+                    self.config,
+                    self.http.request("get", hls_url),
+                    hls_url,
+                    output=self.output,
+                )
                 for key in list(stream.keys()):
                     yield stream[key]
             return
 
-        match = re.search(r'data-mrss=[\'"](http://gakusei-cluster.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]', data)
+        match = re.search(
+            r'data-mrss=[\'"](http://gakusei-cluster.mtvnn.com/v2/mrss.xml[^\'"]+)[\'"]',
+            data,
+        )
         if not match:
             yield ServiceError("Can't find id for the video")
             return
@@ -82,13 +105,22 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
             match = re.search("mtvnn.com:([^&]+)", mrssxmlurl)
             if match:
-                urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists")  # it use playlists dunno from where it gets it
-                hlsapi = "http://api.mtvnn.com/v2/{}/{}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
+                urlpart = (
+                    match.group(1).replace("-", "/").replace("playlist", "playlists")
+                )  # it use playlists dunno from where it gets it
+                hlsapi = "http://api.mtvnn.com/v2/{}/{}.json?video_format=m3u8&callback=&".format(
+                    countrycode, urlpart
+                )
                 data = self.http.request("get", hlsapi).text
 
                 dataj = json.loads(data)
                 for i in dataj["local_playlist_videos"]:
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    streams = hlsparse(
+                        self.config,
+                        self.http.request("get", i["url"]),
+                        i["url"],
+                        output=self.output,
+                    )
                     for n in list(streams.keys()):
                         yield streams[n]
 
@@ -98,7 +130,10 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             logging.error("Couldn't program id")
             return
         programid = match.group(1)
-        match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'", self.get_urldata())
+        match = re.findall(
+            r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'",
+            self.get_urldata(),
+        )
         if not match:
             logging.error("Couldn't retrieve episode list")
             return
@@ -110,7 +145,11 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         for i in sorted(episodNr):
             if n == config.get("all_last"):
                 break
-            episodes.append("http://www.nickelodeon.se/serier/{}-something/videos/{}-something".format(programid, i))
+            episodes.append(
+                "http://www.nickelodeon.se/serier/{}-something/videos/{}-something".format(
+                    programid, i
+                )
+            )
             n += 1
         return episodes
 
@@ -138,8 +177,11 @@ class MtvMusic(Service, OpenGraphThumbMixin):
         for n in janson:
             if wanted_id == str(n["id"]):
 
-                mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
-                    n["video_token"]
+                mrssxmlurl = (
+                    "http://media-utils.mtvnservices.com/services/MediaGenerator/"
+                    "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
+                        n["video_token"]
+                    )
                 )
                 hls_asset = self.http.request("get", mrssxmlurl)
                 xml = ET.XML(hls_asset.text)
@@ -148,11 +190,23 @@ class MtvMusic(Service, OpenGraphThumbMixin):
                     xml.find("./video") is not None
                     and xml.find("./video").find("item") is not None
                     and xml.find("./video").find("item").find("rendition") is not None
-                    and xml.find("./video").find("item").find("rendition").find("src") is not None
+                    and xml.find("./video").find("item").find("rendition").find("src")
+                    is not None
                 ):
 
-                    hls_url = xml.find("./video").find("item").find("rendition").find("src").text
-                    stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
+                    hls_url = (
+                        xml.find("./video")
+                        .find("item")
+                        .find("rendition")
+                        .find("src")
+                        .text
+                    )
+                    stream = hlsparse(
+                        self.config,
+                        self.http.request("get", hls_url),
+                        hls_url,
+                        output=self.output,
+                    )
 
                     if stream:
                         for key in list(stream.keys()):

@@ -43,13 +43,21 @@ class Dplay(Service):
             match = re.search("(programmer|program)/([^/]+)$", parse.path)
             path = "/shows/{}".format(match.group(2))
             url = "https://disco-api.{}/content{}".format(self.domain, path)
-            res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
+            res = self.http.get(
+                url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"}
+            )
             programid = res.json()["data"]["id"]
             qyerystring = (
                 "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&"
-                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
+                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(
+                    programid
+                )
             )
-            res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
+            res = self.http.get(
+                "https://disco-api.{}/content/videos?{}".format(
+                    self.domain, qyerystring
+                )
+            )
             janson = res.json()
             vid = 0
             slug = None
@@ -64,8 +72,12 @@ class Dplay(Service):
                 return
         else:
             match = re.search("(videos|videoer)/(.*)$", parse.path)
-            url = "https://disco-api.{}/content/videos/{}".format(self.domain, match.group(2))
-        res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
+            url = "https://disco-api.{}/content/videos/{}".format(
+                self.domain, match.group(2)
+            )
+        res = self.http.get(
+            url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"}
+        )
         janson = res.json()
         if "errors" in janson:
             yield ServiceError("Cant find any videos on this url")
@@ -81,24 +93,33 @@ class Dplay(Service):
             return
         self.output["id"] = janson["data"]["id"]
 
-        api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(self.domain, janson["data"]["id"])
+        api = "https://disco-api.{}/playback/videoPlaybackInfo/{}".format(
+            self.domain, janson["data"]["id"]
+        )
         res = self.http.get(api)
         if res.status_code > 400:
             yield ServiceError("You dont have permission to watch this")
             return
         streams = hlsparse(
             self.config,
-            self.http.request("get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]),
+            self.http.request(
+                "get", res.json()["data"]["attributes"]["streaming"]["hls"]["url"]
+            ),
             res.json()["data"]["attributes"]["streaming"]["hls"]["url"],
             httpobject=self.http,
             output=self.output,
         )
         for n in list(streams.keys()):
-            if isinstance(streams[n], subtitle):  # we get the subtitles from the hls playlist.
+            if isinstance(
+                streams[n], subtitle
+            ):  # we get the subtitles from the hls playlist.
                 if self.config.get("get_all_subtitles"):
                     yield streams[n]
                 else:
-                    if streams[n].subfix in country and country[streams[n].subfix] in self.domain:
+                    if (
+                        streams[n].subfix in country
+                        and country[streams[n].subfix] in self.domain
+                    ):
                         yield streams[n]
             else:
                 yield streams[n]
@@ -129,7 +150,9 @@ class Dplay(Service):
             if not premium:
                 logging.warning("Wrong username/password.")
 
-        url = "https://disco-api.{}/content/shows/{}".format(self.domain, match.group(2))
+        url = "https://disco-api.{}/content/shows/{}".format(
+            self.domain, match.group(2)
+        )
         res = self.http.get(url)
         programid = res.json()["data"]["id"]
         seasons = res.json()["data"]["attributes"]["seasonNumbers"]
@@ -137,14 +160,24 @@ class Dplay(Service):
         for season in seasons:
             qyerystring = (
                 "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&filter[seasonNumber]={}&"
-                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid, season)
+                "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(
+                    programid, season
+                )
             )
-            res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
+            res = self.http.get(
+                "https://disco-api.{}/content/videos?{}".format(
+                    self.domain, qyerystring
+                )
+            )
             janson = res.json()
             for i in janson["data"]:
                 if not premium and "Free" not in i["attributes"]["packages"]:
                     continue
-                episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
+                episodes.append(
+                    "https://www.{}/videos/{}".format(
+                        self.domain, i["attributes"]["path"]
+                    )
+                )
         if len(episodes) == 0:
             logging.error("Cant find any playable files")
         if config.get("all_last") > 0:
@@ -153,7 +186,12 @@ class Dplay(Service):
 
     def _login(self):
         url = "https://disco-api.{}/login".format(self.domain)
-        login = {"credentials": {"username": self.config.get("username"), "password": self.config.get("password")}}
+        login = {
+            "credentials": {
+                "username": self.config.get("username"),
+                "password": self.config.get("password"),
+            }
+        }
         res = self.http.post(url, json=login)
         if res.status_code > 400:
             return False
@@ -162,7 +200,9 @@ class Dplay(Service):
     def _token(self):
         # random device id for cookietoken
         deviceid = hashlib.sha256(bytes(int(random.random() * 1000))).hexdigest()
-        url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, self.domain.replace(".", ""), deviceid)
+        url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(
+            self.domain, self.domain.replace(".", ""), deviceid
+        )
         res = self.http.get(url)
         if res.status_code > 400:
             return False

@@ -22,9 +22,13 @@ class Atg(Service):
             return
 
         wanted_id = parse.path[7:]
-        current_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+        current_time = int(
+            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000
+        )
 
-        api_url = "https://www.atgplay.se/api/{}/video/{}".format(current_time, wanted_id)
+        api_url = "https://www.atgplay.se/api/{}/video/{}".format(
+            current_time, wanted_id
+        )
         video_assets = self.http.request("get", api_url)
 
         try:
@@ -39,7 +43,12 @@ class Atg(Service):
         if "urls" in janson:
             for i in janson["urls"]:
                 if "m3u" == i:
-                    stream = hlsparse(self.config, self.http.request("get", janson["urls"]["m3u"]), janson["urls"]["m3u"], output=self.output)
+                    stream = hlsparse(
+                        self.config,
+                        self.http.request("get", janson["urls"]["m3u"]),
+                        janson["urls"]["m3u"],
+                        output=self.output,
+                    )
 
                     for key in list(stream.keys()):
                         yield stream[key]

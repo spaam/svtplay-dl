@@ -27,7 +27,12 @@ class Sr(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find audio info")
             return
 
-        dataurl = "https://sverigesradio.se/sida/playerajax/" "getaudiourl?id={}&type={}&quality=high&format=iis".format(aid, type)
+        dataurl = (
+            "https://sverigesradio.se/sida/playerajax/"
+            "getaudiourl?id={}&type={}&quality=high&format=iis".format(aid, type)
+        )
         data = self.http.request("get", dataurl).text
         playerinfo = json.loads(data)
-        yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output)
+        yield HTTP(
+            copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output
+        )

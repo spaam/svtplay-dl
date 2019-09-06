@@ -76,16 +76,40 @@ class normr(unittest.TestCase):
 
 class tt_text(unittest.TestCase):
     def test_tt_text1(self):
-        assert svtplay_dl.subtitle.tt_text(ET.fromstring("<tests>kalle</tests>"), "") == "kalle\n"
+        assert (
+            svtplay_dl.subtitle.tt_text(ET.fromstring("<tests>kalle</tests>"), "")
+            == "kalle\n"
+        )
 
     def test_tt_text2(self):
-        assert svtplay_dl.subtitle.tt_text(ET.fromstring("<tests><test1>kalle</test1><test2>anka</test2></tests>"), "") == "kalle\nanka\n"
+        assert (
+            svtplay_dl.subtitle.tt_text(
+                ET.fromstring("<tests><test1>kalle</test1><test2>anka</test2></tests>"),
+                "",
+            )
+            == "kalle\nanka\n"
+        )
 
     def test_tt_text3(self):
-        assert svtplay_dl.subtitle.tt_text(ET.fromstring("<tests><test1>hej</test1>kalle</tests>"), "") == "hej\nkalle\n"
+        assert (
+            svtplay_dl.subtitle.tt_text(
+                ET.fromstring("<tests><test1>hej</test1>kalle</tests>"), ""
+            )
+            == "hej\nkalle\n"
+        )
 
     def test_tt_text4(self):
-        assert svtplay_dl.subtitle.tt_text(ET.fromstring("<tests>kalle<test2>hej</test2></tests>"), "") == "kalle\nhej\n"
+        assert (
+            svtplay_dl.subtitle.tt_text(
+                ET.fromstring("<tests>kalle<test2>hej</test2></tests>"), ""
+            )
+            == "kalle\nhej\n"
+        )
 
     def test_tt_text5(self):
-        assert svtplay_dl.subtitle.tt_text(ET.fromstring("<tests><test>kalle</test>hej</tests>"), "") == "kalle\nhej\n"
+        assert (
+            svtplay_dl.subtitle.tt_text(
+                ET.fromstring("<tests><test>kalle</test>hej</tests>"), ""
+            )
+            == "kalle\nhej\n"
+        )

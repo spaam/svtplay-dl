@@ -38,7 +38,9 @@ def protocol_prio(streams, priolist):
 
     # Build a tuple (bitrate, proto_score, stream), and use it
     # for sorting.
-    prioritized = [(s.bitrate, proto_score[s.name], s) for s in streams if s.name in proto_score]
+    prioritized = [
+        (s.bitrate, proto_score[s.name], s) for s in streams if s.name in proto_score
+    ]
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
@@ -50,7 +52,9 @@ def select_quality(config, streams):
             if len(config.get("quality").split("-")) > 1:
                 high = int(config.get("quality").split("-")[1])
         except ValueError:
-            raise error.UIException("Requested quality is invalid. use a number or range lowerNumber-higherNumber")
+            raise error.UIException(
+                "Requested quality is invalid. use a number or range lowerNumber-higherNumber"
+            )
     else:
         quality = config.get("quality")
     try:
@@ -82,7 +86,9 @@ def select_quality(config, streams):
     streams = protocol_prio(streams, proto_prio)
 
     if len(streams) == 0:
-        raise error.NoRequestedProtocols(requested=proto_prio, found=list({s.name for s in streams}))
+        raise error.NoRequestedProtocols(
+            requested=proto_prio, found=list({s.name for s in streams})
+        )
 
     # Build a dict indexed by bitrate, where each value
     # is the stream with the highest priority protocol.
@@ -108,12 +114,17 @@ def select_quality(config, streams):
     if len(wanted) == 0:
         data = sort_quality(streams)
         quality = ", ".join("{} ({})".format(str(x), str(y)) for x, y in data)
-        raise error.UIException("Can't find that quality. Try one of: %s (or " "try --flexible-quality)" % quality)
+        raise error.UIException(
+            "Can't find that quality. Try one of: %s (or "
+            "try --flexible-quality)" % quality
+        )
 
     http = HTTP(config)
     # Test if the wanted stream is available. If not try with the second best and so on.
     for w in wanted:
-        res = http.get(stream_hash[w].url, cookies=stream_hash[w].kwargs.get("cookies", None))
+        res = http.get(
+            stream_hash[w].url, cookies=stream_hash[w].kwargs.get("cookies", None)
+        )
         if res is not None and res.status_code < 404:
             return stream_hash[w]
 

@@ -16,7 +16,9 @@ class Cmore(Service):
 
     def get(self):
         if not self.config.get("username") or not self.config.get("password"):
-            yield ServiceError("You need username and password to download things from this site.")
+            yield ServiceError(
+                "You need username and password to download things from this site."
+            )
             return
 
         token, message = self._login()
@@ -32,8 +34,11 @@ class Cmore(Service):
         tld = self._gettld()
         self.output["id"] = vid
 
-        metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" "&device=browser&drm=widevine&protocol=dash%2Chls".format(
-            self.output["id"], tld
+        metaurl = (
+            "https://playback-api.b17g.net/asset/{}?service=cmore.{}"
+            "&device=browser&drm=widevine&protocol=dash%2Chls".format(
+                self.output["id"], tld
+            )
         )
         res = self.http.get(metaurl)
         janson = res.json()
@@ -42,8 +47,15 @@ class Cmore(Service):
             yield ServiceError("Can't play this because the video got drm.")
             return
 
-        url = "https://playback-api.b17g.net/media/{}?service=cmore.{}&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"], tld)
-        res = self.http.request("get", url, cookies=self.cookies, headers={"authorization": "Bearer {}".format(token)})
+        url = "https://playback-api.b17g.net/media/{}?service=cmore.{}&device=browser&protocol=hls%2Cdash&drm=widevine".format(
+            self.output["id"], tld
+        )
+        res = self.http.request(
+            "get",
+            url,
+            cookies=self.cookies,
+            headers={"authorization": "Bearer {}".format(token)},
+        )
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
@@ -95,8 +107,15 @@ class Cmore(Service):
                 "country_code": tld,
             }
         else:
-            post = {"username": self.config.get("username"), "password": self.config.get("password")}
-        res = self.http.post("https://account.cmore.{}/session?client=cmore-web-prod".format(tld), json=post, cookies=self.cookies)
+            post = {
+                "username": self.config.get("username"),
+                "password": self.config.get("password"),
+            }
+        res = self.http.post(
+            "https://account.cmore.{}/session?client=cmore-web-prod".format(tld),
+            json=post,
+            cookies=self.cookies,
+        )
         if res.status_code >= 400:
             return None, "Wrong username or password"
         janson = res.json()
@@ -104,7 +123,11 @@ class Cmore(Service):
         return token, None
 
     def operatorlist(self):
-        res = self.http.get("https://tve.cmore.se/country/{}/operator?client=cmore-web".format(self._gettld()))
+        res = self.http.get(
+            "https://tve.cmore.se/country/{}/operator?client=cmore-web".format(
+                self._gettld()
+            )
+        )
         for i in res.json()["data"]["operators"]:
             print("operator: '{}'".format(i["name"].lower()))
 

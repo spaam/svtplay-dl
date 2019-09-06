@@ -13,4 +13,7 @@ from svtplay_dl.service.tests import HandlesURLsTestMixin
 
 class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
     service = OppetArkiv
-    urls = {"ok": ["http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"], "bad": ["http://www.svtplay.se/video/1090393/del-9"]}
+    urls = {
+        "ok": ["http://www.oppetarkiv.se/video/1129844/jacobs-stege-avsnitt-1-av-1"],
+        "bad": ["http://www.svtplay.se/video/1090393/del-9"],
+    }

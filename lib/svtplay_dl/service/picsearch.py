@@ -15,7 +15,13 @@ from svtplay_dl.service import Service
 
 
 class Picsearch(Service, OpenGraphThumbMixin):
-    supported_domains = ["dn.se", "mobil.dn.se", "di.se", "csp.picsearch.com", "csp.screen9.com"]
+    supported_domains = [
+        "dn.se",
+        "mobil.dn.se",
+        "di.se",
+        "csp.picsearch.com",
+        "csp.screen9.com",
+    ]
 
     def get(self):
         self.backupapi = None
@@ -33,7 +39,9 @@ class Picsearch(Service, OpenGraphThumbMixin):
             mediaid = mediaid.group(1)
 
         jsondata = self.http.request(
-            "get", "http://csp.screen9.com/player?eventParam=1&" "ajaxauth={}&method=embed&mediaid={}".format(ajax_auth.group(1), mediaid)
+            "get",
+            "http://csp.screen9.com/player?eventParam=1&"
+            "ajaxauth={}&method=embed&mediaid={}".format(ajax_auth.group(1), mediaid),
         ).text
         jsondata = json.loads(jsondata)
 
@@ -44,27 +52,41 @@ class Picsearch(Service, OpenGraphThumbMixin):
             for i in playlist:
                 if "application/x-mpegurl" in i:
                     streams = hlsparse(
-                        self.config, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"], output=self.output
+                        self.config,
+                        self.http.request("get", i["application/x-mpegurl"]),
+                        i["application/x-mpegurl"],
+                        output=self.output,
                     )
                     if streams:
                         for n in list(streams.keys()):
                             yield streams[n]
                 if "video/mp4" in i:
-                    yield HTTP(copy.copy(self.config), i["video/mp4"], 800, output=self.output)
+                    yield HTTP(
+                        copy.copy(self.config), i["video/mp4"], 800, output=self.output
+                    )
 
         if self.backupapi:
-            res = self.http.get(self.backupapi.replace("i=", ""), params={"i": "object"})
+            res = self.http.get(
+                self.backupapi.replace("i=", ""), params={"i": "object"}
+            )
             data = res.text.replace("ps.embedHandler(", "").replace('"");', "")
             data = data[: data.rfind(",")]
             jansson = json.loads(data)
             for i in jansson["media"]["playerconfig"]["playlist"]:
                 if "provider" in i and i["provider"] == "httpstreaming":
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    streams = hlsparse(
+                        self.config,
+                        self.http.request("get", i["url"]),
+                        i["url"],
+                        output=self.output,
+                    )
                     for n in list(streams.keys()):
                         yield streams[n]
 
     def get_auth(self):
-        match = re.search(r"picsearch_ajax_auth[ ]*=[ ]*['\"]([^'\"]+)['\"]", self.get_urldata())
+        match = re.search(
+            r"picsearch_ajax_auth[ ]*=[ ]*['\"]([^'\"]+)['\"]", self.get_urldata()
+        )
         if not match:
             match = re.search(r'screen9-ajax-auth="([^"]+)"', self.get_urldata())
         if not match:
@@ -72,13 +94,18 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not match:
             match = re.search('data-auth="([^"]+)"', self.get_urldata())
         if not match:
-            match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
+            match = re.search(
+                's.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)',
+                self.get_urldata(),
+            )
             if match:
                 data = self.http.request("get", match.group(1))
                 self.backupapi = match.group(1)
                 match = re.search(r'ajaxAuth": "([^"]+)"', data.text)
             if not match:
-                match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
+                match = re.search(
+                    'iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata()
+                )
                 if match:
                     url = "http:{}".format(match.group(1))
                     data = self.http.request("get", url)
@@ -102,12 +129,17 @@ class Picsearch(Service, OpenGraphThumbMixin):
         if not match:
             match = re.search(r'data-videoid="([^"]+)"', self.get_urldata())
         if not match:
-            match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', self.get_urldata())
+            match = re.search(
+                's.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)',
+                self.get_urldata(),
+            )
             if match:
                 data = self.http.request("get", match.group(1))
                 match = re.search(r'mediaid": "([^"]+)"', data.text)
             if not match:
-                match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
+                match = re.search(
+                    'iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata()
+                )
                 if match:
                     url = "http:{}".format(match.group(1))
                     data = self.http.request("get", url)

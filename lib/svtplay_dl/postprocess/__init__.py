@@ -38,11 +38,15 @@ class postprocess:
                 fd = open(self, encoding="utf8")
             else:
                 fd = open(self)
-            return list(map(parse_block, fd.read().strip().replace("\r", "").split("\n\n")))
+            return list(
+                map(parse_block, fd.read().strip().replace("\r", "").split("\n\n"))
+            )
 
         def query(self):
             _ = parse(self)
-            random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
+            random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace(
+                "\r\n", ""
+            )
             url = "https://whatlanguage.herokuapp.com"
             payload = {"query": random_sentences}
             # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
@@ -58,10 +62,14 @@ class postprocess:
                     except TypeError:
                         return "und"
                 else:
-                    logging.error("Server error appeared. Setting language as undetermined.")
+                    logging.error(
+                        "Server error appeared. Setting language as undetermined."
+                    )
                     return "und"
             except Timeout:
-                logging.error("30 seconds server timeout reached. Setting language as undetermined.")
+                logging.error(
+                    "30 seconds server timeout reached. Setting language as undetermined."
+                )
                 return "und"
 
         langs = []
@@ -72,17 +80,36 @@ class postprocess:
             logging.info("Determining the language of the subtitle.")
         if self.config.get("get_all_subtitles"):
             for subfix in self.subfixes:
-                if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip("-"))]:
+                if [
+                    exceptions[key]
+                    for key in exceptions.keys()
+                    if match(key, subfix.strip("-"))
+                ]:
                     if "oversattning" in subfix.strip("-"):
                         subfix = subfix.strip("-").split(".")[0]
                     else:
                         subfix = subfix.strip("-")
                     langs += [exceptions[subfix]]
                     continue
-                subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0] + subfix)
+                subfile = "{}.srt".format(
+                    os.path.splitext(
+                        formatname(
+                            self.stream.output,
+                            self.config,
+                            self.stream.output_extention,
+                        )
+                    )[0]
+                    + subfix
+                )
                 langs += [query(subfile)]
         else:
-            subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0])
+            subfile = "{}.srt".format(
+                os.path.splitext(
+                    formatname(
+                        self.stream.output, self.config, self.stream.output_extention
+                    )
+                )[0]
+            )
             langs += [query(subfile)]
         if len(langs) >= 2:
             logging.info("Language codes: " + ", ".join(langs))
@@ -97,8 +124,15 @@ class postprocess:
         if self.stream.finished is False:
             return
 
-        if formatname(self.stream.output, self.config, self.stream.output_extention).endswith(".mp4") is False:
-            orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
+        if (
+            formatname(
+                self.stream.output, self.config, self.stream.output_extention
+            ).endswith(".mp4")
+            is False
+        ):
+            orig_filename = formatname(
+                self.stream.output, self.config, self.stream.output_extention
+            )
             name, ext = os.path.splitext(orig_filename)
             new_name = "{}.mp4".format(name)
 
@@ -107,12 +141,25 @@ class postprocess:
             videotrack, audiotrack = self._checktracks(stderr)
 
             if self.config.get("merge_subtitle"):
-                logging.info("Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
+                logging.info(
+                    "Muxing {} and merging its subtitle into {}".format(
+                        orig_filename, new_name
+                    )
+                )
             else:
                 logging.info("Muxing {} into {}".format(orig_filename, new_name))
 
             tempfile = "{}.temp".format(orig_filename)
-            arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4"]
+            arguments = [
+                "-map",
+                "0:{}".format(videotrack),
+                "-map",
+                "0:{}".format(audiotrack),
+                "-c",
+                "copy",
+                "-f",
+                "mp4",
+            ]
             if ext == ".ts":
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
@@ -161,14 +208,18 @@ class postprocess:
         if self.stream.finished is False:
             return
 
-        orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
+        orig_filename = formatname(
+            self.stream.output, self.config, self.stream.output_extention
+        )
 
         cmd = [self.detect, "-i", orig_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         videotrack, audiotrack = self._checktracks(stderr)
 
         if self.config.get("merge_subtitle"):
-            logging.info("Merge audio, video and subtitle into {}".format(orig_filename))
+            logging.info(
+                "Merge audio, video and subtitle into {}".format(orig_filename)
+            )
         else:
             logging.info("Merge audio and video into {}".format(orig_filename))
 
@@ -221,7 +272,9 @@ class postprocess:
         os.rename(tempfile, orig_filename)
 
     def _checktracks(self, output):
-        allstuff = re.findall(r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
+        allstuff = re.findall(
+            r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output
+        )
         videotrack = 0
         audiotrack = 1
         for stream in allstuff:
