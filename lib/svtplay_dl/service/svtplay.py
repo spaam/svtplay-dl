@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import copy
-import datetime
 import hashlib
 import json
 import logging
@@ -13,6 +12,7 @@ from urllib.parse import parse_qs
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
+import dateutil.parser
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -293,7 +293,7 @@ class Svtplay(Service, MetadataThumbMixin):
 
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
-            self.output["publishing_datetime"] = int(datetime.datetime.strptime(episode["validFrom"], "%Y-%m-%dT%H:%M:%S%z").strftime("%s"))
+            self.output["publishing_datetime"] = int(dateutil.parser.parse(episode["validFrom"]).strftime("%s"))
 
         self.output["title_nice"] = data[data["{}:{}".format(type_name, visibleid)]["parent"]["id"]]["name"]
 
