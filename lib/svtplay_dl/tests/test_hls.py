@@ -70,13 +70,7 @@ class HlsTest(unittest.TestCase):
                         "URI": "something4/else.m3u8",
                         "CODECS": "mp4a.40.2, avc1.4d401f",
                     },
-                    {
-                        "PROGRAM-ID": "1",
-                        "BANDWIDTH": "41457",
-                        "TAG": "EXT-X-STREAM-INF",
-                        "URI": "something0/else.m3u8",
-                        "CODECS": "mp4a.40.2",
-                    },
+                    {"PROGRAM-ID": "1", "BANDWIDTH": "41457", "TAG": "EXT-X-STREAM-INF", "URI": "something0/else.m3u8", "CODECS": "mp4a.40.2"},
                 ],
             }
             # More examples can be found on "https://developer.apple.com/streaming/examples/"

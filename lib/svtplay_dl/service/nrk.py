@@ -41,16 +41,9 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
         # Check if subtitles are available
         if data["subtitlesUrlPath"]:
-            yield subtitle(
-                copy.copy(self.config),
-                "tt",
-                data["subtitlesUrlPath"],
-                output=self.output,
-            )
+            yield subtitle(copy.copy(self.config), "tt", data["subtitlesUrlPath"], output=self.output)
 
-        hlsurl = manifest_url.replace("/z/", "/i/").replace(
-            "manifest.f4m", "master.m3u8"
-        )
+        hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
         data = self.http.request("get", hlsurl)
         if data.status_code == 403:
             yield ServiceError("Can't fetch the video because of geoblocking")
@@ -61,10 +54,7 @@ class Nrk(Service, OpenGraphThumbMixin):
                 yield streams[n]
 
         streams = hdsparse(
-            copy.copy(self.config),
-            self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}),
-            manifest_url,
-            output=self.output,
+            copy.copy(self.config), self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}), manifest_url, output=self.output
         )
         if streams:
             for n in list(streams.keys()):

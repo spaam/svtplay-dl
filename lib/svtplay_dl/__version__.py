@@ -73,13 +73,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
         try:
             dispcmd = str([c] + args)
             # remember shell=False, so use git.cmd on windows, not just git
-            p = subprocess.Popen(
-                [c] + args,
-                cwd=cwd,
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=(subprocess.PIPE if hide_stderr else None),
-            )
+            p = subprocess.Popen([c] + args, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=(subprocess.PIPE if hide_stderr else None))
             break
         except OSError:
             e = sys.exc_info()[1]
@@ -116,23 +110,13 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
     for i in range(3):
         dirname = os.path.basename(root)
         if dirname.startswith(parentdir_prefix):
-            return {
-                "version": dirname[len(parentdir_prefix) :],
-                "full-revisionid": None,
-                "dirty": False,
-                "error": None,
-                "date": None,
-            }
+            return {"version": dirname[len(parentdir_prefix) :], "full-revisionid": None, "dirty": False, "error": None, "date": None}
         else:
             rootdirs.append(root)
             root = os.path.dirname(root)  # up a level
 
     if verbose:
-        print(
-            "Tried directories {} but none started with prefix {}".format(
-                str(rootdirs), parentdir_prefix
-            )
-        )
+        print("Tried directories {} but none started with prefix {}".format(str(rootdirs), parentdir_prefix))
     raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
 
 
@@ -208,23 +192,11 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
             r = ref[len(tag_prefix) :]
             if verbose:
                 print("picking %s" % r)
-            return {
-                "version": r,
-                "full-revisionid": keywords["full"].strip(),
-                "dirty": False,
-                "error": None,
-                "date": date,
-            }
+            return {"version": r, "full-revisionid": keywords["full"].strip(), "dirty": False, "error": None, "date": date}
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")
-    return {
-        "version": "0+unknown",
-        "full-revisionid": keywords["full"].strip(),
-        "dirty": False,
-        "error": "no suitable tags",
-        "date": None,
-    }
+    return {"version": "0+unknown", "full-revisionid": keywords["full"].strip(), "dirty": False, "error": "no suitable tags", "date": None}
 
 
 @register_vcs_handler("git", "pieces_from_vcs")
@@ -247,19 +219,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
-    describe_out, rc = run_command(
-        GITS,
-        [
-            "describe",
-            "--tags",
-            "--dirty",
-            "--always",
-            "--long",
-            "--match",
-            "%s*" % tag_prefix,
-        ],
-        cwd=root,
-    )
+    describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty", "--always", "--long", "--match", "%s*" % tag_prefix], cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
         raise NotThisMethod("'git describe' failed")
@@ -300,9 +260,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = "tag '{}' doesn't start with prefix '{}'".format(
-                full_tag, tag_prefix
-            )
+            pieces["error"] = "tag '{}' doesn't start with prefix '{}'".format(full_tag, tag_prefix)
             return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix) :]
 
@@ -319,9 +277,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         pieces["distance"] = int(count_out)  # total number of commits
 
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
-    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[
-        0
-    ].strip()
+    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[0].strip()
     pieces["date"] = date.strip().replace(" ", "T", 1).replace(" ", "", 1)
 
     return pieces
@@ -466,13 +422,7 @@ def render_git_describe_long(pieces):
 def render(pieces, style):
     """Render the given version pieces into the requested style."""
     if pieces["error"]:
-        return {
-            "version": "unknown",
-            "full-revisionid": pieces.get("long"),
-            "dirty": None,
-            "error": pieces["error"],
-            "date": None,
-        }
+        return {"version": "unknown", "full-revisionid": pieces.get("long"), "dirty": None, "error": pieces["error"], "date": None}
 
     if not style or style == "default":
         style = "pep440"  # the default
@@ -492,13 +442,7 @@ def render(pieces, style):
     else:
         raise ValueError("unknown style '%s'" % style)
 
-    return {
-        "version": rendered,
-        "full-revisionid": pieces["long"],
-        "dirty": pieces["dirty"],
-        "error": None,
-        "date": pieces.get("date"),
-    }
+    return {"version": rendered, "full-revisionid": pieces["long"], "dirty": pieces["dirty"], "error": None, "date": pieces.get("date")}
 
 
 def get_versions():
@@ -524,13 +468,7 @@ def get_versions():
         for i in cfg.versionfile_source.split("/"):
             root = os.path.dirname(root)
     except NameError:
-        return {
-            "version": "0+unknown",
-            "full-revisionid": None,
-            "dirty": None,
-            "error": "unable to find root of source tree",
-            "date": None,
-        }
+        return {"version": "0+unknown", "full-revisionid": None, "dirty": None, "error": "unable to find root of source tree", "date": None}
 
     try:
         pieces = git_pieces_from_vcs(cfg.tag_prefix, root, verbose)
@@ -544,10 +482,4 @@ def get_versions():
     except NotThisMethod:
         pass
 
-    return {
-        "version": "0+unknown",
-        "full-revisionid": None,
-        "dirty": None,
-        "error": "unable to compute version",
-        "date": None,
-    }
+    return {"version": "0+unknown", "full-revisionid": None, "dirty": None, "error": "unable to compute version", "date": None}

@@ -134,10 +134,7 @@ def formatname(output, config, extension="mp4"):
     if not output.get("basedir", False):
         # If tvshow have not been derived by service do it by if season and episode is set
         if output.get("tvshow", None) is None:
-            tvshow = (
-                output.get("season", None) is not None
-                and output.get("episode", None) is not None
-            )
+            tvshow = output.get("season", None) is not None and output.get("episode", None) is not None
         else:
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
@@ -179,11 +176,7 @@ def _formatname(output, config, extension):
 
     # Remove all {text} we cant replace with something
     for item in re.findall(r"([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
-        if (
-            "season" in output
-            and output["season"]
-            and re.search(r"(e\{[\w\-]+\})", name)
-        ):
+        if "season" in output and output["season"] and re.search(r"(e\{[\w\-]+\})", name):
             name = name.replace(re.search(r"(e\{[\w\-]+\})", name).group(1), "")
         else:
             name = name.replace(item[0], "")
@@ -198,34 +191,22 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
 
     logging.info("Outfile: %s", name)
     if os.path.isfile(name) and not config.get("force"):
-        logging.warning(
-            "File ({}) already exists. Use --force to overwrite".format(name)
-        )
+        logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
         return None
     dir = os.path.dirname(os.path.realpath(name))
     if not os.path.isdir(dir):
         # Create directory, needed for creating tvshow subfolder
         os.makedirs(dir)
-    if findexpisode(
-        output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)
-    ):
+    if findexpisode(output, os.path.dirname(os.path.realpath(name)), os.path.basename(name)):
         if extension in subtitlefiles:
             if not config.get("force_subtitle"):
                 if not (config.get("silent") or config.get("silent_semi")):
-                    logging.warning(
-                        "File ({}) already exists. Use --force-subtitle to overwrite".format(
-                            name
-                        )
-                    )
+                    logging.warning("File ({}) already exists. Use --force-subtitle to overwrite".format(name))
                     return None
         else:
             if not config.get("force"):
                 if not (config.get("silent") or config.get("silent_semi")):
-                    logging.warning(
-                        "File ({}) already exists. Use --force to overwrite".format(
-                            name
-                        )
-                    )
+                    logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
                     return None
     file_d = open(name, mode, **kwargs)
     return file_d
@@ -236,9 +217,7 @@ def findexpisode(output, directory, name):
 
     orgname, orgext = os.path.splitext(name)
 
-    files = [
-        f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
-    ]
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     for i in files:
         lsname, lsext = os.path.splitext(i)
         if output["service"]:
@@ -254,10 +233,7 @@ def findexpisode(output, directory, name):
                     return True
             elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
                 if output["id"] and output["service"]:
-                    if (
-                        name.find(output["service"]) > 0
-                        and lsname.find(output["id"]) > 0
-                    ):
+                    if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
                         if lsext == ".ts" and orgext == lsext and lsname.find(".audio"):
                             return False
                         return True

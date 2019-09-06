@@ -65,9 +65,7 @@ class Koket(Service, OpenGraphThumbMixin):
         self.output["id"] = lesson["videoAssetId"]
         self.output["title"] = lesson["title"]
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(
-            self.output["id"]
-        )
+        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
 
         videoDataRes = self.http.get(url)
         if videoDataRes.json()["playbackItem"]["type"] == "hls":
@@ -108,8 +106,6 @@ class Koket(Service, OpenGraphThumbMixin):
             return None
 
         if self._data is None:
-            self._data = self.http.get(
-                "https://www.koket.se/kurser/api/data/{}".format(auth_token)
-            ).json()
+            self._data = self.http.get("https://www.koket.se/kurser/api/data/{}".format(auth_token)).json()
 
         return self._data

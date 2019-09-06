@@ -14,12 +14,6 @@ from svtplay_dl.service.tests import HandlesURLsTestMixin
 class handlesTest(unittest.TestCase, HandlesURLsTestMixin):
     service = Svtplay
     urls = {
-        "ok": [
-            "http://www.svtplay.se/video/1090393/del-9",
-            "http://www.svt.se/nyheter/sverige/det-ar-en-dodsfalla",
-        ],
-        "bad": [
-            "http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1",
-            "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla",
-        ],
+        "ok": ["http://www.svtplay.se/video/1090393/del-9", "http://www.svt.se/nyheter/sverige/det-ar-en-dodsfalla"],
+        "bad": ["http://www.oppetarkiv.se/video/1129844/jacobs-stege-ep1", "http://www.dn.se/nyheter/sverige/det-ar-en-dodsfalla"],
     }

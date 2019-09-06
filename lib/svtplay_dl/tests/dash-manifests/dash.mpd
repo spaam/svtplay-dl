@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:mpeg:dash:schema:mpd:2011" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" type="static" minBufferTime="PT20S" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" mediaPresentationDuration="PT29M35S">
+  <Period start="PT0S" duration="PT29M35S" id="1">
+    <AdaptationSet mimeType="video/mp4" frameRate="25/1" segmentAlignment="true" subsegmentAlignment="true" startWithSAP="1" subsegmentStartsWithSAP="1" bitstreamSwitching="true">
+      <Representation id="1" width="1280" height="720" bandwidth="2700000" codecs="avc1.64001F">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_2700.mp4</BaseURL>
+        <SegmentBase indexRange="762-11457">
+          <Initialization range="0-761"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="2" width="1280" height="720" bandwidth="1598000" codecs="avc1.4D401F">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_1598.mp4</BaseURL>
+        <SegmentBase indexRange="756-11451">
+          <Initialization range="0-755"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="3" width="1280" height="720" bandwidth="894000" codecs="avc1.4D401F">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_894.mp4</BaseURL>
+        <SegmentBase indexRange="756-11451">
+          <Initialization range="0-755"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="4" width="512" height="288" bandwidth="636000" codecs="avc1.42C015">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_636.mp4</BaseURL>
+        <SegmentBase indexRange="755-11450">
+          <Initialization range="0-754"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="5" width="512" height="288" bandwidth="456000" codecs="avc1.42C015">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_456.mp4</BaseURL>
+        <SegmentBase indexRange="754-11449">
+          <Initialization range="0-753"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="6" width="512" height="288" bandwidth="348000" codecs="avc1.42C015">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_348.mp4</BaseURL>
+        <SegmentBase indexRange="754-11449">
+          <Initialization range="0-753"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="7" width="512" height="288" bandwidth="144000" codecs="avc1.42C015">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_144.mp4</BaseURL>
+        <SegmentBase indexRange="753-11448">
+          <Initialization range="0-752"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" segmentAlignment="0">
+      <Representation id="8" bandwidth="96000" audioSamplingRate="48000" codecs="mp4a.40.5">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_dash_audio.mp4</BaseURL>
+        <SegmentBase indexRange="661-11356">
+          <Initialization range="0-660"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

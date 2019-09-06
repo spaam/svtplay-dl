@@ -9,11 +9,7 @@ from svtplay_dl.utils.parser import setup_defaults
 
 
 def parse(playlist):
-    with open(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "dash-manifests", playlist
-        )
-    ) as fd:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "dash-manifests", playlist)) as fd:
         manifest = fd.read()
 
     return _dashparse(setup_defaults(), manifest, "http://localhost", None, None)

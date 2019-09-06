@@ -26,9 +26,7 @@ class Svt(Svtplay):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "websrt" and "url" in i:
-                    yield subtitle(
-                        copy.copy(self.config), "wrst", i["url"], output=self.output
-                    )
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         videos = self._get_video(janson)
         yield from videos

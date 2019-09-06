@@ -48,12 +48,7 @@ class Service:
         #  Config
         if config.get("configfile") and os.path.isfile(config.get("configfile")):
             self.config = merge(
-                readconfig(
-                    setup_defaults(),
-                    config.get("configfile"),
-                    service=self.__class__.__name__.lower(),
-                ).get_variable(),
-                config.get_variable(),
+                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(), config.get_variable()
             )
         else:
             self.config = config
@@ -112,9 +107,7 @@ def opengraph_get(html, prop):
     """
     match = re.search('<meta [^>]*property="og:' + prop + '" content="([^"]*)"', html)
     if match is None:
-        match = re.search(
-            '<meta [^>]*content="([^"]*)" property="og:' + prop + '"', html
-        )
+        match = re.search('<meta [^>]*content="([^"]*)" property="og:' + prop + '"', html)
         if match is None:
             return None
     return match.group(1)
@@ -216,10 +209,7 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
-        match = re.search(
-            's.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)',
-            data,
-        )
+        match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', data)
         if match:
             url = match.group(1)
             for i in sites:

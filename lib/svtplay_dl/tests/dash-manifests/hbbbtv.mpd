@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:mpeg:dash:schema:mpd:2011" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" type="static" minBufferTime="PT20S" profiles="urn:hbbtv:dash:profile:isoff-live:2012" mediaPresentationDuration="PT29M35S">
+  <Period start="PT0S" duration="PT29M35S" id="1">
+    <AdaptationSet mimeType="video/mp4" frameRate="25/1" segmentAlignment="true" subsegmentAlignment="true" startWithSAP="1" subsegmentStartsWithSAP="1" bitstreamSwitching="true">
+      <Representation id="1" width="1280" height="720" bandwidth="2700000" codecs="avc1.64001F" scanType="progressive">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_hbbtv_2700.mp4</BaseURL>
+        <SegmentBase indexRange="762-11457">
+          <Initialization range="0-761"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="2" width="1280" height="720" bandwidth="1598000" codecs="avc1.4D401F" scanType="progressive">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_hbbtv_1598.mp4</BaseURL>
+        <SegmentBase indexRange="756-11451">
+          <Initialization range="0-755"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="3" width="1280" height="720" bandwidth="894000" codecs="avc1.4D401F" scanType="progressive">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_hbbtv_894.mp4</BaseURL>
+        <SegmentBase indexRange="756-11451">
+          <Initialization range="0-755"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" segmentAlignment="0">
+      <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      <Representation id="4" bandwidth="96000" audioSamplingRate="48000" codecs="mp4a.40.5">
+        <BaseURL>PG-1369346-003OA-PERCYTARAR-01_hbbtv_audio.mp4</BaseURL>
+        <SegmentBase indexRange="661-11356">
+          <Initialization range="0-660"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

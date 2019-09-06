@@ -21,11 +21,7 @@ class Pokemon(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant county code")
             return
 
-        res = self.http.get(
-            "http://www.pokemon.com/api/pokemontv/channels?region={}".format(
-                match.group(1)
-            )
-        )
+        res = self.http.get("http://www.pokemon.com/api/pokemontv/channels?region={}".format(match.group(1)))
         janson = res.json()
         match = re.search('data-video-season="([0-9]+)"', data)
         season = match.group(1)
@@ -41,8 +37,6 @@ class Pokemon(Service, OpenGraphThumbMixin):
         self.output["season"] = season
         self.output["episode"] = episode
 
-        streams = hlsparse(
-            self.config, self.http.request("get", stream), stream, output=self.output
-        )
+        streams = hlsparse(self.config, self.http.request("get", stream), stream, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

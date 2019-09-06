@@ -30,14 +30,8 @@ class Svtplay(Service, MetadataThumbMixin):
     def get(self):
         parse = urlparse(self.url)
         if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
-            if (
-                parse.path[:6] != "/video"
-                and parse.path[:6] != "/klipp"
-                and parse.path[:8] != "/kanaler"
-            ):
-                yield ServiceError(
-                    "This mode is not supported anymore. Need the url with the video."
-                )
+            if parse.path[:6] != "/video" and parse.path[:6] != "/klipp" and parse.path[:8] != "/kanaler":
+                yield ServiceError("This mode is not supported anymore. Need the url with the video.")
                 return
 
         query = parse_qs(parse.query)
@@ -59,9 +53,7 @@ class Svtplay(Service, MetadataThumbMixin):
             try:
                 janson = res.json()
             except json.decoder.JSONDecodeError:
-                yield ServiceError(
-                    "Can't decode api request: {}".format(res.request.url)
-                )
+                yield ServiceError("Can't decode api request: {}".format(res.request.url))
                 return
             videos = self._get_video(janson)
             self.config.set("live", True)
@@ -105,9 +97,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "websrt" and "url" in i:
-                    yield subtitle(
-                        copy.copy(self.config), "wrst", i["url"], output=self.output
-                    )
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:
@@ -123,33 +113,13 @@ class Svtplay(Service, MetadataThumbMixin):
                     alt = self.http.get(query["alt"][0])
 
                 if i["format"] == "hls":
-                    streams = hlsparse(
-                        self.config,
-                        self.http.request("get", i["url"]),
-                        i["url"],
-                        output=self.output,
-                    )
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = hlsparse(
-                            self.config,
-                            self.http.request("get", alt.request.url),
-                            alt.request.url,
-                            output=self.output,
-                        )
+                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                 elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                    streams = dashparse(
-                        self.config,
-                        self.http.request("get", i["url"]),
-                        i["url"],
-                        output=self.output,
-                    )
+                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = dashparse(
-                            self.config,
-                            self.http.request("get", alt.request.url),
-                            alt.request.url,
-                            output=self.output,
-                        )
+                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
 
                 if streams:
                     for n in list(streams.keys()):
@@ -216,9 +186,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 return videos
             janson = json.loads(match.group(1))
             episode = janson["Variant:{}".format(self.visibleid)]
-            associatedContent = episode[
-                'associatedContent({"include":["season","productionPeriod","clips","upcoming"]})'
-            ]
+            associatedContent = episode['associatedContent({"include":["season","productionPeriod","clips","upcoming"]})']
 
             keys = []
             videos = []
@@ -231,10 +199,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 else:
                     if i["id"] == "Selection:upcoming":
                         continue
-                    elif (
-                        self.config.get("include_clips")
-                        and "Selection:clips" in i["id"]
-                    ):
+                    elif self.config.get("include_clips") and "Selection:clips" in i["id"]:
                         keys.append(i["id"])
                     elif "Selection:clips" not in i["id"]:
                         keys.append(i["id"])
@@ -244,13 +209,8 @@ class Svtplay(Service, MetadataThumbMixin):
                     epi = janson[janson[n["id"]]["item"]["id"]]
                     if "variants" in epi:
                         for z in epi["variants"]:
-                            if (
-                                janson[janson[z["id"]]["urls"]["id"]]["svtplay"]
-                                not in videos
-                            ):
-                                videos.append(
-                                    janson[janson[z["id"]]["urls"]["id"]]["svtplay"]
-                                )
+                            if janson[janson[z["id"]]["urls"]["id"]]["svtplay"] not in videos:
+                                videos.append(janson[janson[z["id"]]["urls"]["id"]]["svtplay"])
                     if janson[epi["urls"]["id"]]["svtplay"] not in videos:
                         videos.append(janson[epi["urls"]["id"]]["svtplay"])
 
@@ -293,15 +253,9 @@ class Svtplay(Service, MetadataThumbMixin):
 
         season, episode = self.seasoninfo(data)
         if "accessibility" in data["{}:{}".format(self.type_name, self.visibleid)]:
-            if (
-                data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"]
-                == "AudioDescribed"
-            ):
+            if data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"] == "AudioDescribed":
                 desc = "syntolkat"
-            if (
-                data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"]
-                == "SignInterpreted"
-            ):
+            if data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"] == "SignInterpreted":
                 desc = "teckentolkat"
 
         if not other:
@@ -321,15 +275,11 @@ class Svtplay(Service, MetadataThumbMixin):
         if "episode" not in data["{}:{}".format(self.type_name, self.visibleid)]:
             return season, episode
 
-        episodeid = data["{}:{}".format(self.type_name, self.visibleid)]["episode"][
-            "id"
-        ]
+        episodeid = data["{}:{}".format(self.type_name, self.visibleid)]["episode"]["id"]
         if "positionInSeason" not in data[episodeid]:
             return season, episode
 
-        match = re.search(
-            r"Säsong (\d+) — Avsnitt (\d+)", data[episodeid]["positionInSeason"]
-        )
+        match = re.search(r"Säsong (\d+) — Avsnitt (\d+)", data[episodeid]["positionInSeason"])
         if not match:
             return season, episode
 
@@ -341,28 +291,18 @@ class Svtplay(Service, MetadataThumbMixin):
     def extrametadata(self, data, type_name, visibleid):
         episode = data["{}:{}".format(type_name, visibleid)]
 
-        self.output["tvshow"] = (
-            self.output["season"] is not None and self.output["episode"] is not None
-        )
+        self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
-            self.output["publishing_datetime"] = int(
-                datetime.datetime.strptime(
-                    episode["validFrom"], "%Y-%m-%dT%H:%M:%S%z"
-                ).strftime("%s")
-            )
+            self.output["publishing_datetime"] = int(datetime.datetime.strptime(episode["validFrom"], "%Y-%m-%dT%H:%M:%S%z").strftime("%s"))
 
-        self.output["title_nice"] = data[
-            data["{}:{}".format(type_name, visibleid)]["parent"]["id"]
-        ]["name"]
+        self.output["title_nice"] = data[data["{}:{}".format(type_name, visibleid)]["parent"]["id"]]["name"]
 
         try:
             t = data[data[episode["parent"]["id"]]["image"]["id"]]
         except KeyError:
             t = ""
         if isinstance(t, dict):
-            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(
-                **t
-            )
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
             self.output["showthumbnailurl"] = url
         elif t:
             # Get the image if size/format is not specified in the URL set it to large
@@ -373,9 +313,7 @@ class Svtplay(Service, MetadataThumbMixin):
         except KeyError:
             t = ""
         if isinstance(t, dict):
-            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(
-                **t
-            )
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
             self.output["episodethumbnailurl"] = url
         elif t:
             # Get the image if size/format is not specified in the URL set it to large
@@ -383,9 +321,7 @@ class Svtplay(Service, MetadataThumbMixin):
             self.output["episodethumbnailurl"] = url
 
         if "longDescription" in data[episode["parent"]["id"]]:
-            self.output["showdescription"] = data[episode["parent"]["id"]][
-                "longDescription"
-            ]
+            self.output["showdescription"] = data[episode["parent"]["id"]]["longDescription"]
 
         if "longDescription" in episode:
             self.output["episodedescription"] = episode["longDescription"]

@@ -125,15 +125,9 @@ def get_one_media(stream):
             raise
         else:
             logging.error("svtplay-dl crashed")
-            logging.error(
-                "Run again and add --verbose as an argument, to get more information"
-            )
-            logging.error(
-                "If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues"
-            )
-            logging.error(
-                "Include the URL used, the stack trace and the output of svtplay-dl --version in the issue"
-            )
+            logging.error("Run again and add --verbose as an argument, to get more information")
+            logging.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
+            logging.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
         return
 
     try:
@@ -144,18 +138,10 @@ def get_one_media(stream):
         pub_date = datetime.fromtimestamp(stream.output["publishing_datetime"])
     except (ValueError, TypeError, KeyError):
         pub_date = None
-    if (
-        after_date is not None
-        and pub_date is not None
-        and pub_date.date() < after_date.date()
-    ):
+    if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
         logging.info(
             "Video {}S{}E{} skipped since published {} before {}. ".format(
-                stream.output["title"],
-                stream.output["season"],
-                stream.output["episode"],
-                pub_date.date(),
-                after_date.date(),
+                stream.output["title"], stream.output["season"], stream.output["episode"], pub_date.date(), after_date.date()
             )
         )
         return
@@ -222,9 +208,7 @@ def get_one_media(stream):
             if fstream.config.get("get_url"):
                 print(fstream.url)
                 return
-            logging.info(
-                "Selected to download %s, bitrate: %s", fstream.name, fstream.bitrate
-            )
+            logging.info("Selected to download %s, bitrate: %s", fstream.name, fstream.bitrate)
             fstream.download()
         except UIException as e:
             if fstream.config.get("verbose"):
@@ -239,9 +223,7 @@ def get_one_media(stream):
         if fstream.audio and post.detect:
             post.merge()
         if fstream.audio and not post.detect and fstream.finished:
-            logging.warning(
-                "Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds"
-            )
+            logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if fstream.name == "hls" or fstream.config.get("remux"):
             post.remux()
         if fstream.config.get("silent_semi") and fstream.finished:

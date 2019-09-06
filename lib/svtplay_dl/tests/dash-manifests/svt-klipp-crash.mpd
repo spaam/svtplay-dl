@@ -1,0 +1,33 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="static" publishTime="2018-03-06T06:46:15Z" mediaPresentationDuration="PT15.92S" minBufferTime="PT1.5S">
+  <ProgramInformation>
+    <Title>20180222/RW-2018-0222-VOD-DINROST-BORJE/9854e7c8-ddab-4f79-b78e-deb514a1b79c/RW-2018-0222-VOD-DINROST-BORJE</Title>
+  </ProgramInformation>
+  <Period id="0" start="PT0S">
+    <AdaptationSet id="0" mimeType="video/mp4" segmentAlignment="true" frameRate="25" startWithSAP="1" group="1" par="16:9" maxWidth="1280" maxHeight="720" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <SegmentTemplate initialization="chunk_ctvideo_rid$RepresentationID$_cinit_mpd.m4s" media="chunk_ctvideo_rid$RepresentationID$_cs$Time$_mpd.m4s" timescale="90000" presentationTimeOffset="0">
+        <SegmentTimeline>
+          <S t="0" d="900000"/>
+          <S d="532800"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation id="p0va0br1657186" bandwidth="1657186" width="1024" height="576" codecs="avc1.4d401f" sar="1:1"/>
+      <Representation id="p0va0br145602" bandwidth="145602" width="512" height="288" codecs="avc1.42c015" sar="1:1"/>
+      <Representation id="p0va0br2820497" bandwidth="2820497" width="1280" height="720" codecs="avc1.4d401f" sar="1:1"/>
+      <Representation id="p0va0br255149" bandwidth="255149" width="512" height="288" codecs="avc1.42c016" sar="1:1"/>
+      <Representation id="p0va0br364603" bandwidth="364603" width="512" height="288" codecs="avc1.42c016" sar="1:1"/>
+      <Representation id="p0va0br546940" bandwidth="546940" width="512" height="288" codecs="avc1.42c016" sar="1:1"/>
+      <Representation id="p0va0br929670" bandwidth="929670" width="768" height="432" codecs="avc1.4d401e" sar="1:1"/>
+    </AdaptationSet>
+    <AdaptationSet id="1" mimeType="audio/mp4" segmentAlignment="true" startWithSAP="1" group="2" lang="sv" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate initialization="chunk_ctaudio_rid$RepresentationID$_cinit_mpd.m4s" media="chunk_ctaudio_rid$RepresentationID$_cs$Time$_mpd.m4s" timescale="24000" presentationTimeOffset="0">
+        <SegmentTimeline>
+          <S t="0" d="240000"/>
+          <S d="142080"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation id="p0aa0br94405" bandwidth="94405" codecs="mp4a.40.5" audioSamplingRate="24000"/>
+    </AdaptationSet>
+  </Period>
+</MPD>

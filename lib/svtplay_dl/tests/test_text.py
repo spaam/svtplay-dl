@@ -18,10 +18,7 @@ class filenamifyTest(unittest.TestCase):
         ["FOO BAR", "foo.bar"],
         ["foo-bar baz", "foo-bar.baz"],
         ['Jason "Timbuktu" Diakité', "jason.timbuktu.diakite"],
-        [
-            "Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play",
-            "matlagning.del.1.av.10-raksmorgas.svt.play",
-        ],
+        ["Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play", "matlagning.del.1.av.10-raksmorgas.svt.play"],
         ["$FOOBAR", "foobar"],
     ]
 

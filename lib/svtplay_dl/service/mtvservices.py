@@ -21,10 +21,7 @@ class Mtvservices(Service):
         if not match:
             yield ServiceError("Can't find video file")
             return
-        url = (
-            "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s"
-            % match.group(1)
-        )
+        url = "http://media.mtvnservices.com/player/html5/mediagen/?uri=%s" % match.group(1)
         data = self.http.request("get", url)
         start = data.index("<?xml version=")
         data = data[start:]
@@ -34,9 +31,5 @@ class Mtvservices(Service):
 
         for i in sa:
             temp = i.find("src").text.index("gsp.comedystor")
-            url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/{}".format(
-                i.find("src").text[temp:]
-            )
-            yield HTTP(
-                copy.copy(self.config), url, i.attrib["height"], output=self.output
-            )
+            url = "http://mtvnmobile.vo.llnwd.net/kip0/_pxn=0+_pxK=18639+_pxE=mp4/44620/mtvnorigin/{}".format(i.find("src").text[temp:])
+            yield HTTP(copy.copy(self.config), url, i.attrib["height"], output=self.output)

@@ -1,0 +1,29 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" profiles="urn:hbbtv:dash:profile:isoff-live:2012,urn:mpeg:dash:profile:isoff-live:2011" type="static" availabilityStartTime="2018-02-03T19:00:54.747Z" publishTime="2018-02-03T20:30:24.59Z" mediaPresentationDuration="PT1H29M32.8S" minBufferTime="PT6.4S">
+  <Period id="0" start="PT0S">
+    <AdaptationSet id="0" mimeType="video/mp4" segmentAlignment="true" frameRate="25" group="1">
+      <SegmentTemplate initialization="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-v$RepresentationID$/v$RepresentationID$-init.mp4" media="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-v$RepresentationID$/v$RepresentationID$-$Number$.mp4" startNumber="1" timescale="90000" duration="288000"/>
+      <Representation id="0" bandwidth="144000" width="512" height="288" codecs="avc1.42c015"/>
+      <Representation id="1" bandwidth="348000" width="512" height="288" codecs="avc1.42c016"/>
+      <Representation id="2" bandwidth="456000" width="512" height="288" codecs="avc1.42c016"/>
+      <Representation id="3" bandwidth="636000" width="512" height="288" codecs="avc1.42c016"/>
+      <Representation id="4" bandwidth="988000" width="768" height="432" codecs="avc1.4d401e"/>
+      <Representation id="5" bandwidth="1680000" width="1280" height="720" codecs="avc1.4d401f"/>
+      <Representation id="6" bandwidth="2796000" width="1280" height="720" codecs="avc1.4d401f"/>
+    </AdaptationSet>
+    <AdaptationSet id="1" mimeType="audio/mp4" segmentAlignment="true" group="2" lang="sv">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate initialization="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-a0/a0-init.mp4" media="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-a0/a0-$Number$.mp4" startNumber="1" timescale="90000" duration="288000"/>
+      <Representation id="7" bandwidth="96000" codecs="mp4a.40.2" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="2" mimeType="audio/mp4" segmentAlignment="true" group="2" lang="sv-tal">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="dub"/>
+      <SegmentTemplate initialization="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-a1/a1-init.mp4" media="3ebcbc59-8807-4cec-a5ab-11ebcceb607c/dash-a1/a1-$Number$.mp4" startNumber="1" timescale="90000" duration="288000"/>
+      <Representation id="8" bandwidth="96000" codecs="mp4a.40.2" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014" value="https://time.akamai.com/?iso"/>
+</MPD>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" mediaPresentationDuration="PT21.64S" minBufferTime="PT1.5S" profiles="urn:mpeg:dash:profile:isoff-live:2011" publishTime="2017-08-30T09:41:19Z" type="static" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd">
+ <ProgramInformation>
+  <Title>20170830/N-2017-0713-VILDSVINSSVINN-NY-WITHCG/11ad7e8c-ed50-4f60-9f64-6d1cce648176/N-2017-0713-VILDSVINSSVINN-NY-WITHCG.dif</Title>
+ </ProgramInformation>
+ <Period id="0" start="PT0.0S">
+  <AdaptationSet frameRate="25" id="0" maxHeight="720" maxWidth="1280" mimeType="video/mp4" par="16:9" segmentAlignment="true" startWithSAP="1" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+   <SegmentTemplate initialization="chunk_ctvideo_cfm4s_rid$RepresentationID$_cinit_mpd.m4s" media="chunk_ctvideo_cfm4s_rid$RepresentationID$_cs$Time$_mpd.m4s" presentationTimeOffset="0" timescale="90000">
+    <SegmentTimeline>
+     <S d="900000" t="0"/>
+     <S d="900000"/>
+     <S d="147600"/>
+    </SegmentTimeline>
+   </SegmentTemplate>
+   <Representation bandwidth="145000" codecs="avc1.42c015" height="288" id="p0a0r0" sar="1:1" width="512"/>
+   <Representation bandwidth="253000" codecs="avc1.42c015" height="288" id="p0a0r1" sar="1:1" width="512"/>
+   <Representation bandwidth="362000" codecs="avc1.42c015" height="288" id="p0a0r2" sar="1:1" width="512"/>
+   <Representation bandwidth="543000" codecs="avc1.42c015" height="288" id="p0a0r3" sar="1:1" width="512"/>
+   <Representation bandwidth="911000" codecs="avc1.4d401e" height="432" id="p0a0r4" sar="1:1" width="768"/>
+   <Representation bandwidth="1623000" codecs="avc1.4d401f" height="576" id="p0a0r5" sar="1:1" width="1024"/>
+   <Representation bandwidth="2782000" codecs="avc1.64001f" height="720" id="p0a0r6" sar="1:1" width="1280"/>
+  </AdaptationSet>
+  <AdaptationSet id="1" lang="eng" mimeType="audio/mp4" segmentAlignment="true" startWithSAP="1" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+   <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+   <SegmentTemplate initialization="chunk_ctaudio_cfm4s_rid$RepresentationID$_cinit_mpd.m4s" media="chunk_ctaudio_cfm4s_rid$RepresentationID$_cs$Time$_mpd.m4s" presentationTimeOffset="0" timescale="24000">
+    <SegmentTimeline>
+     <S d="240000" t="0"/>
+     <S d="240000"/>
+     <S d="39360"/>
+    </SegmentTimeline>
+   </SegmentTemplate>
+   <Representation audioSamplingRate="24000" bandwidth="94000" codecs="mp4a.40.5" id="p0a1r0">
+    <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+   </Representation>
+  </AdaptationSet>
+ </Period>
+</MPD>

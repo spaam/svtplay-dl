@@ -21,9 +21,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def get(self):
         parse = urlparse(self.url)
         if parse.path[:8] == "/kanaler":
-            end_time_stamp = (
-                datetime.utcnow() - timedelta(minutes=1, seconds=20)
-            ).replace(microsecond=0)
+            end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=20)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
             url = "https://bbr-l2v.akamaized.net/live/{}/master.m3u8?in={}&out={}?".format(
@@ -31,13 +29,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             )
 
             self.config.set("live", True)
-            streams = hlsparse(
-                self.config,
-                self.http.request("get", url),
-                url,
-                output=self.output,
-                hls_time_stamp=True,
-            )
+            streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output, hls_time_stamp=True)
             for n in list(streams.keys()):
                 yield streams[n]
             return
@@ -57,9 +49,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         item = janson2["VideoAsset:{}".format(vid)]
 
         if item["is_drm_protected"]:
-            yield ServiceError(
-                "We can't download DRM protected content from this site."
-            )
+            yield ServiceError("We can't download DRM protected content from this site.")
             return
 
         if item["live"]:
@@ -76,14 +66,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(
-            vid
-        )
+        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(vid)
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
-            yield ServiceError(
-                "Can't play this because the video is geoblocked or not available."
-            )
+            yield ServiceError("Can't play this because the video is geoblocked or not available.")
             return
         if res.json()["playbackItem"]["type"] == "hls":
             streams = hlsparse(
@@ -97,9 +83,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield streams[n]
 
     def _getjson(self):
-        match = re.search(
-            r"application\/json\">(.*\}\})<\/script><script ", self.get_urldata()
-        )
+        match = re.search(r"application\/json\">(.*\}\})<\/script><script ", self.get_urldata())
         return match
 
     def find_all_episodes(self, config):
@@ -143,17 +127,13 @@ class Tv4(Service, OpenGraphThumbMixin):
             return
         self.output["title"] = match.group(1)
 
-        match = re.search(
-            'img alt="([^"]+)" class="video-image responsive"', self.get_urldata()
-        )
+        match = re.search('img alt="([^"]+)" class="video-image responsive"', self.get_urldata())
         if not match:
             yield ServiceError("Cant find title of the video")
             return
         self.output["episodename"] = match.group(1)
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(
-            self.output["id"]
-        )
+        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")

@@ -34,9 +34,7 @@ class Sportlib(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant fint login info")
             return
         cid = match.group(1)
-        res = self.http.get(
-            "https://core.oz.com/channels?slug=sportlib&org=www.sportlib.se"
-        )
+        res = self.http.get("https://core.oz.com/channels?slug=sportlib&org=www.sportlib.se")
         janson = res.json()
         sid = janson["data"][0]["id"]
 
@@ -47,9 +45,7 @@ class Sportlib(Service, OpenGraphThumbMixin):
             "username": self.config.get("username"),
             "password": self.config.get("password"),
         }
-        res = self.http.post(
-            "https://core.oz.com/oauth2/token?channelId={}".format(sid), data=data
-        )
+        res = self.http.post("https://core.oz.com/oauth2/token?channelId={}".format(sid), data=data)
         if res.status_code > 200:
             yield ServiceError("Wrong username / password?")
             return
@@ -64,13 +60,8 @@ class Sportlib(Service, OpenGraphThumbMixin):
             return
         vid = match.group(1)
 
-        headers = {
-            "content-type": "application/json",
-            "authorization": "{} {}".format(token_type, access_token),
-        }
-        url = "https://core.oz.com/channels/{}/videos/{}?include=collection,streamUrl".format(
-            sid, vid
-        )
+        headers = {"content-type": "application/json", "authorization": "{} {}".format(token_type, access_token)}
+        url = "https://core.oz.com/channels/{}/videos/{}?include=collection,streamUrl".format(sid, vid)
         res = self.http.get(url, headers=headers)
         janson = res.json()
         cookiename = janson["data"]["streamUrl"]["cookieName"]
@@ -83,12 +74,6 @@ class Sportlib(Service, OpenGraphThumbMixin):
         postjson = {"name": cookiename, "value": token}
         res = self.http.post("https://playlist.oz.com/cookie", json=postjson)
         cookies = res.cookies
-        streams = hlsparse(
-            self.config,
-            self.http.request("get", hlsplaylist),
-            hlsplaylist,
-            keycookie=cookies,
-            output=self.output,
-        )
+        streams = hlsparse(self.config, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

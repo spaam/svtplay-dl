@@ -111,9 +111,7 @@ class HDS(VideoRetriever):
         total = antal[1]["total"]
         eta = ETA(total)
         while i <= total:
-            url = "{}/{}Seg1-Frag{}?{}".format(
-                baseurl, self.kwargs["url_id"], start, querystring
-            )
+            url = "{}/{}Seg1-Frag{}?{}".format(baseurl, self.kwargs["url_id"], start, querystring)
             if not self.config.get("silent"):
                 eta.update(i)
                 progressbar(total, i, "".join(["ETA: ", str(eta)]))

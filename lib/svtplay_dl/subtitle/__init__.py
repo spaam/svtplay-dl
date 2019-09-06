@@ -58,9 +58,7 @@ class subtitle:
         if self.subfix:
             if self.config.get("get_all_subtitles"):
                 if self.output["episodename"]:
-                    self.output["episodename"] = "{}-{}".format(
-                        self.output["episodename"], self.subfix
-                    )
+                    self.output["episodename"] = "{}-{}".format(self.output["episodename"], self.subfix)
                 else:
                     self.output["episodename"] = self.subfix
 
@@ -107,9 +105,7 @@ class subtitle:
                     end = "%02d:%02d:%06.3f" % (int(begin2[0]), int(begin2[1]), sec)
                 else:
                     end = node.attrib["end"]
-                data += "{}\n{} --> {}\n".format(
-                    i, begin.replace(".", ","), end.replace(".", ",")
-                )
+                data += "{}\n{} --> {}\n".format(i, begin.replace(".", ","), end.replace(".", ","))
                 data = tt_text(node, data)
                 data += "\n"
                 i += 1
@@ -121,9 +117,7 @@ class subtitle:
         number = 1
         subs = ""
         for i in data:
-            subs += "{}\n{} --> {}\n".format(
-                number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"]))
-            )
+            subs += "{}\n{} --> {}\n".format(number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
             subs += "%s\n\n" % i["text"]
             number += 1
 
@@ -151,12 +145,7 @@ class subtitle:
                 for txt in text.itertext():
                     line += "{}".format(txt)
                 all += "{}\n".format(decode_html_entities(line.lstrip()))
-            subs += "{}\n{} --> {}\n{}\n".format(
-                n,
-                timecolon(sub.attrib["TimeIn"]),
-                timecolon(sub.attrib["TimeOut"]),
-                all,
-            )
+            subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
         subs = re.sub("&amp;", r"&", subs)
         return subs
 
@@ -179,9 +168,7 @@ class subtitle:
             if sync:
                 if int(sync.group(1)) != int(timea):
                     if data and data != "&nbsp;":
-                        subs += "{}\n{} --> {}\n".format(
-                            number, timestr(timea), timestr(sync.group(1))
-                        )
+                        subs += "{}\n{} --> {}\n".format(number, timestr(timea), timestr(sync.group(1)))
                         text = "%s\n" % TAG_RE.sub("", data.replace("<br>", "\n"))
                         text = decode_html_entities(text)
                         if text[len(text) - 2] != "\n":
@@ -221,10 +208,7 @@ class subtitle:
             elif match2:
                 if not subnr:
                     srt += "%s\n" % number_b
-                matchx = re.search(
-                    r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)",
-                    i,
-                )
+                matchx = re.search(r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                 if matchx:
                     hour1 = int(matchx.group("h1"))
                     hour2 = int(matchx.group("h2"))
@@ -235,19 +219,11 @@ class subtitle:
                         hour1 -= 10
                         hour2 -= 10
                 else:
-                    matchx = re.search(
-                        r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)",
-                        i,
-                    )
+                    matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                     hour1 = 0
                     hour2 = 0
                 time = "{:02d}:{}:{} --> {:02d}:{}:{}\n".format(
-                    hour1,
-                    matchx.group("m1"),
-                    matchx.group("s1").replace(".", ","),
-                    hour2,
-                    matchx.group("m2"),
-                    matchx.group("s2").replace(".", ","),
+                    hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ",")
                 )
                 srt += time
                 block = 1
@@ -301,17 +277,9 @@ class subtitle:
             if "cmore" in self.url:
                 cont.encoding = "utf-8"
             text = cont.text.split("\n")
-            for (
-                t
-            ) in (
-                text
-            ):  # is in text[1] for tv4play, but this should be more future proof
+            for t in text:  # is in text[1] for tv4play, but this should be more future proof
                 if "X-TIMESTAMP-MAP=MPEGTS" in t:
-                    time = (
-                        float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1))
-                        / 90000
-                        - 10
-                    )
+                    time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
             text = text[3 : len(text) - 2]
             itmes = []
             if len(text) > 1:

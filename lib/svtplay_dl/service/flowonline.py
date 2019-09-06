@@ -31,18 +31,11 @@ class Flowonline(Service, OpenGraphThumbMixin):
         if match:
             yield subtitle(copy.copy(self.config), "wrst", match.group(1))
 
-        match = re.search(
-            'source src="([^"]+)" type="application/x-mpegURL"', data.text
-        )
+        match = re.search('source src="([^"]+)" type="application/x-mpegURL"', data.text)
         if not match:
             yield ServiceError("Cant find video file")
             return
 
-        streams = hlsparse(
-            self.config,
-            self.http.request("get", match.group(1)),
-            match.group(1),
-            output=self.output,
-        )
+        streams = hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

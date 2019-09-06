@@ -24,12 +24,7 @@ class Eurosport(Service):
         clientapikey = janson["sdk"]["clientApiKey"]
 
         devices = "https://eu.edge.bamgrid.com/devices"
-        postdata = {
-            "deviceFamily": "browser",
-            "applicationRuntime": "firefox",
-            "deviceProfile": "macosx",
-            "attributes": {},
-        }
+        postdata = {"deviceFamily": "browser", "applicationRuntime": "firefox", "deviceProfile": "macosx", "attributes": {}}
         header = {"authorization": "Bearer {}".format(clientapikey)}
         res = self.http.post(devices, headers=header, json=postdata)
 
@@ -50,14 +45,7 @@ class Eurosport(Service):
 
         login = "https://eu.edge.bamgrid.com/idp/login"
         header = {"authorization": "Bearer {}".format(access_token)}
-        res = self.http.post(
-            login,
-            headers=header,
-            json={
-                "email": self.config.get("username"),
-                "password": self.config.get("password"),
-            },
-        )
+        res = self.http.post(login, headers=header, json={"email": self.config.get("username"), "password": self.config.get("password")})
         if res.status_code > 400:
             yield ServiceError("Wrong username or password")
             return
@@ -81,12 +69,7 @@ class Eurosport(Service):
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
 
-        query = {
-            "preferredLanguages": ["en"],
-            "mediaRights": ["GeoMediaRight"],
-            "uiLang": "en",
-            "include_images": True,
-        }
+        query = {"preferredLanguages": ["en"], "mediaRights": ["GeoMediaRight"], "uiLang": "en", "include_images": True}
 
         if parse.path[:11] == "/en/channel":
             pagetype = "channel"
@@ -105,22 +88,12 @@ class Eurosport(Service):
 
             url = (
                 "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/"
-                "query/eurosport/web/Airings/onAir?variables={}".format(
-                    quote(json.dumps(query))
-                )
+                "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
             )
             res = self.http.get(url, headers={"authorization": access_token})
             vid2 = res.json()["data"]["Airings"][0]["channel"]["id"]
-            url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/browser".format(
-                vid2
-            )
-            res = self.http.get(
-                url,
-                headers={
-                    "authorization": access_token,
-                    "Accept": "application/vnd.media-service+json; version=1",
-                },
-            )
+            url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/browser".format(vid2)
+            res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["slide"]
         else:
             pagetype = "event"
@@ -132,34 +105,17 @@ class Eurosport(Service):
             query["title"], query["contentId"] = match.groups()
             query["pageType"] = pagetype
 
-            url = (
-                "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/"
-                "persisted/query/eurosport/Airings?variables={}".format(
-                    quote(json.dumps(query))
-                )
+            url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" "persisted/query/eurosport/Airings?variables={}".format(
+                quote(json.dumps(query))
             )
             res = self.http.get(url, headers={"authorization": access_token})
             programid = res.json()["data"]["Airings"][0]["programId"]
             mediaid = res.json()["data"]["Airings"][0]["mediaId"]
 
-            url = "https://global-api.svcs.eurosportplayer.com/programs/{}/media/{}/scenarios/browser".format(
-                programid, mediaid
-            )
-            res = self.http.get(
-                url,
-                headers={
-                    "authorization": access_token,
-                    "Accept": "application/vnd.media-service+json; version=1",
-                },
-            )
+            url = "https://global-api.svcs.eurosportplayer.com/programs/{}/media/{}/scenarios/browser".format(programid, mediaid)
+            res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["complete"]
 
-        streams = hlsparse(
-            self.config,
-            self.http.request("get", hls_url),
-            hls_url,
-            authorization=access_token,
-            output=self.output,
-        )
+        streams = hlsparse(self.config, self.http.request("get", hls_url), hls_url, authorization=access_token, output=self.output)
         for n in list(streams.keys()):
             yield streams[n]

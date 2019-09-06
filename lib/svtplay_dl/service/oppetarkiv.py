@@ -43,9 +43,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
                 if i["format"] == "websrt":
-                    yield subtitle(
-                        copy.copy(self.config), "wrst", i["url"], output=self.output
-                    )
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         if len(data["videoReferences"]) == 0:
             yield ServiceError("Media doesn't have any associated videos (yet?)")
@@ -55,34 +53,19 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
             query = parse_qs(parse.query)
             if i["format"] == "hls" or i["format"] == "ios":
-                streams = hlsparse(
-                    self.config,
-                    self.http.request("get", i["url"]),
-                    i["url"],
-                    output=self.output,
-                )
+                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = hlsparse(
-                            self.config,
-                            self.http.request("get", alt.request.url),
-                            alt.request.url,
-                            output=self.output,
-                        )
+                        streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
             if i["format"] == "hds" or i["format"] == "flash":
                 match = re.search(r"\/se\/secure\/", i["url"])
                 if not match:
-                    streams = hdsparse(
-                        self.config,
-                        self.http.request("get", i["url"], params={"hdcore": "3.7.0"}),
-                        i["url"],
-                        output=self.output,
-                    )
+                    streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"], output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
                     if "alt" in query and len(query["alt"]) > 0:
@@ -90,33 +73,21 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                         if alt:
                             streams = hdsparse(
                                 self.config,
-                                self.http.request(
-                                    "get", alt.request.url, params={"hdcore": "3.7.0"}
-                                ),
+                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
                                 alt.request.url,
                                 output=self.output,
                             )
                             for n in list(streams.keys()):
                                 yield streams[n]
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                streams = dashparse(
-                    self.config,
-                    self.http.request("get", i["url"]),
-                    i["url"],
-                    output=self.output,
-                )
+                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
 
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = dashparse(
-                            self.config,
-                            self.http.request("get", alt.request.url),
-                            alt.request.url,
-                            output=self.output,
-                        )
+                        streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
 
@@ -131,9 +102,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         match = re.search(r'"/etikett/titel/([^"/]+)', data)
         if match is None:
-            match = re.search(
-                r'"http://www.oppetarkiv.se/etikett/titel/([^/]+)/', self.url
-            )
+            match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^/]+)/', self.url)
             if match is None:
                 logging.error("Couldn't find title")
                 return
@@ -147,9 +116,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             sort = "tid_stigande"
 
         while True:
-            url = "http://www.oppetarkiv.se/etikett/titel/{}/?sida={}&sort={}&embed=true".format(
-                program, page, sort
-            )
+            url = "http://www.oppetarkiv.se/etikett/titel/{}/?sida={}&sort={}&embed=true".format(program, page, sort)
             data = self.http.request("get", url)
             if data.status_code == 404:
                 break

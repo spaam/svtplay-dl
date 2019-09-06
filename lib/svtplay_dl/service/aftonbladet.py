@@ -24,12 +24,7 @@ class Aftonbladettv(Service):
                 yield ServiceError("Can't find video info")
                 return
         data = json.loads(decode_html_entities(match.group(1)))
-        streams = hlsparse(
-            self.config,
-            self.http.request("get", data["streamUrls"]["hls"]),
-            data["streamUrls"]["hls"],
-            output=self.output,
-        )
+        streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
         for n in list(streams.keys()):
             yield streams[n]
 
@@ -62,9 +57,7 @@ class Aftonbladet(Service):
                 if "type" in contents[i] and contents[i]["type"] == "video":
                     streams = hlsparse(
                         self.config,
-                        self.http.request(
-                            "get", contents[i]["videoAsset"]["streamUrls"]["hls"]
-                        ),
+                        self.http.request("get", contents[i]["videoAsset"]["streamUrls"]["hls"]),
                         contents[i]["videoAsset"]["streamUrls"]["hls"],
                         output=self.output,
                     )

@@ -11,9 +11,7 @@ from svtplay_dl.utils.parser import Options
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.3"
 
-retry = Retry(
-    total=5, read=5, connect=5, backoff_factor=0.3, status_forcelist=(500, 502, 504)
-)
+retry = Retry(total=5, read=5, connect=5, backoff_factor=0.3, status_forcelist=(500, 502, 504))
 
 
 class HTTP(Session):
@@ -38,9 +36,7 @@ class HTTP(Session):
             for i in headers.keys():
                 self.headers[i] = headers[i]
         logging.debug("HTTP getting %r", url)
-        res = Session.request(
-            self, method, url, verify=self.verify, proxies=self.proxy, *args, **kwargs
-        )
+        res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, *args, **kwargs)
         return res
 
     def split_header(self, headers):
