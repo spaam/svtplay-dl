@@ -5,6 +5,7 @@ matrix:
   fast_finish: true
   include:
     - python: 3.5
+      env: PRECOMMIT=0
     - python: 3.6
     - python: 3.7
       dist: xenial
@@ -16,7 +17,11 @@ install:
 - pip install -r requirements-dev.txt -r requirements.txt awscli
 script:
 - python --version
-- pre-commit run --all-files --show-diff-on-failure
+- |
+  if [[ -z "$PRECOMMIT" ]]
+  then
+      pre-commit run --all-files --show-diff-on-failure
+  fi
 - pytest -v --cov
 - make
 - |
