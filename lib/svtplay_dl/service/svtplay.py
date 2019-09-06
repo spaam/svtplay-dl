@@ -283,8 +283,8 @@ class Svtplay(Service, MetadataThumbMixin):
         if not match:
             return season, episode
 
-        season = "{:02d}".format(match.group(1))
-        episode = "{:02d}".format(match.group(2))
+        season = "{:02d}".format(int(match.group(1)))
+        episode = "{:02d}".format(int(match.group(2)))
 
         return season, episode
 
