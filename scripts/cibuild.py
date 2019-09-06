@@ -130,10 +130,10 @@ logger.info("Tag: {}".format(tag()))
 if not tag() and branch() != "master":
     sys.exit(0)
 
+build_package()
 if travis:
     build_docker()
 aws_upload()
 
 if tag() and travis:
-    build_package()
     pypi_upload()
