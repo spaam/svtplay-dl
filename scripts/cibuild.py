@@ -75,7 +75,7 @@ def build_docker():
 def build_package():
     logger.info("Building python package")
     subprocess.check_output([
-        "python", "setup.py", "-q", "sdist", "bdist_wheel"
+        "python", "setup.py", "sdist", "bdist_wheel"
     ])
 
 
@@ -115,8 +115,11 @@ def aws_upload():
 
 def pypi_upload():
     logger.info("Uploading to pypi")
-    sdist = glob.glob(os.path.join("dist/", 'svtplay_dl-*.tar.gz'))[0]
-    subprocess.check_call(["twine", "upload", sdist])
+    sdist = glob.glob(os.path.join("dist/", 'svtplay_dl-*.tar.gz'))
+    if sdist:
+        subprocess.check_call(["twine", "upload", sdist[0]])
+    else:
+        logging.warning("Can't find file for pypi..")
 
 logger.info("Branch: {}".format(branch()))
 logger.info("Tag: {}".format(tag()))
@@ -124,11 +127,10 @@ logger.info("Tag: {}".format(tag()))
 if not tag() and branch() != "master":
     sys.exit(0)
 
-
-build_package()
 if travis:
     build_docker()
 aws_upload()
 
-if tag():
+if tag() and travis:
+    build_package()
     pypi_upload()
