@@ -124,6 +124,7 @@ def pypi_upload():
     else:
         logging.warning("Can't find file for pypi..")
 
+
 logger.info("Branch: {}".format(branch()))
 logger.info("Tag: {}".format(tag()))
 
