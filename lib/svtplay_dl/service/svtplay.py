@@ -60,29 +60,21 @@ class Svtplay(Service, MetadataThumbMixin):
             yield from videos
             return
 
-        match = re.search(r"__svtplay'] = ({.*});", urldata)
-        if not match:
-            yield ServiceError("Can't find video info.")
-            return
-        janson = json.loads(match.group(1))["videoPage"]
-
-        self.visibleid = list(janson["visible"].keys())[0]
         match = re.search(r"__svtplay_apollo'] = ({.*});", urldata)
         if not match:
             yield ServiceError("Can't find video info.")
             return
 
         janson = json.loads(match.group(1))
-        for key in janson["ROOT_QUERY"].keys():
-            if "listablesByEsceni" in key:
-                esceni = key
-                break
+        self.visibleid = self._get_visibleid(janson)
+        if not self.visibleid:
+            yield ServiceError("Can't find video id")
+            return
 
-        self.type_name = janson["ROOT_QUERY"][esceni][0]["typename"]
-        vid = janson["{}:{}".format(self.type_name, self.visibleid)]["videoSvtId"]
+        vid = janson[self.visibleid]["videoSvtId"]
 
         self.outputfilename(janson)
-        self.extrametadata(janson, self.type_name, self.visibleid)
+        self.extrametadata(janson, self.visibleid)
 
         res = self.http.get(URL_VIDEO_API + vid)
         try:
@@ -127,6 +119,18 @@ class Svtplay(Service, MetadataThumbMixin):
                 if alt_streams:
                     for n in list(alt_streams.keys()):
                         yield alt_streams[n]
+
+    def _get_visibleid(self, janson):
+        esceni = None
+        for key in janson["ROOT_QUERY"].keys():
+            if "listablesBy" in key:
+                esceni = key
+                break
+
+        if esceni:
+            return janson["ROOT_QUERY"][esceni][0]["id"]
+        else:
+            return esceni
 
     def _last_chance(self, videos, page, maxpage=2):
         if page > maxpage:
@@ -174,23 +178,29 @@ class Svtplay(Service, MetadataThumbMixin):
         if re.search("sista-chansen", parse.path):
             videos = self._last_chance(videos, 1)
         else:
-            match = re.search(r"__svtplay'] = ({.*});", self.get_urldata())
+            match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
             if not match:
                 logging.error("Can't find video info.")
-                return videos
-            janson = json.loads(match.group(1))["videoPage"]
-            self.visibleid = list(janson["visible"].keys())[0]
+                return
+
+            janson = json.loads(match.group(1))
+            self.visibleid = self._get_visibleid(janson)
+            if not self.visibleid:
+                logging.error("Can't find video i")
+                return
+
             match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
             if not match:
                 logging.error("Can't find video info.")
                 return videos
             janson = json.loads(match.group(1))
-            episode = janson["Variant:{}".format(self.visibleid)]
+            episode = janson[self.visibleid]
             associatedContent = episode['associatedContent({"include":["season","productionPeriod","clips","upcoming"]})']
 
             keys = []
             videos = []
-            videos.append(janson[episode["urls"]["id"]]["svtplay"])
+            if "urls" in episode:
+                videos.append(janson[episode["urls"]["id"]]["svtplay"])
             for i in associatedContent:
                 if tab:
                     section = "Selection:{}".format(tab)
@@ -238,11 +248,11 @@ class Svtplay(Service, MetadataThumbMixin):
     def outputfilename(self, data):
         name = None
         desc = None
-        pid = data["{}:{}".format(self.type_name, self.visibleid)]["parent"]["id"]
+        pid = data[self.visibleid]["parent"]["id"]
 
         name = data[pid]["slug"]
-        other = data["{}:{}".format(self.type_name, self.visibleid)]["slug"]
-        vid = data["{}:{}".format(self.type_name, self.visibleid)]["id"]
+        other = data[self.visibleid]["slug"]
+        vid = data[self.visibleid]["id"]
         id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
@@ -252,10 +262,10 @@ class Svtplay(Service, MetadataThumbMixin):
             other = None
 
         season, episode = self.seasoninfo(data)
-        if "accessibility" in data["{}:{}".format(self.type_name, self.visibleid)]:
-            if data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"] == "AudioDescribed":
+        if "accessibility" in data[self.visibleid]:
+            if data[self.visibleid]["accessibility"] == "AudioDescribed":
                 desc = "syntolkat"
-            if data["{}:{}".format(self.type_name, self.visibleid)]["accessibility"] == "SignInterpreted":
+            if data[self.visibleid]["accessibility"] == "SignInterpreted":
                 desc = "teckentolkat"
 
         if not other:
@@ -272,10 +282,10 @@ class Svtplay(Service, MetadataThumbMixin):
     def seasoninfo(self, data):
         season, episode = None, None
 
-        if "episode" not in data["{}:{}".format(self.type_name, self.visibleid)]:
+        if "episode" not in data[self.visibleid]:
             return season, episode
 
-        episodeid = data["{}:{}".format(self.type_name, self.visibleid)]["episode"]["id"]
+        episodeid = data[self.visibleid]["episode"]["id"]
         if "positionInSeason" not in data[episodeid]:
             return season, episode
 
@@ -288,14 +298,14 @@ class Svtplay(Service, MetadataThumbMixin):
 
         return season, episode
 
-    def extrametadata(self, data, type_name, visibleid):
-        episode = data["{}:{}".format(type_name, visibleid)]
+    def extrametadata(self, data, visibleid):
+        episode = data[visibleid]
 
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
             self.output["publishing_datetime"] = int(dateutil.parser.parse(episode["validFrom"]).strftime("%s"))
 
-        self.output["title_nice"] = data[data["{}:{}".format(type_name, visibleid)]["parent"]["id"]]["name"]
+        self.output["title_nice"] = data[data[visibleid]["parent"]["id"]]["name"]
 
         try:
             t = data[data[episode["parent"]["id"]]["image"]["id"]]
