@@ -2,4 +2,3 @@ requests
 PySocks
 cryptography
 pyyaml
-python-dateutil

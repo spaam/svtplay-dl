@@ -3,16 +3,17 @@
 from __future__ import absolute_import
 
 import copy
+import datetime
 import hashlib
 import json
 import logging
 import re
+import time
 from operator import itemgetter
 from urllib.parse import parse_qs
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
-import dateutil.parser
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -303,7 +304,17 @@ class Svtplay(Service, MetadataThumbMixin):
 
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
-            self.output["publishing_datetime"] = int(dateutil.parser.parse(episode["validFrom"]).strftime("%s"))
+
+            def _fix_broken_timezone_implementation(value):
+                # cx_freeze cant include .zip file for dateutil and < py37 have issues
+                if ":" == value[-3:-2]:
+                    value = value[:-3] + value[-2:]
+                return value
+
+            print(_fix_broken_timezone_implementation(episode["validFrom"]))
+            self.output["publishing_datetime"] = int(
+                time.mktime(datetime.datetime.strptime(_fix_broken_timezone_implementation(episode["validFrom"]), "%Y-%m-%dT%H:%M:%S%z").timetuple())
+            )
 
         self.output["title_nice"] = data[data[visibleid]["parent"]["id"]]["name"]
 

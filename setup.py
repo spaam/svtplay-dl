@@ -22,7 +22,6 @@ deps.append("requests>=2.0.0")
 deps.append("PySocks")
 deps.append("cryptography")
 deps.append("pyyaml")
-deps.append("python-dateutil")
 
 setup(
     name="svtplay-dl",
