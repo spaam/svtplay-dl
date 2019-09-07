@@ -21,5 +21,7 @@ class HttpTest(unittest.TestCase):
             {"srcurl": "http://example.com/bar", "segment": "foo.ts", "expected": "http://example.com/foo.ts"},
             # with query parameters
             {"srcurl": "http://example.com/bar?baz=qux", "segment": "foo.ts", "expected": "http://example.com/foo.ts"},
+            # with segment with slash
+            {"srcurl": "http://example.com/bar", "segment": "/test", "expected": "http://example.com/test"},
         ]:
             assert get_full_url(test["segment"], test["srcurl"]) == test["expected"]
