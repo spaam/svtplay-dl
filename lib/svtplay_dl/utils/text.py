@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import html.parser as HTMLParser
+import html
 import re
 import unicodedata
 
@@ -22,10 +22,9 @@ def decode_html_entities(s):
         >>> print(decode_html_entities("&lt;3 &amp;"))
         <3 &
     """
-    parser = HTMLParser.HTMLParser()
 
     def unesc(m):
-        return parser.unescape(m.group())
+        return html.unescape(m.group())
 
     return re.sub(r"(&[^;]+;)", unesc, ensure_unicode(s))
 
