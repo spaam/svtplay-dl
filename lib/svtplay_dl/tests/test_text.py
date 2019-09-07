@@ -7,6 +7,8 @@ from __future__ import absolute_import
 import unittest
 
 from svtplay_dl.utils.parser import setup_defaults
+from svtplay_dl.utils.text import decode_html_entities
+from svtplay_dl.utils.text import ensure_unicode
 from svtplay_dl.utils.text import exclude
 from svtplay_dl.utils.text import filenamify
 
@@ -39,3 +41,9 @@ class filenamifyTest(unittest.TestCase):
     def test_exlude_default(self):
         config = setup_defaults()
         assert not exclude(config, "hoppsan")
+
+    def test_ensure_unicode(self):
+        assert ensure_unicode(b"hello") == "hello"
+
+    def test_decode_html(self):
+        assert decode_html_entities("&lt;3 &amp;") == "<3 &"
