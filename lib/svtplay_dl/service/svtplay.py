@@ -311,7 +311,6 @@ class Svtplay(Service, MetadataThumbMixin):
                     value = value[:-3] + value[-2:]
                 return value
 
-            print(_fix_broken_timezone_implementation(episode["validFrom"]))
             self.output["publishing_datetime"] = int(
                 time.mktime(datetime.datetime.strptime(_fix_broken_timezone_implementation(episode["validFrom"]), "%Y-%m-%dT%H:%M:%S%z").timetuple())
             )
