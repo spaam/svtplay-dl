@@ -213,7 +213,7 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
 
 
 def findexpisode(output, directory, name):
-    subtitlefiles = ["srt", "smi", "tt", "sami", "wrst"]
+    otherfiles = ["srt", "smi", "tt", "sami", "wrst", "tbn", "nfo"]
 
     orgname, orgext = os.path.splitext(name)
 
@@ -221,7 +221,7 @@ def findexpisode(output, directory, name):
     for i in files:
         lsname, lsext = os.path.splitext(i)
         if output["service"]:
-            if orgext[1:] in subtitlefiles:
+            if orgext[1:] in otherfiles:
                 if (
                     output["id"]
                     and name.find(output["service"]) > 0
@@ -231,7 +231,7 @@ def findexpisode(output, directory, name):
                     and orgext == lsext
                 ):
                     return True
-            elif lsext[1:] not in subtitlefiles and lsext[1:] not in ["m4a"]:
+            elif lsext[1:] not in otherfiles and lsext[1:] not in ["m4a"]:
                 if output["id"] and output["service"]:
                     if name.find(output["service"]) > 0 and lsname.find(output["id"]) > 0:
                         if lsext == ".ts" and orgext == lsext and lsname.find(".audio"):
