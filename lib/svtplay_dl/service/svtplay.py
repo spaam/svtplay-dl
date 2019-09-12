@@ -306,13 +306,17 @@ class Svtplay(Service, MetadataThumbMixin):
         if "validFrom" in episode:
 
             def _fix_broken_timezone_implementation(value):
-                # cx_freeze cant include .zip file for dateutil and < py37 have issues
+                # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
                 if ":" == value[-3:-2]:
                     value = value[:-3] + value[-2:]
                 return value
 
             self.output["publishing_datetime"] = int(
-                time.mktime(datetime.datetime.strptime(_fix_broken_timezone_implementation(episode["validFrom"]), "%Y-%m-%dT%H:%M:%S%z").timetuple())
+                time.mktime(
+                    datetime.datetime.strptime(
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S%z"
+                    ).timetuple()
+                )
             )
 
         self.output["title_nice"] = data[data[visibleid]["parent"]["id"]]["name"]
