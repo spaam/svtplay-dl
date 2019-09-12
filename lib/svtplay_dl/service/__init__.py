@@ -122,7 +122,7 @@ class OpenGraphThumbMixin:
         url = opengraph_get(self.get_urldata(), "image")
         if url is None:
             return
-        download_thumbnails(options, [(False, url)])
+        download_thumbnails(self.output, options, [(False, url)])
 
 
 class MetadataThumbMixin:
