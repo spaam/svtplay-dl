@@ -232,7 +232,7 @@ class postprocess:
         os.rename(tempfile, orig_filename)
 
     def _streams(self, output):
-        return re.findall(r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
+        return re.findall(r"Stream \#\d:(\d)[\[\(][^\[]+[\]\)]([\(\)\w]+)?: (Video|Audio): (.*)", output)
 
     def _getcodec(self, streams, number):
         for stream in streams:
