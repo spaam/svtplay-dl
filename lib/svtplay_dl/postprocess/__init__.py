@@ -115,9 +115,9 @@ class postprocess:
             tempfile = "{}.temp".format(orig_filename)
             arguments = []
             if videotrack:
-                arguments += ["-map", "0:{}".format(videotrack)]
+                arguments += ["-map", "{}".format(videotrack)]
             if audiotrack:
-                arguments += ["-map", "0:{}".format(audiotrack)]
+                arguments += ["-map", "{}".format(audiotrack)]
             arguments += ["-c", "copy", "-f", "mp4"]
             if ext == ".ts" and "aac" in self._getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -168,8 +168,9 @@ class postprocess:
             return
 
         orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
-
-        cmd = [self.detect, "-i", orig_filename]
+        name, ext = os.path.splitext(orig_filename)
+        audio_filename = "{}.audio.ts".format(name)
+        cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = self._streams(stderr)
         videotrack, audiotrack = self._checktracks(streams)
@@ -180,23 +181,21 @@ class postprocess:
             logging.info("Merge audio and video into {}".format(orig_filename))
 
         tempfile = "{}.temp".format(orig_filename)
-        name, ext = os.path.splitext(orig_filename)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
-            audio_filename = "{}.audio.ts".format(name)
             if audiotrack and "aac" in self._getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
         else:
             audio_filename = "{}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
-
         if videotrack:
-            arguments += ["-map", "0:{}".format(videotrack)]
+            arguments += ["-map", "{}".format(videotrack)]
         if audiotrack:
-            arguments += ["-map", "0:{}".format(audiotrack)]
+            arguments += ["-map", "{}".format(audiotrack)]
         if self.config.get("merge_subtitle"):
             langs = self.sublanguage()
-            for stream_num, language in enumerate(langs, start=audiotrack + 1):
+            tracks = [x for x in [videotrack, audiotrack] if x]
+            for stream_num, language in enumerate(langs, start=len(tracks)):
                 arguments += [
                     "-map",
                     str(stream_num),
@@ -232,7 +231,7 @@ class postprocess:
         os.rename(tempfile, orig_filename)
 
     def _streams(self, output):
-        return re.findall(r"Stream \#\d:(\d)[\[\(][^\[]+[\]\)]([\(\)\w]+)?: (Video|Audio): (.*)", output)
+        return re.findall(r"Stream \#(\d:\d)([\[\(][^\[]+[\]\)])?([\(\)\w]+)?: (Video|Audio): (.*)", output)
 
     def _getcodec(self, streams, number):
         for stream in streams:
@@ -243,10 +242,10 @@ class postprocess:
         videotrack = None
         audiotrack = None
         for stream in streams:
-            if stream[2] == "Video":
+            if stream[3] == "Video":
                 videotrack = stream[0]
-            if stream[2] == "Audio":
-                if stream[3] == "mp3, 0 channels":
+            if stream[3] == "Audio":
+                if stream[4] == "mp3, 0 channels":
                     continue
                 audiotrack = stream[0]
 
