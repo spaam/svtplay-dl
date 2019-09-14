@@ -2,6 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 from __future__ import absolute_import
 
+import hashlib
 import json
 import logging
 import re
@@ -11,6 +12,7 @@ from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.utils.text import filenamify
 
 
 class Barnkanalen(Svtplay):
@@ -103,3 +105,104 @@ class Barnkanalen(Svtplay):
             videos.append(parse.path)
 
         return videos
+
+    def outputfilename(self, data):
+        name = None
+        desc = None
+        if "programTitle" in data and data["programTitle"]:
+            name = filenamify(data["programTitle"])
+        elif "titleSlug" in data and data["titleSlug"]:
+            name = filenamify(data["titleSlug"])
+        other = data["title"]
+
+        if "programVersionId" in data:
+            vid = str(data["programVersionId"])
+        else:
+            vid = str(data["id"])
+        id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
+
+        if name == other:
+            other = None
+        elif name is None:
+            name = other
+            other = None
+
+        season, episode = self.seasoninfo(data)
+        if "accessService" in data:
+            if data["accessService"] == "audioDescription":
+                desc = "syntolkat"
+            if data["accessService"] == "signInterpretation":
+                desc = "teckentolkat"
+
+        if not other:
+            other = desc
+        elif desc:
+            other += "-{}".format(desc)
+
+        self.output["title"] = name
+        self.output["id"] = id
+        self.output["season"] = season
+        self.output["episode"] = episode
+        self.output["episodename"] = other
+
+    def seasoninfo(self, data):
+        season, episode = None, None
+        if "season" in data and data["season"]:
+            season = "{:02d}".format(data["season"])
+            if int(season) == 0:
+                season = None
+        if "episodeNumber" in data and data["episodeNumber"]:
+            episode = "{:02d}".format(data["episodeNumber"])
+            if int(episode) == 0:
+                episode = None
+        if episode is not None and season is None:
+            # Missing season, happens for some barnkanalen shows assume first and only
+            season = "01"
+        return season, episode
+
+    def extrametadata(self, data):
+        self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
+        try:
+            self.output["publishing_datetime"] = data["video"]["broadcastDate"] / 1000
+        except KeyError:
+            pass
+        try:
+            title = data["video"]["programTitle"]
+            self.output["title_nice"] = title
+        except KeyError:
+            title = data["video"]["titleSlug"]
+            self.output["title_nice"] = title
+
+        try:
+            t = data["state"]["titleModel"]["thumbnail"]
+        except KeyError:
+            t = ""
+        if isinstance(t, dict):
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            self.output["showthumbnailurl"] = url
+        elif t:
+            # Get the image if size/format is not specified in the URL set it to large
+            url = t.format(format="large")
+            self.output["showthumbnailurl"] = url
+        try:
+            t = data["video"]["thumbnailXL"]
+        except KeyError:
+            try:
+                t = data["video"]["thumbnail"]
+            except KeyError:
+                t = ""
+        if isinstance(t, dict):
+            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            self.output["episodethumbnailurl"] = url
+        elif t:
+            # Get the image if size/format is not specified in the URL set it to large
+            url = t.format(format="large")
+            self.output["episodethumbnailurl"] = url
+        try:
+            self.output["showdescription"] = data["state"]["titleModel"]["description"]
+        except KeyError:
+            pass
+        try:
+            self.output["episodedescription"] = data["video"]["description"]
+        except KeyError:
+            pass
