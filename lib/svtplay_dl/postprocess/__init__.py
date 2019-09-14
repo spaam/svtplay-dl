@@ -104,7 +104,8 @@ class postprocess:
 
             cmd = [self.detect, "-i", orig_filename]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
-            videotrack, audiotrack = self._checktracks(stderr)
+            streams = self._streams(stderr)
+            videotrack, audiotrack = self._checktracks(streams)
 
             if self.config.get("merge_subtitle"):
                 logging.info("Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
@@ -112,8 +113,13 @@ class postprocess:
                 logging.info("Muxing {} into {}".format(orig_filename, new_name))
 
             tempfile = "{}.temp".format(orig_filename)
-            arguments = ["-map", "0:{}".format(videotrack), "-map", "0:{}".format(audiotrack), "-c", "copy", "-f", "mp4"]
-            if ext == ".ts":
+            arguments = []
+            if videotrack:
+                arguments += ["-map", "0:{}".format(videotrack)]
+            if audiotrack:
+                arguments += ["-map", "0:{}".format(audiotrack)]
+            arguments += ["-c", "copy", "-f", "mp4"]
+            if ext == ".ts" and "aac" in self._getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
             if self.config.get("merge_subtitle"):
@@ -165,7 +171,8 @@ class postprocess:
 
         cmd = [self.detect, "-i", orig_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
-        videotrack, audiotrack = self._checktracks(stderr)
+        streams = self._streams(stderr)
+        videotrack, audiotrack = self._checktracks(streams)
 
         if self.config.get("merge_subtitle"):
             logging.info("Merge audio, video and subtitle into {}".format(orig_filename))
@@ -177,12 +184,16 @@ class postprocess:
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
             audio_filename = "{}.audio.ts".format(name)
-            arguments += ["-bsf:a", "aac_adtstoasc"]
+            if audiotrack and "aac" in self._getcodec(streams, audiotrack):
+                arguments += ["-bsf:a", "aac_adtstoasc"]
         else:
             audio_filename = "{}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
 
-        arguments += ["-map", "{}".format(videotrack), "-map", "{}".format(audiotrack)]
+        if videotrack:
+            arguments += ["-map", "0:{}".format(videotrack)]
+        if audiotrack:
+            arguments += ["-map", "0:{}".format(audiotrack)]
         if self.config.get("merge_subtitle"):
             langs = self.sublanguage()
             for stream_num, language in enumerate(langs, start=audiotrack + 1):
@@ -220,11 +231,18 @@ class postprocess:
                 os.remove(subfile)
         os.rename(tempfile, orig_filename)
 
-    def _checktracks(self, output):
-        allstuff = re.findall(r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
-        videotrack = 0
-        audiotrack = 1
-        for stream in allstuff:
+    def _streams(self, output):
+        return re.findall(r"Stream \#\d:(\d)\[[^\[]+\]([\(\)\w]+)?: (Video|Audio): (.*)", output)
+
+    def _getcodec(self, streams, number):
+        for stream in streams:
+            if stream[0] == number:
+                return stream[3]
+
+    def _checktracks(self, streams):
+        videotrack = None
+        audiotrack = None
+        for stream in streams:
             if stream[2] == "Video":
                 videotrack = stream[0]
             if stream[2] == "Audio":
