@@ -236,7 +236,7 @@ class postprocess:
     def _getcodec(self, streams, number):
         for stream in streams:
             if stream[0] == number:
-                return stream[3]
+                return stream[4]
 
     def _checktracks(self, streams):
         videotrack = None
