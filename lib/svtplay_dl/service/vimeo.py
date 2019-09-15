@@ -14,7 +14,7 @@ from svtplay_dl.service import Service
 
 
 class Vimeo(Service, OpenGraphThumbMixin):
-    supported_domains = ["vimeo.com"]
+    supported_domains = ["vimeo.com", "player.vimeo.com"]
 
     def get(self):
         data = self.get_urldata()
