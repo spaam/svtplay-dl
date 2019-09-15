@@ -145,6 +145,9 @@ class Generic(Service):
 
     def get(self, sites):
         data = self.http.request("get", self.url).text
+        return self._match(data, sites)
+
+    def _match(self, data, sites):
         match = re.search(r"src=(\"|\')(http://www.svt.se/wd[^\'\"]+)(\"|\')", data)
         stream = None
         if match:
@@ -154,67 +157,45 @@ class Generic(Service):
                     url = url.replace("&amp;", "&").replace("&#038;", "&")
                     return url, i(self.config, url)
 
-        match = re.search(r"src=\"(http://player.vimeo.com/video/[0-9]+)\" ", data)
-        if match:
-            for i in sites:
-                if i.handles(match.group(1)):
-                    return match.group(1), i(self.config, url)
+        matchlist = [
+            r"src=\"(https://player.vimeo.com/video/[0-9]+)\" ",
+            r'src="(http://tv.aftonbladet[^"]*)"',
+            r'a href="(http://tv.aftonbladet[^"]*)" class="abVi',
+            r"iframe src='(http://www.svtplay[^']*)'",
+            'src="(http://mm-resource-service.herokuapp.com[^"]*)"',
+            r'src="([^.]+\.solidtango.com[^"+]+)"',
+            's.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)',
+        ]
+        for i in matchlist:
+            match = re.search(i, data)
+            if match:
+                url = match.group(1)
+                for n in sites:
+                    if n.handles(match.group(1)):
+                        print("n", n)
+                        return match.group(1), n(self.config, url)
+
         match = re.search(r"tv4play.se/iframe/video/(\d+)?", data)
         if match:
             url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
             for i in sites:
                 if i.handles(url):
                     return url, i(self.config, url)
-        match = re.search(r'src="(http://tv.aftonbladet[^"]*)"', data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return url, i(self.config, url)
-        match = re.search(r'a href="(http://tv.aftonbladet[^"]*)" class="abVi', data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return url, i(self.config, url)
 
-        match = re.search(r"iframe src='(http://www.svtplay[^']*)'", data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return url, i(self.config, url)
-
-        match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return self.url, i(self.config, self.url)
-        match = re.search(r'src="([^.]+\.solidtango.com[^"+]+)"', data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return self.url, i(self.config, url)
         match = re.search("(lemonwhale|lwcdn.com)", data)
         if match:
             url = "http://lemonwhale.com"
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
-        match = re.search('s.src="(https://csp-ssl.picsearch.com[^"]+|http://csp.picsearch.com/rest[^"]+)', data)
-        if match:
-            url = match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return self.url, i(self.config, self.url)
+
         match = re.search("(picsearch_ajax_auth|screen9-ajax-auth)", data)
         if match:
             url = "http://csp.picsearch.com"
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
+
         match = re.search('iframe src="(//csp.screen9.com[^"]+)"', data)
         if match:
             url = "http:%s" % match.group(1)
