@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import unittest
 
+from svtplay_dl.service import Generic
 from svtplay_dl.service import opengraph_get
 from svtplay_dl.service import Service
 from svtplay_dl.service import service_handler
@@ -52,3 +53,29 @@ class service_opengraphGet2(unittest.TestCase):
 
     def test_og_get(self):
         assert opengraph_get(self.text, "image") == "http://example.com/img3.jpg"
+
+
+class test_generic(unittest.TestCase):
+    def test_nothing(self):
+        config = setup_defaults()
+        generic = Generic(config, "http://example.com")
+        data = "hejsan"
+        assert generic._match(data, sites) == ("http://example.com", None)
+
+    def test_hls(self):
+        config = setup_defaults()
+        generic = Generic(config, "http://example.com")
+        data = 'source src="http://example.com/hls.m3u8" type="application/x-mpegURL"'
+        assert isinstance(generic._match(data, sites)[1], Service)
+
+    def test_tv4(self):
+        config = setup_defaults()
+        generic = Generic(config, "http://example.com")
+        data = "rc=https://www.tv4play.se/iframe/video/12499319 "
+        assert isinstance(generic._match(data, sites)[1], Service)
+
+    def test_vimeo(self):
+        config = setup_defaults()
+        generic = Generic(config, "http://example.com")
+        data = 'src="https://player.vimeo.com/video/359281775" '
+        assert isinstance(generic._match(data, sites)[1], Service)
