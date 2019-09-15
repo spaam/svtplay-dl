@@ -25,71 +25,6 @@ class postprocess:
             if self.detect:
                 break
 
-    def sublanguage(self):
-        # parse() function partly borrowed from a guy on github. /thanks!
-        # https://github.com/riobard/srt.py/blob/master/srt.py
-        def parse(self):
-            def parse_block(block):
-                lines = block.strip("-").split("\n")
-                txt = "\r\n".join(lines[2:])
-                return txt
-
-            if platform.system() == "Windows":
-                fd = open(self, encoding="utf8")
-            else:
-                fd = open(self)
-            return list(map(parse_block, fd.read().strip().replace("\r", "").split("\n\n")))
-
-        def query(self):
-            _ = parse(self)
-            random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
-            url = "https://whatlanguage.herokuapp.com"
-            payload = {"query": random_sentences}
-            # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
-            headers = {"content-type": "application/json"}
-            try:
-                # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume,
-                # and it is heroku after all (fast enough)
-                r = post(url, data=dumps(payload), headers=headers, timeout=30)
-                if r.status_code == codes.ok:
-                    try:
-                        response = r.json()
-                        return response["language"]
-                    except TypeError:
-                        return "und"
-                else:
-                    logging.error("Server error appeared. Setting language as undetermined.")
-                    return "und"
-            except Timeout:
-                logging.error("30 seconds server timeout reached. Setting language as undetermined.")
-                return "und"
-
-        langs = []
-        exceptions = {"lulesamiska": "smj", "meankieli": "fit", "jiddisch": "yid"}
-        if self.subfixes and len(self.subfixes) >= 2:
-            logging.info("Determining the languages of the subtitles.")
-        else:
-            logging.info("Determining the language of the subtitle.")
-        if self.config.get("get_all_subtitles"):
-            for subfix in self.subfixes:
-                if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip("-"))]:
-                    if "oversattning" in subfix.strip("-"):
-                        subfix = subfix.strip("-").split(".")[0]
-                    else:
-                        subfix = subfix.strip("-")
-                    langs += [exceptions[subfix]]
-                    continue
-                subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0] + subfix)
-                langs += [query(subfile)]
-        else:
-            subfile = "{}.srt".format(os.path.splitext(formatname(self.stream.output, self.config, self.stream.output_extention))[0])
-            langs += [query(subfile)]
-        if len(langs) >= 2:
-            logging.info("Language codes: " + ", ".join(langs))
-        else:
-            logging.info("Language code: " + langs[0])
-        return langs
-
     def remux(self):
         if self.detect is None:
             logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
@@ -123,7 +58,7 @@ class postprocess:
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
             if self.config.get("merge_subtitle"):
-                langs = self.sublanguage()
+                langs = _sublanguage(self.stream, self.config, self.subfixes)
                 for stream_num, language in enumerate(langs):
                     arguments += [
                         "-map",
@@ -193,7 +128,7 @@ class postprocess:
         if audiotrack:
             arguments += ["-map", "{}".format(audiotrack)]
         if self.config.get("merge_subtitle"):
-            langs = self.sublanguage()
+            langs = _sublanguage(self.stream, self.config, self.subfixes)
             tracks = [x for x in [videotrack, audiotrack] if x]
             for stream_num, language in enumerate(langs, start=len(tracks)):
                 arguments += [
@@ -254,3 +189,69 @@ def _checktracks(streams):
             audiotrack = stream[0]
 
     return videotrack, audiotrack
+
+
+def _sublanguage(stream, config, subfixes):
+    # parse() function partly borrowed from a guy on github. /thanks!
+    # https://github.com/riobard/srt.py/blob/master/srt.py
+    def parse(self):
+        def parse_block(block):
+            lines = block.strip("-").split("\n")
+            txt = "\r\n".join(lines[2:])
+            return txt
+
+        if platform.system() == "Windows":
+            fd = open(self, encoding="utf8")
+        else:
+            fd = open(self)
+        return list(map(parse_block, fd.read().strip().replace("\r", "").split("\n\n")))
+
+    def query(self):
+        _ = parse(self)
+        random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
+        url = "https://whatlanguage.herokuapp.com"
+        payload = {"query": random_sentences}
+        # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
+        headers = {"content-type": "application/json"}
+        try:
+            # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume,
+            # and it is heroku after all (fast enough)
+            r = post(url, data=dumps(payload), headers=headers, timeout=30)
+            if r.status_code == codes.ok:
+                try:
+                    response = r.json()
+                    return response["language"]
+                except TypeError:
+                    return "und"
+            else:
+                logging.error("Server error appeared. Setting language as undetermined.")
+                return "und"
+        except Timeout:
+            logging.error("30 seconds server timeout reached. Setting language as undetermined.")
+            return "und"
+
+    langs = []
+    exceptions = {"lulesamiska": "smj", "meankieli": "fit", "jiddisch": "yid"}
+    if subfixes and len(subfixes) >= 2:
+        logging.info("Determining the languages of the subtitles.")
+    else:
+        logging.info("Determining the language of the subtitle.")
+    if config.get("get_all_subtitles"):
+        for subfix in subfixes:
+            if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip("-"))]:
+                if "oversattning" in subfix.strip("-"):
+                    subfix = subfix.strip("-").split(".")[0]
+                else:
+                    subfix = subfix.strip("-")
+                langs += [exceptions[subfix]]
+                continue
+            subfile = "{}.srt".format(os.path.splitext(formatname(stream.output, config, stream.output_extention))[0] + subfix)
+            langs += [query(subfile)]
+    else:
+        subfile = "{}.srt".format(os.path.splitext(formatname(stream.output, config, stream.output_extention))[0])
+        langs += [query(subfile)]
+    if len(langs) >= 2:
+        logging.info("Language codes: " + ", ".join(langs))
+    else:
+        logging.info("Language code: " + langs[0])
+    return langs

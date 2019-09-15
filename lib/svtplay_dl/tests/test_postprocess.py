@@ -1,8 +1,13 @@
+import os
 import unittest
 
+from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.postprocess import _checktracks
 from svtplay_dl.postprocess import _getcodec
 from svtplay_dl.postprocess import _streams
+from svtplay_dl.postprocess import _sublanguage
+from svtplay_dl.service import Service
+from svtplay_dl.utils.parser import setup_defaults
 
 
 class streams(unittest.TestCase):
@@ -118,3 +123,31 @@ class checktracks(unittest.TestCase):
 
     def test_cktracks4(self):
         assert _checktracks([("1:0", "", "", "Audio", "mp3, 0 channels")]) == (None, None)
+
+
+class sublang(unittest.TestCase):
+    def test_sublang(self):
+        config = setup_defaults()
+        config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
+        service = Service(config, "http://exmaple.com")
+        service.output["title"] = "textfile"
+        stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
+        assert _sublanguage(stream, config, None) == ["swe"]
+
+    def test_sublang2(self):
+        config = setup_defaults()
+        config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
+        config.set("get_all_subtitles", True)
+        service = Service(config, "http://exmaple.com")
+        service.output["title"] = "textfile"
+        stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
+        assert _sublanguage(stream, config, ["grej", "hej"]) == ["swe", "swe"]
+
+    def test_sublang3(self):
+        config = setup_defaults()
+        config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
+        config.set("get_all_subtitles", True)
+        service = Service(config, "http://exmaple.com")
+        service.output["title"] = "textfile"
+        stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
+        assert _sublanguage(stream, config, ["lulesamiska"]) == ["smj"]
