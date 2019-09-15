@@ -104,8 +104,8 @@ class postprocess:
 
             cmd = [self.detect, "-i", orig_filename]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
-            streams = self._streams(stderr)
-            videotrack, audiotrack = self._checktracks(streams)
+            streams = _streams(stderr)
+            videotrack, audiotrack = _checktracks(streams)
 
             if self.config.get("merge_subtitle"):
                 logging.info("Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
@@ -119,7 +119,7 @@ class postprocess:
             if audiotrack:
                 arguments += ["-map", "{}".format(audiotrack)]
             arguments += ["-c", "copy", "-f", "mp4"]
-            if ext == ".ts" and "aac" in self._getcodec(streams, audiotrack):
+            if ext == ".ts" and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
             if self.config.get("merge_subtitle"):
@@ -172,8 +172,8 @@ class postprocess:
         audio_filename = "{}.audio.ts".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
-        streams = self._streams(stderr)
-        videotrack, audiotrack = self._checktracks(streams)
+        streams = _streams(stderr)
+        videotrack, audiotrack = _checktracks(streams)
 
         if self.config.get("merge_subtitle"):
             logging.info("Merge audio, video and subtitle into {}".format(orig_filename))
@@ -183,7 +183,7 @@ class postprocess:
         tempfile = "{}.temp".format(orig_filename)
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
-            if audiotrack and "aac" in self._getcodec(streams, audiotrack):
+            if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
         else:
             audio_filename = "{}.m4a".format(name)
@@ -230,23 +230,27 @@ class postprocess:
                 os.remove(subfile)
         os.rename(tempfile, orig_filename)
 
-    def _streams(self, output):
-        return re.findall(r"Stream \#(\d:\d)([\[\(][^\[]+[\]\)])?([\(\)\w]+)?: (Video|Audio): (.*)", output)
 
-    def _getcodec(self, streams, number):
-        for stream in streams:
-            if stream[0] == number:
-                return stream[4]
+def _streams(output):
+    return re.findall(r"Stream \#(\d:\d)([\[\(][^\[]+[\]\)])?([\(\)\w]+)?: (Video|Audio): (.*)", output)
 
-    def _checktracks(self, streams):
-        videotrack = None
-        audiotrack = None
-        for stream in streams:
-            if stream[3] == "Video":
-                videotrack = stream[0]
-            if stream[3] == "Audio":
-                if stream[4] == "mp3, 0 channels":
-                    continue
-                audiotrack = stream[0]
 
-        return videotrack, audiotrack
+def _getcodec(streams, number):
+    for stream in streams:
+        if stream[0] == number:
+            return stream[4]
+    return None
+
+
+def _checktracks(streams):
+    videotrack = None
+    audiotrack = None
+    for stream in streams:
+        if stream[3] == "Video":
+            videotrack = stream[0]
+        if stream[3] == "Audio":
+            if stream[4] == "mp3, 0 channels":
+                continue
+            audiotrack = stream[0]
+
+    return videotrack, audiotrack
