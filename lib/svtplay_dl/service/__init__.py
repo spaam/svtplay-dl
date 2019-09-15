@@ -165,12 +165,6 @@ class Generic(Service):
             for i in sites:
                 if i.handles(url):
                     return url, i(self.config, url)
-        match = re.search(r"embed.bambuser.com/broadcast/(\d+)", data)
-        if match:
-            url = "http://bambuser.com/v/%s" % match.group(1)
-            for i in sites:
-                if i.handles(url):
-                    return url, i(self.config, url)
         match = re.search(r'src="(http://tv.aftonbladet[^"]*)"', data)
         if match:
             url = match.group(1)
