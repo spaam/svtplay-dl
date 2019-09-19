@@ -1,6 +1,6 @@
 environment:
-  PYTHON: "C:\\Python35"
-  PYTHON_VERSION: 3.5
+  PYTHON: "C:\\Python37"
+  PYTHON_VERSION: 3.7
   PYTHON_ARCH: "32"
   TWINE_USERNAME:
     secure: yig0ualP0M39xIahEXhxZA==
