@@ -104,7 +104,11 @@ class postprocess:
 
         orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
         name, ext = os.path.splitext(orig_filename)
-        audio_filename = "{}.audio.ts".format(name)
+        if ext == ".ts":
+            audio_filename = "{}.audio.ts".format(name)
+        else:
+            audio_filename = "{}.m4a".format(name)
+
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
@@ -120,8 +124,6 @@ class postprocess:
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
-        else:
-            audio_filename = "{}.m4a".format(name)
         cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
         if videotrack:
             arguments += ["-map", "{}".format(videotrack)]
