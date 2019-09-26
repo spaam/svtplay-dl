@@ -166,7 +166,10 @@ def _formatname(output, config, extension):
             number = "{:02d}".format(int(output[key]))
             name = name.replace("{episode}", number)
         if key == "episodename" and output[key]:
-            name = name.replace("{episodename}", filenamify(output[key]))
+            epname = filenamify(output[key])
+            if len(epname) > 30:
+                epname = epname[:30]
+            name = name.replace("{episodename}", epname)
         if key == "id" and output[key]:
             name = name.replace("{id}", output[key])
         if key == "service" and output[key]:
