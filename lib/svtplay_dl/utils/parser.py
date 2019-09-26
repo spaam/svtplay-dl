@@ -53,7 +53,7 @@ class Options:
         self.default = value
 
 
-def parser(version):
+def gen_parser(version="unknown"):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
     general = parser.add_argument_group()
 
@@ -183,8 +183,13 @@ def parser(version):
     cmorep.add_argument("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
 
     parser.add_argument("urls", nargs="*")
-    options = parser.parse_args()
 
+    return parser
+
+
+def parser(version):
+    parser = gen_parser(version)
+    options = parser.parse_args()
     return parser, options
 
 
