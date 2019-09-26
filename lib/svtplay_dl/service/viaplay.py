@@ -285,7 +285,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     episode = None
             else:
                 title = dataj["summary"].replace("{} - ".format(dataj["format_title"]), "")
-                if title[-1] == ".":
+                if title and title[-1] == ".":
                     title = title[: len(title) - 1]  # remove the last dot
 
         if dataj["type"] == "clip":
