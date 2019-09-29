@@ -307,17 +307,24 @@ class Svtplay(Service, MetadataThumbMixin):
 
             def _fix_broken_timezone_implementation(value):
                 # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
-                if ":" == value[-3:-2]:
+                if "+" in value and ":" == value[-3:-2]:
                     value = value[:-3] + value[-2:]
                 return value
 
-            self.output["publishing_datetime"] = int(
-                time.mktime(
+            validfrom = episode["validFrom"]
+            if "+" in validfrom:
+                date = time.mktime(
                     datetime.datetime.strptime(
                         _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S%z"
                     ).timetuple()
                 )
-            )
+            else:
+                date = time.mktime(
+                    datetime.datetime.strptime(
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S"
+                    ).timetuple()
+                )
+            self.output["publishing_datetime"] = int(date)
 
         self.output["title_nice"] = data[data[visibleid]["parent"]["id"]]["name"]
 
