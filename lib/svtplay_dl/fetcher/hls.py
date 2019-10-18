@@ -80,7 +80,10 @@ def hlsparse(config, res, url, **kwargs):
                             subtitles[i["GROUP-ID"]].append(item)
                 continue
             elif i["TAG"] == "EXT-X-STREAM-INF":
-                bit_rate = float(i["BANDWIDTH"]) / 1000
+                if "AVERAGE-BANDWIDTH" in i:
+                    bit_rate = float(i["AVERAGE-BANDWIDTH"]) / 1000
+                else:
+                    bit_rate = float(i["BANDWIDTH"]) / 1000
                 if "AUDIO" in i and (i["AUDIO"] in media):
                     audio_url = get_full_url(media[i["AUDIO"]][0], url)
                 urls = get_full_url(i["URI"], url)
