@@ -30,7 +30,7 @@ class Dplay(Service):
         if self.config.get("username") and self.config.get("password"):
             premium = self._login()
             if not premium:
-                logging.warning("Wrong username/password.")
+                logging.warning("Wrong username/password. no support for recaptcha.")
 
         channel = False
         if "kanaler" in parse.path:
@@ -155,7 +155,7 @@ class Dplay(Service):
         url = "https://disco-api.{}/login".format(self.domain)
         login = {"credentials": {"username": self.config.get("username"), "password": self.config.get("password")}}
         res = self.http.post(url, json=login)
-        if res.status_code > 400:
+        if res.status_code >= 400:
             return False
         return True
 
@@ -164,6 +164,6 @@ class Dplay(Service):
         deviceid = hashlib.sha256(bytes(int(random.random() * 1000))).hexdigest()
         url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, self.domain.replace(".", ""), deviceid)
         res = self.http.get(url)
-        if res.status_code > 400:
+        if res.status_code >= 400:
             return False
         return True
