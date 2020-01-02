@@ -83,6 +83,11 @@ class postprocess:
             if returncode != 0:
                 return
 
+            if self.config.get("keep_original") is True:
+                logging.info("Muxing done, keeping original file(s).")
+                os.rename(tempfile, new_name)
+                return
+
             if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
                 logging.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
@@ -164,6 +169,11 @@ class postprocess:
         cmd += arguments
         returncode, stdout, stderr = run_program(cmd)
         if returncode != 0:
+            return
+
+        if self.config.get("keep_original") is True:
+            logging.info("Merging done, keeping original files.")
+            os.rename(tempfile, orig_filename)
             return
 
         logging.info("Merging done, removing old files.")

@@ -124,7 +124,6 @@ def gen_parser(version="unknown"):
         metavar="cookie1=value;cookie2=value2",
         help="A cookies to add to each HTTP request.",
     )
-    general.add_argument("--remux", dest="remux", default=False, action="store_true", help="Remux from one container to mp4 using ffmpeg or avconv")
     general.add_argument(
         "--exclude",
         dest="exclude",
@@ -267,6 +266,20 @@ def gen_parser(version="unknown"):
     cmorep.add_argument("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true", help="show operatorlist for cmore")
     cmorep.add_argument("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
 
+    postprocessing = parser.add_argument_group("Post-processing")
+    postprocessing.add_argument("--no-remux", dest="no_remux", default=False, action="store_true", help="Do not automatically remux to mp4")
+    postprocessing.add_argument(
+        "--no-merge",
+        dest="no_merge",
+        default=False,
+        action="store_true",
+        help="Do not automatically merge video, audio and possibly also subtitle(s) together",
+    )
+    postprocessing.add_argument("--no-postprocess", dest="no_postprocess", default=False, action="store_true", help="Do not postprocess anything")
+    postprocessing.add_argument(
+        "--keep-original", dest="keep_original", default=False, action="store_true", help="Do postprocessing while also keeping original files"
+    )
+
     parser.add_argument("urls", nargs="*")
 
     return parser
@@ -321,7 +334,10 @@ def setup_defaults():
     options.set("audio_language", None)
     options.set("audio_role", None)
     options.set("stream_prio", None)
-    options.set("remux", False)
+    options.set("no_remux", False)
+    options.set("no_merge", False)
+    options.set("no_postprocess", False)
+    options.set("keep_original", False)
     options.set("silent_semi", False)
     options.set("proxy", None)
     options.set("include_clips", False)
@@ -369,7 +385,10 @@ def parsertoconfig(config, parser):
     config.set("audio_role", parser.audio_role)
     config.set("audio_language", parser.audio_language)
     config.set("stream_prio", parser.stream_prio)
-    config.set("remux", parser.remux)
+    config.set("no_remux", parser.no_remux)
+    config.set("no_merge", parser.no_merge)
+    config.set("no_postprocess", parser.no_postprocess)
+    config.set("keep_original", parser.keep_original)
     config.set("get_all_subtitles", parser.get_all_subtitles)
     config.set("get_raw_subtitles", parser.get_raw_subtitles)
     config.set("convert_subtitle_colors", parser.convert_subtitle_colors)
