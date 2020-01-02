@@ -92,7 +92,6 @@ def parser(version):
     general.add_argument(
         "--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2", help="A header to add to each HTTP request."
     )
-    general.add_argument("--remux", dest="remux", default=False, action="store_true", help="Remux from one container to mp4 using ffmpeg or avconv")
     general.add_argument(
         "--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated."
     )
@@ -172,6 +171,20 @@ def parser(version):
     cmorep.add_argument("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true", help="show operatorlist for cmore")
     cmorep.add_argument("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
 
+    postprocessing = parser.add_argument_group("Post-processing")
+    postprocessing.add_argument("--no-remux", dest="no_remux", default=False, action="store_true", help="Do not automatically remux to mp4")
+    postprocessing.add_argument(
+        "--no-merge",
+        dest="no_merge",
+        default=False,
+        action="store_true",
+        help="Do not automatically merge video, audio and possibly also subtitle(s) together",
+    )
+    postprocessing.add_argument("--no-postprocess", dest="no_postprocess", default=False, action="store_true", help="Do not postprocess anything")
+    postprocessing.add_argument(
+        "--keep-original", dest="keep_original", default=False, action="store_true", help="Do postprocessing while also keeping original files"
+    )
+
     parser.add_argument("urls", nargs="*")
     options = parser.parse_args()
 
@@ -218,7 +231,10 @@ def setup_defaults():
     options.set("ssl_verify", True)
     options.set("http_headers", None)
     options.set("stream_prio", None)
-    options.set("remux", False)
+    options.set("no_remux", False)
+    options.set("no_merge", False)
+    options.set("no_postprocess", False)
+    options.set("keep_original", False)
     options.set("silent_semi", False)
     options.set("proxy", None)
     options.set("include_clips", False)
@@ -260,7 +276,10 @@ def parsertoconfig(config, parser):
     config.set("ssl_verify", parser.ssl_verify)
     config.set("http_headers", parser.http_headers)
     config.set("stream_prio", parser.stream_prio)
-    config.set("remux", parser.remux)
+    config.set("no_remux", parser.no_remux)
+    config.set("no_merge", parser.no_merge)
+    config.set("no_postprocess", parser.no_postprocess)
+    config.set("keep_original", parser.keep_original)
     config.set("get_all_subtitles", parser.get_all_subtitles)
     config.set("get_raw_subtitles", parser.get_raw_subtitles)
     config.set("convert_subtitle_colors", parser.convert_subtitle_colors)
