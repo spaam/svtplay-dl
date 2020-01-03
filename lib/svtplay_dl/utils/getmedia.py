@@ -210,21 +210,21 @@ def get_one_media(stream):
 
         if fstream.config.get("no_postprocess") is True or all(fstream.config.get(x) for x in ["no_remux", "no_merge"]) is True:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")
+            return
 
-        if fstream.config.get("no_postprocess") is False:
-            post = postprocess(fstream, fstream.config, subfixes)
-            if fstream.audio and not post.detect and fstream.finished:
-                logging.warning("Can't find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
+        post = postprocess(fstream, fstream.config, subfixes)
+        if fstream.audio and not post.detect and fstream.finished:
+            logging.warning("Can't find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
 
-            if fstream.audio and post.detect and fstream.config.get("no_merge") is False:
-                post.merge()
-            elif fstream.name == "hls" and post.detect and fstream.config.get("no_remux") is False:
-                if fstream.config.get("no_merge") is True:
-                    logging.warning("Can't remux HLS streams without merging. Use --no-postprocess to leave content completely untouched.")
-                post.merge()
-                post.remux()
-            else:
-                logging.info("All done. Not postprocessing files, leaving them completely untouched.")
+        if fstream.audio and post.detect and fstream.config.get("no_merge") is False:
+            post.merge()
+        elif fstream.name == "hls" and post.detect and fstream.config.get("no_remux") is False:
+            if fstream.config.get("no_merge") is True:
+                logging.warning("Can't remux HLS streams without merging. Use --no-postprocess to leave content completely untouched.")
+            post.merge()
+            post.remux()
+        else:
+            logging.info("All done. Not postprocessing files, leaving them completely untouched.")
 
         if fstream.config.get("silent_semi") and fstream.finished:
             logging.log(25, "Download of %s was completed" % fstream.options.output)
