@@ -22,7 +22,7 @@ install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install -U pip setuptools"
   - "pip install -r requirements-dev.txt -r requirements.txt"
-  - "pip install cx_freeze awscli backports-datetime-fromisoformat"
+  - "pip install awscli backports-datetime-fromisoformat"
   - "git describe --tags --dirty --always"
 
 test_script:
@@ -32,8 +32,10 @@ test_script:
 after_test:
   - "mkdir svtplay-dl"
   - "python setversion.py"
-  - "%PYTHON%\\Scripts\\cxfreeze.exe --include-modules=cffi,queue,idna.idnadata --target-dir=svtplay-dl bin/svtplay-dl"
-  - "svtplay-dl\\svtplay-dl.exe --version"
+  - "python setup.py build_exe"
+  - "dir /s build"
+  - "build\\exe.win32-3.7\\svtplay-dl.exe --version"
+  - "xcopy /s build\\exe.win32-3.7 svtplay-dl"
   - "7z.exe a -tzip svtplay-dl.zip svtplay-dl"
   - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" python scripts/cibuild.py
 
