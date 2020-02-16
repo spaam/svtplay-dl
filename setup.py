@@ -2,7 +2,19 @@ import os
 import sys
 
 from setuptools import find_packages
-from setuptools import setup
+
+if "build_exe" in sys.argv:
+    from cx_Freeze import setup, Executable
+else:
+    from setuptools import setup
+
+    # fake Executable class to avoid cx_Freeze on non-Windows
+    # noinspection Mypy
+    class Executable:
+        # noinspection PyUnusedLocal
+        def __init__(self, script=None, base=None):
+            pass
+
 
 import versioneer
 
@@ -51,4 +63,7 @@ setup(
         "Topic :: Multimedia :: Video",
         "Topic :: Utilities",
     ],
+    # cx_freeze info for Windows builds with Python embedded
+    options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"]}},
+    executables=[Executable("bin/svtplay-dl", base=None)],
 )
