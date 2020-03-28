@@ -64,6 +64,6 @@ setup(
         "Topic :: Utilities",
     ],
     # cx_freeze info for Windows builds with Python embedded
-    options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"]}},
+    options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"], "includes": "_cffi_backend"}},
     executables=[Executable("bin/svtplay-dl", base=None)],
 )
