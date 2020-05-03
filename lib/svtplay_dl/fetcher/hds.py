@@ -325,7 +325,7 @@ def readasrtbox(data, pos):
 def decode_f4f(fragID, fragData):
     start = fragData.find(b"mdat") + 4
     if fragID > 1:
-        tagLen, = struct.unpack_from(">L", fragData, start)
+        (tagLen,) = struct.unpack_from(">L", fragData, start)
         tagLen &= 0x00FFFFFF
         start += tagLen + 11 + 4
     return start

@@ -76,7 +76,7 @@ class Eurosport(Service):
                 yield ServiceError("Cant find channel")
                 return
 
-            vid, = match.groups()
+            (vid,) = match.groups()
             query["pageType"] = pagetype
             query["channelCallsign"] = vid
             query["channelCallsigns"] = vid
