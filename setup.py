@@ -26,7 +26,7 @@ if vi < (3, 4):
     raise RuntimeError("svtplay-dl requires Python 3.4 or greater")
 
 about = {}
-with open(os.path.join(srcdir, "svtplay_dl", "__version__.py"), "r") as f:
+with open(os.path.join(srcdir, "svtplay_dl", "__version__.py")) as f:
     exec(f.read(), about)
 
 deps = []

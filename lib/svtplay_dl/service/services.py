@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.aftonbladet import Aftonbladettv
 from svtplay_dl.service.barnkanalen import Barnkanalen

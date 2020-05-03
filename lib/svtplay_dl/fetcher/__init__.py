@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import copy
 
 from svtplay_dl.utils.http import HTTP

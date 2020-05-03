@@ -2,8 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 # pylint has issues with urlparse: "some types could not be inferred"
 # pylint: disable=E1103
-from __future__ import absolute_import
-
 import copy
 import json
 import logging

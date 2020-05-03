@@ -5,8 +5,6 @@
 #   pylint: disable-msg=C0103
 # We're a test, we go where ever we want (within reason, of course):
 #   pylint: disable-msg=protected-access
-from __future__ import absolute_import
-
 import unittest
 
 from svtplay_dl.fetcher.hls import M3U8

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import re
 
 from svtplay_dl.error import ServiceError

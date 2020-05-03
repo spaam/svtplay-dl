@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import unittest
 
 from svtplay_dl.service import Service
