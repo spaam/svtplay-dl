@@ -5,12 +5,13 @@
 from __future__ import absolute_import
 
 import copy
+import hashlib
 import json
+import logging
 import re
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
@@ -19,14 +20,6 @@ from svtplay_dl.subtitle import subtitle
 
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
-        "tv3play.se",
-        "tv6play.se",
-        "tv8play.se",
-        "tv10play.se",
-        "tv3play.no",
-        "tv3play.dk",
-        "tv6play.no",
-        "viasat4play.no",
         "tv3play.ee",
         "tv3play.lv",
         "tv3play.lt",
@@ -42,298 +35,147 @@ class Viaplay(Service, OpenGraphThumbMixin):
         "tvplay.skaties.lv",
     ]
 
-    def _get_video_id(self, url=None):
-        """
-        Extract video id. It will try to avoid making an HTTP request
-        if it can find the ID in the URL, but otherwise it will try
-        to scrape it from the HTML document. Returns None in case it's
-        unable to extract the ID at all.
-        """
-        if url:
-            html_data = self.http.request("get", url).text
-        else:
-            html_data = self.get_urldata()
-        html_data = self.get_urldata()
-        match = re.search(r'data-video-id="([0-9]+)"', html_data)
-        if match:
-            return match.group(1)
-        match = re.search(r'data-videoid="([0-9]+)', html_data)
-        if match:
-            return match.group(1)
-        match = re.search(r'"mediaGuid":"([0-9]+)"', html_data)
-        if match:
-            return match.group(1)
-
-        clips = False
-        slug = None
-        match = re.search('params":({.*}),"query', self.get_urldata())
-        if match:
-            jansson = json.loads(match.group(1))
-            if "seasonNumberOrVideoId" in jansson:
-                season = jansson["seasonNumberOrVideoId"]
-                match = re.search(r"\w-(\d+)$", season)
-                if match:
-                    season = match.group(1)
-            else:
-                match = self._conentpage(self.get_urldata())
-                if match:  # this only happen on the program page?
-                    janson2 = json.loads(match.group(1))
-                    if janson2["formatPage"]["format"]:
-                        season = janson2["formatPage"]["format"]["seasonNumber"]
-                        return janson2["formatPage"]["format"]["videos"][str(season)]["program"][0]["id"]
-                return None
-            if "videoIdOrEpisodeNumber" in jansson:
-                videp = jansson["videoIdOrEpisodeNumber"]
-                match = re.search(r"(\w+)-(\d+)", videp)
-                if match:
-                    episodenr = match.group(2)
-                else:
-                    episodenr = videp
-                    clips = True
-                match = re.search(r"(s\w+)-(\d+)", season)
-                if match:
-                    season = match.group(2)
-            else:
-                # sometimes videoIdOrEpisodeNumber does not work.. this is a workaround
-                match = re.search(r"(episode|avsnitt)-(\d+)", self.url)
-                if match:
-                    episodenr = match.group(2)
-                else:
-                    episodenr = season
-            if "slug" in jansson:
-                slug = jansson["slug"]
-
-            if clips:
-                return episodenr
-            else:
-                match = self._conentpage(self.get_urldata())
-                if match:
-                    janson = json.loads(match.group(1))
-                    for i in janson["formatPage"]["format"]["videos"].keys():
-                        if "program" in janson["formatPage"]["format"]["videos"][str(i)]:
-                            for n in janson["formatPage"]["format"]["videos"][i]["program"]:
-                                if str(n["episodeNumber"]) and int(episodenr) == n["episodeNumber"] and int(season) == n["seasonNumber"]:
-                                    if slug is None or slug == n["formatSlug"]:
-                                        return n["id"]
-                                elif n["id"] == episodenr:
-                                    return episodenr
-
-        parse = urlparse(self.url)
-        match = re.search(r"/\w+/(\d+)", parse.path)
-        if match:
-            return match.group(1)
-        match = re.search(r'iframe src="http://play.juicyplay.se[^\"]+id=(\d+)', html_data)
-        if match:
-            return match.group(1)
-
-        match = re.search(r'<meta property="og:image" content="([\S]+)"', html_data)
-        if match:
-            return match.group(1).split("/")[-2]
-
-        return None
-
     def get(self):
-        parse = urlparse(self.url)
-        vid = self._get_video_id()
-        if vid is None:
-            if parse.path[:6] == "/sport":
-                result = self._sport()
-                yield from result
-                return
-            else:
-                yield ServiceError("Can't find video file for: {}".format(self.url))
-                return
-
-        data = self._get_video_data(vid)
-        if data.status_code == 403:
-            yield ServiceError("Can't play this because the video is geoblocked.")
-            return
-        dataj = json.loads(data.text)
-
-        if "msg" in dataj:
-            yield ServiceError(dataj["msg"])
+        login = self._login()
+        if not login:
+            yield ServiceError("You need to login")
             return
 
-        if dataj["type"] == "live":
-            self.config.set("live", True)
-
-        self.output["id"] = vid
-        self._autoname(dataj)
-
-        streams = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/stream/{}".format(vid))
-        if streams.status_code == 403:
-            yield ServiceError("Can't play this because the video is geoblocked.")
-            return
-        streamj = json.loads(streams.text)
-
-        if "msg" in streamj:
-            yield ServiceError("Can't play this because the video is either not found or geoblocked.")
+        data = self.get_urldata()
+        match = re.search('}}}},("staticPages".*}}); windo', data)
+        if not match:
+            yield ServiceError("Cant find necessary info")
             return
 
-        if dataj["sami_path"]:
-            if dataj["sami_path"].endswith("vtt"):
-                subtype = "wrst"
-            else:
-                subtype = "sami"
-            yield subtitle(copy.copy(self.config), subtype, dataj["sami_path"], output=self.output)
-        if dataj["subtitles_webvtt"]:
-            yield subtitle(copy.copy(self.config), "wrst", dataj["subtitles_webvtt"], output=self.output)
-        if dataj["subtitles_for_hearing_impaired"]:
-            if dataj["subtitles_for_hearing_impaired"].endswith("vtt"):
-                subtype = "wrst"
-            else:
-                subtype = "sami"
-            if self.config.get("get_all_subtitles"):
-                yield subtitle(copy.copy(self.config), subtype, dataj["subtitles_for_hearing_impaired"], "-SDH", output=self.output)
-            else:
-                yield subtitle(copy.copy(self.config), subtype, dataj["subtitles_for_hearing_impaired"], output=self.output)
+        janson = json.loads("{}{}".format("{", match.group(1)))
+        video = None
+        for play in janson["page"]["blocks"]:
+            if "componentName" in play and play["componentName"] == "player":
+                video = play
+                break
 
-        if streamj["streams"]["medium"] and streamj["streams"]["medium"][:7] != "[empty]":
-            filename = streamj["streams"]["medium"]
-            if ".f4m" in filename:
-                streams = hdsparse(self.config, self.http.request("get", filename, params={"hdcore": "3.7.0"}), filename, output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+        if not video:
+            yield ServiceError("Can't find video")
+            return
 
-        if streamj["streams"]["hls"]:
-            streams = hlsparse(self.config, self.http.request("get", streamj["streams"]["hls"]), streamj["streams"]["hls"], output=self.output)
+        self._autoname(video)
+
+        if "subtitles" in video["_embedded"]["program"] and "subtitlesWebvtt" in video["_embedded"]["program"]["subtitles"]:
+            yield subtitle(copy.copy(self.config), "wrst", video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"], output=self.output)
+
+        res = self.http.get(video["_embedded"]["program"]["_links"]["streamLink"]["href"])
+        janson = res.json()
+        stream = janson["embedded"]["prioritizedStreams"][0]["links"]["stream"]
+
+        if video["_embedded"]["program"]["_links"]["streamLink"]:
+            streams = hlsparse(
+                self.config,
+                self.http.request("get", stream["href"]),
+                stream["href"],
+                output=self.output,
+                authorization="MTG-AT {}".format(self.token),
+            )
             for n in list(streams.keys()):
                 yield streams[n]
 
     def find_all_episodes(self, config):
-        seasons = []
-        match = re.search(r"(sasong|sesong)-(\d+)", urlparse(self.url).path)
-        if match:
-            seasons.append(match.group(2))
-        else:
-            match = self._conentpage(self.get_urldata())
-            if match:
-                janson = json.loads(match.group(1))
-                for i in janson["formatPage"]["format"]["seasons"]:
-                    seasons.append(i["seasonNumber"])
+        episodes = []
+        parse = urlparse(self.url)
+        data = self.get_urldata()
+        match = re.search('}}}},("staticPages".*}}); windo', data)
+        if not match:
+            logging.error("Cant find necessary info")
+            return
 
-        episodes = self._grab_episodes(config, seasons)
+        janson = json.loads("{}{}".format("{", match.group(1)))
+        seasons = []
+
+        if janson["page"]["pageType"] == "player":
+            res = self.http.get("{}://{}{}".format(parse.scheme, parse.netloc, janson["page"]["blocks"][0]["_links"]["back"]["publicPath"]))
+            data = res.text
+            match = re.search('}}}},("staticPages".*}}); windo', data)
+            if not match:
+                logging.error("Cant find necessary info")
+                return
+
+            janson = json.loads("{}{}".format("{", match.group(1)))
+
+        for i in janson["page"]["blocks"]:
+            if i["slug"] == "series_header" and "seasons" in i["seriesHeader"]:
+                for n in i["seriesHeader"]["seasons"]:
+                    seasons.append(n["_links"]["season"]["href"])
+                break
+
+        videos_tmp = []
+        clips = []
+        for season in seasons:
+            res = self.http.get(season)
+            janson = res.json()
+
+            groups = None
+            for i in janson["_embedded"]["viafreeBlocks"]:
+                if i["componentName"] == "groups":
+                    groups = i
+                    break
+
+            if groups:
+                for i in groups["_embedded"]["blocks"][0]["_embedded"]["programs"]:
+                    if i["type"] == "episode":
+                        if i["episode"]["episodeNumber"]:
+                            videos_tmp.append(
+                                [
+                                    int("{}{}".format(i["episode"]["seasonNumber"], i["episode"]["episodeNumber"])),
+                                    "{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]),
+                                ]
+                            )
+                        elif config.get("include_clips"):
+                            clips.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))
+                    else:
+                        episodes.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))
+        if videos_tmp:
+            for i in sorted(videos_tmp, key=lambda x: x[0]):
+                episodes.append(i[1])
+
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]
+
+        if clips:
+            episodes.extend(clips)
+
         return sorted(episodes)
 
-    def _grab_episodes(self, config, seasons):
-        episodes = []
-        baseurl = self.url
-        match = re.search(r"(saeson|sasong|sesong)-\d+", urlparse(self.url).path)
-        if match:
-            if re.search(r"(avsnitt|episode)", urlparse(baseurl).path):
-                baseurl = baseurl[: baseurl.rfind("/")]
-            baseurl = baseurl[: baseurl.rfind("/")]
-
-        for i in seasons:
-            url = "{}/{}-{}".format(baseurl, self._isswe(self.url), i)
-            res = self.http.get(url)
-            if res:
-                match = self._conentpage(res.text)
-                if match:
-                    janson = json.loads(match.group(1))
-                    if "program" in janson["formatPage"]["format"]["videos"][str(i)]:
-                        for n in janson["formatPage"]["format"]["videos"][str(i)]["program"]:
-                            episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
-                    if config.get("include_clips"):
-                        if "clip" in janson["formatPage"]["format"]["videos"][str(i)]:
-                            for n in janson["formatPage"]["format"]["videos"][str(i)]["clip"]:
-                                episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
-        return episodes
-
-    def _isswe(self, url):
-        if re.search(r".se$", urlparse(url).netloc):
-            return "sasong"
-        elif re.search(r".dk$", urlparse(url).netloc):
-            return "saeson"
-        else:
-            return "sesong"
-
-    def _conentpage(self, data):
-        return re.search(r'=({"sportsPlayer.*}); window.__config', data)
-
-    def _videos_to_list(self, url, vid, episodes):
-        dataj = json.loads(self._get_video_data(vid).text)
-        if "msg" not in dataj:
-            if url not in episodes:
-                episodes.append(url)
-        return episodes
-
-    def _get_video_data(self, vid):
-        url = "http://playapi.mtgx.tv/v3/videos/{}".format(vid)
-        data = self.http.request("get", url)
-        return data
-
     def _autoname(self, dataj):
-        program = dataj["format_slug"]
-        season = None
-        episode = None
-        title = None
+        typ = dataj["_embedded"]["program"]["type"]
+        title = dataj["_embedded"]["program"]["title"]
 
-        if "season" in dataj["format_position"]:
-            if dataj["format_position"]["season"] and dataj["format_position"]["season"] > 0:
-                season = dataj["format_position"]["season"]
-        if season:
-            if dataj["format_position"]["episode"] and len(dataj["format_position"]["episode"]) > 0:
-                episode = dataj["format_position"]["episode"]
-            if episode:
-                try:
-                    episode = int(episode)
-                except (TypeError, ValueError):
-                    title = episode
-                    episode = None
-            else:
-                title = dataj["summary"].replace("{} - ".format(dataj["format_title"]), "")
-                if title and title[-1] == ".":
-                    title = title[: len(title) - 1]  # remove the last dot
+        vid = dataj["_embedded"]["program"]["guid"]
+        if re.search("-", vid):  # in sports they have "-" in the id..
+            vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
+        self.output["id"] = vid
 
-        if dataj["type"] == "clip":
-            # Removes the show name from the end of the filename
-            # e.g. Showname.S0X.title instead of Showname.S07.title-showname
-            match = re.search(r"(.+)-", dataj["title"])
-            if match:
-                title = match.group(1)
-            else:
-                title = dataj["title"]
-            if "derived_from_id" in dataj:
-                if dataj["derived_from_id"]:
-                    parent_id = dataj["derived_from_id"]
-                    parent_episode = self.http.request("get", "http://playapi.mtgx.tv/v3/videos/{}".format(parent_id))
-                    if parent_episode.status_code != 403:  # if not geoblocked
-                        datajparent = json.loads(parent_episode.text)
-                        if not season and datajparent["format_position"]["season"] > 0:
-                            season = datajparent["format_position"]["season"]
-                        if len(datajparent["format_position"]["episode"]) > 0:
-                            episode = datajparent["format_position"]["episode"]
+        if typ == "episode":
+            program = dataj["_embedded"]["program"][typ]["seriesTitle"]
+            self.output["season"] = dataj["_embedded"]["program"][typ]["seasonNumber"]
+            self.output["episode"] = dataj["_embedded"]["program"][typ]["episodeNumber"]
+            self.output["episodename"] = title
+        elif typ == "clip":
+            program = dataj["_embedded"]["program"]["episode"]["seriesTitle"]
+            self.output["season"] = dataj["_embedded"]["program"]["episode"]["seasonNumber"]
+            self.output["episodename"] = title
+        else:
+            program = title
 
         self.output["title"] = program
-        self.output["season"] = season
-        self.output["episode"] = episode
-        self.output["episodename"] = title
 
-        return True
+    def _login(self):
+        res = self.http.post(
+            "https://viafree.mtg-api.com/identity/viafree/auth/pwd/sessions",
+            json={"email": self.config.get("username"), "password": self.config.get("password")},
+            headers={"Accept": "Application/json"},
+        )
 
-    def _sport(self):
-        content = self._conentpage(self.get_urldata())
-        if not content:
-            yield ServiceError("Can't find video file for: {}".format(self.url))
-            return
-
-        janson = json.loads(content.group(1))
-        if not janson["sportsPlayer"]["currentVideo"]:
-            yield ServiceError("Can't find video file for: {}".format(self.url))
-            return
-
-        self.output["title"] = janson["sportsPlayer"]["currentVideo"]["title"]
-
-        res = self.http.request("get", janson["sportsPlayer"]["currentVideo"]["_links"]["streamLink"]["href"])
-        if res.status_code == 403:
-            yield ServiceError("Can't play this because the video is geoblocked.")
-            return
-
-        for i in res.json()["embedded"]["prioritizedStreams"]:
-            streams = hlsparse(self.config, self.http.request("get", i["links"]["stream"]["href"]), i["links"]["stream"]["href"], output=self.output)
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
+        if res.status_code < 400:
+            self.userID = res.json()["data"]["userData"]["userId"]
+            self.token = res.json()["data"]["accessToken"]
+            return True
+        return False
