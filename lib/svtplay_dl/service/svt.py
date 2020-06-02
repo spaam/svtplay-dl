@@ -1,4 +1,5 @@
 import copy
+import json
 import re
 
 from svtplay_dl.error import ServiceError
@@ -12,16 +13,14 @@ class Svt(Svtplay):
     def get(self):
 
         data = self.get_urldata()
-        match_data_video_id = re.search('data-video-id="(.+?)"', data)
-
-        if match_data_video_id:
-            id = match_data_video_id.group(1)
-
-        else:
+        match = re.search("n.reduxState=(.*);", data)
+        if not match:
             yield ServiceError("Cant find video info.")
             return
 
-        res = self.http.get("http://api.svt.se/videoplayer-api/video/{}".format(id))
+        janson = json.loads(match.group(1))
+        vid = janson["areaData"]["articles"][list(janson["areaData"]["articles"].keys())[0]]["media"][0]["image"]["svtId"]
+        res = self.http.get("https://api.svt.se/video/{}".format(vid))
         janson = res.json()
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
