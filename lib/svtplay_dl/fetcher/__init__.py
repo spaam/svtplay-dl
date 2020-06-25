@@ -7,10 +7,10 @@ from svtplay_dl.utils.output import progressbar
 
 
 class VideoRetriever:
-    def __init__(self, config, url, bitrate=0, **kwargs):
+    def __init__(self, config, url, bitrate, output, **kwargs):
         self.config = config
         self.url = url
-        self.bitrate = int(bitrate)
+        self.bitrate = int(bitrate) if bitrate else 0
         self.kwargs = kwargs
         self.http = HTTP(config)
         self.finished = False
@@ -18,12 +18,15 @@ class VideoRetriever:
         self.files = kwargs.pop("files", None)
         self.keycookie = kwargs.pop("keycookie", None)
         self.authorization = kwargs.pop("authorization", None)
-        self.output = kwargs.pop("output", None)
+        self.output = output
         self.segments = kwargs.pop("segments", None)
         self.output_extention = None
+        channels = kwargs.pop("channels", None)
+        codec = kwargs.pop("codec", "h264")
+        self.format = "{}-{}".format(codec, channels) if channels else codec
 
     def __repr__(self):
-        return "<Video(fetcher={}, bitrate={}>".format(self.__class__.__name__, self.bitrate)
+        return "<Video(fetcher={}, bitrate={} format={}>".format(self.__class__.__name__, self.bitrate, self.format)
 
     @property
     def name(self):
