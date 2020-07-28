@@ -50,7 +50,8 @@ def hlsparse(config, res, url, **kwargs):
     authorization = kwargs.pop("authorization", None)
     httpobject = kwargs.pop("httpobject", None)
     output = kwargs.pop("output", None)
-
+    channels = kwargs.pop("channels", None)
+    codec = kwargs.pop("codec", "h264")
     media = {}
     subtitles = {}
     segments = None
@@ -58,6 +59,8 @@ def hlsparse(config, res, url, **kwargs):
     if m3u8.master_playlist:
         for i in m3u8.master_playlist:
             audio_url = None
+            vcodec = None
+            chans = None
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
                     if i["TYPE"] and i["TYPE"] != "SUBTITLES":
@@ -66,7 +69,10 @@ def hlsparse(config, res, url, **kwargs):
                                 segments = True
                             if i["GROUP-ID"] not in media:
                                 media[i["GROUP-ID"]] = []
-                            media[i["GROUP-ID"]].append(i["URI"])
+                            if "CHANNELS" in i:
+                                if i["CHANNELS"] == "6":
+                                    chans = "51"
+                            media[i["GROUP-ID"]].append([i["URI"], chans])
                         else:
                             segments = False
                 if i["TYPE"] == "SUBTITLES":
@@ -82,11 +88,20 @@ def hlsparse(config, res, url, **kwargs):
                     bit_rate = float(i["AVERAGE-BANDWIDTH"]) / 1000
                 else:
                     bit_rate = float(i["BANDWIDTH"]) / 1000
+                if "CODECS" in i:
+                    if i["CODECS"][:3] == "hvc":
+                        vcodec = "hevc"
+                    if i["CODECS"][:3] == "avc":
+                        vcodec = "h264"
                 if "AUDIO" in i and (i["AUDIO"] in media):
-                    audio_url = get_full_url(media[i["AUDIO"]][0], url)
+                    chans = media[i["AUDIO"]][0][1]
+                    audio_url = get_full_url(media[i["AUDIO"]][0][0], url)
                 urls = get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
+            chans = chans if audio_url else channels
+            codec = vcodec if vcodec else codec
+
             streams[int(bit_rate)] = HLS(
                 copy.copy(config),
                 urls,
@@ -97,7 +112,9 @@ def hlsparse(config, res, url, **kwargs):
                 audio=audio_url,
                 output=output,
                 segments=bool(segments),
-                kwargs=kwargs,
+                channels=chans,
+                codec=codec,
+                **kwargs,
             )
 
         if subtitles and httpobject:
