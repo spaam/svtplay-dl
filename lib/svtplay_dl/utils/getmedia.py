@@ -210,7 +210,7 @@ def get_one_media(stream):
             if fstream.config.get("get_url"):
                 print(fstream.url)
                 return
-            logging.info("Selected to download %s, bitrate: %s", fstream.name, fstream.bitrate)
+            logging.info("Selected to download %s, bitrate: %s format: %s", fstream.name, fstream.bitrate, fstream.format)
             fstream.download()
         except UIException as e:
             if fstream.config.get("verbose"):

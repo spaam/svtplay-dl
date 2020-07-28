@@ -129,6 +129,13 @@ def parser(version):
         metavar="dash,hls,hds,http",
         help="If two streams have the same quality, choose the one you prefer",
     )
+    quality.add_argument(
+        "--format-preferred",
+        dest="format_preferred",
+        default=None,
+        metavar="h264,h264-51",
+        help="Choose the format you prefer, --list-quality to show which one to choose from",
+    )
 
     subtitle = parser.add_argument_group("Subtitle")
     subtitle.add_argument(
@@ -217,6 +224,7 @@ def setup_defaults():
     options.set("get_only_episode_url", False)
     options.set("ssl_verify", True)
     options.set("http_headers", None)
+    options.set("format_preferred", None)
     options.set("stream_prio", None)
     options.set("remux", False)
     options.set("silent_semi", False)
@@ -259,6 +267,7 @@ def parsertoconfig(config, parser):
     config.set("get_only_episode_url", parser.get_only_episode_url)
     config.set("ssl_verify", parser.ssl_verify)
     config.set("http_headers", parser.http_headers)
+    config.set("format_preferred", parser.format_preferred)
     config.set("stream_prio", parser.stream_prio)
     config.set("remux", parser.remux)
     config.set("get_all_subtitles", parser.get_all_subtitles)

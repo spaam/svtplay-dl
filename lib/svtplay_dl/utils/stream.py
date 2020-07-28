@@ -8,13 +8,14 @@ from svtplay_dl.utils.http import HTTP
 # TODO: should be set as the default option in the argument parsing?
 DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http"]
 LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http"]
+DEFAULT_FORMAT_PRIO = ["h264", "h264-51"]
 
 
 def sort_quality(data):
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
     for i in data:
-        datas.append([i.bitrate, i.name])
+        datas.append([i.bitrate, i.name, i.format])
     return datas
 
 
@@ -22,7 +23,7 @@ def list_quality(videos):
     data = sort_quality(videos)
     logging.info("Quality\tMethod")
     for i in data:
-        logging.info("%s\t%s", i[0], i[1].upper())
+        logging.info("%s\t%s\t%s", i[0], i[1].upper(), i[2].upper())
 
 
 def protocol_prio(streams, priolist):
@@ -40,6 +41,12 @@ def protocol_prio(streams, priolist):
     # for sorting.
     prioritized = [(s.bitrate, proto_score[s.name], s) for s in streams if s.name in proto_score]
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
+
+
+def format_prio(streams, priolist):
+    logging.debug("Format priority: %s", str(priolist))
+    prioritized = [s for s in streams if s.format in priolist]
+    return prioritized
 
 
 def select_quality(config, streams):
@@ -66,6 +73,12 @@ def select_quality(config, streams):
     if optf == 0 and high:
         optf = (high - quality) / 2
         optq = quality + (high - quality) / 2
+
+    if config.get("format_preferred"):
+        form_prio = config.get("format_preferred").split(",")
+    else:
+        form_prio = DEFAULT_FORMAT_PRIO
+    streams = format_prio(streams, form_prio)
 
     # Extract protocol prio, in the form of "hls,hds,http",
     # we want it as a list
