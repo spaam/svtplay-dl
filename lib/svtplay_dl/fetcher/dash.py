@@ -122,6 +122,10 @@ def adaptionset(attributes, element, url, baseurl=None):
     template = element[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
     represtation = element[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
 
+    codecs = None
+    if "codecs" in element[0].attrib:
+        codecs = element[0].attrib["codecs"]
+
     for i in represtation:
         files = []
         segments = False
@@ -129,7 +133,20 @@ def adaptionset(attributes, element, url, baseurl=None):
         attributes.set("bandwidth", i.attrib["bandwidth"])
         bitrate = int(i.attrib["bandwidth"]) / 1000
         idnumber = i.attrib["id"]
-
+        channels = None
+        codec = None
+        if codecs is None and "codecs" in i.attrib:
+            codecs = i.attrib["codecs"]
+        if codecs[:3] == "avc":
+            codec = "h264"
+        if codecs[:3] == "hvc":
+            codec = "hevc"
+        if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
+            chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
+            if chan == "6":
+                channels = "51"
+            else:
+                channels = None
         if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
             filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
 
@@ -144,12 +161,12 @@ def adaptionset(attributes, element, url, baseurl=None):
             files = templateelemt(attributes, i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
 
         if files:
-            streams[bitrate] = {"segments": segments, "files": files}
+            streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels}
 
     return streams
 
 
-def dashparse(config, res, url, output=None):
+def dashparse(config, res, url, **kwargs):
     streams = {}
     if not res:
         return streams
@@ -161,12 +178,13 @@ def dashparse(config, res, url, output=None):
         streams[0] = ServiceError("Can't read DASH playlist. {}, size: {}".format(res.status_code, len(res.text)))
         return streams
 
-    return _dashparse(config, res.text, url, output, res.cookies)
+    return _dashparse(config, res.text, url, res.cookies, **kwargs)
 
 
-def _dashparse(config, text, url, output, cookies):
+def _dashparse(config, text, url, cookies, **kwargs):
     streams = {}
     baseurl = None
+    output = kwargs.pop("output", None)
     attributes = DASHattibutes()
 
     xml = ET.XML(text)
@@ -198,7 +216,10 @@ def _dashparse(config, text, url, output, cookies):
     if not audiofiles or not videofiles:
         streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
         return streams
-
+    if "channels" in kwargs:
+        kwargs.pop("channels")
+    if "codec" in kwargs:
+        kwargs.pop("codec")
     for i in videofiles.keys():
         bitrate = i + list(audiofiles.keys())[0]
         streams[bitrate] = DASH(
@@ -210,6 +231,9 @@ def _dashparse(config, text, url, output, cookies):
             files=videofiles[i]["files"],
             output=output,
             segments=videofiles[i]["segments"],
+            codec=videofiles[i]["codecs"],
+            channels=audiofiles[list(audiofiles.keys())[0]]["channels"],
+            **kwargs,
         )
 
     return streams
