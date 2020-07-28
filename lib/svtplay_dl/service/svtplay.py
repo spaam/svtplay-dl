@@ -103,11 +103,11 @@ class Svtplay(Service, MetadataThumbMixin):
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
 
-                if i["format"] == "hls":
+                if i["format"][:3] == "hls":
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
                         alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                elif i["format"] == "dash264" or i["format"] == "dashhbbtv":
+                elif i["format"][:4] == "dash":
                     streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
                         alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
@@ -127,7 +127,10 @@ class Svtplay(Service, MetadataThumbMixin):
                 break
 
         if esceni:
-            return janson["ROOT_QUERY"][esceni][0]["id"]
+            try:
+                return janson["ROOT_QUERY"][esceni][0]["id"]
+            except IndexError:
+                return None
         else:
             return esceni
 
