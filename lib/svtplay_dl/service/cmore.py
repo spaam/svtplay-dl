@@ -82,26 +82,32 @@ class Cmore(Service):
 
     def _login(self):
         tld = self._gettld()
-        url = "https://www.cmore.{}/login".format(tld)
-        res = self.http.get(url, cookies=self.cookies)
         if self.config.get("cmoreoperator"):
+            url = "https://tve.cmore.se/country/{}/operator/{}/user/{}/exists?client=cmore-web-prod".format(
+                tld, self.config.get("cmoreoperator"), self.config.get("username")
+            )
             post = {
-                "username": self.config.get("username"),
                 "password": self.config.get("password"),
-                "operator": self.config.get("cmoreoperator"),
-                "country_code": tld,
             }
         else:
-            post = {"username": self.config.get("username"), "password": self.config.get("password")}
-        res = self.http.post("https://account.cmore.{}/session?client=cmore-web-prod".format(tld), json=post, cookies=self.cookies)
+            url = "https://account-delta.b17g.services/api?client=cmore-web"
+            post = {
+                "query": "mutation($username: String, $password: String, $site: String) { login(credentials:"
+                "{username: $username, password: $password}, site: $site) { user { ...UserFields } session { token vimondToken } }} "
+                "fragment UserFields on User { acceptedCmoreTerms acceptedPlayTerms countryCode email firstName genericAds "
+                "lastName tv4UserDataComplete userId username yearOfBirth zipCode type}",
+                "variables": {"username": self.config.get("username"), "password": self.config.get("password"), "site": "CMORE_SE"},
+            }
+
+        res = self.http.post(url, json=post, cookies=self.cookies)
         if res.status_code >= 400:
             return None, "Wrong username or password"
         janson = res.json()
-        token = janson["data"]["vimond_token"]
+        token = janson["data"]["login"]["session"]["vimondToken"]
         return token, None
 
     def operatorlist(self):
-        res = self.http.get("https://tve.cmore.se/country/{}/operator?client=cmore-web".format(self._gettld()))
+        res = self.http.get("https://tve.cmore.se/country/{}/operator?client=cmore-web-prod".format(self._gettld()))
         for i in res.json()["data"]["operators"]:
             print("operator: '{}'".format(i["name"].lower()))
 
