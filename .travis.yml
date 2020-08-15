@@ -1,6 +1,11 @@
 sudo: false
 language: python
 
+addons:
+  apt:
+    packages:
+      - libgnutls-dev
+
 matrix:
   fast_finish: true
   include:
