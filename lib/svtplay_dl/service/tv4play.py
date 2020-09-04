@@ -89,7 +89,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         show = None
         match = self._getjson()
         jansson = json.loads(match.group(1))
-        janson2 = jansson["props"]["apolloState"]
+        janson2 = jansson["props"]["pageProps"]["initialApolloState"]
         for i in janson2:
             if "VideoAsset:" in i:
                 if janson2[i]["clip"] and config.get("include_clips"):
