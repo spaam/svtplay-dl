@@ -4,9 +4,9 @@
 # The unittest framwork doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
 import unittest
+from unittest.mock import patch
 
 import svtplay_dl.utils.output
-from mock import patch
 
 
 # FIXME: use mock framework instead of this hack
