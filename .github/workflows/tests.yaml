@@ -1,0 +1,85 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: '3.8', python: '3.8', os: ubuntu-latest, architecture: 'x64', cibuild: "yes"}
+          - {name: '3.7', python: '3.7', os: ubuntu-latest, architecture: 'x64', cibuild: "no"}
+          - {name: '3.6', python: '3.6', os: ubuntu-latest, architecture: 'x64', cibuild: "no"}
+          - {name: Windows, python: '3.8', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "no"}
+          - {name: WindowsX86, python: '3.8', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "no"}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.architecture }}
+      - name: update pip
+        run: |
+          pip install -U wheel
+          pip install -U setuptools
+          python -m pip install -U pip
+      - name: get pip cache dir
+        id: pip-cache
+        run: echo "::set-output name=dir::$(pip cache dir)"
+      - name: cache pip
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
+      - name: set full Python version in PY env var
+        # See https://pre-commit.com/#github-actions-example
+        run: echo "::set-env name=PY::$(python -VV | sha256sum | cut -d' ' -f1)"
+      - name: install deps
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: cache pre-commit
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
+        if: matrix.os == 'ubuntu-latest'
+      - name: pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
+        if: matrix.os == 'ubuntu-latest'
+      - name: pytest
+        run: pytest -v --cov
+
+      - name: set version
+        run: python setversion.py
+
+      # Build .zip fil for *nix
+      - run: make
+        if: matrix.os == 'ubuntu-latest'
+
+      # Build .exe for windows
+      - name: build .exe
+        run: python setup.py build_exe
+        if: matrix.os == 'windows-latest'
+      - name: run the .exe file
+        run: build\\exe.${{ matrix.arch-cx }}-${{ matrix.python }}\\svtplay-dl.exe --version
+        if: matrix.os == 'windows-latest'
+      - run: |
+          mkdir svtplay-dl
+          xcopy /s build\\exe.${{ matrix.arch-cx }}-${{ matrix.python }} svtplay-dl
+        if: matrix.os == 'windows-latest'
+      - run: 7z a -tzip svtplay-dl-${{ matrix.cx_name }}.zip svtplay-dl
+        if: matrix.os == 'windows-latest'
+
+      - name: cibuild
+        run: python scripts/cibuild.py
+        env:
+          CIBUILD: ${{ matrix.cibuild }}
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

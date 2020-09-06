@@ -1,28 +1,15 @@
 #!/usr/bin/env python3
-import argparse
 import glob
 import logging
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime
 
-if sys.version_info[0] == 3 and sys.version_info[1] < 7:
-    from backports.datetime_fromisoformat import MonkeyPatch
 
-    MonkeyPatch.patch_fromisoformat()
-
-
-root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cibuild")
-
-
-parser = argparse.ArgumentParser(prog="cibuild")
-general = parser.add_argument_group()
-general.add_argument("-s", "--snapshots", action="store_true", dest="snapshot", default=False)
-general.add_argument("-r", "--release", action="store_true", dest="release", default=False)
-options = parser.parse_args()
 
 
 twine_username = os.environ.get("TWINE_USERNAME")
@@ -31,19 +18,19 @@ docker_username = os.environ.get("DOCKER_USERNAME")
 docker_password = os.environ.get("DOCKER_PASSWORD")
 aws_creds = os.environ.get("AWS_ACCESS_KEY_ID")
 
-travis = os.environ.get("TRAVIS", "")
-travis_tag = os.environ.get("TRAVIS_TAG", "")
-travis_branch = os.environ.get("TRAVIS_BRANCH", "")
-appveyor_tag = os.environ.get("APPVEYOR_REPO_TAG_NAME", "")
-appveyor_branch = os.environ.get("APPVEYOR_REPO_BRANCH", "")
-
 
 def tag():
-    return travis_tag or appveyor_tag
+    match = re.search("refs/tags/(.*)", os.environ.get("GITHUB_REF"))
+    if match:
+        return match.group(1)
+    return None
 
 
 def branch():
-    return travis_branch or appveyor_branch
+    match = re.search("refs/heads/(.*)", os.environ.get("GITHUB_REF"))
+    if match:
+        return match.group(1)
+    return None
 
 
 def docker_name(version):
@@ -99,7 +86,7 @@ def aws_upload():
         folder = "snapshots"
         version = snapshot_folder()
     logger.info("Upload to aws {}/{}".format(folder, version))
-    for file in ["svtplay-dl", "svtplay-dl.zip"]:
+    for file in ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]:
         if os.path.isfile(file):
             subprocess.check_call(["aws", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)])
 
@@ -120,9 +107,9 @@ if not tag() and branch() != "master":
     sys.exit(0)
 
 build_package()
-if travis:
+if os.environ.get("CIBUILD") == "yes":
     build_docker()
 aws_upload()
 
-if tag() and travis:
+if tag() and os.environ.get("CIBUILD") == "yes":
     pypi_upload()
