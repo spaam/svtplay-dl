@@ -5,4 +5,4 @@ wheel
 pre-commit
 pytest
 pytest-cov
-git+https://github.com/anthony-tuininga/cx_Freeze.git#egg=cx-freeze
+cx_Freeze
