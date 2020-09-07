@@ -42,6 +42,8 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             for i in data["subtitleReferences"]:
                 if i["format"] == "websrt":
                     yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
+                if i["format"] == "webvtt" and "url" in i:
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
         if len(data["videoReferences"]) == 0:
             yield ServiceError("Media doesn't have any associated videos (yet?)")
