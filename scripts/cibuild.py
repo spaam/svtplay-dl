@@ -109,7 +109,7 @@ if not tag() and branch() != "master":
 build_package()
 if os.environ.get("CIBUILD") == "yes":
     build_docker()
-    aws_upload()
+aws_upload()
 
 if tag() and os.environ.get("CIBUILD") == "yes":
     pypi_upload()
