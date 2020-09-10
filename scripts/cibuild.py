@@ -103,11 +103,17 @@ def pypi_upload():
 logger.info("Branch: {}".format(branch()))
 logger.info("Tag: {}".format(tag()))
 
-if not tag() and branch() != "master" and os.environ.get("CIBUILD") != "yes":
+if not tag() and branch() != "master":
+    sys.exit(0)
+
+if os.environ.get("CIBUILD") != "yes":
     sys.exit(0)
 
 build_package()
-build_docker()
+
+if os.environ.get("OS").startswith("ubuntu"):
+    build_docker()
+
 aws_upload()
 
 if tag() and os.environ.get("OS").startswith("ubuntu"):
