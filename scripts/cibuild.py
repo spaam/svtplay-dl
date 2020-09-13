@@ -88,7 +88,9 @@ def aws_upload():
     logger.info("Upload to aws {}/{}".format(folder, version))
     for file in ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]:
         if os.path.isfile(file):
-            subprocess.check_call(["aws", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)])
+            subprocess.check_call(
+                ["aws", "--region", "us-east-1", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)]
+            )
 
 
 def pypi_upload():
