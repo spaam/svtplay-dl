@@ -38,11 +38,9 @@ jobs:
         # See https://pre-commit.com/#github-actions-example
         run: echo "::set-env name=PY::$(python -VV | sha256sum | cut -d' ' -f1)"
       - name: install deps
-        # awscli beacuse the one on the windows OS is broken 2.0.43. linux .44 works. 2020-09-09
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          pip install --user awscli
       - name: cache pre-commit
         uses: actions/cache@v2
         with:
