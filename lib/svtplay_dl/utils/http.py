@@ -25,6 +25,8 @@ class HTTP(Session):
         self.proxy = config.get("proxy")
         if config.get("http_headers"):
             self.headers.update(self.split_header(config.get("http_headers")))
+        if config.get("cookies"):
+            self.cookies.update(self.split_header(config.get("cookies")))
         self.headers.update({"User-Agent": FIREFOX_UA})
 
     def check_redirect(self, url):

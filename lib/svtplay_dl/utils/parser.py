@@ -92,6 +92,9 @@ def parser(version):
     general.add_argument(
         "--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2", help="A header to add to each HTTP request."
     )
+    general.add_argument(
+        "--cookies", dest="cookies", default=None, metavar="cookie1=value;cookie2=value2", help="A cookies to add to each HTTP request."
+    )
     general.add_argument("--remux", dest="remux", default=False, action="store_true", help="Remux from one container to mp4 using ffmpeg or avconv")
     general.add_argument(
         "--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated."
@@ -267,6 +270,7 @@ def parsertoconfig(config, parser):
     config.set("get_only_episode_url", parser.get_only_episode_url)
     config.set("ssl_verify", parser.ssl_verify)
     config.set("http_headers", parser.http_headers)
+    config.set("cookies", parser.cookies)
     config.set("format_preferred", parser.format_preferred)
     config.set("stream_prio", parser.stream_prio)
     config.set("remux", parser.remux)
