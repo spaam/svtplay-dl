@@ -29,6 +29,9 @@ about = {}
 with open(os.path.join(srcdir, "svtplay_dl", "__version__.py")) as f:
     exec(f.read(), about)
 
+with open("README.md", "r", "utf-8") as f:
+    readme = f.read()
+
 deps = []
 deps.append("requests>=2.0.0")
 deps.append("PySocks")
@@ -46,9 +49,11 @@ setup(
     author="Johan Andersson",
     author_email="j@i19.se",
     description="Command-line program to download videos from various video on demand sites",
+    long_description=readme,
+    long_description_content_type="text/markdown",
     license="MIT",
     url="https://svtplay-dl.se",
-    python_requires=">=3.4",
+    python_requires=">=3.5",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
