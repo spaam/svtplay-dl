@@ -29,7 +29,7 @@ about = {}
 with open(os.path.join(srcdir, "svtplay_dl", "__version__.py")) as f:
     exec(f.read(), about)
 
-with open("README.md", "r", "utf-8") as f:
+with open("README.md") as f:
     readme = f.read()
 
 deps = []
