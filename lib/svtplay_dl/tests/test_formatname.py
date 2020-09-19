@@ -2,6 +2,7 @@ import unittest
 
 from svtplay_dl.service import Service
 from svtplay_dl.utils.output import _formatname
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import setup_defaults
 
 
@@ -302,3 +303,60 @@ class formatnameTest(unittest.TestCase):
             service = Service(config, "localhost")
             service.output.update(item[1])
             assert _formatname(service.output, config, "mp4") == item[2]
+
+
+class formatnameTest2(unittest.TestCase):
+    def test_formatnameEmpty(self):
+        config = setup_defaults()
+        service = Service(config, "http://localhost")
+        assert formatname(service.output, config) == "-service.mp4"
+
+    def test_formatnameOutput(self):
+        config = setup_defaults()
+        config.set("output", "/tmp")
+        service = Service(config, "http://localhost")
+        assert formatname(service.output, config) == "/tmp/-service.mp4"
+
+    def test_formatnameBasedir(self):
+        config = setup_defaults()
+        service = Service(config, "http://localhost")
+        service.output["basedir"] = True
+        assert formatname(service.output, config) == "-service.mp4"
+
+    def test_formatnameTvshow(self):
+        config = setup_defaults()
+        service = Service(config, "http://localhost")
+        service.output["tvshow"] = True
+        service.output["title"] = "kalle"
+        service.output["season"] = 2
+        service.output["episode"] = 2
+        assert formatname(service.output, config) == "kalle.s02e02-service.mp4"
+
+    def test_formatnameTvshowSubfolder(self):
+        config = setup_defaults()
+        config.set("subfolder", True)
+        service = Service(config, "http://localhost")
+        service.output["tvshow"] = True
+        service.output["title"] = "kalle"
+        service.output["season"] = 2
+        service.output["episode"] = 2
+        assert formatname(service.output, config) == "kalle/kalle.s02e02-service.mp4"
+
+    def test_formatnameTvshowSubfolderMovie(self):
+        config = setup_defaults()
+        config.set("subfolder", True)
+        service = Service(config, "http://localhost")
+        service.output["tvshow"] = False
+        service.output["title"] = "kalle"
+        service.output["season"] = 2
+        service.output["episode"] = 2
+        assert formatname(service.output, config) == "movies/kalle.s02e02-service.mp4"
+
+    def test_formatnameTvshowPath(self):
+        config = setup_defaults()
+        config.set("path", "/tmp")
+        service = Service(config, "http://localhost")
+        service.output["title"] = "kalle"
+        service.output["season"] = 2
+        service.output["episode"] = 2
+        assert formatname(service.output, config) == "/tmp/kalle.s02e02-service.mp4"
