@@ -1,3 +1,4 @@
+import platform
 import unittest
 
 from svtplay_dl.service import Service
@@ -315,7 +316,10 @@ class formatnameTest2(unittest.TestCase):
         config = setup_defaults()
         config.set("output", "/tmp")
         service = Service(config, "http://localhost")
-        assert formatname(service.output, config) == "/tmp/-service.mp4"
+        if platform.system() == "Windows":
+            assert formatname(service.output, config) == "/tmp.mp4"
+        else:
+            assert formatname(service.output, config) == "/tmp/-service.mp4"
 
     def test_formatnameBasedir(self):
         config = setup_defaults()
@@ -340,7 +344,10 @@ class formatnameTest2(unittest.TestCase):
         service.output["title"] = "kalle"
         service.output["season"] = 2
         service.output["episode"] = 2
-        assert formatname(service.output, config) == "kalle/kalle.s02e02-service.mp4"
+        if platform.system() == "Windows":
+            assert formatname(service.output, config) == r"kalle\kalle.s02e02-service.mp4"
+        else:
+            assert formatname(service.output, config) == "kalle/kalle.s02e02-service.mp4"
 
     def test_formatnameTvshowSubfolderMovie(self):
         config = setup_defaults()
@@ -350,13 +357,22 @@ class formatnameTest2(unittest.TestCase):
         service.output["title"] = "kalle"
         service.output["season"] = 2
         service.output["episode"] = 2
-        assert formatname(service.output, config) == "movies/kalle.s02e02-service.mp4"
+        if platform.system() == "Windows":
+            assert formatname(service.output, config) == r"movies\kalle.s02e02-service.mp4"
+        else:
+            assert formatname(service.output, config) == "movies/kalle.s02e02-service.mp4"
 
     def test_formatnameTvshowPath(self):
         config = setup_defaults()
-        config.set("path", "/tmp")
+        if platform.system() == "Windows":
+            config.set("path", "c:")
+        else:
+            config.set("path", "/tmp")
         service = Service(config, "http://localhost")
         service.output["title"] = "kalle"
         service.output["season"] = 2
         service.output["episode"] = 2
-        assert formatname(service.output, config) == "/tmp/kalle.s02e02-service.mp4"
+        if platform.system() == "Windows":
+            assert formatname(service.output, config) == r"c:kalle.s02e02-service.mp4"
+        else:
+            assert formatname(service.output, config) == "/tmp/kalle.s02e02-service.mp4"
