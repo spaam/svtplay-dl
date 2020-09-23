@@ -11,7 +11,7 @@ from svtplay_dl.service import Service
 
 class Solidtango(Service):
     supported_domains_re = [r"^([^.]+\.)*solidtango.com"]
-    supported_domains = ["mm-resource-service.herokuapp.com", "solidtango.com", "solidsport.com "]
+    supported_domains = ["mm-resource-service.herokuapp.com", "solidtango.com", "solidsport.com"]
 
     def get(self):
         data = self.get_urldata()
