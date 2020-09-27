@@ -170,7 +170,6 @@ class Generic(Service):
                 url = match.group(1)
                 for n in sites:
                     if n.handles(match.group(1)):
-                        print("n", n)
                         return match.group(1), n(self.config, url)
 
         match = re.search(r"tv4play.se/iframe/video/(\d+)?", data)
