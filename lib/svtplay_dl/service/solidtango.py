@@ -15,6 +15,26 @@ class Solidtango(Service):
 
     def get(self):
         data = self.get_urldata()
+        parse = urlparse(self.url)
+        if "solidsport" in parse.netloc:
+            if self.config.get("username") and self.config.get("password"):
+                res = self.http.request("get", "https://solidsport.com/login")
+                match = re.search('authenticity_token" value="([^"]+)"', res.text)
+                if not match:
+                    yield ServiceError("Cant find auth token for login")
+                    return
+                pdata = {
+                    "authenticity_token": match.group(1),
+                    "user[email]": self.config.get("username"),
+                    "user[password]": self.config.get("password"),
+                    "commit": "Sign in",
+                    "utf8": "✓",
+                }
+                res = self.http.request("post", "https://solidsport.com/login", data=pdata)
+                if "Wrong passwor" in res.text or "Can't find account" in res.text:
+                    yield ServiceError("Wrong username or password")
+                    return
+                data = self.http.request("get", self.url).text
 
         match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
         if match:
