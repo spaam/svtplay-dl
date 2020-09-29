@@ -32,12 +32,18 @@ class Dplay(Service):
         channel = False
         if "kanaler" in parse.path:
             match = re.search("kanaler/([^/]+)$", parse.path)
+            if not match:
+                yield ServiceError("Can't detect 'kanaler'")
+                return
             path = "/channels/{}".format(match.group(1))
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             channel = True
             self.config.set("live", True)
         elif "program" in parse.path:
             match = re.search("(programmer|program)/([^/]+)$", parse.path)
+            if not match:
+                yield ServiceError("Can't find program url")
+                return
             path = "/shows/{}".format(match.group(2))
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
