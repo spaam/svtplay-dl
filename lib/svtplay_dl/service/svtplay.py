@@ -217,7 +217,7 @@ class Svtplay(Service, MetadataThumbMixin):
                         keys.append(i["id"])
 
             for i in keys:
-                for n in janson[i]["items"]:
+                for n in janson[i]['items({"filter":{"includeFullOppetArkiv":false}})']:
                     epi = janson[janson[n["id"]]["item"]["id"]]
                     if "variants" in epi:
                         for z in epi["variants"]:
