@@ -34,10 +34,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
-      - name: set full Python version in PY env var
-        # See https://pre-commit.com/#github-actions-example
-        run: echo "::set-env name=PY::$(python -VV | sha256sum | cut -d' ' -f1)"
+          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
+          restore-keys: pip-${{ runner.os }}-${{ matrix.python }}-
       - name: install deps
         run: |
           pip install -r requirements.txt
@@ -46,7 +44,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
+          key: per-commit|${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: per-commit|${{ runner.os }}-${{ matrix.python }}-
         if: matrix.os == 'ubuntu-latest'
       - name: pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
