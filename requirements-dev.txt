@@ -6,3 +6,4 @@ pre-commit
 pytest
 pytest-cov
 cx_Freeze
+twine
