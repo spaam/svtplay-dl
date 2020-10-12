@@ -1,8 +1,8 @@
 import os
 import unittest
 from unittest.mock import patch
-from requests import Response
 
+from requests import Response
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.postprocess import _checktracks
 from svtplay_dl.postprocess import _getcodec
