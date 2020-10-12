@@ -1,5 +1,7 @@
 import os
 import unittest
+from unittest.mock import patch
+from requests import Response
 
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.postprocess import _checktracks
@@ -131,29 +133,44 @@ class checktracks(unittest.TestCase):
         assert _checktracks([("1:0", "", "", "Audio", "mp3, 0 channels")]) == (None, None)
 
 
+@patch("svtplay_dl.postprocess.post")
 class sublang(unittest.TestCase):
-    def test_sublang(self):
+    def setup_mock(self, req, lang):
+        class MockResponse(Response):
+            def __init__(self, lang, status=200):
+                self.status_code = status
+                self._json = {"language": lang}
+
+            def json(self):
+                return self._json
+
+        req.return_value = MockResponse(lang)
+
+    def test_sublang(self, req):
         config = setup_defaults()
+        self.setup_mock(req, "swe")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
         service = Service(config, "http://exmaple.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
-        assert _sublanguage(stream, config, None) == ["swe"]
+        self.assertEqual(_sublanguage(stream, config, None), ["swe"])
 
-    def test_sublang2(self):
+    def test_sublang2(self, req):
         config = setup_defaults()
+        self.setup_mock(req, "swe")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
         config.set("get_all_subtitles", True)
         service = Service(config, "http://exmaple.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
-        assert _sublanguage(stream, config, ["grej", "hej"]) == ["swe", "swe"]
+        self.assertEqual(_sublanguage(stream, config, ["grej", "hej"]), ["swe", "swe"])
 
-    def test_sublang3(self):
+    def test_sublang3(self, req):
         config = setup_defaults()
+        self.setup_mock(req, "smj")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
         config.set("get_all_subtitles", True)
         service = Service(config, "http://exmaple.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
-        assert _sublanguage(stream, config, ["lulesamiska"]) == ["smj"]
+        self.assertEqual(_sublanguage(stream, config, ["lulesamiska"]), ["smj"])
