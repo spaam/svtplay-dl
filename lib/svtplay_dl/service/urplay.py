@@ -30,7 +30,7 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         for streaminfo in jsondata["currentProduct"]["streamingInfo"].keys():
             stream = jsondata["currentProduct"]["streamingInfo"][streaminfo]
-            if stream["default"]:
+            if streaminfo == "raw":
                 url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
                 streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
                 for n in list(streams.keys()):
@@ -39,8 +39,8 @@ class Urplay(Service, OpenGraphThumbMixin):
                 streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
                 for n in list(streams.keys()):
                     yield streams[n]
-                if not self.config.get("get_all_subtitles"):
-                    yield subtitle(copy.copy(self.config), "tt", stream["tt"]["location"], output=self.output)
+            if not (self.config.get("get_all_subtitles")) and (stream["default"]):
+                yield subtitle(copy.copy(self.config), "tt", stream["tt"]["location"], output=self.output)
 
             if self.config.get("get_all_subtitles") and "tt" in stream:
                 label = stream["tt"]["language"]
