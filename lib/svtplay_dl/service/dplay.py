@@ -132,7 +132,12 @@ class Dplay(Service):
             logging.error("Something went wrong getting token for requests")
 
         premium = self._checkpremium()
-        url = "http://disco-api.{}/cms/routes/program/{}?decorators=viewingHistory&include=default".format(self.domain, match.group(2))
+
+        urllocal=''
+        if self.domain in ['dplay.dk', 'dplay.no']:
+            urllocal = 'mer'
+
+        url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal,match.group(2))
         res = self.http.get(url)
         for what in res.json()["included"]:
             if "attributes" in what and "alias" in what["attributes"] and "season" in what["attributes"]["alias"]:
