@@ -188,7 +188,7 @@ class Svtplay(Service, MetadataThumbMixin):
             janson = json.loads(match.group(1))
             self.visibleid = self._get_visibleid(janson)
             if not self.visibleid:
-                logging.error("Can't find video i")
+                logging.error("Can't find video id. removed?")
                 return
 
             match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
@@ -217,14 +217,22 @@ class Svtplay(Service, MetadataThumbMixin):
                         keys.append(i["id"])
 
             for i in keys:
-                for n in janson[i]['items({"filter":{"includeFullOppetArkiv":false}})']:
-                    epi = janson[janson[n["id"]]["item"]["id"]]
-                    if "variants" in epi:
-                        for z in epi["variants"]:
-                            if janson[janson[z["id"]]["urls"]["id"]]["svtplay"] not in videos:
-                                videos.append(janson[janson[z["id"]]["urls"]["id"]]["svtplay"])
-                    if janson[epi["urls"]["id"]]["svtplay"] not in videos:
-                        videos.append(janson[epi["urls"]["id"]]["svtplay"])
+                item = None
+                for items in janson[i].keys():
+                    if "items" in items:
+                        item = items
+                        break
+                if item:
+                    for n in janson[i][item]:
+                        epi = janson[janson[n["id"]]["item"]["id"]]
+                        if "variants" in epi:
+                            for z in epi["variants"]:
+                                if janson[janson[z["id"]]["urls"]["id"]]["svtplay"] not in videos:
+                                    videos.append(janson[janson[z["id"]]["urls"]["id"]]["svtplay"])
+                        if janson[epi["urls"]["id"]]["svtplay"] not in videos:
+                            videos.append(janson[epi["urls"]["id"]]["svtplay"])
+                else:
+                    logging.error("Can't find other episodes.")
 
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
