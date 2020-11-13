@@ -75,7 +75,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             )
             for n in list(streams.keys()):
                 yield streams[n]
-        if "subtitles" in janson["embedded"]:
+        if "subtitles" in janson["embedded"] and len(janson["embedded"]["subtitles"]) > 0:
             yield subtitle(copy.copy(self.config), "wrst", janson["embedded"]["subtitles"][0]["link"]["href"], output=self.output)
 
     def find_all_episodes(self, config):
