@@ -9,7 +9,6 @@ RUN set -xe \
 	    ca-certificates \
 	    python3 \
         py3-pip \
-        rtmpdump \
         py3-cryptography \
         ffmpeg \
     && python3 -m pip install *.whl \
