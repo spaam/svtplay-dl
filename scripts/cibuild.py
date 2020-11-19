@@ -105,7 +105,7 @@ if not tag() and branch() != "master":
 if os.environ.get("CIBUILD") != "yes":
     sys.exit(0)
 
-if os.environ.get("OS").startswith("ubuntu"):
+if os.environ.get("OS").startswith("ubuntu") and os.environ.get("BUILD_DOCKER") == "yes":
     build_docker()
 
 aws_upload()

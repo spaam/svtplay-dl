@@ -90,6 +90,7 @@ jobs:
         run: python scripts/cibuild.py
         env:
           CIBUILD: "yes"
+          BUILD_DOCKER: "no"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           OS: "ubuntu-latest"
@@ -143,6 +144,7 @@ jobs:
         run: python scripts/cibuild.py
         env:
           CIBUILD: "yes"
+          BUILD_DOCKER: "no"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           OS: "windows-latest"
@@ -182,6 +184,7 @@ jobs:
         run: python scripts/cibuild.py
         env:
           CIBUILD: "yes"
+          BUILD_DOCKER: "yes"
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
