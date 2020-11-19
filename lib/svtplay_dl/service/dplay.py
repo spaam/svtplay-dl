@@ -133,11 +133,11 @@ class Dplay(Service):
 
         premium = self._checkpremium()
 
-        urllocal=''
-        if self.domain in ['dplay.dk', 'dplay.no']:
-            urllocal = 'mer'
+        urllocal = ""
+        if self.domain in ["dplay.dk", "dplay.no"]:
+            urllocal = "mer"
 
-        url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal,match.group(2))
+        url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal, match.group(2))
         res = self.http.get(url)
         for what in res.json()["included"]:
             if "attributes" in what and "alias" in what["attributes"] and "season" in what["attributes"]["alias"]:
