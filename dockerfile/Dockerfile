@@ -1,6 +1,6 @@
 # using edge to get ffmpeg-4.x
 FROM alpine:edge
-MAINTAINER spaam
+LABEL maintainer="j@i19.se"
 
 COPY dist/*.whl .
 
