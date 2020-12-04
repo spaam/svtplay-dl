@@ -12,11 +12,11 @@ from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
 
 
-country = {"sv": ".se", "da": ".dk", "no": ".no"}
+country = {"sv": ".se", "da": ".dk", "no": ".no", "es": ".es"}
 
 
 class Dplay(Service):
-    supported_domains = ["dplay.se", "dplay.dk", "dplay.no"]
+    supported_domains = ["dplay.se", "dplay.dk", "dplay.no", "dplay.es"]
 
     def get(self):
         parse = urlparse(self.url)
@@ -39,6 +39,15 @@ class Dplay(Service):
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             channel = True
             self.config.set("live", True)
+        elif "series-canales-tv" in parse.path:
+            match = re.search("series-canales-tv/([^/]+)$", parse.path)
+            if not match:
+                yield ServiceError("Can't detect 'series'")
+                return
+            path = "/canales/{}".format(match.group(1))
+            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            channel = True
+            self.config.set("live", True)             
         elif "program" in parse.path:
             match = re.search("(programmer|program)/([^/]+)$", parse.path)
             if not match:
