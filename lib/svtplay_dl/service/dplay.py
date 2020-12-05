@@ -44,7 +44,7 @@ class Dplay(Service):
             if not match:
                 yield ServiceError("Can't detect 'series'")
                 return
-            path = "/canales/{}".format(match.group(1))
+            path = "/channels/{}".format(match.group(1))
             url = "https://disco-api.{}/content{}".format(self.domain, path)
             channel = True
             self.config.set("live", True)             
