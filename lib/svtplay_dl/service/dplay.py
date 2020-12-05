@@ -173,6 +173,8 @@ class Dplay(Service):
 
     def _login(self):
         res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
+        if res.status_code >= 400:
+            return False
         if not res.json()["data"]["attributes"]["anonymous"]:
             return True
         return False
