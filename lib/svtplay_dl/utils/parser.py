@@ -112,6 +112,13 @@ def gen_parser(version="unknown"):
     general.add_argument("-v", "--verbose", action="store_true", dest="verbose", default=False, help="explain what is going on")
     general.add_argument("--nfo", action="store_true", dest="nfo", default=False, help="create a NFO file")
     general.add_argument("--force-nfo", action="store_true", dest="force_nfo", default=False, help="download only NFO if used with --nfo")
+    general.add_argument(
+        "--only-audio", action="store_true", dest="only_audio", default=False, help="only download audio if audio and video is seperated"
+    )
+    general.add_argument(
+        "--only-video", action="store_true", dest="only_video", default=False, help="only download video if audio and video is seperated"
+    )
+
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
         "-q",
@@ -240,6 +247,8 @@ def setup_defaults():
     options.set("include_clips", False)
     options.set("cmoreoperatorlist", False)
     options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
+    options.set("only_audio", False)
+    options.set("only_video", False)
     return _special_settings(options)
 
 
@@ -286,6 +295,8 @@ def parsertoconfig(config, parser):
     config.set("cmoreoperatorlist", parser.cmoreoperatorlist)
     config.set("cmoreoperator", parser.cmoreoperator)
     config.set("proxy", parser.proxy)
+    config.set("only_audio", parser.only_audio)
+    config.set("only_video", parser.only_video)
     return _special_settings(config)
 
 

@@ -45,6 +45,9 @@ def main():
 
     if options.flexibleq and not options.quality:
         logging.error("flexible-quality requires a quality")
+    if options.only_audio and options.only_video:
+        logging.error("Only use one of them, not both at the same time")
+        sys.exit(2)
 
     if len(options.urls) == 0:
         parse.print_help()

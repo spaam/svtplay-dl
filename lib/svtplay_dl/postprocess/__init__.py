@@ -109,7 +109,11 @@ class postprocess:
         else:
             audio_filename = "{}.m4a".format(name)
 
-        cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
+        cmd = [self.detect]
+        if self.config.get("only_video") or not self.config.get("only_audio"):
+            cmd += ["-i", orig_filename]
+        if self.config.get("only_audio") or not self.config.get("only_video"):
+            cmd += ["-i", audio_filename]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
@@ -124,7 +128,11 @@ class postprocess:
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
-        cmd = [self.detect, "-i", orig_filename, "-i", audio_filename]
+        cmd = [self.detect]
+        if self.config.get("only_video") or not self.config.get("only_audio"):
+            cmd += ["-i", orig_filename]
+        if self.config.get("only_audio") or not self.config.get("only_video"):
+            cmd += ["-i", audio_filename]
         if videotrack:
             arguments += ["-map", "{}".format(videotrack)]
         if audiotrack:
@@ -156,8 +164,11 @@ class postprocess:
             return
 
         logging.info("Merging done, removing old files.")
-        os.remove(orig_filename)
-        os.remove(audio_filename)
+        if self.config.get("only_video") or not self.config.get("only_audio"):
+            os.remove(orig_filename)
+        if self.config.get("only_audio") or not self.config.get("only_video"):
+            os.remove(audio_filename)
+
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
