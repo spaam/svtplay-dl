@@ -41,13 +41,8 @@ class Svtplay(Service, MetadataThumbMixin):
         urldata = self.get_urldata()
 
         if parse.path[:8] == "/kanaler":
-            match = re.search('data-video-id="([\\w-]+)"', urldata)
-
-            if not match:
-                yield ServiceError("Can't find video info.")
-                return
-
-            _url = urljoin(URL_VIDEO_API, match.group(1))
+            ch = "ch-{}".format(parse.path[parse.path.rfind("/") + 1 :])
+            _url = urljoin(URL_VIDEO_API, ch)
             res = self.http.get(_url)
             try:
                 janson = res.json()
