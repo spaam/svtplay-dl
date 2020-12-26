@@ -70,7 +70,7 @@ class HlsTest(unittest.TestCase):
                     },
                     {"PROGRAM-ID": "1", "BANDWIDTH": "41457", "TAG": "EXT-X-STREAM-INF", "URI": "something0/else.m3u8", "CODECS": "mp4a.40.2"},
                 ],
-            }
+            },
             # More examples can be found on "https://developer.apple.com/streaming/examples/"
         ]:
             assert M3U8(test["playlist"]).master_playlist == test["expected"]

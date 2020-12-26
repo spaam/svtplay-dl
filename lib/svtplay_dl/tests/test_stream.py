@@ -25,5 +25,5 @@ class streamTest_sort(unittest.TestCase):
                         HLS(setup_defaults(), "http://example.com", 2000, None),
                     ],
                 )
-            ]
+            ],
         )

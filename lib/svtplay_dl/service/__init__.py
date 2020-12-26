@@ -46,7 +46,8 @@ class Service:
         #  Config
         if config.get("configfile") and os.path.isfile(config.get("configfile")):
             self.config = merge(
-                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(), config.get_variable()
+                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(),
+                config.get_variable(),
             )
         else:
             self.config = config

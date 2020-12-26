@@ -39,7 +39,10 @@ class Vg(Service, OpenGraphThumbMixin):
                 yield streams[n]
         if "hls" in jsondata["streamUrls"]:
             streams = hlsparse(
-                self.config, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"], output=self.output
+                self.config,
+                self.http.request("get", jsondata["streamUrls"]["hls"]),
+                jsondata["streamUrls"]["hls"],
+                output=self.output,
             )
             for n in list(streams.keys()):
                 yield streams[n]

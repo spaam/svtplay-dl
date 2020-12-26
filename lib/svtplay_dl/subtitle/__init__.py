@@ -223,7 +223,12 @@ class subtitle:
                     hour1 = 0
                     hour2 = 0
                 time = "{:02d}:{}:{} --> {:02d}:{}:{}\n".format(
-                    hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ",")
+                    hour1,
+                    matchx.group("m1"),
+                    matchx.group("s1").replace(".", ","),
+                    hour2,
+                    matchx.group("m2"),
+                    matchx.group("s2").replace(".", ","),
                 )
                 srt += time
                 block = 1

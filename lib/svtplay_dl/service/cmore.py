@@ -30,7 +30,8 @@ class Cmore(Service):
         self.output["id"] = vid
 
         metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" "&device=browser&drm=widevine&protocol=dash%2Chls".format(
-            self.output["id"], tld
+            self.output["id"],
+            tld,
         )
         res = self.http.get(metaurl)
         janson = res.json()
@@ -84,7 +85,9 @@ class Cmore(Service):
         tld = self._gettld()
         if self.config.get("cmoreoperator"):
             url = "https://tve.cmore.se/country/{}/operator/{}/user/{}/exists?client=cmore-web-prod".format(
-                tld, self.config.get("cmoreoperator"), self.config.get("username")
+                tld,
+                self.config.get("cmoreoperator"),
+                self.config.get("username"),
             )
             post = {
                 "password": self.config.get("password"),

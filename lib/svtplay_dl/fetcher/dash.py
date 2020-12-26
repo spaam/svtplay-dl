@@ -87,7 +87,7 @@ def templateelemt(attributes, element, filename, idnumber):
         periodDuration = periodEndWC - periodStartWC
         segmentCount = math.ceil(periodDuration * attributes.get("timescale") / attributes.get("duration"))
         availableStart = math.floor(
-            (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration")
+            (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration"),
         )
         availableEnd = math.floor((now - periodStartWC) * attributes.get("timescale") / attributes.get("duration"))
         start = max(0, availableStart)

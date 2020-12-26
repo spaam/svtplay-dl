@@ -141,8 +141,12 @@ def get_one_media(stream):
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
         logging.info(
             "Video {}S{}E{} skipped since published {} before {}. ".format(
-                stream.output["title"], stream.output["season"], stream.output["episode"], pub_date.date(), after_date.date()
-            )
+                stream.output["title"],
+                stream.output["season"],
+                stream.output["episode"],
+                pub_date.date(),
+                after_date.date(),
+            ),
         )
         return
 

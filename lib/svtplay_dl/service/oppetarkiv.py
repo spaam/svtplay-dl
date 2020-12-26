@@ -153,7 +153,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             if match:
                 self.output["episode"] = int(match.group(1))
 
-    def name(selfs, data):
+    def name(self, data):
         if data.find(" - S.song") > 0:
             title = data[: data.find(" - S.song")]
         else:

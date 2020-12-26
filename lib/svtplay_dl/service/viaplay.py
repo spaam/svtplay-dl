@@ -126,7 +126,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                                 [
                                     int("{}{}".format(i["episode"]["seasonNumber"], i["episode"]["episodeNumber"])),
                                     "{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]),
-                                ]
+                                ],
                             )
                         elif config.get("include_clips"):
                             clips.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))

@@ -137,7 +137,14 @@ def hlsparse(config, res, url, **kwargs):
     elif m3u8.media_segment:
         config.set("segments", False)
         streams[0] = HLS(
-            copy.copy(config), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization, output=output, segments=False
+            copy.copy(config),
+            url,
+            0,
+            cookies=res.cookies,
+            keycookie=keycookie,
+            authorization=authorization,
+            output=output,
+            segments=False,
         )
 
     else:
@@ -297,7 +304,12 @@ class M3U8:
 
     def __str__(self):
         return "Version: {}\nMedia Segment: {}\nMedia Playlist: {}\nMaster Playlist: {}\nEncrypted: {}\tIndependent_segments: {}".format(
-            self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.independent_segments
+            self.version,
+            self.media_segment,
+            self.media_playlist,
+            self.master_playlist,
+            self.encrypted,
+            self.independent_segments,
         )
 
     def parse_m3u(self, data):

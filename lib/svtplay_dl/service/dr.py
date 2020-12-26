@@ -40,7 +40,8 @@ class Dr(Service, OpenGraphThumbMixin):
         token = res.json()[0]["value"]
 
         url = "https://isl.dr-massive.com/api/account/items/{}/videos?delivery=stream&device=web_browser&ff=idp%2Cldp&lang=da&resolution={}&sub=Anonymous".format(
-            vid, resolution
+            vid,
+            resolution,
         )
         res = self.http.request("get", url, headers={"authorization": "Bearer {}".format(token)})
         for video in res.json():

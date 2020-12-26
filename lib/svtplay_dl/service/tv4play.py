@@ -22,7 +22,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
             url = "https://bbr-l2v.akamaized.net/live/{}/master.m3u8?in={}&out={}?".format(
-                parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat()
+                parse.path[9:],
+                start_time_stamp.isoformat(),
+                end_time_stamp.isoformat(),
             )
 
             self.config.set("live", True)

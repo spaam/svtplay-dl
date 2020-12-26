@@ -83,7 +83,7 @@ def aws_upload():
     for file in ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]:
         if os.path.isfile(file):
             subprocess.check_call(
-                ["aws", "--region", "us-east-1", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)]
+                ["aws", "--region", "us-east-1", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)],
             )
 
 

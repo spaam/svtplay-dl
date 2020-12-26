@@ -104,7 +104,7 @@ class Eurosport(Service):
             query["pageType"] = pagetype
 
             url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" "persisted/query/eurosport/Airings?variables={}".format(
-                quote(json.dumps(query))
+                quote(json.dumps(query)),
             )
             res = self.http.get(url, headers={"authorization": access_token})
             programid = res.json()["data"]["Airings"][0]["programId"]

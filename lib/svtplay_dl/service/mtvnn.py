@@ -137,7 +137,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
             if wanted_id == str(n["id"]):
 
                 mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
-                    n["video_token"]
+                    n["video_token"],
                 )
                 hls_asset = self.http.request("get", mrssxmlurl)
                 xml = ET.XML(hls_asset.text)

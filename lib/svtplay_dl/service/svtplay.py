@@ -319,14 +319,16 @@ class Svtplay(Service, MetadataThumbMixin):
             if "+" in validfrom:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S%z"
-                    ).timetuple()
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        "%Y-%m-%dT%H:%M:%S%z",
+                    ).timetuple(),
                 )
             else:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S"
-                    ).timetuple()
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        "%Y-%m-%dT%H:%M:%S",
+                    ).timetuple(),
                 )
             self.output["publishing_datetime"] = int(date)
 

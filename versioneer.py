@@ -1561,7 +1561,7 @@ def get_cmdclass():
                             "TAG_PREFIX": cfg.tag_prefix,
                             "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                             "VERSIONFILE_SOURCE": cfg.versionfile_source,
-                        }
+                        },
                     )
 
         cmds["build_exe"] = cmd_build_exe
@@ -1594,7 +1594,7 @@ def get_cmdclass():
                             "TAG_PREFIX": cfg.tag_prefix,
                             "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                             "VERSIONFILE_SOURCE": cfg.versionfile_source,
-                        }
+                        },
                     )
 
         cmds["py2exe"] = cmd_py2exe
@@ -1698,7 +1698,7 @@ def do_setup():
                 "TAG_PREFIX": cfg.tag_prefix,
                 "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                 "VERSIONFILE_SOURCE": cfg.versionfile_source,
-            }
+            },
         )
 
     ipy = os.path.join(os.path.dirname(cfg.versionfile_source), "__init__.py")
