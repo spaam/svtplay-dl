@@ -31,14 +31,16 @@ class Urplay(Service, OpenGraphThumbMixin):
         for streaminfo in jsondata["currentProduct"]["streamingInfo"].keys():
             stream = jsondata["currentProduct"]["streamingInfo"][streaminfo]
             if streaminfo == "raw":
-                url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
-                streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
-                url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["hd"]["location"])
-                streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                if "sd" in stream:
+                    url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
+                    streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
+                    for n in list(streams.keys()):
+                        yield streams[n]
+                if "hd" in stream:
+                    url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["hd"]["location"])
+                    streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
+                    for n in list(streams.keys()):
+                        yield streams[n]
             if not (self.config.get("get_all_subtitles")) and (stream["default"]):
                 yield subtitle(copy.copy(self.config), "tt", stream["tt"]["location"], output=self.output)
 
