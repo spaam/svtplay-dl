@@ -229,10 +229,14 @@ class HLS(VideoRetriever):
                     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                     decryptor = cipher.decryptor()
 
-                if decryptor:
-                    data = decryptor.update(data)
-                else:
-                    raise ValueError("No decryptor found for encrypted hls steam.")
+                # In some cases the playlist say its encrypted but the files is not.
+                # This happen on svtplay 5.1ch stream where it started with ID3..
+                # Adding the other ones is header for mpeg-ts files. third byte is 10 or 11..
+                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10":
+                    if decryptor:
+                        data = decryptor.update(data)
+                    else:
+                        raise ValueError("No decryptor found for encrypted hls steam.")
 
             file_d.write(data)
 
