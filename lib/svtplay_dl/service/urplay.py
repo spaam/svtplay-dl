@@ -17,10 +17,14 @@ class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ["urplay.se", "ur.se", "betaplay.ur.se", "urskola.se"]
 
     def get(self):
+        key = "currentProduct"
         match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', self.get_urldata())
         if not match:
-            yield ServiceError("Can't find json info")
-            return
+            key = "program"
+            match = re.search(r'/ProgramContainer" data-react-props="([^\"]+)\"', self.get_urldata())
+            if not match:
+                yield ServiceError("Can't find json info")
+                return
 
         data = unescape(match.group(1))
         jsondata = json.loads(data)
@@ -28,8 +32,8 @@ class Urplay(Service, OpenGraphThumbMixin):
         res = self.http.get("https://streaming-loadbalancer.ur.se/loadbalancer.json")
         loadbalancer = res.json()["redirect"]
 
-        for streaminfo in jsondata["currentProduct"]["streamingInfo"].keys():
-            stream = jsondata["currentProduct"]["streamingInfo"][streaminfo]
+        for streaminfo in jsondata[key]["streamingInfo"].keys():
+            stream = jsondata[key]["streamingInfo"][streaminfo]
             if streaminfo == "raw":
                 if "sd" in stream:
                     url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
