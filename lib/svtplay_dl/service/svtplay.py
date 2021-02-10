@@ -344,7 +344,7 @@ class Svtplay(Service, MetadataThumbMixin):
         self.output["title_nice"] = episode["parent"]["name"]
 
         try:
-            t = episode["parent"]["image"]["id"]
+            t = episode["parent"]["image"]
         except KeyError:
             t = ""
         if isinstance(t, dict):
