@@ -154,18 +154,20 @@ class Dplay(Service):
                     if ses["id"] == "seasonNumber":
                         for opt in ses["options"]:
                             seasons.append(opt["value"])
-                showid = what["attributes"]["component"]["mandatoryParams"]
+                if "mandatoryParams" in what["attributes"]["component"]:
+                    showid = what["attributes"]["component"]["mandatoryParams"]
 
         if programid:
             for season in seasons:
                 page = 1
                 totalpages = 1
                 while page <= totalpages:
-                    querystring = "decorators=viewingHistory&include=default&page[items.number]={}&{}&pf[seasonNumber]={}".format(
+                    querystring = "decorators=viewingHistory&include=default&page[items.number]={}&pf[seasonNumber]={}".format(
                         page,
-                        showid,
                         season,
                     )
+                    if showid:
+                        querystring += "&{}".format(showid)
                     res = self.http.get("https://disco-api.{}/cms/collections/{}?{}".format(self.domain, programid, querystring))
                     janson = res.json()
                     totalpages = janson["data"]["meta"]["itemsTotalPages"]
