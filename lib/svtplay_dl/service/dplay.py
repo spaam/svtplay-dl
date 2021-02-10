@@ -120,6 +120,7 @@ class Dplay(Service):
         self.domain = re.search(r"(discoveryplus\.\w\w)", parse.netloc).group(1)
         programid = None
         seasons = []
+        episodes = []
         match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
         if not match:
             logging.error("Can't find show name")
@@ -140,6 +141,9 @@ class Dplay(Service):
 
         url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal, match.group(2))
         res = self.http.get(url)
+        if res.status_code > 400:
+            logging.error("Cant find any videos. wrong url?")
+            return episodes
         for what in res.json()["included"]:
             if "attributes" in what and "alias" in what["attributes"] and "season" in what["attributes"]["alias"]:
                 programid = what["id"]
@@ -147,7 +151,6 @@ class Dplay(Service):
                     if ses["id"] == "seasonNumber":
                         for opt in ses["options"]:
                             seasons.append(opt["value"])
-        episodes = []
 
         if programid:
             for season in seasons:
