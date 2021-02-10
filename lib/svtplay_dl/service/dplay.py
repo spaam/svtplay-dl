@@ -121,6 +121,7 @@ class Dplay(Service):
         programid = None
         seasons = []
         episodes = []
+
         match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
         if not match:
             logging.error("Can't find show name")
@@ -144,6 +145,8 @@ class Dplay(Service):
         if res.status_code > 400:
             logging.error("Cant find any videos. wrong url?")
             return episodes
+
+        showid = None
         for what in res.json()["included"]:
             if "attributes" in what and "alias" in what["attributes"] and "season" in what["attributes"]["alias"]:
                 programid = what["id"]
@@ -151,14 +154,19 @@ class Dplay(Service):
                     if ses["id"] == "seasonNumber":
                         for opt in ses["options"]:
                             seasons.append(opt["value"])
+                showid = what["attributes"]["component"]["mandatoryParams"]
 
         if programid:
             for season in seasons:
                 page = 1
                 totalpages = 1
                 while page <= totalpages:
-                    qyerystring = "decorators=viewingHistory&include=default&page[items.number]={}&&pf[seasonNumber]={}".format(page, season)
-                    res = self.http.get("https://disco-api.{}/cms/collections/{}?{}".format(self.domain, programid, qyerystring))
+                    querystring = "decorators=viewingHistory&include=default&page[items.number]={}&{}&pf[seasonNumber]={}".format(
+                        page,
+                        showid,
+                        season,
+                    )
+                    res = self.http.get("https://disco-api.{}/cms/collections/{}?{}".format(self.domain, programid, querystring))
                     janson = res.json()
                     totalpages = janson["data"]["meta"]["itemsTotalPages"]
                     for i in janson["included"]:
