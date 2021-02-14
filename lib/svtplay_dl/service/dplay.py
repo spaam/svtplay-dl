@@ -1,5 +1,6 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+import datetime
 import hashlib
 import logging
 import random
@@ -18,6 +19,7 @@ REALMS = {"discoveryplus.se": "dplayse", "discoveryplus.no": "dplayno", "discove
 
 class Dplay(Service):
     supported_domains = ["discoveryplus.se", "discoveryplus.no", "discoveryplus.dk"]
+    packages = []
 
     def get(self):
         parse = urlparse(self.url)
@@ -134,7 +136,7 @@ class Dplay(Service):
         if not self._token():
             logging.error("Something went wrong getting token for requests")
 
-        premium = self._checkpremium()
+        self._getpackages()
 
         urllocal = ""
         if self.domain in ["dplay.dk", "dplay.no"]:
@@ -175,7 +177,7 @@ class Dplay(Service):
                         if i["type"] != "video":
                             continue
                         if i["attributes"]["videoType"] == "EPISODE":
-                            if not premium and "Free" not in i["attributes"]["packages"]:
+                            if not self._playablefile(i["attributes"]["availabilityWindows"]):
                                 continue
                             episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
                     page += 1
@@ -202,9 +204,24 @@ class Dplay(Service):
             return False
         return True
 
-    def _checkpremium(self) -> bool:
+    def _getpackages(self):
         res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
         if res.status_code < 400:
-            if "premium" in res.json()["data"]["attributes"]["products"]:
-                return True
-        return False
+            self.packages.extend(res.json()["data"]["attributes"]["packages"])
+
+    def _playablefile(self, needs):
+        playable = False
+        now = datetime.datetime.utcnow()
+        for package in self.packages:
+            for need in needs:
+                if package != need["package"]:
+                    continue
+                start = datetime.datetime.strptime(need["playableStart"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+                if now > start:
+                    if "playableEnd" in need:
+                        end = datetime.datetime.strptime(need["playableEnd"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+                        if now < end:
+                            playable = True
+                    else:
+                        playable = True
+        return playable
