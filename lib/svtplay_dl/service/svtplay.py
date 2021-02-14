@@ -210,7 +210,7 @@ class Svtplay(Service, MetadataThumbMixin):
             for json_entry in janson["props"]["urqlState"].values():
                 entry = json.loads(json_entry["data"])
                 for key, data in entry.items():
-                    if "listablesBy" in key and data[0]["associatedContent"][0]["id"] != "related":
+                    if "listablesBy" in key and (len(data[0]["associatedContent"]) == 0 or data[0]["associatedContent"][0]["id"] != "related"):
                         associatedContent = data[0]["associatedContent"]
                         break
                 if associatedContent:
