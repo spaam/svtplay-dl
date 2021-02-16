@@ -46,13 +46,13 @@ class Urplay(Service, OpenGraphThumbMixin):
                     for n in list(streams.keys()):
                         yield streams[n]
             if not (self.config.get("get_all_subtitles")) and (stream["default"]):
-                yield subtitle(copy.copy(self.config), "tt", stream["tt"]["location"], output=self.output)
+                yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), output=self.output)
 
             if self.config.get("get_all_subtitles") and "tt" in stream:
                 label = stream["tt"]["language"]
                 if stream["tt"]["scope"] != "complete":
                     label = "{}-{}".format(label, stream["tt"]["scope"])
-                yield subtitle(copy.copy(self.config), "tt", stream["tt"]["location"], label, output=copy.copy(self.output))
+                yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), label, output=copy.copy(self.output))
 
     def find_all_episodes(self, config):
         episodes = []
