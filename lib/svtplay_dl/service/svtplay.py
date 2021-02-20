@@ -21,6 +21,13 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.text import filenamify
 
 URL_VIDEO_API = "https://api.svt.se/video/"
+LIVE_CHANNELS = {
+    "svtbarn": "ch-barnkanalen",
+    "svt1": "ch-svt1",
+    "svt2": "ch-svt2",
+    "svt24": "ch-svt24",
+    "kunskapskanalen": "ch-kunskapskanalen",
+}
 
 
 class Svtplay(Service, MetadataThumbMixin):
@@ -42,7 +49,7 @@ class Svtplay(Service, MetadataThumbMixin):
         urldata = self.get_urldata()
 
         if parse.path[:8] == "/kanaler":
-            ch = "ch-{}".format(parse.path[parse.path.rfind("/") + 1 :])
+            ch = LIVE_CHANNELS[parse.path[parse.path.rfind("/") + 1 :]]
             _url = urljoin(URL_VIDEO_API, ch)
             res = self.http.get(_url)
             try:
