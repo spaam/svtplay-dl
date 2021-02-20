@@ -139,7 +139,7 @@ class Dplay(Service):
         self._getpackages()
 
         urllocal = ""
-        if self.domain in ["dplay.dk", "dplay.no"]:
+        if self.domain in ["discoveryplus.no", "discoveryplus.dk"]:
             urllocal = "mer"
 
         url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal, match.group(2))
