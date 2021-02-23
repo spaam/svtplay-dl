@@ -42,7 +42,7 @@ class HTTP(Session):
         return res
 
     def split_header(self, headers):
-        return dict(x.split("=") for x in headers.split(";"))
+        return dict(x.split("=") for x in headers.split(";") if x)
 
 
 def download_thumbnails(output, config, urls):
