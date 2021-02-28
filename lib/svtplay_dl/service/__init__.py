@@ -53,7 +53,7 @@ class Service:
         else:
             self.http = http
 
-        logging.debug("service: {}".format(self.__class__.__name__.lower()))
+        logging.debug(f"service: {self.__class__.__name__.lower()}")
 
     @property
     def url(self):

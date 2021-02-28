@@ -41,7 +41,7 @@ class Cmore(Service):
             return
 
         url = "https://playback-api.b17g.net/media/{}?service=cmore.{}&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"], tld)
-        res = self.http.request("get", url, cookies=self.cookies, headers={"authorization": "Bearer {}".format(token)})
+        res = self.http.request("get", url, cookies=self.cookies, headers={"authorization": f"Bearer {token}"})
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
@@ -66,7 +66,7 @@ class Cmore(Service):
         res = self.http.get(self.url)
         tags = re.findall('<a class="card__link" href="([^"]+)"', res.text)
         for i in tags:
-            url = urljoin("https://www.cmore.{}/".format(self._gettld()), i)
+            url = urljoin(f"https://www.cmore.{self._gettld()}/", i)
             if url not in episodes:
                 episodes.append(url)
 
@@ -110,7 +110,7 @@ class Cmore(Service):
         return token, None
 
     def operatorlist(self):
-        res = self.http.get("https://tve.cmore.se/country/{}/operator?client=cmore-web-prod".format(self._gettld()))
+        res = self.http.get(f"https://tve.cmore.se/country/{self._gettld()}/operator?client=cmore-web-prod")
         for i in res.json()["data"]["operators"]:
             print("operator: '{}'".format(i["name"].lower()))
 

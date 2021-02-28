@@ -42,7 +42,7 @@ def get_media(url, options, version="Unknown"):
         url = "http://%s" % url
 
     if options.get("verbose"):
-        logging.debug("version: {}".format(version))
+        logging.debug(f"version: {version}")
 
     stream = service_handler(sites, options, url)
     if not stream:
@@ -196,7 +196,7 @@ def get_one_media(stream):
             else:
                 errormsg = str(exc)
         if errormsg:
-            logging.error("No videos found. {}".format(errormsg))
+            logging.error(f"No videos found. {errormsg}")
         else:
             logging.error("No videos found.")
     else:

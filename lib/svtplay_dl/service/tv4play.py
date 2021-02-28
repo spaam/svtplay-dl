@@ -45,7 +45,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         vid = jansson["props"]["pageProps"]["assetId"]
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
-        item = janson2["VideoAsset:{}".format(vid)]
+        item = janson2[f"VideoAsset:{vid}"]
 
         if item["is_drm_protected"]:
             yield ServiceError("We can't download DRM protected content from this site.")
@@ -65,7 +65,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome".format(vid)
+        url = f"https://playback-api.b17g.net/media/{vid}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome"
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked or not available.")
@@ -94,7 +94,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
         show = jansson["query"]["nid"]
 
-        program = janson2["Program:{}".format(show)]
+        program = janson2[f"Program:{show}"]
         episodes_panel = []
         clips_panel = []
         for panel in program["panels"]:
@@ -116,7 +116,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         items = sorted(items)
         for item in items:
-            episodes.append("https://www.tv4play.se/program/{}/{}".format(show, item))
+            episodes.append(f"https://www.tv4play.se/program/{show}/{item}")
 
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]

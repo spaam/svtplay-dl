@@ -43,7 +43,7 @@ class Dr(Service, OpenGraphThumbMixin):
             vid,
             resolution,
         )
-        res = self.http.request("get", url, headers={"authorization": "Bearer {}".format(token)})
+        res = self.http.request("get", url, headers={"authorization": f"Bearer {token}"})
         for video in res.json():
             if video["accessService"] == "StandardVideo":
                 if video["format"] == "video/hls":

@@ -39,7 +39,7 @@ class Dplay(Service):
                 yield ServiceError("Can't detect 'kanaler'")
                 return
             path = "/channels/{}".format(match.group(1))
-            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            url = f"https://disco-api.{self.domain}/content{path}"
             channel = True
             self.config.set("live", True)
         elif "program" in parse.path:
@@ -48,14 +48,14 @@ class Dplay(Service):
                 yield ServiceError("Can't find program url")
                 return
             path = "/shows/{}".format(match.group(2))
-            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            url = f"https://disco-api.{self.domain}/content{path}"
             res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
             programid = res.json()["data"]["id"]
             qyerystring = (
                 "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&"
                 "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
             )
-            res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
+            res = self.http.get(f"https://disco-api.{self.domain}/content/videos?{qyerystring}")
             janson = res.json()
             vid = 0
             slug = None
@@ -64,7 +64,7 @@ class Dplay(Service):
                     vid = int(i["id"])
                     slug = i["attributes"]["path"]
             if slug:
-                url = "https://disco-api.{}/content/videos/{}".format(self.domain, slug)
+                url = f"https://disco-api.{self.domain}/content/videos/{slug}"
             else:
                 yield ServiceError("Cant find latest video on program url")
                 return
@@ -169,8 +169,8 @@ class Dplay(Service):
                         season,
                     )
                     if showid:
-                        querystring += "&{}".format(showid)
-                    res = self.http.get("https://disco-api.{}/cms/collections/{}?{}".format(self.domain, programid, querystring))
+                        querystring += f"&{showid}"
+                    res = self.http.get(f"https://disco-api.{self.domain}/cms/collections/{programid}?{querystring}")
                     janson = res.json()
                     totalpages = janson["data"]["meta"]["itemsTotalPages"]
                     for i in janson["included"]:
@@ -188,7 +188,7 @@ class Dplay(Service):
         return episodes
 
     def _login(self):
-        res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
+        res = self.http.get(f"https://disco-api.{self.domain}/users/me", headers={"authority": f"disco-api.{self.domain}"})
         if res.status_code >= 400:
             return False
         if not res.json()["data"]["attributes"]["anonymous"]:
@@ -205,7 +205,7 @@ class Dplay(Service):
         return True
 
     def _getpackages(self):
-        res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
+        res = self.http.get(f"https://disco-api.{self.domain}/users/me", headers={"authority": f"disco-api.{self.domain}"})
         if res.status_code < 400:
             self.packages.extend(res.json()["data"]["attributes"]["packages"])
 

@@ -42,7 +42,7 @@ def hlsparse(config, res, url, **kwargs):
         return streams
 
     if res.status_code > 400:
-        streams[0] = ServiceError("Can't read HLS playlist. {}".format(res.status_code))
+        streams[0] = ServiceError(f"Can't read HLS playlist. {res.status_code}")
         return streams
     m3u8 = M3U8(res.text)
 
@@ -257,7 +257,7 @@ class HLS(VideoRetriever):
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
-                        url = "{}.m3u8?in={}&out={}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        url = f"{base_url}.m3u8?in={start_time_stamp.isoformat()}&out={end_time_stamp.isoformat()}?"
 
                     new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:

@@ -24,11 +24,11 @@ class Svt(Svtplay):
                 vid = janson["recipe"]["content"]["data"]["videoClips"][0]["id"]
             else:
                 vid = janson["recipe"]["content"]["data"]["videoEpisodes"][0]["id"]
-            res = self.http.get("https://api.svt.se/videoplayer-api/video/{}".format(vid))
+            res = self.http.get(f"https://api.svt.se/videoplayer-api/video/{vid}")
         else:
             janson = json.loads(match.group(1))
             vid = janson["areaData"]["articles"][list(janson["areaData"]["articles"].keys())[0]]["media"][0]["image"]["svtId"]
-            res = self.http.get("https://api.svt.se/video/{}".format(vid))
+            res = self.http.get(f"https://api.svt.se/video/{vid}")
 
         janson = res.json()
         if "subtitleReferences" in janson:

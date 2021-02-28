@@ -172,7 +172,7 @@ def dashparse(config, res, url, **kwargs):
         return streams
 
     if res.status_code >= 400:
-        streams[0] = ServiceError("Can't read DASH playlist. {}".format(res.status_code))
+        streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}")
         return streams
     if len(res.text) < 1:
         streams[0] = ServiceError("Can't read DASH playlist. {}, size: {}".format(res.status_code, len(res.text)))
@@ -262,7 +262,7 @@ def parse_dates(date_str):
         except Exception:
             pass
     if not dt:
-        raise ValueError("Can't parse date format: {}".format(date_str))
+        raise ValueError(f"Can't parse date format: {date_str}")
 
     return dt
 

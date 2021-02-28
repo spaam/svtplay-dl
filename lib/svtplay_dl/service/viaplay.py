@@ -74,7 +74,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 self.http.request("get", stream["href"]),
                 stream["href"],
                 output=self.output,
-                authorization="MTG-AT {}".format(self.token),
+                authorization=f"MTG-AT {self.token}",
             )
             for n in list(streams.keys()):
                 yield streams[n]

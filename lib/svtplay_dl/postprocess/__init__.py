@@ -35,7 +35,7 @@ class postprocess:
         if formatname(self.stream.output, self.config, self.stream.output_extention).endswith(".mp4") is False:
             orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
             name, ext = os.path.splitext(orig_filename)
-            new_name = "{}.mp4".format(name)
+            new_name = f"{name}.mp4"
 
             cmd = [self.detect, "-i", orig_filename]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
@@ -43,16 +43,16 @@ class postprocess:
             videotrack, audiotrack = _checktracks(streams)
 
             if self.config.get("merge_subtitle"):
-                logging.info("Muxing {} and merging its subtitle into {}".format(orig_filename, new_name))
+                logging.info(f"Muxing {orig_filename} and merging its subtitle into {new_name}")
             else:
-                logging.info("Muxing {} into {}".format(orig_filename, new_name))
+                logging.info(f"Muxing {orig_filename} into {new_name}")
 
-            tempfile = "{}.temp".format(orig_filename)
+            tempfile = f"{orig_filename}.temp"
             arguments = []
             if videotrack:
-                arguments += ["-map", "{}".format(videotrack)]
+                arguments += ["-map", f"{videotrack}"]
             if audiotrack:
-                arguments += ["-map", "{}".format(audiotrack)]
+                arguments += ["-map", f"{audiotrack}"]
             arguments += ["-c", "copy", "-f", "mp4"]
             if ext == ".ts" and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -73,7 +73,7 @@ class postprocess:
                         subfile = "{}.srt".format(name + subfix)
                         cmd += ["-i", subfile]
                 else:
-                    subfile = "{}.srt".format(name)
+                    subfile = f"{name}.srt"
                     cmd += ["-i", subfile]
 
             arguments += ["-y", tempfile]
@@ -105,9 +105,9 @@ class postprocess:
         orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
         name, ext = os.path.splitext(orig_filename)
         if ext == ".ts":
-            audio_filename = "{}.audio.ts".format(name)
+            audio_filename = f"{name}.audio.ts"
         else:
-            audio_filename = "{}.m4a".format(name)
+            audio_filename = f"{name}.m4a"
 
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
@@ -119,11 +119,11 @@ class postprocess:
         videotrack, audiotrack = _checktracks(streams)
 
         if self.config.get("merge_subtitle"):
-            logging.info("Merge audio, video and subtitle into {}".format(orig_filename))
+            logging.info(f"Merge audio, video and subtitle into {orig_filename}")
         else:
-            logging.info("Merge audio and video into {}".format(orig_filename))
+            logging.info(f"Merge audio and video into {orig_filename}")
 
-        tempfile = "{}.temp".format(orig_filename)
+        tempfile = f"{orig_filename}.temp"
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
@@ -134,9 +134,9 @@ class postprocess:
         if self.config.get("only_audio") or not self.config.get("only_video"):
             cmd += ["-i", audio_filename]
         if videotrack:
-            arguments += ["-map", "{}".format(videotrack)]
+            arguments += ["-map", f"{videotrack}"]
         if audiotrack:
-            arguments += ["-map", "{}".format(audiotrack)]
+            arguments += ["-map", f"{audiotrack}"]
         if self.config.get("merge_subtitle"):
             langs = _sublanguage(self.stream, self.config, self.subfixes)
             tracks = [x for x in [videotrack, audiotrack] if x]
@@ -154,7 +154,7 @@ class postprocess:
                     subfile = "{}.srt".format(name + subfix)
                     cmd += ["-i", subfile]
             else:
-                subfile = "{}.srt".format(name)
+                subfile = f"{name}.srt"
                 cmd += ["-i", subfile]
 
         arguments += ["-y", tempfile]

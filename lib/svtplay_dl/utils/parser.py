@@ -57,7 +57,7 @@ def gen_parser(version="unknown"):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
     general = parser.add_argument_group()
 
-    general.add_argument("--version", action="version", version="%(prog)s {}".format(version))
+    general.add_argument("--version", action="version", version=f"%(prog)s {version}")
     general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
     general.add_argument(
         "--subfolder",
@@ -414,7 +414,7 @@ def readconfig(config, configfile, service=None, preset=None):
                 data = fd.read()
                 configdata = safe_load(data)
         except PermissionError:
-            logging.error("Permission denied while reading config: {}".format(configfile))
+            logging.error(f"Permission denied while reading config: {configfile}")
 
     if configdata is None:
         return config
