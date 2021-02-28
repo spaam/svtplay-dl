@@ -19,15 +19,15 @@ repos:
     hooks:
     - id: flake8
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.4
+    rev: v2.10.0
     hooks:
     - id: pyupgrade
       args: [--py3-plus]
 -   repo: https://github.com/asottile/reorder_python_imports
-    rev: v2.3.6
+    rev: v2.4.0
     hooks:
     -   id: reorder-python-imports
 -   repo: https://github.com/asottile/add-trailing-comma
-    rev: v2.0.1
+    rev: v2.1.0
     hooks:
     -   id: add-trailing-comma
