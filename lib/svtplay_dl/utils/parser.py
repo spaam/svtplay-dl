@@ -57,10 +57,13 @@ def gen_parser(version="unknown"):
     parser = argparse.ArgumentParser(prog="svtplay-dl")
     general = parser.add_argument_group()
 
-    general.add_argument("--version", action="version", version="%(prog)s {}".format(version))
+    general.add_argument("--version", action="version", version=f"%(prog)s {version}")
     general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
     general.add_argument(
-        "--subfolder", action="store_true", default=False, help="Create a subfolder titled as the show, non-series gets in folder movies"
+        "--subfolder",
+        action="store_true",
+        default=False,
+        help="Create a subfolder titled as the show, non-series gets in folder movies",
     )
     general.add_argument("--config", dest="configfile", metavar="configfile", default=CONFIGFILE, help="Specify configuration file")
     general.add_argument("-f", "--force", action="store_true", dest="force", default=False, help="overwrite if file exists already")
@@ -69,15 +72,29 @@ def gen_parser(version="unknown"):
     general.add_argument("-c", "--capture_time", default=-1, type=int, metavar="capture_time", help="define capture time in minutes of a live stream")
     general.add_argument("-s", "--silent", action="store_true", dest="silent", default=False, help="be less verbose")
     general.add_argument(
-        "--silent-semi", action="store_true", dest="silent_semi", default=False, help="only show a message when the file is downloaded"
+        "--silent-semi",
+        action="store_true",
+        dest="silent_semi",
+        default=False,
+        help="only show a message when the file is downloaded",
     )
     general.add_argument("-u", "--username", default=None, help="username")
     general.add_argument("-p", "--password", default=None, help="password")
     general.add_argument(
-        "-t", "--thumbnail", action="store_true", dest="thumbnail", default=False, help="download thumbnail from the site if available"
+        "-t",
+        "--thumbnail",
+        action="store_true",
+        dest="thumbnail",
+        default=False,
+        help="download thumbnail from the site if available",
     )
     general.add_argument(
-        "-g", "--get-url", action="store_true", dest="get_url", default=False, help="do not download any video, but instead print the URL."
+        "-g",
+        "--get-url",
+        action="store_true",
+        dest="get_url",
+        default=False,
+        help="do not download any video, but instead print the URL.",
     )
     general.add_argument(
         "--get-only-episode-url",
@@ -87,17 +104,33 @@ def gen_parser(version="unknown"):
         help="do not get video URLs, only print the episode URL.",
     )
     general.add_argument(
-        "--dont-verify-ssl-cert", action="store_false", dest="ssl_verify", default=True, help="Don't attempt to verify SSL certificates."
+        "--dont-verify-ssl-cert",
+        action="store_false",
+        dest="ssl_verify",
+        default=True,
+        help="Don't attempt to verify SSL certificates.",
     )
     general.add_argument(
-        "--http-header", dest="http_headers", default=None, metavar="header1=value;header2=value2", help="A header to add to each HTTP request."
+        "--http-header",
+        dest="http_headers",
+        default=None,
+        metavar="header1=value;header2=value2",
+        help="A header to add to each HTTP request.",
     )
     general.add_argument(
-        "--cookies", dest="cookies", default=None, metavar="cookie1=value;cookie2=value2", help="A cookies to add to each HTTP request."
+        "--cookies",
+        dest="cookies",
+        default=None,
+        metavar="cookie1=value;cookie2=value2",
+        help="A cookies to add to each HTTP request.",
     )
     general.add_argument("--remux", dest="remux", default=False, action="store_true", help="Remux from one container to mp4 using ffmpeg or avconv")
     general.add_argument(
-        "--exclude", dest="exclude", default=None, metavar="WORD1,WORD2,...", help="exclude videos with the WORD(s) in the filename. comma separated."
+        "--exclude",
+        dest="exclude",
+        default=None,
+        metavar="WORD1,WORD2,...",
+        help="exclude videos with the WORD(s) in the filename. comma separated.",
     )
     general.add_argument("--after-date", dest="after_date", default=None, metavar="yyyy-MM-dd", help="only videos published on or after this date")
     general.add_argument(
@@ -113,10 +146,18 @@ def gen_parser(version="unknown"):
     general.add_argument("--nfo", action="store_true", dest="nfo", default=False, help="create a NFO file")
     general.add_argument("--force-nfo", action="store_true", dest="force_nfo", default=False, help="download only NFO if used with --nfo")
     general.add_argument(
-        "--only-audio", action="store_true", dest="only_audio", default=False, help="only download audio if audio and video is seperated"
+        "--only-audio",
+        action="store_true",
+        dest="only_audio",
+        default=False,
+        help="only download audio if audio and video is seperated",
     )
     general.add_argument(
-        "--only-video", action="store_true", dest="only_video", default=False, help="only download video if audio and video is seperated"
+        "--only-video",
+        action="store_true",
+        dest="only_video",
+        default=False,
+        help="only download video if audio and video is seperated",
     )
 
     quality = parser.add_argument_group("Quality")
@@ -128,7 +169,12 @@ def gen_parser(version="unknown"):
         help="choose what format to download based on bitrate / video resolution." "it will download the best format by default",
     )
     quality.add_argument(
-        "-Q", "--flexible-quality", default=0, metavar="amount", dest="flexibleq", help="allow given quality (as above) to differ by an amount"
+        "-Q",
+        "--flexible-quality",
+        default=0,
+        metavar="amount",
+        dest="flexibleq",
+        help="allow given quality (as above) to differ by an amount",
     )
     quality.add_argument("-P", "--preferred", default=None, metavar="preferred", help="preferred download method (dash, hls, hds, or http)")
     quality.add_argument("--list-quality", dest="list_quality", action="store_true", default=False, help="list the quality for a video")
@@ -149,7 +195,12 @@ def gen_parser(version="unknown"):
 
     subtitle = parser.add_argument_group("Subtitle")
     subtitle.add_argument(
-        "-S", "--subtitle", action="store_true", dest="subtitle", default=False, help="download subtitle from the site if available"
+        "-S",
+        "--subtitle",
+        action="store_true",
+        dest="subtitle",
+        default=False,
+        help="download subtitle from the site if available",
     )
     subtitle.add_argument(
         "-M",
@@ -157,20 +208,35 @@ def gen_parser(version="unknown"):
         action="store_true",
         dest="merge_subtitle",
         default=False,
-        help="merge subtitle with video/audio file with corresponding ISO639-3 language code."
-        "this invokes --remux automatically. use with -S for external also.",
+        help="merge subtitle with video/audio file with corresponding ISO639-3 language code." "this invokes --remux automatically.",
     )
     subtitle.add_argument(
-        "--force-subtitle", dest="force_subtitle", default=False, action="store_true", help="download only subtitle if its used with -S"
+        "--force-subtitle",
+        dest="force_subtitle",
+        default=False,
+        action="store_true",
+        help="download only subtitle if its used with -S",
     )
     subtitle.add_argument(
-        "--require-subtitle", dest="require_subtitle", default=False, action="store_true", help="download only if a subtitle is available"
+        "--require-subtitle",
+        dest="require_subtitle",
+        default=False,
+        action="store_true",
+        help="download only if a subtitle is available",
     )
     subtitle.add_argument(
-        "--all-subtitles", dest="get_all_subtitles", default=False, action="store_true", help="Download all available subtitles for the video"
+        "--all-subtitles",
+        dest="get_all_subtitles",
+        default=False,
+        action="store_true",
+        help="Download all available subtitles for the video",
     )
     subtitle.add_argument(
-        "--raw-subtitles", dest="get_raw_subtitles", default=False, action="store_true", help="also download the subtitles in their native format"
+        "--raw-subtitles",
+        dest="get_raw_subtitles",
+        default=False,
+        action="store_true",
+        help="also download the subtitles in their native format",
     )
     subtitle.add_argument(
         "--convert-subtitle-colors",
@@ -308,6 +374,7 @@ def _special_settings(config):
             config.set("subtitle", True)
     if config.get("merge_subtitle"):
         config.set("remux", True)
+        config.set("subtitle", True)
 
     if config.get("silent_semi"):
         config.set("silent", True)
@@ -347,7 +414,7 @@ def readconfig(config, configfile, service=None, preset=None):
                 data = fd.read()
                 configdata = safe_load(data)
         except PermissionError:
-            logging.error("Permission denied while reading config: {}".format(configfile))
+            logging.error(f"Permission denied while reading config: {configfile}")
 
     if configdata is None:
         return config

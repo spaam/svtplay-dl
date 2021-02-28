@@ -103,6 +103,6 @@ class Koket(Service, OpenGraphThumbMixin):
             return None
 
         if self._data is None:
-            self._data = self.http.get("https://www.koket.se/kurser/api/data/{}".format(auth_token)).json()
+            self._data = self.http.get(f"https://www.koket.se/kurser/api/data/{auth_token}").json()
 
         return self._data

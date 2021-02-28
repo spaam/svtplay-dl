@@ -40,7 +40,8 @@ class NHL(Service, OpenGraphThumbMixin):
                 yield ServiceError("Can't find api url")
                 return
             filename = "{}?contentId={}&playbackScenario=HTTP_CLOUD_WIRED_WEB&format=json&platform=WEB_MEDIAPLAYER" "&_=1487455224334".format(
-                janson["vpm"]["mediaFramework"]["mediaFrameworkEndPoint"], vid
+                janson["vpm"]["mediaFramework"]["mediaFrameworkEndPoint"],
+                vid,
             )
             url = urljoin(apiurl, filename)
             res = self.http.get(url)

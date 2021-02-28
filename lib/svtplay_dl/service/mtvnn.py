@@ -81,7 +81,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
             match = re.search("mtvnn.com:([^&]+)", mrssxmlurl)
             if match:
                 urlpart = match.group(1).replace("-", "/").replace("playlist", "playlists")  # it use playlists dunno from where it gets it
-                hlsapi = "http://api.mtvnn.com/v2/{}/{}.json?video_format=m3u8&callback=&".format(countrycode, urlpart)
+                hlsapi = f"http://api.mtvnn.com/v2/{countrycode}/{urlpart}.json?video_format=m3u8&callback=&"
                 data = self.http.request("get", hlsapi).text
 
                 dataj = json.loads(data)
@@ -108,7 +108,7 @@ class Mtvnn(Service, OpenGraphThumbMixin):
         for i in sorted(episodNr):
             if n == config.get("all_last"):
                 break
-            episodes.append("http://www.nickelodeon.se/serier/{}-something/videos/{}-something".format(programid, i))
+            episodes.append(f"http://www.nickelodeon.se/serier/{programid}-something/videos/{i}-something")
             n += 1
         return episodes
 
@@ -137,7 +137,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
             if wanted_id == str(n["id"]):
 
                 mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
-                    n["video_token"]
+                    n["video_token"],
                 )
                 hls_asset = self.http.request("get", mrssxmlurl)
                 xml = ET.XML(hls_asset.text)

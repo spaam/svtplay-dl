@@ -42,7 +42,7 @@ def hlsparse(config, res, url, **kwargs):
         return streams
 
     if res.status_code > 400:
-        streams[0] = ServiceError("Can't read HLS playlist. {}".format(res.status_code))
+        streams[0] = ServiceError(f"Can't read HLS playlist. {res.status_code}")
         return streams
     m3u8 = M3U8(res.text)
 
@@ -137,7 +137,14 @@ def hlsparse(config, res, url, **kwargs):
     elif m3u8.media_segment:
         config.set("segments", False)
         streams[0] = HLS(
-            copy.copy(config), url, 0, cookies=res.cookies, keycookie=keycookie, authorization=authorization, output=output, segments=False
+            copy.copy(config),
+            url,
+            0,
+            cookies=res.cookies,
+            keycookie=keycookie,
+            authorization=authorization,
+            output=output,
+            segments=False,
         )
 
     else:
@@ -222,10 +229,14 @@ class HLS(VideoRetriever):
                     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                     decryptor = cipher.decryptor()
 
-                if decryptor:
-                    data = decryptor.update(data)
-                else:
-                    raise ValueError("No decryptor found for encrypted hls steam.")
+                # In some cases the playlist say its encrypted but the files is not.
+                # This happen on svtplay 5.1ch stream where it started with ID3..
+                # Adding the other ones is header for mpeg-ts files. third byte is 10 or 11..
+                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10":
+                    if decryptor:
+                        data = decryptor.update(data)
+                    else:
+                        raise ValueError("No decryptor found for encrypted hls steam.")
 
             file_d.write(data)
 
@@ -246,7 +257,7 @@ class HLS(VideoRetriever):
                         start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
                         base_url = url.split(".m3u8")[0]
-                        url = "{}.m3u8?in={}&out={}?".format(base_url, start_time_stamp.isoformat(), end_time_stamp.isoformat())
+                        url = f"{base_url}.m3u8?in={start_time_stamp.isoformat()}&out={end_time_stamp.isoformat()}?"
 
                     new_m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
                     for n_m3u in new_m3u8.media_segment:
@@ -297,7 +308,12 @@ class M3U8:
 
     def __str__(self):
         return "Version: {}\nMedia Segment: {}\nMedia Playlist: {}\nMaster Playlist: {}\nEncrypted: {}\tIndependent_segments: {}".format(
-            self.version, self.media_segment, self.media_playlist, self.master_playlist, self.encrypted, self.independent_segments
+            self.version,
+            self.media_segment,
+            self.media_playlist,
+            self.master_playlist,
+            self.encrypted,
+            self.independent_segments,
         )
 
     def parse_m3u(self, data):

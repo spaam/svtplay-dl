@@ -8,5 +8,5 @@ def run_program(cmd, show=True):
     stderr = stderr.decode("utf-8", "replace")
     if p.returncode != 0 and show:
         msg = stderr.strip()
-        logging.error("Something went wrong: {}".format(msg))
+        logging.error(f"Something went wrong: {msg}")
     return p.returncode, stdout, stderr

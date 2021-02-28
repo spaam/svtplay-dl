@@ -13,6 +13,6 @@ initfile = "lib/svtplay_dl/__init__.py"
 with open(initfile) as fd:
     data = fd.read()
 
-newstring = re.sub("(__version__ = get_version[^\n]+)", '__version__ = "{}"'.format(version), data)
+newstring = re.sub("(__version__ = get_version[^\n]+)", f'__version__ = "{version}"', data)
 with open(initfile, "wt") as fd:
     fd.write(newstring)

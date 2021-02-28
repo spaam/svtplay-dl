@@ -43,7 +43,7 @@ class Sportlib(Service, OpenGraphThumbMixin):
             "username": self.config.get("username"),
             "password": self.config.get("password"),
         }
-        res = self.http.post("https://core.oz.com/oauth2/token?channelId={}".format(sid), data=data)
+        res = self.http.post(f"https://core.oz.com/oauth2/token?channelId={sid}", data=data)
         if res.status_code > 200:
             yield ServiceError("Wrong username / password?")
             return
@@ -58,8 +58,8 @@ class Sportlib(Service, OpenGraphThumbMixin):
             return
         vid = match.group(1)
 
-        headers = {"content-type": "application/json", "authorization": "{} {}".format(token_type, access_token)}
-        url = "https://core.oz.com/channels/{}/videos/{}?include=collection,streamUrl".format(sid, vid)
+        headers = {"content-type": "application/json", "authorization": f"{token_type} {access_token}"}
+        url = f"https://core.oz.com/channels/{sid}/videos/{vid}?include=collection,streamUrl"
         res = self.http.get(url, headers=headers)
         janson = res.json()
         cookiename = janson["data"]["streamUrl"]["cookieName"]

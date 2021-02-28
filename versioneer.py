@@ -402,7 +402,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             return None, None
     else:
         if verbose:
-            print("unable to find command, tried {}".format(commands))
+            print(f"unable to find command, tried {commands}")
         return None, None
     stdout = p.communicate()[0].strip()
     if sys.version_info[0] >= 3:
@@ -1080,7 +1080,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = "tag '{}' doesn't start with prefix '{}'".format(full_tag, tag_prefix)
+            pieces["error"] = f"tag '{full_tag}' doesn't start with prefix '{tag_prefix}'"
             return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix) :]
 
@@ -1414,7 +1414,7 @@ def get_versions(verbose=False):
     try:
         ver = versions_from_file(versionfile_abs)
         if verbose:
-            print("got version from file {} {}".format(versionfile_abs, ver))
+            print(f"got version from file {versionfile_abs} {ver}")
         return ver
     except NotThisMethod:
         pass
@@ -1561,7 +1561,7 @@ def get_cmdclass():
                             "TAG_PREFIX": cfg.tag_prefix,
                             "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                             "VERSIONFILE_SOURCE": cfg.versionfile_source,
-                        }
+                        },
                     )
 
         cmds["build_exe"] = cmd_build_exe
@@ -1594,7 +1594,7 @@ def get_cmdclass():
                             "TAG_PREFIX": cfg.tag_prefix,
                             "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                             "VERSIONFILE_SOURCE": cfg.versionfile_source,
-                        }
+                        },
                     )
 
         cmds["py2exe"] = cmd_py2exe
@@ -1698,7 +1698,7 @@ def do_setup():
                 "TAG_PREFIX": cfg.tag_prefix,
                 "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                 "VERSIONFILE_SOURCE": cfg.versionfile_source,
-            }
+            },
         )
 
     ipy = os.path.join(os.path.dirname(cfg.versionfile_source), "__init__.py")

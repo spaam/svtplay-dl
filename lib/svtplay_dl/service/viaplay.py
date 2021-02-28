@@ -16,6 +16,9 @@ from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
 
 
+country = {".se": "sv", ".dk": "da", ".no": "no"}
+
+
 class Viaplay(Service, OpenGraphThumbMixin):
     supported_domains = [
         "tv3play.ee",
@@ -71,12 +74,28 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 self.http.request("get", stream["href"]),
                 stream["href"],
                 output=self.output,
-                authorization="MTG-AT {}".format(self.token),
+                authorization=f"MTG-AT {self.token}",
             )
             for n in list(streams.keys()):
                 yield streams[n]
         if "subtitles" in janson["embedded"] and len(janson["embedded"]["subtitles"]) > 0:
-            yield subtitle(copy.copy(self.config), "wrst", janson["embedded"]["subtitles"][0]["link"]["href"], output=self.output)
+            lang = re.search(r"(\.\w\w)$", urlparse(self.url).netloc).group(1)
+            if lang in country:
+                language = country[lang]
+            else:
+                language = None
+
+            if not self.config.get("get_all_subtitles"):
+                if not language:
+                    yield subtitle(copy.copy(self.config), "wrst", janson["embedded"]["subtitles"][0]["link"]["href"], output=self.output)
+                else:
+                    for i in janson["embedded"]["subtitles"]:
+                        if i["data"]["language"] == language:
+                            yield subtitle(copy.copy(self.config), "wrst", i["link"]["href"], output=self.output)
+
+            else:
+                for i in janson["embedded"]["subtitles"]:
+                    yield subtitle(copy.copy(self.config), "wrst", i["link"]["href"], i["data"]["language"], output=copy.copy(self.output))
 
     def find_all_episodes(self, config):
         episodes = []
@@ -126,7 +145,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
                                 [
                                     int("{}{}".format(i["episode"]["seasonNumber"], i["episode"]["episodeNumber"])),
                                     "{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]),
-                                ]
+                                ],
                             )
                         elif config.get("include_clips"):
                             clips.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))

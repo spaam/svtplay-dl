@@ -24,7 +24,7 @@ class subtitle:
         self.kwargs = kwargs
 
     def __repr__(self):
-        return "<Subtitle(type={}, url={}>".format(self.subtype, self.url)
+        return f"<Subtitle(type={self.subtype}, url={self.url}>"
 
     def download(self):
         subdata = self.http.request("get", self.url)
@@ -143,7 +143,7 @@ class subtitle:
             for text in texts:
                 line = ""
                 for txt in text.itertext():
-                    line += "{}".format(txt)
+                    line += f"{txt}"
                 all += "{}\n".format(decode_html_entities(line.lstrip()))
             subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
         subs = re.sub("&amp;", r"&", subs)
@@ -223,7 +223,12 @@ class subtitle:
                     hour1 = 0
                     hour2 = 0
                 time = "{:02d}:{}:{} --> {:02d}:{}:{}\n".format(
-                    hour1, matchx.group("m1"), matchx.group("s1").replace(".", ","), hour2, matchx.group("m2"), matchx.group("s2").replace(".", ",")
+                    hour1,
+                    matchx.group("m1"),
+                    matchx.group("s1").replace(".", ","),
+                    hour2,
+                    matchx.group("m2"),
+                    matchx.group("s2").replace(".", ","),
                 )
                 srt += time
                 block = 1

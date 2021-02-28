@@ -21,10 +21,18 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.text import filenamify
 
 URL_VIDEO_API = "https://api.svt.se/video/"
+LIVE_CHANNELS = {
+    "svtbarn": "ch-barnkanalen",
+    "svt1": "ch-svt1",
+    "svt2": "ch-svt2",
+    "svt24": "ch-svt24",
+    "kunskapskanalen": "ch-kunskapskanalen",
+}
 
 
 class Svtplay(Service, MetadataThumbMixin):
     supported_domains = ["svtplay.se", "svt.se", "beta.svtplay.se", "svtflow.se"]
+    info_search_expr = r"<script id=\"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>"
 
     def get(self):
         parse = urlparse(self.url)
@@ -41,40 +49,49 @@ class Svtplay(Service, MetadataThumbMixin):
         urldata = self.get_urldata()
 
         if parse.path[:8] == "/kanaler":
-            ch = "ch-{}".format(parse.path[parse.path.rfind("/") + 1 :])
+            ch = LIVE_CHANNELS[parse.path[parse.path.rfind("/") + 1 :]]
             _url = urljoin(URL_VIDEO_API, ch)
             res = self.http.get(_url)
             try:
                 janson = res.json()
             except json.decoder.JSONDecodeError:
-                yield ServiceError("Can't decode api request: {}".format(res.request.url))
+                yield ServiceError(f"Can't decode api request: {res.request.url}")
                 return
             videos = self._get_video(janson)
             self.config.set("live", True)
             yield from videos
             return
 
-        match = re.search(r"__svtplay_apollo'] = ({.*});", urldata)
+        match = re.search(self.info_search_expr, urldata)
         if not match:
             yield ServiceError("Can't find video info.")
             return
 
         janson = json.loads(match.group(1))
-        self.visibleid = self._get_visibleid(janson)
-        if not self.visibleid:
+        video_data = None
+        vid = None
+        for data_entry in janson["props"]["urqlState"].values():
+            entry = json.loads(data_entry["data"])
+            for key, data in entry.items():
+                if key == "listablesByEscenicId" and "videoSvtId" in data[0]:
+                    video_data = data[0]
+                    vid = video_data["videoSvtId"]
+                    break
+            # if video_data:
+            #    break
+
+        if not vid and not self.visibleid:
             yield ServiceError("Can't find video id")
             return
 
-        vid = janson[self.visibleid]["videoSvtId"]
-
-        self.outputfilename(janson)
-        self.extrametadata(janson, self.visibleid)
+        self.outputfilename(video_data)
+        self.extrametadata(video_data)
 
         res = self.http.get(URL_VIDEO_API + vid)
         try:
             janson = res.json()
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {}".format(res.request.url))
+            yield ServiceError(f"Can't decode api request: {res.request.url}")
             return
         videos = self._get_video(janson)
         yield from videos
@@ -116,14 +133,18 @@ class Svtplay(Service, MetadataThumbMixin):
 
     def _get_visibleid(self, janson):
         esceni = None
-        for key in janson["ROOT_QUERY"].keys():
-            if "listablesBy" in key:
-                esceni = key
+        for data_entry in janson["props"]["urqlState"].values():
+            entry = json.loads(data_entry["data"])
+            for key in entry.keys():
+                if "listablesBy" in key:
+                    esceni = entry[key]
+                    break
+            if esceni:
                 break
 
         if esceni:
             try:
-                return janson["ROOT_QUERY"][esceni][0]["id"]
+                return esceni[0]["id"]
             except IndexError:
                 return None
         else:
@@ -133,7 +154,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if page > maxpage:
             return videos
 
-        res = self.http.get("http://www.svtplay.se/sista-chansen?sida={}".format(page))
+        res = self.http.get(f"http://www.svtplay.se/sista-chansen?sida={page}")
         match = re.search("__svtplay'] = ({.*});", res.text)
         if not match:
             return videos
@@ -175,7 +196,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if re.search("sista-chansen", parse.path):
             videos = self._last_chance(videos, 1)
         else:
-            match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
+            match = re.search(self.info_search_expr, self.get_urldata())
             if not match:
                 logging.error("Can't find video info.")
                 return
@@ -186,48 +207,47 @@ class Svtplay(Service, MetadataThumbMixin):
                 logging.error("Can't find video id. removed?")
                 return
 
-            match = re.search(r"__svtplay_apollo'] = ({.*});", self.get_urldata())
+            match = re.search(self.info_search_expr, self.get_urldata())
             if not match:
                 logging.error("Can't find video info.")
                 return videos
             janson = json.loads(match.group(1))
-            episode = janson[self.visibleid]
-            associatedContent = episode['associatedContent({"include":["season","productionPeriod","clips","upcoming"]})']
+            associatedContent = None
 
-            keys = []
+            for json_entry in janson["props"]["urqlState"].values():
+                entry = json.loads(json_entry["data"])
+                for key, data in entry.items():
+                    if "listablesBy" in key and (len(data[0]["associatedContent"]) == 0 or data[0]["associatedContent"][0]["id"] != "related"):
+                        associatedContent = data[0]["associatedContent"]
+                        break
+                if associatedContent:
+                    break
+
+            collections = []
             videos = []
-            if "urls" in episode:
-                videos.append(janson[episode["urls"]["id"]]["svtplay"])
             for i in associatedContent:
                 if tab:
-                    section = "Selection:{}".format(tab)
-                    if section == i["id"]:
-                        keys.append(section)
+                    if tab == i["id"]:
+                        collections.append(i)
                 else:
-                    if i["id"] == "Selection:upcoming":
+                    if i["id"] == "upcoming":
                         continue
-                    elif self.config.get("include_clips") and "Selection:clips" in i["id"]:
-                        keys.append(i["id"])
-                    elif "Selection:clips" not in i["id"]:
-                        keys.append(i["id"])
+                    elif self.config.get("include_clips") and "clips" in i["id"]:
+                        collections.append(i)
+                    elif "clips" not in i["id"]:
+                        collections.append(i)
 
-            for i in keys:
-                item = None
-                for items in janson[i].keys():
-                    if "items" in items:
-                        item = items
-                        break
-                if item:
-                    for n in janson[i][item]:
-                        epi = janson[janson[n["id"]]["item"]["id"]]
-                        if "variants" in epi:
-                            for z in epi["variants"]:
-                                if janson[janson[z["id"]]["urls"]["id"]]["svtplay"] not in videos:
-                                    videos.append(janson[janson[z["id"]]["urls"]["id"]]["svtplay"])
-                        if janson[epi["urls"]["id"]]["svtplay"] not in videos:
-                            videos.append(janson[epi["urls"]["id"]]["svtplay"])
-                else:
-                    logging.error("Can't find other episodes.")
+            if not collections:
+                logging.error("Can't find other episodes.")
+
+            for i in collections:
+                for epi in i["items"]:
+                    if "variants" in epi["item"]:
+                        for variant in epi["item"]["variants"]:
+                            if variant["urls"]["svtplay"] not in videos:
+                                videos.append(variant["urls"]["svtplay"])
+                    if epi["item"]["urls"]["svtplay"] not in videos:
+                        videos.append(epi["item"]["urls"]["svtplay"])
 
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
 
@@ -253,11 +273,10 @@ class Svtplay(Service, MetadataThumbMixin):
     def outputfilename(self, data):
         name = None
         desc = None
-        pid = data[self.visibleid]["parent"]["id"]
 
-        name = data[pid]["slug"]
-        other = data[self.visibleid]["slug"]
-        vid = data[self.visibleid]["id"]
+        name = data["parent"]["slug"]
+        other = data["slug"]
+        vid = data["id"]
         id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
@@ -267,16 +286,16 @@ class Svtplay(Service, MetadataThumbMixin):
             other = None
 
         season, episode = self.seasoninfo(data)
-        if "accessibility" in data[self.visibleid]:
-            if data[self.visibleid]["accessibility"] == "AudioDescribed":
+        if "accessibility" in data:
+            if data["accessibility"] == "AudioDescribed":
                 desc = "syntolkat"
-            if data[self.visibleid]["accessibility"] == "SignInterpreted":
+            if data["accessibility"] == "SignInterpreted":
                 desc = "teckentolkat"
 
         if not other:
             other = desc
         elif desc:
-            other += "-{}".format(desc)
+            other += f"-{desc}"
 
         self.output["title"] = filenamify(name)
         self.output["id"] = id
@@ -287,14 +306,13 @@ class Svtplay(Service, MetadataThumbMixin):
     def seasoninfo(self, data):
         season, episode = None, None
 
-        if "episode" not in data[self.visibleid]:
+        if "episode" not in data:
             return season, episode
 
-        episodeid = data[self.visibleid]["episode"]["id"]
-        if "positionInSeason" not in data[episodeid]:
+        if "positionInSeason" not in data["episode"]:
             return season, episode
 
-        match = re.search(r"Säsong (\d+) — Avsnitt (\d+)", data[episodeid]["positionInSeason"])
+        match = re.search(r"Säsong (\d+) — Avsnitt (\d+)", data["episode"]["positionInSeason"])
         if not match:
             return season, episode
 
@@ -303,9 +321,7 @@ class Svtplay(Service, MetadataThumbMixin):
 
         return season, episode
 
-    def extrametadata(self, data, visibleid):
-        episode = data[visibleid]
-
+    def extrametadata(self, episode):
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode:
 
@@ -319,21 +335,23 @@ class Svtplay(Service, MetadataThumbMixin):
             if "+" in validfrom:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S%z"
-                    ).timetuple()
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        "%Y-%m-%dT%H:%M:%S%z",
+                    ).timetuple(),
                 )
             else:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")), "%Y-%m-%dT%H:%M:%S"
-                    ).timetuple()
+                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        "%Y-%m-%dT%H:%M:%S",
+                    ).timetuple(),
                 )
             self.output["publishing_datetime"] = int(date)
 
-        self.output["title_nice"] = data[data[visibleid]["parent"]["id"]]["name"]
+        self.output["title_nice"] = episode["parent"]["name"]
 
         try:
-            t = data[data[episode["parent"]["id"]]["image"]["id"]]
+            t = episode["parent"]["image"]
         except KeyError:
             t = ""
         if isinstance(t, dict):
@@ -344,7 +362,7 @@ class Svtplay(Service, MetadataThumbMixin):
             url = t.format(format="large")
             self.output["showthumbnailurl"] = url
         try:
-            t = data[episode["image"]["id"]]
+            t = episode["image"]
         except KeyError:
             t = ""
         if isinstance(t, dict):
@@ -355,8 +373,8 @@ class Svtplay(Service, MetadataThumbMixin):
             url = t.format(format="large")
             self.output["episodethumbnailurl"] = url
 
-        if "longDescription" in data[episode["parent"]["id"]]:
-            self.output["showdescription"] = data[episode["parent"]["id"]]["longDescription"]
+        if "longDescription" in episode["parent"]:
+            self.output["showdescription"] = episode["parent"]["longDescription"]
 
         if "longDescription" in episode:
             self.output["episodedescription"] = episode["longDescription"]

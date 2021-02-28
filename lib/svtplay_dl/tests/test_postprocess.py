@@ -23,7 +23,7 @@ class streams(unittest.TestCase):
 
     def test_video1(self):
         video = _streams(
-            "Stream #0:0[0x21]: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc"
+            "Stream #0:0[0x21]: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
         )
         assert video == [
             (
@@ -32,12 +32,12 @@ class streams(unittest.TestCase):
                 "",
                 "Video",
                 "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
-            )
+            ),
         ]
 
     def test_video2(self):
         video = _streams(
-            "Stream #0:0(und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)"
+            "Stream #0:0(und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)",
         )
         assert video == [
             (
@@ -46,12 +46,12 @@ class streams(unittest.TestCase):
                 "",
                 "Video",
                 "h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)",
-            )
+            ),
         ]
 
     def test_video3(self):
         video = _streams(
-            "Stream #0:0: Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)"
+            "Stream #0:0: Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)",
         )
         assert video == [
             (
@@ -60,7 +60,7 @@ class streams(unittest.TestCase):
                 "",
                 "Video",
                 "h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 2710 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc (default)",
-            )
+            ),
         ]
 
 
@@ -80,7 +80,7 @@ class getcodec(unittest.TestCase):
                         "",
                         "Video",
                         "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
-                    )
+                    ),
                 ],
                 "0:0",
             )
@@ -104,7 +104,7 @@ class checktracks(unittest.TestCase):
                         "Video",
                         "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
                     ),
-                ]
+                ],
             )
             == ("0:0", "1:0")
         )
@@ -121,7 +121,7 @@ class checktracks(unittest.TestCase):
                         "Video",
                         "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
                     ),
-                ]
+                ],
             )
             == ("0:0", None)
         )

@@ -39,7 +39,7 @@ def hdsparse(config, res, manifest, output=None):
         return streams
 
     if res.status_code >= 400:
-        streams[0] = ServiceError("Can't read HDS playlist. {}".format(res.status_code))
+        streams[0] = ServiceError(f"Can't read HDS playlist. {res.status_code}")
         return streams
     data = res.text
 
@@ -58,7 +58,7 @@ def hdsparse(config, res, manifest, output=None):
             bootstrap["0"] = i.text
     parse = urlparse(manifest)
     querystring = parse.query
-    url = "{}://{}{}".format(parse.scheme, parse.netloc, parse.path)
+    url = f"{parse.scheme}://{parse.netloc}{parse.path}"
     for i in mediaIter:
         bootstrapid = bootstrap[i.attrib["bootstrapInfoId"]]
         streams[int(i.attrib["bitrate"])] = HDS(

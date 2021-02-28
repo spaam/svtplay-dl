@@ -1,5 +1,6 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+import datetime
 import hashlib
 import logging
 import random
@@ -13,14 +14,16 @@ from svtplay_dl.subtitle import subtitle
 
 
 country = {"sv": ".se", "da": ".dk", "no": ".no"}
+REALMS = {"discoveryplus.se": "dplayse", "discoveryplus.no": "dplayno", "discoveryplus.dk": "dplaydk"}
 
 
 class Dplay(Service):
-    supported_domains = ["dplay.se", "dplay.dk", "dplay.no"]
+    supported_domains = ["discoveryplus.se", "discoveryplus.no", "discoveryplus.dk"]
+    packages = []
 
     def get(self):
         parse = urlparse(self.url)
-        self.domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
+        self.domain = re.search(r"(discoveryplus\.\w\w)", parse.netloc).group(1)
 
         if not self._token():
             logging.error("Something went wrong getting token for requests")
@@ -36,7 +39,7 @@ class Dplay(Service):
                 yield ServiceError("Can't detect 'kanaler'")
                 return
             path = "/channels/{}".format(match.group(1))
-            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            url = f"https://disco-api.{self.domain}/content{path}"
             channel = True
             self.config.set("live", True)
         elif "program" in parse.path:
@@ -45,14 +48,14 @@ class Dplay(Service):
                 yield ServiceError("Can't find program url")
                 return
             path = "/shows/{}".format(match.group(2))
-            url = "https://disco-api.{}/content{}".format(self.domain, path)
+            url = f"https://disco-api.{self.domain}/content{path}"
             res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
             programid = res.json()["data"]["id"]
             qyerystring = (
                 "include=primaryChannel,show&filter[videoType]=EPISODE&filter[show.id]={}&"
                 "page[size]=100&sort=seasonNumber,episodeNumber,-earliestPlayableStart".format(programid)
             )
-            res = self.http.get("https://disco-api.{}/content/videos?{}".format(self.domain, qyerystring))
+            res = self.http.get(f"https://disco-api.{self.domain}/content/videos?{qyerystring}")
             janson = res.json()
             vid = 0
             slug = None
@@ -61,7 +64,7 @@ class Dplay(Service):
                     vid = int(i["id"])
                     slug = i["attributes"]["path"]
             if slug:
-                url = "https://disco-api.{}/content/videos/{}".format(self.domain, slug)
+                url = f"https://disco-api.{self.domain}/content/videos/{slug}"
             else:
                 yield ServiceError("Cant find latest video on program url")
                 return
@@ -116,9 +119,11 @@ class Dplay(Service):
 
     def find_all_episodes(self, config):
         parse = urlparse(self.url)
-        self.domain = re.search(r"(dplay\.\w\w)", parse.netloc).group(1)
+        self.domain = re.search(r"(discoveryplus\.\w\w)", parse.netloc).group(1)
         programid = None
         seasons = []
+        episodes = []
+
         match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
         if not match:
             logging.error("Can't find show name")
@@ -131,14 +136,19 @@ class Dplay(Service):
         if not self._token():
             logging.error("Something went wrong getting token for requests")
 
-        premium = self._checkpremium()
+        self._getpackages()
 
         urllocal = ""
-        if self.domain in ["dplay.dk", "dplay.no"]:
+        if self.domain in ["discoveryplus.no", "discoveryplus.dk"]:
             urllocal = "mer"
 
         url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal, match.group(2))
         res = self.http.get(url)
+        if res.status_code > 400:
+            logging.error("Cant find any videos. wrong url?")
+            return episodes
+
+        showid = None
         for what in res.json()["included"]:
             if "attributes" in what and "alias" in what["attributes"] and "season" in what["attributes"]["alias"]:
                 programid = what["id"]
@@ -146,22 +156,28 @@ class Dplay(Service):
                     if ses["id"] == "seasonNumber":
                         for opt in ses["options"]:
                             seasons.append(opt["value"])
-        episodes = []
+                if "mandatoryParams" in what["attributes"]["component"]:
+                    showid = what["attributes"]["component"]["mandatoryParams"]
 
         if programid:
             for season in seasons:
                 page = 1
                 totalpages = 1
                 while page <= totalpages:
-                    qyerystring = "decorators=viewingHistory&include=default&page[items.number]={}&&pf[seasonNumber]={}".format(page, season)
-                    res = self.http.get("https://disco-api.{}/cms/collections/{}?{}".format(self.domain, programid, qyerystring))
+                    querystring = "decorators=viewingHistory&include=default&page[items.number]={}&pf[seasonNumber]={}".format(
+                        page,
+                        season,
+                    )
+                    if showid:
+                        querystring += f"&{showid}"
+                    res = self.http.get(f"https://disco-api.{self.domain}/cms/collections/{programid}?{querystring}")
                     janson = res.json()
                     totalpages = janson["data"]["meta"]["itemsTotalPages"]
                     for i in janson["included"]:
                         if i["type"] != "video":
                             continue
                         if i["attributes"]["videoType"] == "EPISODE":
-                            if not premium and "Free" not in i["attributes"]["packages"]:
+                            if not self._playablefile(i["attributes"]["availabilityWindows"]):
                                 continue
                             episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
                     page += 1
@@ -172,7 +188,7 @@ class Dplay(Service):
         return episodes
 
     def _login(self):
-        res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
+        res = self.http.get(f"https://disco-api.{self.domain}/users/me", headers={"authority": f"disco-api.{self.domain}"})
         if res.status_code >= 400:
             return False
         if not res.json()["data"]["attributes"]["anonymous"]:
@@ -182,15 +198,30 @@ class Dplay(Service):
     def _token(self) -> bool:
         # random device id for cookietoken
         deviceid = hashlib.sha256(bytes(int(random.random() * 1000))).hexdigest()
-        url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, self.domain.replace(".", ""), deviceid)
+        url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, REALMS[self.domain], deviceid)
         res = self.http.get(url)
         if res.status_code >= 400:
             return False
         return True
 
-    def _checkpremium(self) -> bool:
-        res = self.http.get("https://disco-api.{}/users/me".format(self.domain), headers={"authority": "disco-api.{}".format(self.domain)})
+    def _getpackages(self):
+        res = self.http.get(f"https://disco-api.{self.domain}/users/me", headers={"authority": f"disco-api.{self.domain}"})
         if res.status_code < 400:
-            if "premium" in res.json()["data"]["attributes"]["products"]:
-                return True
-        return False
+            self.packages.extend(res.json()["data"]["attributes"]["packages"])
+
+    def _playablefile(self, needs):
+        playable = False
+        now = datetime.datetime.utcnow()
+        for package in self.packages:
+            for need in needs:
+                if package != need["package"]:
+                    continue
+                start = datetime.datetime.strptime(need["playableStart"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+                if now > start:
+                    if "playableEnd" in need:
+                        end = datetime.datetime.strptime(need["playableEnd"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=None)
+                        if now < end:
+                            playable = True
+                    else:
+                        playable = True
+        return playable

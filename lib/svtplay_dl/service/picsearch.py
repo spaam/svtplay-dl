@@ -31,7 +31,8 @@ class Picsearch(Service, OpenGraphThumbMixin):
             mediaid = mediaid.group(1)
 
         jsondata = self.http.request(
-            "get", "http://csp.screen9.com/player?eventParam=1&" "ajaxauth={}&method=embed&mediaid={}".format(ajax_auth.group(1), mediaid)
+            "get",
+            "http://csp.screen9.com/player?eventParam=1&" "ajaxauth={}&method=embed&mediaid={}".format(ajax_auth.group(1), mediaid),
         ).text
         jsondata = json.loads(jsondata)
 
@@ -42,7 +43,10 @@ class Picsearch(Service, OpenGraphThumbMixin):
             for i in playlist:
                 if "application/x-mpegurl" in i:
                     streams = hlsparse(
-                        self.config, self.http.request("get", i["application/x-mpegurl"]), i["application/x-mpegurl"], output=self.output
+                        self.config,
+                        self.http.request("get", i["application/x-mpegurl"]),
+                        i["application/x-mpegurl"],
+                        output=self.output,
                     )
                     if streams:
                         for n in list(streams.keys()):

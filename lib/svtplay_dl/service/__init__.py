@@ -38,19 +38,22 @@ class Service:
             "episodethumbnailurl": None,
             "publishing_datetime": None,
         }
-        if not http:
-            self.http = HTTP(config)
-        else:
-            self.http = http
 
         #  Config
         if config.get("configfile") and os.path.isfile(config.get("configfile")):
             self.config = merge(
-                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(), config.get_variable()
+                readconfig(setup_defaults(), config.get("configfile"), service=self.__class__.__name__.lower()).get_variable(),
+                config.get_variable(),
             )
         else:
             self.config = config
-        logging.debug("service: {}".format(self.__class__.__name__.lower()))
+
+        if not http:
+            self.http = HTTP(self.config)
+        else:
+            self.http = http
+
+        logging.debug(f"service: {self.__class__.__name__.lower()}")
 
     @property
     def url(self):

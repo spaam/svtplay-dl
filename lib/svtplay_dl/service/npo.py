@@ -25,7 +25,7 @@ class Npo(Service):
             return
 
         # Get prid
-        prid_src = self.http.request("get", "http://e.omroep.nl/metadata/{}".format(video_id))
+        prid_src = self.http.request("get", f"http://e.omroep.nl/metadata/{video_id}")
         prid_raw = prid_src.text.split("(", 1)[-1].split(")", 1)[0]
 
         try:
@@ -35,28 +35,28 @@ class Npo(Service):
             if "titel" in janson:
                 self.output["title"] = janson["titel"]
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode prid request: {}".format(prid_raw))
+            yield ServiceError(f"Can't decode prid request: {prid_raw}")
             return
 
         # Get token
-        token_src = self.http.request("get", "http://ida.omroep.nl/app.php/auth/{}".format(prid))
+        token_src = self.http.request("get", f"http://ida.omroep.nl/app.php/auth/{prid}")
 
         try:
             janson = json.loads(token_src.text)
             token = janson["token"]
 
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode token request: {}".format(token_src.text))
+            yield ServiceError(f"Can't decode token request: {token_src.text}")
             return
 
         # Get super api
-        api_url = self.http.request("get", "http://ida.omroep.nl/app.php/{}?token={}".format(prid, token))
+        api_url = self.http.request("get", f"http://ida.omroep.nl/app.php/{prid}?token={token}")
 
         try:
             janson = json.loads(api_url.text)
 
         except json.decoder.JSONDecodeError:
-            yield ServiceError("Can't decode api request: {}".format(api_url.text))
+            yield ServiceError(f"Can't decode api request: {api_url.text}")
             return
 
         # Get sub api and streams
@@ -66,7 +66,7 @@ class Npo(Service):
             if item["format"] == "hls":
                 api = self.http.request("get", item["url"]).text
                 raw_url = re.search(r'"url":"(.+?)"', api).group(1)
-                url = json.loads('"{}"'.format(raw_url))
+                url = json.loads(f'"{raw_url}"')
 
                 stream = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
 

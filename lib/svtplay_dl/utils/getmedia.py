@@ -42,7 +42,7 @@ def get_media(url, options, version="Unknown"):
         url = "http://%s" % url
 
     if options.get("verbose"):
-        logging.debug("version: {}".format(version))
+        logging.debug(f"version: {version}")
 
     stream = service_handler(sites, options, url)
     if not stream:
@@ -141,8 +141,12 @@ def get_one_media(stream):
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
         logging.info(
             "Video {}S{}E{} skipped since published {} before {}. ".format(
-                stream.output["title"], stream.output["season"], stream.output["episode"], pub_date.date(), after_date.date()
-            )
+                stream.output["title"],
+                stream.output["season"],
+                stream.output["episode"],
+                pub_date.date(),
+                after_date.date(),
+            ),
         )
         return
 
@@ -192,7 +196,7 @@ def get_one_media(stream):
             else:
                 errormsg = str(exc)
         if errormsg:
-            logging.error("No videos found. {}".format(errormsg))
+            logging.error(f"No videos found. {errormsg}")
         else:
             logging.error("No videos found.")
     else:

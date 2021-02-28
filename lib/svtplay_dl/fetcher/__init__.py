@@ -23,10 +23,10 @@ class VideoRetriever:
         self.output_extention = None
         channels = kwargs.pop("channels", None)
         codec = kwargs.pop("codec", "h264")
-        self.format = "{}-{}".format(codec, channels) if channels else codec
+        self.format = f"{codec}-{channels}" if channels else codec
 
     def __repr__(self):
-        return "<Video(fetcher={}, bitrate={} format={}>".format(self.__class__.__name__, self.bitrate, self.format)
+        return f"<Video(fetcher={self.__class__.__name__}, bitrate={self.bitrate} format={self.format}>"
 
     @property
     def name(self):
@@ -62,7 +62,7 @@ class VideoRetriever:
             old = bytes_so_far + 1
             bytes_so_far = total_size
 
-            bytes_range = "bytes={}-{}".format(old, bytes_so_far)
+            bytes_range = f"bytes={old}-{bytes_so_far}"
 
             data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
             file_d.write(data.content)

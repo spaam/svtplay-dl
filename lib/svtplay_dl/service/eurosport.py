@@ -23,7 +23,7 @@ class Eurosport(Service):
 
         devices = "https://eu.edge.bamgrid.com/devices"
         postdata = {"deviceFamily": "browser", "applicationRuntime": "firefox", "deviceProfile": "macosx", "attributes": {}}
-        header = {"authorization": "Bearer {}".format(clientapikey)}
+        header = {"authorization": f"Bearer {clientapikey}"}
         res = self.http.post(devices, headers=header, json=postdata)
 
         assertion = res.json()["assertion"]
@@ -42,7 +42,7 @@ class Eurosport(Service):
         access_token = res.json()["access_token"]
 
         login = "https://eu.edge.bamgrid.com/idp/login"
-        header = {"authorization": "Bearer {}".format(access_token)}
+        header = {"authorization": f"Bearer {access_token}"}
         res = self.http.post(login, headers=header, json={"email": self.config.get("username"), "password": self.config.get("password")})
         if res.status_code > 400:
             yield ServiceError("Wrong username or password")
@@ -63,7 +63,7 @@ class Eurosport(Service):
             "subject_token": assertion,
             "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
         }
-        header = {"authorization": "Bearer {}".format(clientapikey)}
+        header = {"authorization": f"Bearer {clientapikey}"}
         res = self.http.post(token, headers=header, data=data)
         access_token = res.json()["access_token"]
 
@@ -90,7 +90,7 @@ class Eurosport(Service):
             )
             res = self.http.get(url, headers={"authorization": access_token})
             vid2 = res.json()["data"]["Airings"][0]["channel"]["id"]
-            url = "https://global-api.svcs.eurosportplayer.com/channels/{}/scenarios/browser".format(vid2)
+            url = f"https://global-api.svcs.eurosportplayer.com/channels/{vid2}/scenarios/browser"
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["slide"]
         else:
@@ -104,13 +104,13 @@ class Eurosport(Service):
             query["pageType"] = pagetype
 
             url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" "persisted/query/eurosport/Airings?variables={}".format(
-                quote(json.dumps(query))
+                quote(json.dumps(query)),
             )
             res = self.http.get(url, headers={"authorization": access_token})
             programid = res.json()["data"]["Airings"][0]["programId"]
             mediaid = res.json()["data"]["Airings"][0]["mediaId"]
 
-            url = "https://global-api.svcs.eurosportplayer.com/programs/{}/media/{}/scenarios/browser".format(programid, mediaid)
+            url = f"https://global-api.svcs.eurosportplayer.com/programs/{programid}/media/{mediaid}/scenarios/browser"
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["complete"]
 

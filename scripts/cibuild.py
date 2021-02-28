@@ -34,7 +34,7 @@ def branch():
 
 
 def docker_name(version):
-    return "spaam/svtplay-dl:{}".format(version)
+    return f"spaam/svtplay-dl:{version}"
 
 
 def build_docker():
@@ -64,7 +64,7 @@ def snapshot_folder():
         logger.error("Error: {}".format(e.output.decode("ascii", "ignore").strip()))
         sys.exit(2)
     except FileNotFoundError as e:
-        logger.error("Error: {}".format(e))
+        logger.error(f"Error: {e}")
         sys.exit(2)
     ds = stdout.decode("ascii", "ignore").strip()
     dt = datetime.fromisoformat(ds)
@@ -79,11 +79,11 @@ def aws_upload():
     else:
         folder = "snapshots"
         version = snapshot_folder()
-    logger.info("Upload to aws {}/{}".format(folder, version))
+    logger.info(f"Upload to aws {folder}/{version}")
     for file in ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]:
         if os.path.isfile(file):
             subprocess.check_call(
-                ["aws", "--region", "us-east-1", "s3", "cp", "{}".format(file), "s3://svtplay-dl/{}/{}/{}".format(folder, version, file)]
+                ["aws", "--region", "us-east-1", "s3", "cp", f"{file}", f"s3://svtplay-dl/{folder}/{version}/{file}"],
             )
 
 
@@ -96,8 +96,8 @@ def pypi_upload():
         logging.warning("Can't find file for pypi..")
 
 
-logger.info("Branch: {}".format(branch()))
-logger.info("Tag: {}".format(tag()))
+logger.info(f"Branch: {branch()}")
+logger.info(f"Tag: {tag()}")
 
 if not tag() and branch() != "master":
     sys.exit(0)

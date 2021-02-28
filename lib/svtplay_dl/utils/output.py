@@ -189,7 +189,7 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
 
     logging.info("Outfile: %s", name)
     if os.path.isfile(name) and not config.get("force"):
-        logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
+        logging.warning(f"File ({name}) already exists. Use --force to overwrite")
         return None
     dir = os.path.dirname(os.path.realpath(name))
     if not os.path.isdir(dir):
@@ -199,12 +199,12 @@ def output(output, config, extension="mp4", mode="wb", **kwargs):
         if extension in subtitlefiles:
             if not config.get("force_subtitle"):
                 if not (config.get("silent") or config.get("silent_semi")):
-                    logging.warning("File ({}) already exists. Use --force-subtitle to overwrite".format(name))
+                    logging.warning(f"File ({name}) already exists. Use --force-subtitle to overwrite")
                     return None
         else:
             if not config.get("force"):
                 if not (config.get("silent") or config.get("silent_semi")):
-                    logging.warning("File ({}) already exists. Use --force to overwrite".format(name))
+                    logging.warning(f"File ({name}) already exists. Use --force to overwrite")
                     return None
     file_d = open(name, mode, **kwargs)
     return file_d

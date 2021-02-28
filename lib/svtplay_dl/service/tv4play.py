@@ -22,7 +22,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
             url = "https://bbr-l2v.akamaized.net/live/{}/master.m3u8?in={}&out={}?".format(
-                parse.path[9:], start_time_stamp.isoformat(), end_time_stamp.isoformat()
+                parse.path[9:],
+                start_time_stamp.isoformat(),
+                end_time_stamp.isoformat(),
             )
 
             self.config.set("live", True)
@@ -43,7 +45,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         vid = jansson["props"]["pageProps"]["assetId"]
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
-        item = janson2["VideoAsset:{}".format(vid)]
+        item = janson2[f"VideoAsset:{vid}"]
 
         if item["is_drm_protected"]:
             yield ServiceError("We can't download DRM protected content from this site.")
@@ -63,7 +65,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(vid)
+        url = f"https://playback-api.b17g.net/media/{vid}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome"
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked or not available.")
@@ -90,22 +92,85 @@ class Tv4play(Service, OpenGraphThumbMixin):
         match = self._getjson()
         jansson = json.loads(match.group(1))
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
-        for i in janson2:
-            if "VideoAsset:" in i:
-                if janson2[i]["clip"] and config.get("include_clips"):
-                    show = janson2[i]["program_nid"]
-                    items.append(janson2[i]["id"])
-                elif janson2[i]["clip"] is False:
-                    show = janson2[i]["program_nid"]
-                    items.append(janson2[i]["id"])
+        show = jansson["query"]["nid"]
+
+        program = janson2[f"Program:{show}"]
+        episodes_panel = []
+        clips_panel = []
+        for panel in program["panels"]:
+            if panel["assetType"] == "EPISODE":
+                params = json.loads(panel["loadMoreParams"])
+                if "tags" in params:
+                    for tag in params["tags"].split(","):
+                        episodes_panel.append(tag)
+            if config.get("include_clips") and panel["assetType"] == "CLIP":
+                params = json.loads(panel["loadMoreParams"])
+                if "tags" in params:
+                    for tag in params["tags"].split(","):
+                        clips_panel.append(tag)
+
+        if episodes_panel:
+            items.extend(self._graphql(show, episodes_panel, "EPISODE"))
+        if clips_panel:
+            items.extend(self._graphql(show, clips_panel, "CLIP"))
 
         items = sorted(items)
         for item in items:
-            episodes.append("https://www.tv4play.se/program/{}/{}".format(show, item))
+            episodes.append(f"https://www.tv4play.se/program/{show}/{item}")
 
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]
         return episodes
+
+    def _graphql(self, show, panels, panel_type):
+        items = []
+        for panel in panels:
+            offset = 0
+            total = 9999
+            moreData = True
+
+            while moreData:
+                gql = {
+                    "variables": {
+                        "offset": offset,
+                        "limit": 50,
+                        "serializedParams": '{"tags":"'
+                        + panel
+                        + '","tags_mode":"any","sort_order":"asc","type":"'
+                        + panel_type.lower()
+                        + '","is_live":false,"node_nids_mode":"any","nodes_mode":"any"}',
+                        "query": show,
+                    },
+                    "query": "query SearchVideoAsset($query: String, $limit: Int, $offset: Int, $serializedParams: String)"
+                    " {\n  videoAssetSearch(q: $query, offset: $offset, type: "
+                    + panel_type
+                    + ", limit: $limit, serializedParams: $serializedParams) {\n    __typename\n    totalHits\n    "
+                    "videoAssets {\n      __typename\n      ...VideoAssetField\n    }\n  }\n}fragment VideoAssetField "
+                    "on VideoAsset {\n  __typename\n  id\n  title\n  tags\n  description\n  image\n  live\n  clip\n  "
+                    "season\n  episode\n  hideAds\n  categories\n  publishedDateTime\n  humanPublishedDateTime\n  "
+                    "broadcastDateTime\n  humanBroadcastDateTime\n  humanDaysLeftInService\n  humanBroadcastShortDateTime\n  "
+                    "expireDateTime\n  productGroups\n  productGroupNids\n  duration\n  humanDuration\n  drmProtected\n  "
+                    "freemium\n  geoRestricted\n  startOver\n  progress {\n    __typename\n    ...ProgressField\n  }\n  "
+                    "program {\n    __typename\n    ...ProgramField\n  }\n  nextEpisode {\n    __typename\n    id\n    "
+                    "title\n    publishedDateTime\n    humanPublishedDateTime\n    duration\n    image\n  }\n}"
+                    "fragment ProgressField on Progress {\n  __typename\n  percentage\n  position\n}"
+                    "fragment ProgramField on Program {\n  __typename\n  nid\n  name\n  description\n  geoRestricted\n  "
+                    "carouselImage\n  image\n  displayCategory\n  genres\n  logo\n  type\n  webview2 {\n    __typename\n    "
+                    "id\n    url\n    name\n  }\n  label {\n    __typename\n    label\n    cdpText\n  }\n  actors\n  "
+                    "directors\n  upcoming {\n    __typename\n    id\n    image\n    episode\n    humanBroadcastDateWithWeekday\n    "
+                    "title\n  }\n  images {\n    __typename\n    main4x3\n    main16x9\n    main16x7\n    main16x9Annotated\n  }\n  "
+                    "favorite\n  keepWatchingIgnored\n  cmoreInfo {\n    __typename\n    text\n    link\n  }\n  trailers "
+                    "{\n    __typename\n    mp4\n  }\n  trackingData {\n    __typename\n    burt {\n      __typename\n"
+                    "      vmanId\n      category\n      tags\n    }\n  }\n}",
+                }
+                res = self.http.post("https://graphql.tv4play.se/graphql", json=gql)
+                total = res.json()["data"]["videoAssetSearch"]["totalHits"]
+                for asset in res.json()["data"]["videoAssetSearch"]["videoAssets"]:
+                    items.append(asset["id"])
+                offset += len(res.json()["data"]["videoAssetSearch"]["videoAssets"])
+                if offset >= total:
+                    moreData = False
+        return items
 
 
 class Tv4(Service, OpenGraphThumbMixin):

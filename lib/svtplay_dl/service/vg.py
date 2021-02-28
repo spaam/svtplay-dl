@@ -21,10 +21,10 @@ class Vg(Service, OpenGraphThumbMixin):
             parse = urlparse(self.url)
             match = re.search(r"video/(\d+)/", parse.fragment)
             if not match:
-                yield ServiceError("Can't find video file for: {}".format(self.url))
+                yield ServiceError(f"Can't find video file for: {self.url}")
                 return
         videoid = match.group(1)
-        data = self.http.request("get", "http://svp.vg.no/svp/api/v1/vgtv/assets/{}?appName=vgtv-website".format(videoid)).text
+        data = self.http.request("get", f"http://svp.vg.no/svp/api/v1/vgtv/assets/{videoid}?appName=vgtv-website").text
         jsondata = json.loads(data)
         self.output["title"] = jsondata["title"]
 
@@ -39,7 +39,10 @@ class Vg(Service, OpenGraphThumbMixin):
                 yield streams[n]
         if "hls" in jsondata["streamUrls"]:
             streams = hlsparse(
-                self.config, self.http.request("get", jsondata["streamUrls"]["hls"]), jsondata["streamUrls"]["hls"], output=self.output
+                self.config,
+                self.http.request("get", jsondata["streamUrls"]["hls"]),
+                jsondata["streamUrls"]["hls"],
+                output=self.output,
             )
             for n in list(streams.keys()):
                 yield streams[n]
