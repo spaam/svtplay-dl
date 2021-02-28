@@ -17,8 +17,9 @@ class Urplay(Service, OpenGraphThumbMixin):
     supported_domains = ["urplay.se", "ur.se", "betaplay.ur.se", "urskola.se"]
 
     def get(self):
+        urldata = self.get_urldata()
         key = "currentProduct"
-        match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', self.get_urldata())
+        match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', urldata)
         if not match:
             key = "program"
             match = re.search(r'/ProgramContainer" data-react-props="([^\"]+)\"', self.get_urldata())
@@ -32,8 +33,11 @@ class Urplay(Service, OpenGraphThumbMixin):
         res = self.http.get("https://streaming-loadbalancer.ur.se/loadbalancer.json")
         loadbalancer = res.json()["redirect"]
 
+        self.outputfilename(jsondata[key], urldata)
+
         for streaminfo in jsondata[key]["streamingInfo"].keys():
             stream = jsondata[key]["streamingInfo"][streaminfo]
+
             if streaminfo == "raw":
                 if "sd" in stream:
                     url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
@@ -76,3 +80,21 @@ class Urplay(Service, OpenGraphThumbMixin):
                 episodes_new.append(i)
             n += 1
         return episodes_new
+
+    def outputfilename(self, data, urldata):
+        if "seriesTitle" in data:
+            self.output["title"] = data["seriesTitle"]
+            self.output["title_nice"] = data["seriesTitle"]
+        if "episodeNumber" in data and data["episodeNumber"]:
+            self.output["episode"] = str(data["episodeNumber"])
+        if "title" in data:
+            self.output["episodename"] = data["title"]
+        if "id" in data and data["id"]:
+            self.output["id"] = str(data["id"])
+
+        # Try to match Season info from HTML (not available in json, it seems), e.g.: <button class="SeasonsDropdown-module__seasonButton___25Uyt" type="button"><span>Säsong 6</span>
+        seasonmatch = re.search(r"class..SeasonsDropdown-module__seasonButton.*span.S.song (\d+)..span", urldata)
+        if seasonmatch:
+            self.output["season"] = seasonmatch.group(1)
+        else:
+            self.output["season"] = "1"  # No season info - probably show without seasons
