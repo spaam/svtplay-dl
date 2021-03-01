@@ -3,6 +3,7 @@
 import copy
 import math
 import os
+import random
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -12,6 +13,7 @@ from urllib.parse import urljoin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import output
 from svtplay_dl.utils.output import progress_stream
@@ -112,56 +114,61 @@ def templateelemt(attributes, element, filename, idnumber):
     return files
 
 
-def adaptionset(attributes, element, url, baseurl=None):
+def adaptionset(attributes, elements, url, baseurl=None):
     streams = {}
 
     dirname = os.path.dirname(url) + "/"
     if baseurl:
         dirname = urljoin(dirname, baseurl)
+    for element in elements:
+        template = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
+        represtation = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
 
-    template = element[0].find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
-    represtation = element[0].findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
+        codecs = None
+        if "codecs" in element.attrib:
+            codecs = element.attrib["codecs"]
+        lang = None
+        if "lang" in element.attrib:
+            lang = element.attrib["lang"]
 
-    codecs = None
-    if "codecs" in element[0].attrib:
-        codecs = element[0].attrib["codecs"]
+        for i in represtation:
+            files = []
+            segments = False
+            filename = dirname
+            attributes.set("bandwidth", i.attrib["bandwidth"])
+            bitrate = int(i.attrib["bandwidth"]) / 1000
+            if "contentType" in element.attrib and element.attrib["contentType"] == "text":
+                bitrate += random.randint(1, 40)
+            idnumber = i.attrib["id"]
+            channels = None
+            codec = None
+            if codecs is None and "codecs" in i.attrib:
+                codecs = i.attrib["codecs"]
+            if codecs[:3] == "avc":
+                codec = "h264"
+            if codecs[:3] == "hvc":
+                codec = "hevc"
+            if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
+                chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
+                if chan == "6":
+                    channels = "51"
+                else:
+                    channels = None
+            if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
+                filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
 
-    for i in represtation:
-        files = []
-        segments = False
-        filename = dirname
-        attributes.set("bandwidth", i.attrib["bandwidth"])
-        bitrate = int(i.attrib["bandwidth"]) / 1000
-        idnumber = i.attrib["id"]
-        channels = None
-        codec = None
-        if codecs is None and "codecs" in i.attrib:
-            codecs = i.attrib["codecs"]
-        if codecs[:3] == "avc":
-            codec = "h264"
-        if codecs[:3] == "hvc":
-            codec = "hevc"
-        if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
-            chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
-            if chan == "6":
-                channels = "51"
-            else:
-                channels = None
-        if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
-            filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
+            if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
+                segments = True
+                files.append(filename)
+            if template is not None:
+                segments = True
+                files = templateelemt(attributes, template, filename, idnumber)
+            elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
+                segments = True
+                files = templateelemt(attributes, i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
 
-        if i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentBase") is not None:
-            segments = True
-            files.append(filename)
-        if template is not None:
-            segments = True
-            files = templateelemt(attributes, template, filename, idnumber)
-        elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
-            segments = True
-            files = templateelemt(attributes, i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
-
-        if files:
-            streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels}
+            if files:
+                streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels, "lang": lang}
 
     return streams
 
@@ -212,6 +219,8 @@ def _dashparse(config, text, url, cookies, **kwargs):
     if len(temp) == 0:
         temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="video"]')
     videofiles = adaptionset(attributes, temp, url, baseurl)
+    temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="text"]')
+    subtitles = adaptionset(attributes, temp, url, baseurl)
 
     if not audiofiles or not videofiles:
         streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
@@ -235,6 +244,8 @@ def _dashparse(config, text, url, cookies, **kwargs):
             channels=audiofiles[list(audiofiles.keys())[0]]["channels"],
             **kwargs,
         )
+    for i in subtitles.keys():
+        streams[i] = subtitle(copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs)
 
     return streams
 
