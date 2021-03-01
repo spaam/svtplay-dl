@@ -54,6 +54,8 @@ class subtitle:
             data = self.wrstsegment(subdata)
         if self.subtype == "raw":
             data = self.raw(subdata)
+        if self.subtype == "stpp":
+            data = self.stpp(subdata)
 
         if self.subfix:
             if self.config.get("get_all_subtitles"):
@@ -80,9 +82,11 @@ class subtitle:
 
     def tt(self, subdata):
         i = 1
-        data = ""
         subs = subdata.text
+        return self._tt(subs, i)
 
+    def _tt(self, subs, i):
+        data = ""
         subdata = re.sub(' xmlns="[^"]+"', "", subs, count=1)
         tree = ET.XML(subdata)
         xml = tree.find("body").find("div")
@@ -92,7 +96,8 @@ class subtitle:
             if tag == "p" or tag == "span":
                 begin = node.attrib["begin"]
                 if not ("dur" in node.attrib):
-                    duration = node.attrib["duration"]
+                    if "end" not in node.attrib:
+                        duration = node.attrib["duration"]
                 else:
                     duration = node.attrib["dur"]
                 if not ("end" in node.attrib):
@@ -332,6 +337,63 @@ class subtitle:
             nr += 1
 
         return string
+
+    def stpp(self, subdata):
+        nr = 1
+        entries = []
+
+        for i in self.kwargs["files"]:
+            res = self.http.get(i)
+            start = res.content.find(b"mdat") + 4
+            if start > 3:
+                _data = self._tt(res.content[start:].decode(), nr)
+                if _data:
+                    entries.append(_data.split("\n\n"))
+                    nr += 1
+
+        new_entries = []
+        for entry in entries:
+            for i in entry:
+                if i:
+                    new_entries.append(i.split("\n"))
+
+        entries = new_entries
+        changed = True
+        while changed:
+            changed, entries = _resolv(entries)
+
+        nr = 1
+        data = ""
+        for entry in entries:
+            for item in entry:
+                data += f"{item}\n"
+            data += "\n"
+
+        return data
+
+
+def _resolv(entries):
+    skip = False
+    changed = False
+    new_entries = []
+    for nr, i in enumerate(entries):
+        if skip:
+            skip = False
+            continue
+        time_match = strdate(i[1].replace(",", "."))
+        time_match_next = None
+        if nr + 1 < len(entries):
+            time_match_next = strdate(entries[nr + 1][1].replace(",", "."))
+        left_time = time_match.group(1)
+        right_time = time_match.group(2)
+        if time_match_next and time_match.group(2) == time_match_next.group(1):
+            right_time = time_match_next.group(2)
+            skip = True
+            changed = True
+        next_entries = [nr + 1, f"{left_time} --> {right_time}"]
+        next_entries.extend(i[2:])
+        new_entries.append(next_entries)
+    return changed, new_entries
 
 
 def timestr(msec):
