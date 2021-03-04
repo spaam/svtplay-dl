@@ -281,6 +281,8 @@ class subtitle:
             cont = self.http.get(itemurl)
             if "cmore" in self.url:
                 cont.encoding = "utf-8"
+            if "mtgx" in self.url:
+                cont.encoding = "utf-8"
             text = cont.text.split("\n")
             for t in text:  # is in text[1] for tv4play, but this should be more future proof
                 if "X-TIMESTAMP-MAP=MPEGTS" in t:
@@ -294,6 +296,7 @@ class subtitle:
 
             several_items = False
             skip = False
+            pre_date_skip = True
             sub = []
 
             for x in range(len(itmes)):
@@ -304,6 +307,7 @@ class subtitle:
                     second = str2sec(ha3.group(2)) + time
                     subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
                     skip = True
+                    pre_date_skip = False
                     continue
                 has_date = strdate(item)
                 if has_date:
@@ -315,7 +319,8 @@ class subtitle:
                     second = str2sec(has_date.group(2)) + time
                     sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
                     several_items = True
-                elif has_date is None and skip is False:
+                    pre_date_skip = False
+                elif has_date is None and skip is False and pre_date_skip is False:
                     sub.append(item)
 
             if sub:

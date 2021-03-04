@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
+from svtplay_dl.fetcher.hls import M3U8
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
@@ -62,7 +63,17 @@ class Viaplay(Service, OpenGraphThumbMixin):
         self._autoname(video)
 
         if "subtitles" in video["_embedded"]["program"] and "subtitlesWebvtt" in video["_embedded"]["program"]["subtitles"]:
-            yield subtitle(copy.copy(self.config), "wrst", video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"], output=self.output)
+            if "m3u8" in video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"]:
+                m3u8s = M3U8(self.http.get(video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"]).text)
+                yield subtitle(
+                    copy.copy(self.config),
+                    "wrstsegment",
+                    video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"],
+                    output=copy.copy(self.output),
+                    m3u8=m3u8s,
+                )
+            else:
+                yield subtitle(copy.copy(self.config), "wrst", video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"], output=self.output)
 
         res = self.http.get(video["_embedded"]["program"]["_links"]["streamLink"]["href"])
         janson = res.json()
