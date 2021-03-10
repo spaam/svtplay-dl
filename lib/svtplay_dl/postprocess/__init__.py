@@ -54,7 +54,7 @@ class postprocess:
             if audiotrack:
                 arguments += ["-map", f"{audiotrack}"]
             arguments += ["-c", "copy", "-f", "mp4"]
-            if ext == ".ts" and "aac" in _getcodec(streams, audiotrack):
+            if ext == ".ts" and streams and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
             if self.config.get("merge_subtitle"):

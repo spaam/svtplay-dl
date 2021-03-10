@@ -114,7 +114,6 @@ class Svtplay(Service, MetadataThumbMixin):
                 query = parse_qs(urlparse(i["url"]).query)
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
-
                 if i["format"][:3] == "hls":
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:

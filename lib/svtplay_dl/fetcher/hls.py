@@ -184,6 +184,11 @@ class HLS(VideoRetriever):
         if file_d is None:
             return
 
+        if "EXT-X-MAP" in m3u8.media_segment[0]:
+            entry = {"URI": get_full_url(m3u8.media_segment[0]["EXT-X-MAP"]["URI"], url), "EXTINF": {"duration": 0}}
+            if "EXT-X-KEY" in m3u8.media_segment[0]:
+                entry["EXT-X-KEY"] = {"URI": m3u8.media_segment[0]["EXT-X-KEY"]["URI"]}
+            m3u8.media_segment.insert(0, entry)
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
         decryptor = None
         size_media = len(m3u8.media_segment)
@@ -209,6 +214,7 @@ class HLS(VideoRetriever):
             if data.status_code == 404:
                 break
             data = data.content
+
             if m3u8.encrypted:
                 headers = {}
                 if self.keycookie:
@@ -232,12 +238,11 @@ class HLS(VideoRetriever):
                 # In some cases the playlist say its encrypted but the files is not.
                 # This happen on svtplay 5.1ch stream where it started with ID3..
                 # Adding the other ones is header for mpeg-ts files. third byte is 10 or 11..
-                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10":
+                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10" and data[4:12] != b"ftypisom":
                     if decryptor:
                         data = decryptor.update(data)
                     else:
                         raise ValueError("No decryptor found for encrypted hls steam.")
-
             file_d.write(data)
 
             if self.config.get("capture_time") > 0 and total_duration >= self.config.get("capture_time") * 60:
