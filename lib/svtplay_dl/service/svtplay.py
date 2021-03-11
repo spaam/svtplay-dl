@@ -7,7 +7,6 @@ import json
 import logging
 import re
 import time
-from operator import itemgetter
 from urllib.parse import parse_qs
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -73,14 +72,12 @@ class Svtplay(Service, MetadataThumbMixin):
         for data_entry in janson["props"]["urqlState"].values():
             entry = json.loads(data_entry["data"])
             for key, data in entry.items():
-                if key == "listablesByEscenicId" and "videoSvtId" in data[0]:
-                    video_data = data[0]
-                    vid = video_data["videoSvtId"]
+                if key == "detailsPage" and "moreDetails" in data:
+                    video_data = data
+                    vid = data["video"]["svtId"]
                     break
-            # if video_data:
-            #    break
 
-        if not vid and not self.visibleid:
+        if not vid:
             yield ServiceError("Can't find video id")
             return
 
@@ -130,56 +127,23 @@ class Svtplay(Service, MetadataThumbMixin):
                     for n in list(alt_streams.keys()):
                         yield alt_streams[n]
 
-    def _get_visibleid(self, janson):
-        esceni = None
+    def _last_chance(self):
+        videos = []
+        match = re.search(self.info_search_expr, self.get_urldata())
+        if not match:
+            logging.error("Can't find video info.")
+            return
+        janson = json.loads(match.group(1))
+        video_data = None
         for data_entry in janson["props"]["urqlState"].values():
             entry = json.loads(data_entry["data"])
-            for key in entry.keys():
-                if "listablesBy" in key:
-                    esceni = entry[key]
-                    break
-            if esceni:
-                break
-
-        if esceni:
-            try:
-                return esceni[0]["id"]
-            except IndexError:
-                return None
-        else:
-            return esceni
-
-    def _last_chance(self, videos, page, maxpage=2):
-        if page > maxpage:
+            for key, data in entry.items():
+                if key == "startForSvtPlay":
+                    video_data = data
+        if not video_data:
             return videos
-
-        res = self.http.get(f"http://www.svtplay.se/sista-chansen?sida={page}")
-        match = re.search("__svtplay'] = ({.*});", res.text)
-        if not match:
-            return videos
-
-        dataj = json.loads(match.group(1))
-        pages = dataj["gridPage"]["pagination"]["totalPages"]
-
-        for i in dataj["gridPage"]["content"]:
-            videos.append(i["contentUrl"])
-        page += 1
-        videos.extend(self._last_chance(videos, page, pages))
-        return videos
-
-    def _genre(self, jansson):
-        videos = []
-        parse = urlparse(self._url)
-        dataj = jansson["clusterPage"]
-        tab = re.search("tab=(.+)", parse.query)
-        if tab:
-            tab = tab.group(1)
-            for i in dataj["tabs"]:
-                if i["slug"] == tab:
-                    videos = self.videos_to_list(i["content"], videos)
-        else:
-            videos = self.videos_to_list(dataj["clips"], videos)
-
+        for i in video_data["selections"][0]["items"]:
+            videos.append(i["item"]["urls"]["svtplay"])
         return videos
 
     def find_all_episodes(self, config):
@@ -193,7 +157,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 tab = query["tab"][0]
 
         if re.search("sista-chansen", parse.path):
-            videos = self._last_chance(videos, 1)
+            videos = self._last_chance()
         else:
             match = re.search(self.info_search_expr, self.get_urldata())
             if not match:
@@ -201,30 +165,17 @@ class Svtplay(Service, MetadataThumbMixin):
                 return
 
             janson = json.loads(match.group(1))
-            self.visibleid = self._get_visibleid(janson)
-            if not self.visibleid:
-                logging.error("Can't find video id. removed?")
-                return
-
-            match = re.search(self.info_search_expr, self.get_urldata())
-            if not match:
-                logging.error("Can't find video info.")
-                return videos
-            janson = json.loads(match.group(1))
-            associatedContent = None
-
-            for json_entry in janson["props"]["urqlState"].values():
-                entry = json.loads(json_entry["data"])
+            video_data = None
+            for data_entry in janson["props"]["urqlState"].values():
+                entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if "listablesBy" in key and (len(data[0]["associatedContent"]) == 0 or data[0]["associatedContent"][0]["id"] != "related"):
-                        associatedContent = data[0]["associatedContent"]
+                    if key == "detailsPage":
+                        video_data = data
                         break
-                if associatedContent:
-                    break
 
             collections = []
             videos = []
-            for i in associatedContent:
+            for i in video_data["associatedContent"]:
                 if tab:
                     if tab == i["id"]:
                         collections.append(i)
@@ -241,41 +192,21 @@ class Svtplay(Service, MetadataThumbMixin):
 
             for i in collections:
                 for epi in i["items"]:
-                    if "variants" in epi["item"]:
-                        for variant in epi["item"]["variants"]:
-                            if variant["urls"]["svtplay"] not in videos:
-                                videos.append(variant["urls"]["svtplay"])
                     if epi["item"]["urls"]["svtplay"] not in videos:
                         videos.append(epi["item"]["urls"]["svtplay"])
 
         episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
-
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]
         return episodes
-
-    def videos_to_list(self, lvideos, videos):
-        if "episodeNumber" in lvideos[0] and lvideos[0]["episodeNumber"]:
-            lvideos = sorted(lvideos, key=itemgetter("episodeNumber"))
-        for n in lvideos:
-            parse = urlparse(n["contentUrl"])
-            if parse.path not in videos:
-                videos.append(parse.path)
-            if "versions" in n:
-                for i in n["versions"]:
-                    parse = urlparse(i["contentUrl"])
-                    if parse.path not in videos:
-                        videos.append(parse.path)
-
-        return videos
 
     def outputfilename(self, data):
         name = None
         desc = None
 
-        name = data["parent"]["slug"]
-        other = data["slug"]
-        vid = data["id"]
+        name = data["moreDetails"]["heading"]
+        other = data["moreDetails"]["episodeHeading"]
+        vid = data["video"]["svtId"]
         id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
@@ -305,13 +236,7 @@ class Svtplay(Service, MetadataThumbMixin):
     def seasoninfo(self, data):
         season, episode = None, None
 
-        if "episode" not in data:
-            return season, episode
-
-        if "positionInSeason" not in data["episode"]:
-            return season, episode
-
-        match = re.search(r"Säsong (\d+) — Avsnitt (\d+)", data["episode"]["positionInSeason"])
+        match = re.search(r"/säsong (\d+)/avsnitt (\d+)", data["analyticsIdentifiers"]["viewId"])
         if not match:
             return season, episode
 
@@ -330,27 +255,27 @@ class Svtplay(Service, MetadataThumbMixin):
                     value = value[:-3] + value[-2:]
                 return value
 
-            validfrom = episode["validFrom"]
+            validfrom = episode["item"]["validFrom"]
             if "+" in validfrom:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        _fix_broken_timezone_implementation(episode["item"]["validFrom"].replace("Z", "")),
                         "%Y-%m-%dT%H:%M:%S%z",
                     ).timetuple(),
                 )
             else:
                 date = time.mktime(
                     datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["validFrom"].replace("Z", "")),
+                        _fix_broken_timezone_implementation(episode["item"]["validFrom"].replace("Z", "")),
                         "%Y-%m-%dT%H:%M:%S",
                     ).timetuple(),
                 )
             self.output["publishing_datetime"] = int(date)
 
-        self.output["title_nice"] = episode["parent"]["name"]
+        self.output["title_nice"] = episode["moreDetails"]["heading"]
 
         try:
-            t = episode["parent"]["image"]
+            t = episode["item"]["parent"]["image"]["wide"]
         except KeyError:
             t = ""
         if isinstance(t, dict):
@@ -361,7 +286,7 @@ class Svtplay(Service, MetadataThumbMixin):
             url = t.format(format="large")
             self.output["showthumbnailurl"] = url
         try:
-            t = episode["image"]
+            t = episode["images"]["wide"]
         except KeyError:
             t = ""
         if isinstance(t, dict):
@@ -372,8 +297,8 @@ class Svtplay(Service, MetadataThumbMixin):
             url = t.format(format="large")
             self.output["episodethumbnailurl"] = url
 
-        if "longDescription" in episode["parent"]:
-            self.output["showdescription"] = episode["parent"]["longDescription"]
+        if "longDescription" in episode["item"]["parent"]:
+            self.output["showdescription"] = episode["item"]["parent"]["longDescription"]
 
-        if "longDescription" in episode:
-            self.output["episodedescription"] = episode["longDescription"]
+        if "description" in episode:
+            self.output["episodedescription"] = episode["description"]
