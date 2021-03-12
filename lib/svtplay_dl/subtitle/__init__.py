@@ -255,7 +255,7 @@ class subtitle:
                         "c.green": "#00ff00",
                         "c.yellow": "#ffff00",
                         "c.blue": "#0000ff",
-                        "c.magneta": "#ff00ff",
+                        "c.magenta": "#ff00ff",
                         "c.cyan": "#00ffff",
                         "c.gray": "#ffffff",
                     }
