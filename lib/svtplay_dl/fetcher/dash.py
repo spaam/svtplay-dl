@@ -144,10 +144,12 @@ def adaptionset(attributes, elements, url, baseurl=None):
             codec = None
             if codecs is None and "codecs" in i.attrib:
                 codecs = i.attrib["codecs"]
-            if codecs[:3] == "avc":
+            if codecs and codecs[:3] == "avc":
                 codec = "h264"
-            if codecs[:3] == "hvc":
+            elif codecs and codecs[:3] == "hvc":
                 codec = "hevc"
+            else:
+                codec = codecs
             if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
                 chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
                 if chan == "6":
