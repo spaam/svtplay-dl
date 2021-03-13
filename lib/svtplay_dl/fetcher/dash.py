@@ -3,7 +3,6 @@
 import copy
 import math
 import os
-import random
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -135,10 +134,15 @@ def adaptionset(attributes, elements, url, baseurl=None):
             files = []
             segments = False
             filename = dirname
+            mimetype = None
             attributes.set("bandwidth", i.attrib["bandwidth"])
             bitrate = int(i.attrib["bandwidth"]) / 1000
             if "contentType" in element.attrib and element.attrib["contentType"] == "text":
-                bitrate += random.randint(1, 40)
+                if streams.keys():
+                    bitrate = list(streams.keys())[-1]
+                bitrate += 1
+            if "mimeType" in element.attrib:
+                mimetype = element.attrib["mimeType"]
             idnumber = i.attrib["id"]
             channels = None
             codec = None
@@ -168,9 +172,11 @@ def adaptionset(attributes, elements, url, baseurl=None):
             elif i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate") is not None:
                 segments = True
                 files = templateelemt(attributes, i.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate"), filename, idnumber)
+            if mimetype == "text/vtt":
+                files.append(filename)
 
             if files:
-                streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels, "lang": lang}
+                streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels, "lang": lang, "mimetype": mimetype}
 
     return streams
 
@@ -247,8 +253,14 @@ def _dashparse(config, text, url, cookies, **kwargs):
             **kwargs,
         )
     for i in subtitles.keys():
-        streams[i] = subtitle(copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs)
-
+        if subtitles[i]["codecs"] == "stpp":
+            streams[i] = subtitle(
+                copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs
+            )
+        if subtitles[i]["mimetype"] == "text/vtt":
+            streams[i] = subtitle(
+                copy.copy(config), "webvtt", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs
+            )
     return streams
 
 
