@@ -72,7 +72,7 @@ class Svtplay(Service, MetadataThumbMixin):
         for data_entry in janson["props"]["urqlState"].values():
             entry = json.loads(data_entry["data"])
             for key, data in entry.items():
-                if key == "detailsPage" and "moreDetails" in data:
+                if key == "detailsPage" and data and "moreDetails" in data:
                     video_data = data
                     vid = data["video"]["svtId"]
                     break
