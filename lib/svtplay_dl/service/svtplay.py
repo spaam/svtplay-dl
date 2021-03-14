@@ -111,11 +111,11 @@ class Svtplay(Service, MetadataThumbMixin):
                 query = parse_qs(urlparse(i["url"]).query)
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
-                if i["format"][:3] == "hls":
+                if i["url"].find(".m3u8") > 0:
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
                         alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                elif i["format"][:4] == "dash":
+                elif i["url"].find(".mpd") > 0:
                     streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
                         alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
