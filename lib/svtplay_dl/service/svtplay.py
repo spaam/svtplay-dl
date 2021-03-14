@@ -236,14 +236,52 @@ class Svtplay(Service, MetadataThumbMixin):
     def seasoninfo(self, data):
         season, episode = None, None
 
-        match = re.search(r"/säsong (\d+)/avsnitt (\d+)", data["analyticsIdentifiers"]["viewId"])
-        if not match:
+        season_nr = self._find_season(data)
+        episode_nr = self._find_episode(data)
+
+        if season_nr is None or episode_nr is None:
             return season, episode
 
-        season = "{:02d}".format(int(match.group(1)))
-        episode = "{:02d}".format(int(match.group(2)))
+        season = "{:02d}".format(int(season_nr))
+        episode = "{:02d}".format(int(episode_nr))
 
         return season, episode
+
+    def _find_season(self, data):
+        match = re.search(r"/säsong (\d+)/", data["analyticsIdentifiers"]["viewId"])
+        if match:
+            return match.group(1)
+
+        match = re.search(r"-sasong-(\d+)-", data["item"]["urls"]["svtplay"])
+        if match:
+            return match.group(1)
+
+        vid = data["video"]["svtId"]
+        for seasons in data["associatedContent"]:
+            for i in seasons["items"]:
+                if i["item"]["videoSvtId"] == vid:
+                    match = re.search(r"S.song (\d+)", i["item"]["positionInSeason"])
+                    if match:
+                        return match.group(1)
+        return None
+
+    def _find_episode(self, data):
+        match = re.search(r"/avsnitt (\d+)", data["analyticsIdentifiers"]["viewId"])
+        if match:
+            return match.group(1)
+
+        match = re.search(r"Avsnitt (\d+)", data["item"]["name"])
+        if match:
+            return match.group(1)
+
+        vid = data["video"]["svtId"]
+        for seasons in data["associatedContent"]:
+            for i in seasons["items"]:
+                if i["item"]["videoSvtId"] == vid:
+                    match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
+                    if match:
+                        return match.group(1)
+        return None
 
     def extrametadata(self, episode):
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
