@@ -10,7 +10,7 @@ from svtplay_dl.utils.text import decode_html_entities
 
 
 class Aftonbladettv(Service):
-    supported_domains = ["svd.se"]
+    supported_domains = ["svd.se", "tv.aftonbladet.se"]
 
     def get(self):
         data = self.get_urldata()
@@ -19,8 +19,10 @@ class Aftonbladettv(Service):
         if not match:
             match = re.search('data-svpPlayer-video="([^"]+)"', data)
             if not match:
-                yield ServiceError("Can't find video info")
-                return
+                match = re.search("window.ASSET = ({.*})", data)
+                if not match:
+                    yield ServiceError("Can't find video info")
+                    return
         data = json.loads(decode_html_entities(match.group(1)))
         streams = hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
         for n in list(streams.keys()):
@@ -28,7 +30,7 @@ class Aftonbladettv(Service):
 
 
 class Aftonbladet(Service):
-    supported_domains = ["aftonbladet.se", "tv.aftonbladet.se"]
+    supported_domains = ["aftonbladet.se"]
 
     def get(self):
         data = self.get_urldata()
