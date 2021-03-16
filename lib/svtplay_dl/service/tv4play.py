@@ -102,15 +102,27 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 params = json.loads(panel["loadMoreParams"])
                 if "tags" in params:
                     for tag in params["tags"].split(","):
-                        episodes_panel.append(tag)
+                        if re.search(r"\d+", tag):
+                            episodes_panel.append(tag)
+                for key in panel.keys():
+                    if "videoList" in key:
+                        for video in panel[key]["videoAssets"]:
+                            match = re.search(r"VideoAsset:(\d+)", video["__ref"])
+                            if match:
+                                if match.group(1) not in items:
+                                    items.append(int(match.group(1)))
             if config.get("include_clips") and panel["assetType"] == "CLIP":
                 params = json.loads(panel["loadMoreParams"])
                 if "tags" in params:
                     for tag in params["tags"].split(","):
-                        clips_panel.append(tag)
+                        if re.search(r"\d+", tag):
+                            clips_panel.append(tag)
 
         if episodes_panel:
-            items.extend(self._graphql(show, episodes_panel, "EPISODE"))
+            graph_list = self._graphql(show, episodes_panel, "EPISODE")
+            for i in graph_list:
+                if i not in items:
+                    items.append(i)
         if clips_panel:
             items.extend(self._graphql(show, clips_panel, "CLIP"))
 
