@@ -277,7 +277,7 @@ class Svtplay(Service, MetadataThumbMixin):
         vid = data["video"]["svtId"]
         for seasons in data["associatedContent"]:
             for i in seasons["items"]:
-                if i["item"]["videoSvtId"] == vid:
+                if i["item"]["videoSvtId"] == vid and "positionInSeason" in i["item"]:
                     match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
                     if match:
                         return match.group(1)
