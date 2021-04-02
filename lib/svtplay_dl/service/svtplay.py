@@ -281,6 +281,12 @@ class Svtplay(Service, MetadataThumbMixin):
                     match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
                     if match:
                         return match.group(1)
+
+        if "description" in data:
+            match = re.search(r"Del (\d+) av (\d+)", data["description"])
+            if match:
+                return match.group(1)
+
         return None
 
     def extrametadata(self, episode):
