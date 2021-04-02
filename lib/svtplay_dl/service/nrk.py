@@ -17,7 +17,7 @@ class Nrk(Service, OpenGraphThumbMixin):
 
     def get(self):
         # First, fint the video ID from the html document
-        match = re.search('programId: "([^"]+)"', self.get_urldata())
+        match = re.search('program-id" content="([^"]+)"', self.get_urldata())
         if match:
             video_id = match.group(1)
         else:
@@ -25,7 +25,7 @@ class Nrk(Service, OpenGraphThumbMixin):
             return
 
         # Get media element details
-        match = re.search("apiBaseUrl: '([^']+)'", self.get_urldata())
+        match = re.search('psapi-base-url="([^"]+)"', self.get_urldata())
         if not match:
             yield ServiceError("Cant find apiurl.")
             return
@@ -51,12 +51,13 @@ class Nrk(Service, OpenGraphThumbMixin):
             for n in list(streams.keys()):
                 yield streams[n]
 
-        streams = hdsparse(
-            copy.copy(self.config),
-            self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}),
-            manifest_url,
-            output=self.output,
-        )
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        else:
+            streams = hdsparse(
+                copy.copy(self.config),
+                self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}),
+                manifest_url,
+                output=self.output,
+            )
+            if streams:
+                for n in list(streams.keys()):
+                    yield streams[n]
