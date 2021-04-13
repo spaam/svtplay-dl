@@ -70,12 +70,13 @@ class Svtplay(Service, MetadataThumbMixin):
         video_data = None
         vid = None
         for data_entry in janson["props"]["urqlState"].values():
-            entry = json.loads(data_entry["data"])
-            for key, data in entry.items():
-                if key == "detailsPage" and data and "moreDetails" in data:
-                    video_data = data
-                    vid = data["video"]["svtId"]
-                    break
+            if "data" in data_entry:
+                entry = json.loads(data_entry["data"])
+                for key, data in entry.items():
+                    if key == "detailsPage" and data and "moreDetails" in data:
+                        video_data = data
+                        vid = data["video"]["svtId"]
+                        break
 
         if not vid:
             yield ServiceError("Can't find video id")
