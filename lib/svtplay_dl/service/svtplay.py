@@ -168,11 +168,12 @@ class Svtplay(Service, MetadataThumbMixin):
             janson = json.loads(match.group(1))
             video_data = None
             for data_entry in janson["props"]["urqlState"].values():
-                entry = json.loads(data_entry["data"])
-                for key, data in entry.items():
-                    if key == "detailsPage" and data and "heading" in data:
-                        video_data = data
-                        break
+                if "data" in data_entry:
+                    entry = json.loads(data_entry["data"])
+                    for key, data in entry.items():
+                        if key == "detailsPage" and data and "heading" in data:
+                            video_data = data
+                            break
 
             collections = []
             videos = []
