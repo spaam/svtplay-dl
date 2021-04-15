@@ -88,7 +88,10 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "episodeNumber" in data and data["episodeNumber"]:
             self.output["episode"] = str(data["episodeNumber"])
         if "title" in data:
-            self.output["episodename"] = data["title"]
+            if self.output["title"] is None:
+                self.output["title"] = data["title"]
+            else:
+                self.output["episodename"] = data["title"]
         if "id" in data and data["id"]:
             self.output["id"] = str(data["id"])
 
