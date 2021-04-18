@@ -61,6 +61,7 @@ def hlsparse(config, res, url, **kwargs):
             audio_url = None
             vcodec = None
             chans = None
+            resolution = ""
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
                     if i["TYPE"] and i["TYPE"] != "SUBTITLES":
@@ -88,6 +89,8 @@ def hlsparse(config, res, url, **kwargs):
                     bit_rate = float(i["AVERAGE-BANDWIDTH"]) / 1000
                 else:
                     bit_rate = float(i["BANDWIDTH"]) / 1000
+                if "RESOLUTION" in i:
+                    resolution = i["RESOLUTION"]
                 if "CODECS" in i:
                     if i["CODECS"][:3] == "hvc":
                         vcodec = "hevc"
@@ -114,6 +117,7 @@ def hlsparse(config, res, url, **kwargs):
                 segments=bool(segments),
                 channels=chans,
                 codec=codec,
+                resolution=resolution,
                 **kwargs,
             )
 

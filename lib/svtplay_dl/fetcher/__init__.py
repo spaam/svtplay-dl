@@ -23,6 +23,7 @@ class VideoRetriever:
         self.output_extention = None
         channels = kwargs.pop("channels", None)
         codec = kwargs.pop("codec", "h264")
+        self.resolution = kwargs.pop("resolution", "")
         self.format = f"{codec}-{channels}" if channels else codec
 
     def __repr__(self):

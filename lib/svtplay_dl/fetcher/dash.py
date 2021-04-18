@@ -130,6 +130,10 @@ def adaptionset(attributes, elements, url, baseurl=None):
         if "lang" in element.attrib:
             lang = element.attrib["lang"]
 
+        resolution = None
+        if "maxWidth" in element.attrib and "maxHeight" in element.attrib:
+            resolution = f'{element.attrib["maxWidth"]}x{element.attrib["maxHeight"]}'
+
         for i in represtation:
             files = []
             segments = False
@@ -154,6 +158,8 @@ def adaptionset(attributes, elements, url, baseurl=None):
                 codec = "hevc"
             else:
                 codec = codecs
+            if not resolution and "maxWidth" in i.attrib and "maxHeight" in i.attrib:
+                resolution = f'{element.attrib["maxWidth"]}x{element.attrib["maxHeight"]}'
             if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
                 chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
                 if chan == "6":
@@ -176,7 +182,15 @@ def adaptionset(attributes, elements, url, baseurl=None):
                 files.append(filename)
 
             if files:
-                streams[bitrate] = {"segments": segments, "files": files, "codecs": codec, "channels": channels, "lang": lang, "mimetype": mimetype}
+                streams[bitrate] = {
+                    "segments": segments,
+                    "files": files,
+                    "codecs": codec,
+                    "channels": channels,
+                    "lang": lang,
+                    "mimetype": mimetype,
+                    "resolution": resolution,
+                }
 
     return streams
 
@@ -250,6 +264,7 @@ def _dashparse(config, text, url, cookies, **kwargs):
             segments=videofiles[i]["segments"],
             codec=videofiles[i]["codecs"],
             channels=audiofiles[list(audiofiles.keys())[0]]["channels"],
+            resolution=videofiles[i]["resolution"],
             **kwargs,
         )
     for i in subtitles.keys():

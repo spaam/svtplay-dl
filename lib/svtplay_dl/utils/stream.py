@@ -15,15 +15,15 @@ def sort_quality(data):
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
     for i in data:
-        datas.append([i.bitrate, i.name, i.format])
+        datas.append([i.bitrate, i.name, i.format, i.resolution])
     return datas
 
 
 def list_quality(videos):
     data = sort_quality(videos)
-    logging.info("Quality\tMethod")
+    logging.info("Quality\tMethod\tCodec\tResolution")
     for i in data:
-        logging.info("%s\t%s\t%s", i[0], i[1].upper(), i[2].upper())
+        logging.info("%s\t%s\t%s\t%s", i[0], i[1].upper(), i[2].upper(), i[3])
 
 
 def protocol_prio(streams, priolist):
