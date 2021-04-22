@@ -150,11 +150,7 @@ class Dplay(Service):
 
         showid = None
         for what in res.json()["included"]:
-            if (
-                "attributes" in what
-                and "alias" in what["attributes"]
-                and ("grid" in what["attributes"]["alias"] or "season" in what["attributes"]["alias"])
-            ):
+            if "attributes" in what and "component" in what["attributes"] and what["attributes"]["component"]["id"] == "tabbed-content":
                 programid = what["id"]
                 for ses in what["attributes"]["component"]["filters"]:
                     if ses["id"] == "seasonNumber":
