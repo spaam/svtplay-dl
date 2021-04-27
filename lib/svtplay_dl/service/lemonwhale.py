@@ -28,7 +28,7 @@ class Lemonwhale(Service):
                 for n in list(streams.keys()):
                     yield streams[n]
 
-        url = "http://ljsp.lwcdn.com/web/public/video.json?id={}&delivery=hls".format(decode_html_entities(vid))
+        url = f"http://ljsp.lwcdn.com/web/public/video.json?id={decode_html_entities(vid)}&delivery=hls"
         data = self.http.request("get", url).text
         jdata = json.loads(data)
         if "videos" in jdata:

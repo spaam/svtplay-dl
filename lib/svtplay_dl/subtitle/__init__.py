@@ -149,7 +149,7 @@ class subtitle:
                 line = ""
                 for txt in text.itertext():
                     line += f"{txt}"
-                all += "{}\n".format(decode_html_entities(line.lstrip()))
+                all += f"{decode_html_entities(line.lstrip())}\n"
             subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
         subs = re.sub("&amp;", r"&", subs)
         return subs
@@ -173,7 +173,7 @@ class subtitle:
             if sync:
                 if int(sync.group(1)) != int(timea):
                     if data and data != "&nbsp;":
-                        subs += "{}\n{} --> {}\n".format(number, timestr(timea), timestr(sync.group(1)))
+                        subs += f"{number}\n{timestr(timea)} --> {timestr(sync.group(1))}\n"
                         text = "%s\n" % TAG_RE.sub("", data.replace("<br>", "\n"))
                         text = decode_html_entities(text)
                         if text[len(text) - 2] != "\n":
@@ -310,7 +310,7 @@ class subtitle:
                     ha = strdate(subs[-1][0])
                     ha3 = strdate(item)
                     second = str2sec(ha3.group(2)) + time
-                    subs[-1][0] = "{} --> {}".format(ha.group(1), sec2str(second))
+                    subs[-1][0] = f"{ha.group(1)} --> {sec2str(second)}"
                     skip = True
                     pre_date_skip = False
                     continue
@@ -322,7 +322,7 @@ class subtitle:
                     skip = False
                     first = str2sec(has_date.group(1)) + time
                     second = str2sec(has_date.group(2)) + time
-                    sub.append("{} --> {}".format(sec2str(first), sec2str(second)))
+                    sub.append(f"{sec2str(first)} --> {sec2str(second)}")
                     several_items = True
                     pre_date_skip = False
                 elif has_date is None and skip is False and pre_date_skip is False:
@@ -420,7 +420,7 @@ def timestr(msec):
 
 def timecolon(data):
     match = re.search(r"(\d+:\d+:\d+):(\d+)", data)
-    return "{},{}".format(match.group(1), match.group(2))
+    return f"{match.group(1)},{match.group(2)}"
 
 
 def norm(name):
@@ -452,7 +452,7 @@ def strdate(datestring):
 def sec2str(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
-    return "{:02d}:{:02d}:{:06.3f}".format(int(h), int(m), s)
+    return f"{int(h):02d}:{int(m):02d}:{s:06.3f}"
 
 
 def str2sec(string):

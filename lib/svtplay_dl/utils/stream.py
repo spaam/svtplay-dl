@@ -120,7 +120,7 @@ def select_quality(config, streams):
     # If none remains, the bitrate filtering was too tight.
     if len(wanted) == 0:
         data = sort_quality(streams)
-        quality = ", ".join("{} ({})".format(str(x), str(y)) for x, y in data)
+        quality = ", ".join(f"{str(x)} ({str(y)})" for x, y in data)
         raise error.UIException("Can't find that quality. Try one of: %s (or " "try --flexible-quality)" % quality)
 
     http = HTTP(config)

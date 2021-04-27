@@ -126,7 +126,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             for match in regex.finditer(data):
                 if n == self.config.get("all_last"):
                     break
-                episodes.append("http://www.oppetarkiv.se{}".format(match.group(1)))
+                episodes.append(f"http://www.oppetarkiv.se{match.group(1)}")
                 n += 1
             page += 1
 

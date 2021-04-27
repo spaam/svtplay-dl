@@ -82,7 +82,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not match:
                 match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
                 if match:
-                    url = "http:{}".format(match.group(1))
+                    url = f"http:{match.group(1)}"
                     data = self.http.request("get", url)
                     self.backupapi = url
                     match = re.search(r"picsearch_ajax_auth = '([^']+)'", data.text)
@@ -111,7 +111,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
             if not match:
                 match = re.search('iframe src="(//csp.screen9.com[^"]+)"', self.get_urldata())
                 if match:
-                    url = "http:{}".format(match.group(1))
+                    url = f"http:{match.group(1)}"
                     data = self.http.request("get", url)
                     match = re.search(r"mediaid: '([^']+)'", data.text)
         if not match:

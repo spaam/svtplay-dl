@@ -204,7 +204,7 @@ def dashparse(config, res, url, **kwargs):
         streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}")
         return streams
     if len(res.text) < 1:
-        streams[0] = ServiceError("Can't read DASH playlist. {}, size: {}".format(res.status_code, len(res.text)))
+        streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}, size: {len(res.text)}")
         return streams
 
     return _dashparse(config, res.text, url, res.cookies, **kwargs)

@@ -192,7 +192,7 @@ def get_one_media(stream):
         errormsg = None
         for exc in error:
             if errormsg:
-                errormsg = "{}. {}".format(errormsg, str(exc))
+                errormsg = f"{errormsg}. {str(exc)}"
             else:
                 errormsg = str(exc)
         if errormsg:

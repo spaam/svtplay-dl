@@ -246,8 +246,8 @@ class Svtplay(Service, MetadataThumbMixin):
         if season_nr is None or episode_nr is None:
             return season, episode
 
-        season = "{:02d}".format(int(season_nr))
-        episode = "{:02d}".format(int(episode_nr))
+        season = f"{int(season_nr):02d}"
+        episode = f"{int(episode_nr):02d}"
 
         return season, episode
 

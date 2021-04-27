@@ -38,7 +38,7 @@ class Dplay(Service):
             if not match:
                 yield ServiceError("Can't detect 'kanaler'")
                 return
-            path = "/channels/{}".format(match.group(1))
+            path = f"/channels/{match.group(1)}"
             url = f"https://disco-api.{self.domain}/content{path}"
             channel = True
             self.config.set("live", True)
@@ -47,7 +47,7 @@ class Dplay(Service):
             if not match:
                 yield ServiceError("Can't find program url")
                 return
-            path = "/shows/{}".format(match.group(2))
+            path = f"/shows/{match.group(2)}"
             url = f"https://disco-api.{self.domain}/content{path}"
             res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
             programid = res.json()["data"]["id"]
@@ -70,7 +70,7 @@ class Dplay(Service):
                 return
         else:
             match = re.search("(videos|videoer)/(.*)$", parse.path)
-            url = "https://disco-api.{}/content/videos/{}".format(self.domain, match.group(2))
+            url = f"https://disco-api.{self.domain}/content/videos/{match.group(2)}"
         res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
         janson = res.json()
         if "errors" in janson:
@@ -142,7 +142,7 @@ class Dplay(Service):
         if self.domain in ["discoveryplus.no", "discoveryplus.dk"]:
             urllocal = "mer"
 
-        url = "http://disco-api.{}/cms/routes/program{}/{}?decorators=viewingHistory&include=default".format(self.domain, urllocal, match.group(2))
+        url = f"http://disco-api.{self.domain}/cms/routes/program{urllocal}/{match.group(2)}?decorators=viewingHistory&include=default"
         res = self.http.get(url)
         if res.status_code > 400:
             logging.error("Cant find any videos. wrong url?")
@@ -200,7 +200,7 @@ class Dplay(Service):
     def _token(self) -> bool:
         # random device id for cookietoken
         deviceid = hashlib.sha256(bytes(int(random.random() * 1000))).hexdigest()
-        url = "https://disco-api.{}/token?realm={}&deviceId={}&shortlived=true".format(self.domain, REALMS[self.domain], deviceid)
+        url = f"https://disco-api.{self.domain}/token?realm={REALMS[self.domain]}&deviceId={deviceid}&shortlived=true"
         res = self.http.get(url)
         if res.status_code >= 400:
             return False

@@ -127,7 +127,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
         try:
             janson = json.loads(match.group(1))
         except Exception:
-            yield ServiceError("Can't decode api request: {}".format(match.group(1)))
+            yield ServiceError(f"Can't decode api request: {match.group(1)}")
             return
 
         parse = urlparse(self.url)

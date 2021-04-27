@@ -72,5 +72,5 @@ def main():
     except KeyboardInterrupt:
         print("")
     except (yaml.YAMLError, yaml.MarkedYAMLError) as e:
-        logging.error("Your settings file(s) contain invalid YAML syntax! Please fix and restart!, {}".format(str(e)))
+        logging.error(f"Your settings file(s) contain invalid YAML syntax! Please fix and restart!, {str(e)}")
         sys.exit(2)

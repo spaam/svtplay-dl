@@ -70,7 +70,7 @@ class postprocess:
                     ]
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{}.srt".format(name + subfix)
+                        subfile = f"{name + subfix}.srt"
                         cmd += ["-i", subfile]
                 else:
                     subfile = f"{name}.srt"
@@ -86,7 +86,7 @@ class postprocess:
                 logging.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = "{}.srt".format(name + subfix)
+                        subfile = f"{name + subfix}.srt"
                         os.remove(subfile)
                 else:
                     os.remove(subfile)
@@ -151,7 +151,7 @@ class postprocess:
                 ]
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{}.srt".format(name + subfix)
+                    subfile = f"{name + subfix}.srt"
                     cmd += ["-i", subfile]
             else:
                 subfile = f"{name}.srt"
@@ -172,7 +172,7 @@ class postprocess:
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = "{}.srt".format(name + subfix)
+                    subfile = f"{name + subfix}.srt"
                     os.remove(subfile)
             else:
                 os.remove(subfile)
@@ -258,10 +258,10 @@ def _sublanguage(stream, config, subfixes):
                     subfix = subfix.strip("-")
                 langs += [exceptions[subfix]]
                 continue
-            subfile = "{}.srt".format(os.path.splitext(formatname(stream.output, config, stream.output_extention))[0] + subfix)
+            subfile = f"{os.path.splitext(formatname(stream.output, config, stream.output_extention))[0] + subfix}.srt"
             langs += [query(subfile)]
     else:
-        subfile = "{}.srt".format(os.path.splitext(formatname(stream.output, config, stream.output_extention))[0])
+        subfile = f"{os.path.splitext(formatname(stream.output, config, stream.output_extention))[0]}.srt"
         langs += [query(subfile)]
     if len(langs) >= 2:
         logging.info("Language codes: " + ", ".join(langs))

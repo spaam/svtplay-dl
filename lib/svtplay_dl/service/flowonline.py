@@ -21,7 +21,7 @@ class Flowonline(Service, OpenGraphThumbMixin):
             return
         parse = urlparse(self.url)
 
-        url = "{}://{}{}".format(parse.scheme, parse.netloc, match.group(1))
+        url = f"{parse.scheme}://{parse.netloc}{match.group(1)}"
 
         data = self.http.get(url)
 

@@ -158,10 +158,10 @@ def _formatname(output, config, extension):
         if key == "title" and output[key]:
             name = name.replace("{title}", filenamify(output[key]))
         if key == "season" and output[key]:
-            number = "{:02d}".format(int(output[key]))
+            number = f"{int(output[key]):02d}"
             name = name.replace("{season}", number)
         if key == "episode" and output[key]:
-            number = "{:02d}".format(int(output[key]))
+            number = f"{int(output[key]):02d}"
             name = name.replace("{episode}", number)
         if key == "episodename" and output[key]:
             name = name.replace("{episodename}", filenamify(output[key]))

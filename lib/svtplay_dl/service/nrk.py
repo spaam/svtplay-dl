@@ -29,7 +29,7 @@ class Nrk(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant find apiurl.")
             return
-        dataurl = "{}/mediaelement/{}".format(match.group(1), video_id)
+        dataurl = f"{match.group(1)}/mediaelement/{video_id}"
         data = self.http.request("get", dataurl).text
         data = json.loads(data)
         manifest_url = data["mediaUrl"]
