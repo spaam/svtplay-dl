@@ -67,7 +67,8 @@ class subtitle:
         if self.config.get("get_raw_subtitles"):
             subdata = self.raw(subdata)
             self.save_file(subdata, self.subtype)
-
+        if data is None:
+            return
         self.save_file(data, "srt")
 
     def save_file(self, data, subtype):
