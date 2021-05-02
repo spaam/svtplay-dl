@@ -16,6 +16,7 @@ from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.nfo import write_nfo_episode
 from svtplay_dl.utils.nfo import write_nfo_tvshow
 from svtplay_dl.utils.output import filename
+from svtplay_dl.utils.output import find_dupes
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.stream import list_quality
 from svtplay_dl.utils.stream import select_quality
@@ -209,11 +210,16 @@ def get_one_media(stream):
             write_nfo_tvshow(stream.output, stream.config)
             if stream.config.get("force_nfo"):
                 return
+        fstream = select_quality(stream.config, videos)
+        if fstream.config.get("get_url"):
+            print(fstream.url)
+            return
+
+        dupe, fileame = find_dupes(fstream.output, stream.config)
+        if dupe and not stream.config.get("force"):
+            logging.warning(f"File ({fileame.name}) already exists. Use --force to overwrite")
+            return
         try:
-            fstream = select_quality(stream.config, videos)
-            if fstream.config.get("get_url"):
-                print(fstream.url)
-                return
             logging.info("Selected to download %s, bitrate: %s format: %s", fstream.name, fstream.bitrate, fstream.format)
             fstream.download()
         except UIException as e:

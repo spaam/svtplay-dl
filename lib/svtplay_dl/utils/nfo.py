@@ -1,9 +1,10 @@
+import copy
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
+from svtplay_dl.utils.output import find_dupes
 from svtplay_dl.utils.output import formatname
-from svtplay_dl.utils.parser import Options
 
 # https://kodi.wiki/view/NFO_files/TV_shows#nfo_Tags
 
@@ -12,6 +13,7 @@ def write_nfo_episode(output, config):
     if not output["title_nice"]:
         # If we don't even have the title, skip the NFO
         return
+
     root = ET.Element("episodedetails")
     ET.SubElement(root, "showtitle").text = output["title_nice"]
     if output["episodename"]:
@@ -26,8 +28,13 @@ def write_nfo_episode(output, config):
     if not config.get("thumbnail") and output["showthumbnailurl"]:
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["episodethumbnailurl"]
-
-    filename = formatname(output.copy(), config, extension="nfo")
+    loutout = output.copy()
+    loutout["ext"] = "nfo"
+    filename = formatname(loutout, config)
+    dupe, fileame = find_dupes(loutout.copy(), config, False)
+    if dupe and not config.get("force_nfo"):
+        logging.warning(f"File ({fileame.name}) already exists. Use --force-nfo to overwrite")
+        return
     logging.info("NFO episode: %s", filename)
 
     tree = ET.ElementTree(root)
@@ -50,12 +57,19 @@ def write_nfo_tvshow(output, config):
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["showthumbnailurl"]
 
-    cconfig = Options()
+    cconfig = copy.deepcopy(config)
     cconfig.set("output", config.get("output"))
     cconfig.set("path", config.get("path"))
     cconfig.set("subfolder", config.get("subfolder"))
-    cconfig.set("filename", "tvshow.{ext}")
-    filename = formatname(output.copy(), cconfig, extension="nfo")
+    cconfig.set("filename", "tvshow.nfo")
+
+    loutput = output.copy()
+    filename = formatname(loutput, cconfig)
+    dupe, fileame = find_dupes(loutput, cconfig, False)
+    if dupe and not cconfig.get("force_nfo"):
+        logging.warning(f"File ({fileame.name}) already exists. Use --force-nfo to overwrite")
+        return
+
     logging.info("NFO show: %s", filename)
 
     tree = ET.ElementTree(root)

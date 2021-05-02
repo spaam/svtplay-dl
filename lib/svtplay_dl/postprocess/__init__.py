@@ -32,10 +32,10 @@ class postprocess:
         if self.stream.finished is False:
             return
 
-        if formatname(self.stream.output, self.config, self.stream.output_extention).endswith(".mp4") is False:
-            orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
-            name, ext = os.path.splitext(orig_filename)
-            new_name = f"{name}.mp4"
+        if formatname(self.stream.output, self.config).suffix != ".mp4":
+            orig_filename = formatname(self.stream.output, self.config)
+
+            new_name = orig_filename.with_suffix(".mp4")
 
             cmd = [self.detect, "-i", orig_filename]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
@@ -43,18 +43,18 @@ class postprocess:
             videotrack, audiotrack = _checktracks(streams)
 
             if self.config.get("merge_subtitle"):
-                logging.info(f"Muxing {orig_filename} and merging its subtitle into {new_name}")
+                logging.info(f"Muxing {orig_filename.name} and merging its subtitle into {new_name.name}")
             else:
-                logging.info(f"Muxing {orig_filename} into {new_name}")
+                logging.info(f"Muxing {orig_filename.name} into {new_name.name}")
 
-            tempfile = f"{orig_filename}.temp"
+            tempfile = orig_filename.with_suffix(".temp")
             arguments = []
             if videotrack:
                 arguments += ["-map", f"{videotrack}"]
             if audiotrack:
                 arguments += ["-map", f"{audiotrack}"]
             arguments += ["-c", "copy", "-f", "mp4"]
-            if ext == ".ts" and streams and "aac" in _getcodec(streams, audiotrack):
+            if orig_filename.suffix == ".ts" and streams and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
             if self.config.get("merge_subtitle"):
@@ -70,10 +70,11 @@ class postprocess:
                     ]
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = f"{name + subfix}.srt"
+                        # subfile = f"{name + subfix}.srt"
+                        subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                         cmd += ["-i", subfile]
                 else:
-                    subfile = f"{name}.srt"
+                    subfile = orig_filename.with_suffix(".srt")
                     cmd += ["-i", subfile]
 
             arguments += ["-y", tempfile]
@@ -86,7 +87,7 @@ class postprocess:
                 logging.info("Muxing done, removing the old files.")
                 if self.subfixes and len(self.subfixes) >= 2:
                     for subfix in self.subfixes:
-                        subfile = f"{name + subfix}.srt"
+                        subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                         os.remove(subfile)
                 else:
                     os.remove(subfile)
@@ -102,12 +103,13 @@ class postprocess:
         if self.stream.finished is False:
             return
 
-        orig_filename = formatname(self.stream.output, self.config, self.stream.output_extention)
-        name, ext = os.path.splitext(orig_filename)
+        orig_filename = formatname(self.stream.output, self.config)
+        ext = orig_filename.suffix
+
         if ext == ".ts":
-            audio_filename = f"{name}.audio.ts"
+            audio_filename = orig_filename.with_suffix(".audio.ts")
         else:
-            audio_filename = f"{name}.m4a"
+            audio_filename = orig_filename.with_suffix(".m4a")
 
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
@@ -119,11 +121,11 @@ class postprocess:
         videotrack, audiotrack = _checktracks(streams)
 
         if self.config.get("merge_subtitle"):
-            logging.info(f"Merge audio, video and subtitle into {orig_filename}")
+            logging.info(f"Merge audio, video and subtitle into {orig_filename.name}")
         else:
-            logging.info(f"Merge audio and video into {orig_filename}")
+            logging.info(f"Merge audio and video into {orig_filename.name}")
 
-        tempfile = f"{orig_filename}.temp"
+        tempfile = orig_filename.with_suffix(".temp")
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
@@ -151,10 +153,10 @@ class postprocess:
                 ]
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = f"{name + subfix}.srt"
+                    subfile = orig_filename.parent / (orig_filename.name + "." + subfix + ".srt")
                     cmd += ["-i", subfile]
             else:
-                subfile = f"{name}.srt"
+                subfile = orig_filename.with_suffix(".srt")
                 cmd += ["-i", subfile]
 
         arguments += ["-y", tempfile]
@@ -172,7 +174,7 @@ class postprocess:
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = f"{name + subfix}.srt"
+                    subfile = orig_filename.parent / (orig_filename.name + "." + subfix + ".srt")
                     os.remove(subfile)
             else:
                 os.remove(subfile)
@@ -258,10 +260,11 @@ def _sublanguage(stream, config, subfixes):
                     subfix = subfix.strip("-")
                 langs += [exceptions[subfix]]
                 continue
-            subfile = f"{os.path.splitext(formatname(stream.output, config, stream.output_extention))[0] + subfix}.srt"
+            sfile = formatname(stream.output, config)
+            subfile = sfile.parent / (sfile.stem + "." + subfix + ".srt")
             langs += [query(subfile)]
     else:
-        subfile = f"{os.path.splitext(formatname(stream.output, config, stream.output_extention))[0]}.srt"
+        subfile = formatname(stream.output, config).with_suffix(".srt")
         langs += [query(subfile)]
     if len(langs) >= 2:
         logging.info("Language codes: " + ", ".join(langs))

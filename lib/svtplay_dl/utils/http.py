@@ -48,7 +48,8 @@ class HTTP(Session):
 def download_thumbnails(output, config, urls):
     for show, url in urls:
         data = Session().get(url).content
-
+        loutout = output.copy()
+        loutout["ext"] = "tbn"
         if show:
             # Config for downloading show thumbnail
             cconfig = Options()
@@ -59,12 +60,11 @@ def download_thumbnails(output, config, urls):
         else:
             cconfig = config
 
-        filename = formatname(output.copy(), cconfig, extension="tbn")
+        filename = formatname(loutout, cconfig)
         logging.info("Thumbnail: %s", filename)
 
-        fd = open(filename, "wb")
-        fd.write(data)
-        fd.close()
+        with open(filename, "wb") as fd:
+            fd.write(data)
 
 
 def get_full_url(url, srcurl):

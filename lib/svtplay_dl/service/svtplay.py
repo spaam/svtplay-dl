@@ -113,13 +113,13 @@ class Svtplay(Service, MetadataThumbMixin):
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                 if i["url"].find(".m3u8") > 0:
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
                     if alt:
-                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
+                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, self.output)
                 elif i["url"].find(".mpd") > 0:
                     streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                     if alt:
-                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
+                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, self.output)
 
                 if streams:
                     for n in list(streams.keys()):

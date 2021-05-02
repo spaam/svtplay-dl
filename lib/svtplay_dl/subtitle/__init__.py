@@ -7,7 +7,8 @@ from io import StringIO
 from requests import __build__ as requests_version
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.http import HTTP
-from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import find_dupes
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.text import decode_html_entities
 
 
@@ -27,6 +28,18 @@ class subtitle:
         return f"<Subtitle(type={self.subtype}, url={self.url}>"
 
     def download(self):
+        output_ext = "srt"
+        if self.config.get("get_raw_subtitles"):
+            output_ext = self.subtype
+
+        if self.subfix and self.config.get("get_all_subtitles"):
+            self.output["ext"] = f"{self.subfix}.{output_ext}"
+        else:
+            self.output["ext"] = output_ext
+        dupe, fileame = find_dupes(self.output, self.config, False)
+        if dupe and not self.config.get("force_subtitle"):
+            logging.warning(f"File ({fileame.name}) already exists. Use --force-subtitle to overwrite")
+            return
         subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
             logging.warning("Can't download subtitle file")
@@ -57,25 +70,15 @@ class subtitle:
         if self.subtype == "stpp":
             data = self.stpp(subdata)
 
-        if self.subfix:
-            if self.config.get("get_all_subtitles"):
-                if self.output["episodename"]:
-                    self.output["episodename"] = "{}-{}".format(self.output["episodename"], self.subfix)
-                else:
-                    self.output["episodename"] = self.subfix
-
         if self.config.get("get_raw_subtitles"):
-            subdata = self.raw(subdata)
-            self.save_file(subdata, self.subtype)
+            data = self.raw(subdata)
 
-        self.save_file(data, "srt")
+        self.save_file(data)
 
-    def save_file(self, data, subtype):
-        file_d = output(self.output, self.config, subtype, mode="w", encoding="utf-8")
-        if hasattr(file_d, "read") is False:
-            return
-        file_d.write(data)
-        file_d.close()
+    def save_file(self, data):
+        filename = formatname(self.output, self.config)
+        with open(filename, "w", encoding="utf-8") as file_d:
+            file_d.write(data)
 
     def raw(self, subdata):
         return subdata.text

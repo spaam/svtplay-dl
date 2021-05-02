@@ -37,6 +37,8 @@ class Service:
             "showthumbnailurl": None,
             "episodethumbnailurl": None,
             "publishing_datetime": None,
+            "language": None,
+            "ext": None,
         }
 
         #  Config

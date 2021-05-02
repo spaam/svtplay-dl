@@ -19,7 +19,7 @@ from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.output import ETA
-from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
 from svtplay_dl.utils.output import progressbar
 
@@ -35,7 +35,7 @@ class LiveHLSException(HLSException):
         super().__init__(url, "This is a live HLS stream, and they are not supported.")
 
 
-def hlsparse(config, res, url, **kwargs):
+def hlsparse(config, res, url, output, **kwargs):
     streams = {}
 
     if not res:
@@ -49,7 +49,8 @@ def hlsparse(config, res, url, **kwargs):
     keycookie = kwargs.pop("keycookie", None)
     authorization = kwargs.pop("authorization", None)
     httpobject = kwargs.pop("httpobject", None)
-    output = kwargs.pop("output", None)
+    loutput = copy.copy(output)
+    loutput["ext"] = "ts"
     channels = kwargs.pop("channels", None)
     codec = kwargs.pop("codec", "h264")
     media = {}
@@ -113,7 +114,7 @@ def hlsparse(config, res, url, **kwargs):
                 keycookie=keycookie,
                 authorization=authorization,
                 audio=audio_url,
-                output=output,
+                output=loutput,
                 segments=bool(segments),
                 channels=chans,
                 codec=codec,
@@ -147,7 +148,7 @@ def hlsparse(config, res, url, **kwargs):
             cookies=res.cookies,
             keycookie=keycookie,
             authorization=authorization,
-            output=output,
+            output=loutput,
             segments=False,
         )
 
@@ -166,16 +167,17 @@ class HLS(VideoRetriever):
         self.output_extention = "ts"
         if self.segments:
             if self.audio and not self.config.get("only_video"):
-                self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
+                # self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
+                self._download(self.audio, True)
             if not self.config.get("only_audio"):
-                self._download(self.url, file_name=(self.output, "ts"))
+                self._download(self.url)
 
         else:
             # Ignore audio
             self.audio = None
-            self._download(self.url, file_name=(self.output, "ts"))
+            self._download(self.url)
 
-    def _download(self, url, file_name):
+    def _download(self, url, audio=False):
         cookies = self.kwargs.get("cookies", None)
         start_time = time.time()
         m3u8 = M3U8(self.http.request("get", url, cookies=cookies).text)
@@ -184,9 +186,12 @@ class HLS(VideoRetriever):
         def random_iv():
             return os.urandom(16)
 
-        file_d = output(file_name[0], self.config, file_name[1])
-        if file_d is None:
-            return
+        if audio:
+            self.output["ext"] = "audio.ts"
+        else:
+            self.output["ext"] = "ts"
+        filename = formatname(self.output, self.config)
+        file_d = open(filename, "wb")
 
         if "EXT-X-MAP" in m3u8.media_segment[0]:
             entry = {"URI": get_full_url(m3u8.media_segment[0]["EXT-X-MAP"]["URI"], url), "EXTINF": {"duration": 0}}

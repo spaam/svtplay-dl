@@ -4,7 +4,7 @@ import os
 
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.utils.output import ETA
-from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progressbar
 
 
@@ -17,9 +17,9 @@ class HTTP(VideoRetriever):
         """ Get the stream from HTTP """
         _, ext = os.path.splitext(self.url)
         if ext == ".mp3":
-            self.output_extention = "mp3"
+            self.output["ext"] = "mp3"
         else:
-            self.output_extention = "mp4"  # this might be wrong..
+            self.output["ext"] = "mp4"  # this might be wrong..
         data = self.http.request("get", self.url, stream=True)
         try:
             total_size = data.headers["content-length"]
@@ -28,9 +28,8 @@ class HTTP(VideoRetriever):
         total_size = int(total_size)
         bytes_so_far = 0
 
-        file_d = output(self.output, self.config, self.output_extention)
-        if file_d is None:
-            return
+        filename = formatname(self.output, self.config)
+        file_d = open(filename, "wb")
 
         eta = ETA(total_size)
         for i in data.iter_content(8192):

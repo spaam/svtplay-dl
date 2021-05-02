@@ -14,7 +14,7 @@ from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.output import ETA
-from svtplay_dl.utils.output import output
+from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
 from svtplay_dl.utils.output import progressbar
 
@@ -195,7 +195,7 @@ def adaptionset(attributes, elements, url, baseurl=None):
     return streams
 
 
-def dashparse(config, res, url, **kwargs):
+def dashparse(config, res, url, output, **kwargs):
     streams = {}
     if not res:
         return streams
@@ -207,13 +207,14 @@ def dashparse(config, res, url, **kwargs):
         streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}, size: {len(res.text)}")
         return streams
 
-    return _dashparse(config, res.text, url, res.cookies, **kwargs)
+    return _dashparse(config, res.text, url, output, cookies=res.cookies, **kwargs)
 
 
-def _dashparse(config, text, url, cookies, **kwargs):
+def _dashparse(config, text, url, output, cookies, **kwargs):
     streams = {}
     baseurl = None
-    output = kwargs.pop("output", None)
+    loutput = copy.copy(output)
+    loutput["ext"] = "mp4"
     attributes = DASHattibutes()
 
     xml = ET.XML(text)
@@ -260,7 +261,7 @@ def _dashparse(config, text, url, cookies, **kwargs):
             cookies=cookies,
             audio=audiofiles[list(audiofiles.keys())[0]]["files"],
             files=videofiles[i]["files"],
-            output=output,
+            output=loutput,
             segments=videofiles[i]["segments"],
             codec=videofiles[i]["codecs"],
             channels=audiofiles[list(audiofiles.keys())[0]]["channels"],
@@ -270,11 +271,11 @@ def _dashparse(config, text, url, cookies, **kwargs):
     for i in subtitles.keys():
         if subtitles[i]["codecs"] == "stpp":
             streams[i] = subtitle(
-                copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs
+                copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(loutput), files=subtitles[i]["files"], **kwargs
             )
         if subtitles[i]["mimetype"] == "text/vtt":
             streams[i] = subtitle(
-                copy.copy(config), "webvtt", url, subtitles[i]["lang"], output=copy.copy(output), files=subtitles[i]["files"], **kwargs
+                copy.copy(config), "webvtt", url, subtitles[i]["lang"], output=copy.copy(loutput), files=subtitles[i]["files"], **kwargs
             )
     return streams
 
@@ -332,11 +333,13 @@ class DASH(VideoRetriever):
         cookies = self.kwargs["cookies"]
 
         if audio:
-            file_d = output(copy.copy(self.output), self.config, extension="m4a")
+            self.output["ext"] = "m4a"
         else:
-            file_d = output(self.output, self.config, extension="mp4")
-        if file_d is None:
-            return
+            self.output["ext"] = "mp4"
+
+        filename = formatname(self.output, self.config)
+        file_d = open(filename, "wb")
+
         eta = ETA(len(files))
         n = 1
         for i in files:
@@ -354,4 +357,44 @@ class DASH(VideoRetriever):
         file_d.close()
         if not self.config.get("silent"):
             progress_stream.write("\n")
+        self.finished = True
+
+    def _download_url(self, url, audio=False, total_size=None):
+        cookies = self.kwargs["cookies"]
+        data = self.http.request("get", url, cookies=cookies, headers={"Range": "bytes=0-8192"})
+        if not total_size:
+            try:
+                total_size = data.headers["Content-Range"]
+                total_size = total_size[total_size.find("/") + 1 :]
+                total_size = int(total_size)
+            except KeyError:
+                raise KeyError("Can't get the total size.")
+
+        bytes_so_far = 8192
+        if audio:
+            self.output["ext"] = "m4a"
+        else:
+            self.output["ext"] = "mp4"
+        filename = formatname(self.output, self.config)
+        file_d = open(filename, "wb")
+
+        file_d.write(data.content)
+        eta = ETA(total_size)
+        while bytes_so_far < total_size:
+
+            if not self.config.get("silent"):
+                eta.update(bytes_so_far)
+                progressbar(total_size, bytes_so_far, "".join(["ETA: ", str(eta)]))
+
+            old = bytes_so_far + 1
+            bytes_so_far = total_size
+
+            bytes_range = f"bytes={old}-{bytes_so_far}"
+
+            data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
+            file_d.write(data.content)
+
+        file_d.close()
+        progressbar(bytes_so_far, total_size, "ETA: complete")
+        # progress_stream.write('\n')
         self.finished = True
