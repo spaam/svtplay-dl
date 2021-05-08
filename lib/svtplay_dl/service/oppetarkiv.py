@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
-from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
@@ -62,23 +61,6 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
                         streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
                         for n in list(streams.keys()):
                             yield streams[n]
-            if i["format"] == "hds" or i["format"] == "flash":
-                match = re.search(r"\/se\/secure\/", i["url"])
-                if not match:
-                    streams = hdsparse(self.config, self.http.request("get", i["url"], params={"hdcore": "3.7.0"}), i["url"], output=self.output)
-                    for n in list(streams.keys()):
-                        yield streams[n]
-                    if "alt" in query and len(query["alt"]) > 0:
-                        alt = self.http.get(query["alt"][0])
-                        if alt:
-                            streams = hdsparse(
-                                self.config,
-                                self.http.request("get", alt.request.url, params={"hdcore": "3.7.0"}),
-                                alt.request.url,
-                                output=self.output,
-                            )
-                            for n in list(streams.keys()):
-                                yield streams[n]
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
                 streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 for n in list(streams.keys()):

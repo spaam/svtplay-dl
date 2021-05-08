@@ -176,13 +176,13 @@ def gen_parser(version="unknown"):
         dest="flexibleq",
         help="allow given quality (as above) to differ by an amount",
     )
-    quality.add_argument("-P", "--preferred", default=None, metavar="preferred", help="preferred download method (dash, hls, hds, or http)")
+    quality.add_argument("-P", "--preferred", default=None, metavar="preferred", help="preferred download method (dash, hls, or http)")
     quality.add_argument("--list-quality", dest="list_quality", action="store_true", default=False, help="list the quality for a video")
     quality.add_argument(
         "--stream-priority",
         dest="stream_prio",
         default=None,
-        metavar="dash,hls,hds,http",
+        metavar="dash,hls,http",
         help="If two streams have the same quality, choose the one you prefer",
     )
     quality.add_argument(

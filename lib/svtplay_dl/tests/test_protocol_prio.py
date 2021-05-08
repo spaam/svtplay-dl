@@ -26,10 +26,10 @@ class PrioStreamsTest(unittest.TestCase):
         return [str(x) for x in protocol_prio(streams, ordered, **kwargs)] == expected
 
     def test_custom_order(self):
-        assert self._gen_proto_case(["http", "hds", "hls"], ["hds", "hls", "http"])
+        assert self._gen_proto_case(["http", "hls"], ["hls", "http"])
 
     def test_custom_order_1(self):
-        assert self._gen_proto_case(["http"], ["hds", "hls", "http"])
+        assert self._gen_proto_case(["http"], ["hls", "http"])
 
     def test_proto_unavail(self):
-        assert self._gen_proto_case(["http", "hds"], ["hls", "https"], expected=[])
+        assert self._gen_proto_case(["http"], ["hls", "https"], expected=[])

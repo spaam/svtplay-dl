@@ -5,7 +5,6 @@ import json
 import re
 
 from svtplay_dl.error import ServiceError
-from svtplay_dl.fetcher.hds import hdsparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
@@ -50,14 +49,3 @@ class Nrk(Service, OpenGraphThumbMixin):
         if streams:
             for n in list(streams.keys()):
                 yield streams[n]
-
-        else:
-            streams = hdsparse(
-                copy.copy(self.config),
-                self.http.request("get", manifest_url, params={"hdcore": "3.7.0"}),
-                manifest_url,
-                output=self.output,
-            )
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]

@@ -6,8 +6,8 @@ from svtplay_dl.utils.http import HTTP
 
 
 # TODO: should be set as the default option in the argument parsing?
-DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "hds", "http"]
-LIVE_PROTOCOL_PRIO = ["hls", "dash", "hds", "http"]
+DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "http"]
+LIVE_PROTOCOL_PRIO = ["hls", "dash", "http"]
 DEFAULT_FORMAT_PRIO = ["h264", "h264-51"]
 
 
@@ -80,7 +80,7 @@ def select_quality(config, streams):
         form_prio = DEFAULT_FORMAT_PRIO
     streams = format_prio(streams, form_prio)
 
-    # Extract protocol prio, in the form of "hls,hds,http",
+    # Extract protocol prio, in the form of "hls,http",
     # we want it as a list
 
     if config.get("stream_prio"):

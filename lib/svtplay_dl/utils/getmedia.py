@@ -229,7 +229,7 @@ def get_one_media(stream):
         if fstream.audio and post.detect:
             post.merge()
         if fstream.audio and not post.detect and fstream.finished:
-            logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
+            logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls")
         if fstream.name == "hls" or fstream.config.get("remux"):
             post.remux()
         if fstream.config.get("silent_semi") and fstream.finished:
