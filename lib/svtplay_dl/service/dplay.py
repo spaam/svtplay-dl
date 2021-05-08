@@ -174,6 +174,9 @@ class Dplay(Service):
                         querystring += f"&{showid}"
                     res = self.http.get(f"https://disco-api.{self.domain}/cms/collections/{programid}?{querystring}")
                     janson = res.json()
+                    if "meta" not in janson["data"]:
+                        page += 1
+                        continue
                     totalpages = janson["data"]["meta"]["itemsTotalPages"]
                     for i in janson["included"]:
                         if i["type"] != "video":
