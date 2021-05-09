@@ -232,11 +232,11 @@ def get_one_media(stream):
             stream.get_thumbnail(stream.config)
 
         post = postprocess(fstream, fstream.config, subfixes)
-        if fstream.audio and post.detect:
-            post.merge()
         if fstream.audio and not post.detect and fstream.finished:
             logging.warning("Cant find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls")
-        if fstream.name == "hls" or fstream.config.get("remux"):
+        elif fstream.audio and post.detect:
+            post.merge()
+        elif fstream.name == "hls" or fstream.config.get("remux"):
             post.remux()
         if fstream.config.get("silent_semi") and fstream.finished:
             logging.log(25, "Download of %s was completed" % fstream.options.output)
