@@ -152,9 +152,9 @@ class postprocess:
                     "-metadata:s:s:" + str(stream_num - 2),
                     "language=" + language,
                 ]
-            if self.subfixes and len(self.subfixes) >= 2:
+            if self.subfixes:
                 for subfix in self.subfixes:
-                    subfile = orig_filename.parent / (orig_filename.name + "." + subfix + ".srt")
+                    subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                     cmd += ["-i", subfile]
             else:
                 subfile = orig_filename.with_suffix(".srt")
