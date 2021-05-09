@@ -105,6 +105,7 @@ class postprocess:
 
         orig_filename = formatname(self.stream.output, self.config)
         ext = orig_filename.suffix
+        new_name = orig_filename.with_suffix(".mp4")
 
         if ext == ".ts":
             audio_filename = orig_filename.with_suffix(".audio.ts")
@@ -178,7 +179,7 @@ class postprocess:
                     os.remove(subfile)
             else:
                 os.remove(subfile)
-        os.rename(tempfile, orig_filename)
+        os.rename(tempfile, new_name)
 
 
 def _streams(output):
