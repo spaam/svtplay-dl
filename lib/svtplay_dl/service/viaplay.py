@@ -72,8 +72,6 @@ class Viaplay(Service, OpenGraphThumbMixin):
                     output=copy.copy(self.output),
                     m3u8=m3u8s,
                 )
-            else:
-                yield subtitle(copy.copy(self.config), "wrst", video["_embedded"]["program"]["subtitles"]["subtitlesWebvtt"], output=self.output)
 
         res = self.http.get(video["_embedded"]["program"]["_links"]["streamLink"]["href"])
         janson = res.json()
@@ -98,15 +96,22 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
             if not self.config.get("get_all_subtitles"):
                 if not language:
-                    yield subtitle(copy.copy(self.config), "wrst", janson["embedded"]["subtitles"][0]["link"]["href"], output=self.output)
+                    yield subtitle(copy.deepcopy(self.config), "wrst", janson["embedded"]["subtitles"][0]["link"]["href"], output=self.output)
                 else:
                     for i in janson["embedded"]["subtitles"]:
-                        if i["data"]["language"] == language:
-                            yield subtitle(copy.copy(self.config), "wrst", i["link"]["href"], output=self.output)
+                        if i["data"]["language"] == language and i["data"]["sdh"] is False:
+                            yield subtitle(copy.deepcopy(self.config), "wrst", i["link"]["href"], output=self.output)
 
             else:
+                substitles = {}
                 for i in janson["embedded"]["subtitles"]:
-                    yield subtitle(copy.copy(self.config), "wrst", i["link"]["href"], i["data"]["language"], output=copy.copy(self.output))
+                    substitles[(i["data"]["language"], i["data"]["sdh"])] = i["link"]["href"]
+
+                for i in substitles:
+                    lang, shd = i
+                    if shd:
+                        lang = f"{lang}-shd"
+                    yield subtitle(copy.deepcopy(self.config), "wrst", substitles[i], lang, output=copy.copy(self.output))
 
     def find_all_episodes(self, config):
         episodes = []
