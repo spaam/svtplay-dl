@@ -57,6 +57,6 @@ def exclude(config, name):
     if config.get("exclude"):
         excludes = config.get("exclude").split(",")
         for exclude in excludes:
-            if exclude in name:
+            if exclude in str(name.name):
                 return True
     return False
