@@ -37,7 +37,7 @@ class postprocess:
 
             new_name = orig_filename.with_suffix(".mp4")
 
-            cmd = [self.detect, "-i", orig_filename]
+            cmd = [self.detect, "-i", str(orig_filename)]
             _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
             streams = _streams(stderr)
             videotrack, audiotrack = _checktracks(streams)
@@ -72,12 +72,12 @@ class postprocess:
                     for subfix in self.subfixes:
                         # subfile = f"{name + subfix}.srt"
                         subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
-                        cmd += ["-i", subfile]
+                        cmd += ["-i", str(subfile)]
                 else:
                     subfile = orig_filename.with_suffix(".srt")
-                    cmd += ["-i", subfile]
+                    cmd += ["-i", str(subfile)]
 
-            arguments += ["-y", tempfile]
+            arguments += ["-y", str(tempfile)]
             cmd += arguments
             returncode, stdout, stderr = run_program(cmd)
             if returncode != 0:
@@ -114,9 +114,9 @@ class postprocess:
 
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
-            cmd += ["-i", orig_filename]
+            cmd += ["-i", str(orig_filename)]
         if self.config.get("only_audio") or not self.config.get("only_video"):
-            cmd += ["-i", audio_filename]
+            cmd += ["-i", str(audio_filename)]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
@@ -133,9 +133,9 @@ class postprocess:
                 arguments += ["-bsf:a", "aac_adtstoasc"]
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
-            cmd += ["-i", orig_filename]
+            cmd += ["-i", str(orig_filename)]
         if self.config.get("only_audio") or not self.config.get("only_video"):
-            cmd += ["-i", audio_filename]
+            cmd += ["-i", str(audio_filename)]
         if videotrack:
             arguments += ["-map", f"{videotrack}"]
         if audiotrack:
@@ -155,12 +155,12 @@ class postprocess:
             if self.subfixes:
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
-                    cmd += ["-i", subfile]
+                    cmd += ["-i", str(subfile)]
             else:
                 subfile = orig_filename.with_suffix(".srt")
-                cmd += ["-i", subfile]
+                cmd += ["-i", str(subfile)]
 
-        arguments += ["-y", tempfile]
+        arguments += ["-y", str(tempfile)]
         cmd += arguments
         returncode, stdout, stderr = run_program(cmd)
         if returncode != 0:
