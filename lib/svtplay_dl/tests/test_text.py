@@ -2,6 +2,7 @@
 # ex:ts=4:sw=4:sts=4:et:fenc=utf-8
 # The unittest framwork doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
+import pathlib
 import unittest
 
 from svtplay_dl.utils.parser import setup_defaults
@@ -29,16 +30,16 @@ class filenamifyTest(unittest.TestCase):
     def test_exclude_true(self):
         config = setup_defaults()
         config.set("exclude", "hej")
-        assert exclude(config, "hejsanhoppsan")
+        assert exclude(config, pathlib.Path("hejsanhoppsan"))
 
     def test_exclude_false(self):
         config = setup_defaults()
         config.set("exclude", "hej")
-        assert not exclude(config, "hoppsan")
+        assert not exclude(config, pathlib.Path("hoppsan"))
 
     def test_exlude_default(self):
         config = setup_defaults()
-        assert not exclude(config, "hoppsan")
+        assert not exclude(config, pathlib.Path("hoppsan"))
 
     def test_ensure_unicode(self):
         assert ensure_unicode(b"hello") == "hello"
