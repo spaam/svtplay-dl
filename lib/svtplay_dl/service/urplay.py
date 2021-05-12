@@ -49,7 +49,7 @@ class Urplay(Service, OpenGraphThumbMixin):
                     streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
                     for n in list(streams.keys()):
                         yield streams[n]
-            if not (self.config.get("get_all_subtitles")) and (stream["default"]):
+            if not (self.config.get("get_all_subtitles")) and streaminfo == "sweComplete":
                 yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), output=self.output)
 
             if self.config.get("get_all_subtitles") and "tt" in stream:
