@@ -63,8 +63,10 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', self.get_urldata())
         if not match:
-            logging.error("Can't find json info")
-            return
+            match = re.search(r'/ProgramContainer" data-react-props="([^\"]+)\"', self.get_urldata())
+            if not match:
+                logging.error("Can't find json info")
+                return
 
         data = unescape(match.group(1))
         jsondata = json.loads(data)
