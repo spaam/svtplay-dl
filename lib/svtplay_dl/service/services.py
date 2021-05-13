@@ -4,7 +4,7 @@ from svtplay_dl.service.barnkanalen import Barnkanalen
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
 from svtplay_dl.service.disney import Disney
-from svtplay_dl.service.dplay import Dplay
+from svtplay_dl.service.dplay import Discoveryplus
 from svtplay_dl.service.dr import Dr
 from svtplay_dl.service.efn import Efn
 from svtplay_dl.service.eurosport import Eurosport
@@ -35,7 +35,7 @@ from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.urplay import Urplay
 from svtplay_dl.service.vg import Vg
-from svtplay_dl.service.viaplay import Viaplay
+from svtplay_dl.service.viaplay import Viafree
 from svtplay_dl.service.viasatsport import Viasatsport
 from svtplay_dl.service.vimeo import Vimeo
 from svtplay_dl.service.youplay import Youplay
@@ -47,7 +47,7 @@ sites = [
     Bigbrother,
     Cmore,
     Disney,
-    Dplay,
+    Discoveryplus,
     Dr,
     Efn,
     Eurosport,
@@ -75,7 +75,7 @@ sites = [
     Tv4,
     Tv4play,
     Urplay,
-    Viaplay,
+    Viafree,
     Viasatsport,
     Vimeo,
     Vg,

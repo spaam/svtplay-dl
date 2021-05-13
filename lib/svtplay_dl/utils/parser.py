@@ -419,6 +419,20 @@ def readconfig(config, configfile, service=None, preset=None):
     if configdata is None:
         return config
 
+    # migrate old service name to new
+    old_name_in_config = False
+    if "service" in configdata and "dplay" in configdata["service"]:
+        old_name_in_config = True
+        logging.warning("'dplay' have been renamed to 'discoveryplus'")
+        configdata["service"]["discoveryplus"] = configdata["service"].pop("dplay")
+
+    if "service" in configdata and "viaplay" in configdata["service"]:
+        old_name_in_config = True
+        logging.warning("'viaplay' have been renamed to 'viafree'")
+        configdata["service"]["viafree"] = configdata["service"].pop("viaplay")
+    if old_name_in_config:
+        logging.warning("Old service names still work at the moment. To avoid the warnings you need to rename the service(s) to the new name(s)")
+
     if "default" in configdata:
         config = merge(config.get_variable(), configdata["default"])
 

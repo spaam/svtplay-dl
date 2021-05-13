@@ -20,7 +20,7 @@ from svtplay_dl.subtitle import subtitle
 country = {".se": "sv", ".dk": "da", ".no": "no"}
 
 
-class Viaplay(Service, OpenGraphThumbMixin):
+class Viafree(Service, OpenGraphThumbMixin):
     supported_domains = [
         "tv3play.ee",
         "tv3play.lv",

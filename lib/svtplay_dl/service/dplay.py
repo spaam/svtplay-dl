@@ -17,7 +17,7 @@ country = {"sv": ".se", "da": ".dk", "no": ".no"}
 REALMS = {"discoveryplus.se": "dplayse", "discoveryplus.no": "dplayno", "discoveryplus.dk": "dplaydk"}
 
 
-class Dplay(Service):
+class Discoveryplus(Service):
     supported_domains = ["discoveryplus.se", "discoveryplus.no", "discoveryplus.dk"]
     packages = []
 
