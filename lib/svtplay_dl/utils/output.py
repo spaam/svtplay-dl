@@ -148,7 +148,7 @@ def formatname(output, config):
         name = pathlib.Path(config.get("path")) / name.name
     elif config.get("output"):
         if output["ext"]:
-            name = pathlib.Path(config.get("output")).with_suffix(f".{output['ext']}")
+            name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
         else:
             name = pathlib.Path(config.get("output"))
     return name
