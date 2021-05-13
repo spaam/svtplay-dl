@@ -1,7 +1,10 @@
+import datetime
 import os
 import unittest
 
+import pytest
 from svtplay_dl.fetcher.dash import _dashparse
+from svtplay_dl.fetcher.dash import parse_dates
 from svtplay_dl.fetcher.dash import parse_duration
 from svtplay_dl.utils.parser import setup_defaults
 
@@ -49,4 +52,12 @@ class dashtest(unittest.TestCase):
         assert parse_duration("PT2.00S") == 2.0
         assert parse_duration("PT1H0M30.000S") == 3630.0
         assert parse_duration("P1Y1M1DT1H0M30.000S") == 34218030.0
-        assert parse_duration("PWroNG") == 0
+        assert parse_duration("mMWroNG") == 0
+
+    def test_parse_date(self):
+        assert isinstance(parse_dates("2021-05-10T06:00:11.451554796Z"), datetime.datetime)
+        assert isinstance(parse_dates("2021-05-10T06:00:11.45Z"), datetime.datetime)
+        assert isinstance(parse_dates("2021-05-10T06:00:11Z"), datetime.datetime)
+        assert isinstance(parse_dates("2021-05-10T06:00:11"), datetime.datetime)
+        with pytest.raises(ValueError):
+            assert parse_dates("2021-05-10Z06:00:11.45Z")
