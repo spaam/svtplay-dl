@@ -181,7 +181,7 @@ class Discoveryplus(Service):
                     for i in janson["included"]:
                         if i["type"] != "video":
                             continue
-                        if i["attributes"]["videoType"] == "EPISODE":
+                        if i["attributes"]["videoType"] == "EPISODE" or i["attributes"]["videoType"] == "STANDALONE":
                             if not self._playablefile(i["attributes"]["availabilityWindows"]):
                                 continue
                             episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
