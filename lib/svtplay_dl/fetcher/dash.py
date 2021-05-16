@@ -145,10 +145,6 @@ def adaptionset(attributes, elements, url, baseurl=None):
             mimetype = None
             attributes.set("bandwidth", i.attrib["bandwidth"])
             bitrate = int(i.attrib["bandwidth"]) / 1000
-            if "contentType" in element.attrib and element.attrib["contentType"] == "text":
-                if streams.keys():
-                    bitrate = list(streams.keys())[-1]
-                bitrate += 1
             if "mimeType" in element.attrib:
                 mimetype = element.attrib["mimeType"]
             idnumber = i.attrib["id"]
@@ -278,11 +274,11 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
                 role=audio["role"],
                 **kwargs,
             )
-    for i in subtitles:
-        if i["codecs"] == "stpp":
-            yield subtitle(copy.copy(config), "stpp", url, i["lang"], output=copy.copy(loutput), files=i["files"], **kwargs)
-        if subtitles[i]["mimetype"] == "text/vtt":
-            yield subtitle(copy.copy(config), "webvtt", url, i["lang"], output=copy.copy(loutput), files=i["files"], **kwargs)
+    for sub in subtitles:
+        if sub["codecs"] == "stpp":
+            yield subtitle(copy.copy(config), "stpp", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
+        if sub["mimetype"] == "text/vtt":
+            yield subtitle(copy.copy(config), "webvtt", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
 
 
 def parse_duration(duration):
