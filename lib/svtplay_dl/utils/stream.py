@@ -21,10 +21,12 @@ def sort_quality(data) -> List:
 
 
 def list_quality(videos):
-    data = sort_quality(videos)
-    logging.info("Quality\tMethod\tCodec\tResolution\tlang\trole")
-    for i in data:
-        logging.info("%s\t%s\t%s\t%s\t%s\t%s", i[0], i[1].upper(), i[2].upper(), i[3], i[4], i[5])
+    data = [["Quality:", "Method:", "Codec:", "Resolution:", "Language:", "Role:"]]
+    data.extend(sort_quality(videos))
+    for i in range(len(data)):
+        logging.info(
+            f"{str(data[i][0]):<10s} {data[i][1].upper():<10s} {data[i][2]:<10s} {data[i][3]:<15s} {data[i][4]:<20s} {data[i][5]:<20s}",
+        )
 
 
 def protocol_prio(streams, priolist) -> List:
