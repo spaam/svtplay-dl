@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import re
+from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
@@ -78,10 +79,15 @@ class Viafree(Service, OpenGraphThumbMixin):
         stream = janson["embedded"]["prioritizedStreams"][0]["links"]["stream"]
 
         if video["_embedded"]["program"]["_links"]["streamLink"]:
+            parse = urlparse(stream["href"])
+            query = parse_qs(parse.query)
+            query.pop("filter", None)
+            query = "&".join(f"{key}={val[0]}".format(key, val) for (key, val) in query.items())
+            hls_url = f"https://{parse.netloc}{parse.path}?{query}"
             yield from hlsparse(
                 self.config,
-                self.http.request("get", stream["href"]),
-                stream["href"],
+                self.http.request("get", hls_url),
+                hls_url,
                 output=self.output,
                 authorization=f"MTG-AT {self.token}",
             )
