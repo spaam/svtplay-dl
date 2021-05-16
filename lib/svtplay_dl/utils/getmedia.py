@@ -210,7 +210,12 @@ def get_one_media(stream):
             write_nfo_tvshow(stream.output, stream.config)
             if stream.config.get("force_nfo"):
                 return
-        fstream = select_quality(stream.config, videos)
+        try:
+            fstream = select_quality(stream.config, videos)
+        except UIException as e:
+            logging.error(e)
+            return
+
         if fstream.config.get("get_url"):
             print(fstream.url)
             return

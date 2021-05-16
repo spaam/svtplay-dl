@@ -11,14 +11,8 @@ class Raw(Service):
         filename = os.path.basename(self.url[: self.url.rfind("/")])
         self.output["title"] = filename
 
-        streams = []
         if re.search(".m3u8", self.url):
-            streams.append(hlsparse(self.config, self.http.request("get", self.url), self.url, output=self.output))
+            yield from hlsparse(self.config, self.http.request("get", self.url), self.url, output=self.output)
 
         if re.search(".mpd", self.url):
-            streams.append(dashparse(self.config, self.http.request("get", self.url), self.url, output=self.output))
-
-        for stream in streams:
-            if stream:
-                for n in list(stream.keys()):
-                    yield stream[n]
+            yield from dashparse(self.config, self.http.request("get", self.url), self.url, output=self.output)

@@ -23,18 +23,13 @@ class Lemonwhale(Service):
         data = self.http.request("get", url).text
         jdata = json.loads(data)
         if "videos" in jdata:
-            streams = self.get_video(jdata)
-            if streams:
-                for n in list(streams.keys()):
-                    yield streams[n]
+            yield from self.get_video(jdata)
 
         url = f"http://ljsp.lwcdn.com/web/public/video.json?id={decode_html_entities(vid)}&delivery=hls"
         data = self.http.request("get", url).text
         jdata = json.loads(data)
         if "videos" in jdata:
-            streams = self.get_video(jdata)
-            for n in list(streams.keys()):
-                yield streams[n]
+            yield from self.get_video(jdata)
 
     def get_vid(self):
         match = re.search(r'video url-([^"]+)', self.get_urldata())
@@ -57,5 +52,4 @@ class Lemonwhale(Service):
         for i in videos:
             if i["name"] == "auto":
                 hls = "{}{}".format(janson["videos"][0]["media"]["base"], i["url"])
-        streams = hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)
-        return streams
+        yield from hlsparse(self.config, self.http.request("get", hls), hls, output=self.output)

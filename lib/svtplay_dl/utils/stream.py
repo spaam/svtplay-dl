@@ -1,5 +1,6 @@
 import logging
 from operator import itemgetter
+from typing import List
 
 from svtplay_dl import error
 from svtplay_dl.utils.http import HTTP
@@ -11,22 +12,22 @@ LIVE_PROTOCOL_PRIO = ["hls", "dash", "http"]
 DEFAULT_FORMAT_PRIO = ["h264", "h264-51"]
 
 
-def sort_quality(data):
+def sort_quality(data) -> List:
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
     for i in data:
-        datas.append([i.bitrate, i.name, i.format, i.resolution])
+        datas.append([i.bitrate, i.name, i.format, i.resolution, i.language, i.audio_role])
     return datas
 
 
 def list_quality(videos):
     data = sort_quality(videos)
-    logging.info("Quality\tMethod\tCodec\tResolution")
+    logging.info("Quality\tMethod\tCodec\tResolution\tlang\trole")
     for i in data:
-        logging.info("%s\t%s\t%s\t%s", i[0], i[1].upper(), i[2].upper(), i[3])
+        logging.info("%s\t%s\t%s\t%s\t%s\t%s", i[0], i[1].upper(), i[2].upper(), i[3], i[4], i[5])
 
 
-def protocol_prio(streams, priolist):
+def protocol_prio(streams, priolist) -> List:
     """
     Given a list of VideoRetriever objects and a prioritized list of
     accepted protocols (as strings) (highest priority first), return
@@ -43,9 +44,30 @@ def protocol_prio(streams, priolist):
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
-def format_prio(streams, priolist):
+def format_prio(streams, priolist) -> List:
     logging.debug("Format priority: %s", str(priolist))
     prioritized = [s for s in streams if s.format in priolist]
+    return prioritized
+
+
+def language_prio(config, streams) -> List:
+    if config.get("audio_language"):
+        language = config.get("audio_language")
+    else:
+        return streams
+    prioritized = [s for s in streams if s.language == language]
+    return prioritized
+
+
+def audio_role(config, streams) -> List:
+    if config.get("audio_role"):
+        role = config.get("audio_role")
+    elif config.get("audio_role") is None and config.get("audio_language"):
+        return streams
+    else:
+        role = "main"
+
+    prioritized = [s for s in streams if s.audio_role == role]
     return prioritized
 
 
@@ -79,6 +101,14 @@ def select_quality(config, streams):
     else:
         form_prio = DEFAULT_FORMAT_PRIO
     streams = format_prio(streams, form_prio)
+
+    streams = audio_role(config, streams)
+    if not streams:
+        raise error.UIException(f"Can't find any streams with that audio role {config.get('audio_role')}")
+
+    streams = language_prio(config, streams)
+    if not streams:
+        raise error.UIException(f"Can't find any streams with that audio language {config.get('audio_language')}")
 
     # Extract protocol prio, in the form of "hls,http",
     # we want it as a list

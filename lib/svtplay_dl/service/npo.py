@@ -61,15 +61,8 @@ class Npo(Service):
 
         # Get sub api and streams
         for item in janson["items"][0]:
-            stream = None
-
             if item["format"] == "hls":
                 api = self.http.request("get", item["url"]).text
                 raw_url = re.search(r'"url":"(.+?)"', api).group(1)
                 url = json.loads(f'"{raw_url}"')
-
-                stream = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-
-            if stream:
-                for key in list(stream.keys()):
-                    yield stream[key]
+                yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)

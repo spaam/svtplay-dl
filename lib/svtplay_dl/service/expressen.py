@@ -23,6 +23,4 @@ class Expressen(Service):
         janson = json.loads(data)
         self.config.set("live", janson["isLive"])
 
-        streams = hlsparse(self.config, self.http.request("get", janson["stream"]), janson["stream"], output=self.output)
-        for n in list(streams.keys()):
-            yield streams[n]
+        yield from hlsparse(self.config, self.http.request("get", janson["stream"]), janson["stream"], output=self.output)

@@ -28,13 +28,11 @@ class Vg(Service, OpenGraphThumbMixin):
         self.output["title"] = jsondata["title"]
 
         if "hls" in jsondata["streamUrls"]:
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.request("get", jsondata["streamUrls"]["hls"]),
                 jsondata["streamUrls"]["hls"],
                 output=self.output,
             )
-            for n in list(streams.keys()):
-                yield streams[n]
         if "mp4" in jsondata["streamUrls"]:
             yield HTTP(copy.copy(self.config), jsondata["streamUrls"]["mp4"], output=self.output)

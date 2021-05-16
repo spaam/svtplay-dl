@@ -114,6 +114,4 @@ class Eurosport(Service):
             res = self.http.get(url, headers={"authorization": access_token, "Accept": "application/vnd.media-service+json; version=1"})
             hls_url = res.json()["stream"]["complete"]
 
-        streams = hlsparse(self.config, self.http.request("get", hls_url), hls_url, authorization=access_token, output=self.output)
-        for n in list(streams.keys()):
-            yield streams[n]
+        yield from hlsparse(self.config, self.http.request("get", hls_url), hls_url, authorization=access_token, output=self.output)

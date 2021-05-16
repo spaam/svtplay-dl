@@ -52,26 +52,17 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             parse = urlparse(i["url"])
             query = parse_qs(parse.query)
             if i["format"] == "hls" or i["format"] == "ios":
-                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                        yield from hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
             if i["format"] == "dash264" or i["format"] == "dashhbbtv":
-                streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
-
+                yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 if "alt" in query and len(query["alt"]) > 0:
                     alt = self.http.get(query["alt"][0])
                     if alt:
-                        streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                        yield from dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, output=self.output)
 
     def find_video_id(self):
         match = re.search('data-video-id="([^"]+)"', self.get_urldata())

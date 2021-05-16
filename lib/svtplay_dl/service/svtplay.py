@@ -106,27 +106,10 @@ class Svtplay(Service, MetadataThumbMixin):
                 return
 
             for i in janson["videoReferences"]:
-                streams = None
-                alt_streams = None
-                alt = None
-                query = parse_qs(urlparse(i["url"]).query)
-                if "alt" in query and len(query["alt"]) > 0:
-                    alt = self.http.get(query["alt"][0])
                 if i["url"].find(".m3u8") > 0:
-                    streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
-                    if alt:
-                        alt_streams = hlsparse(self.config, self.http.request("get", alt.request.url), alt.request.url, self.output)
+                    yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
                 elif i["url"].find(".mpd") > 0:
-                    streams = dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                    if alt:
-                        alt_streams = dashparse(self.config, self.http.request("get", alt.request.url), alt.request.url, self.output)
-
-                if streams:
-                    for n in list(streams.keys()):
-                        yield streams[n]
-                if alt_streams:
-                    for n in list(alt_streams.keys()):
-                        yield alt_streams[n]
+                    yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
 
     def _last_chance(self):
         videos = []

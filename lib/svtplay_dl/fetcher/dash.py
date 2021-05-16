@@ -114,14 +114,16 @@ def templateelemt(attributes, element, filename, idnumber):
 
 
 def adaptionset(attributes, elements, url, baseurl=None):
-    streams = {}
+    streams = []
 
     dirname = os.path.dirname(url) + "/"
     if baseurl:
         dirname = urljoin(dirname, baseurl)
     for element in elements:
+        role = "main"
         template = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
         represtation = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
+        role_elemets = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Role")
 
         codecs = None
         if "codecs" in element.attrib:
@@ -129,6 +131,8 @@ def adaptionset(attributes, elements, url, baseurl=None):
         lang = None
         if "lang" in element.attrib:
             lang = element.attrib["lang"]
+        if role_elemets:
+            role = role_elemets[0].attrib["value"]
 
         resolution = None
         if "maxWidth" in element.attrib and "maxHeight" in element.attrib:
@@ -182,36 +186,36 @@ def adaptionset(attributes, elements, url, baseurl=None):
                 files.append(filename)
 
             if files:
-                streams[bitrate] = {
-                    "segments": segments,
-                    "files": files,
-                    "codecs": codec,
-                    "channels": channels,
-                    "lang": lang,
-                    "mimetype": mimetype,
-                    "resolution": resolution,
-                }
+                streams.append(
+                    {
+                        "bitrate": bitrate,
+                        "segments": segments,
+                        "files": files,
+                        "codecs": codec,
+                        "channels": channels,
+                        "lang": lang,
+                        "mimetype": mimetype,
+                        "resolution": resolution,
+                        "role": role,
+                    },
+                )
 
     return streams
 
 
 def dashparse(config, res, url, output, **kwargs):
-    streams = {}
     if not res:
-        return streams
+        return
 
     if res.status_code >= 400:
-        streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}")
-        return streams
+        yield ServiceError(f"Can't read DASH playlist. {res.status_code}")
     if len(res.text) < 1:
-        streams[0] = ServiceError(f"Can't read DASH playlist. {res.status_code}, size: {len(res.text)}")
-        return streams
+        yield ServiceError(f"Can't read DASH playlist. {res.status_code}, size: {len(res.text)}")
 
-    return _dashparse(config, res.text, url, output, cookies=res.cookies, **kwargs)
+    yield from _dashparse(config, res.text, url, output, cookies=res.cookies, **kwargs)
 
 
 def _dashparse(config, text, url, output, cookies, **kwargs):
-    streams = {}
     baseurl = None
     loutput = copy.copy(output)
     loutput["ext"] = "mp4"
@@ -246,38 +250,37 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
     subtitles = adaptionset(attributes, temp, url, baseurl)
 
     if not audiofiles or not videofiles:
-        streams[0] = ServiceError("Found no Audiofiles or Videofiles to download.")
-        return streams
+        yield ServiceError("Found no Audiofiles or Videofiles to download.")
+        return
     if "channels" in kwargs:
         kwargs.pop("channels")
     if "codec" in kwargs:
         kwargs.pop("codec")
-    for i in videofiles.keys():
-        bitrate = i + list(audiofiles.keys())[0]
-        streams[bitrate] = DASH(
-            copy.copy(config),
-            url,
-            bitrate,
-            cookies=cookies,
-            audio=audiofiles[list(audiofiles.keys())[0]]["files"],
-            files=videofiles[i]["files"],
-            output=loutput,
-            segments=videofiles[i]["segments"],
-            codec=videofiles[i]["codecs"],
-            channels=audiofiles[list(audiofiles.keys())[0]]["channels"],
-            resolution=videofiles[i]["resolution"],
-            **kwargs,
-        )
-    for i in subtitles.keys():
-        if subtitles[i]["codecs"] == "stpp":
-            streams[i] = subtitle(
-                copy.copy(config), "stpp", url, subtitles[i]["lang"], output=copy.copy(loutput), files=subtitles[i]["files"], **kwargs
+
+    for video in videofiles:
+        for audio in audiofiles:
+            bitrate = video["bitrate"] + audio["bitrate"]
+            yield DASH(
+                copy.copy(config),
+                url,
+                bitrate,
+                cookies=cookies,
+                audio=audio["files"],
+                files=video["files"],
+                output=loutput,
+                segments=video["segments"],
+                codec=video["codecs"],
+                channels=audio["channels"],
+                resolution=video["resolution"],
+                language=audio["lang"],
+                role=audio["role"],
+                **kwargs,
             )
+    for i in subtitles:
+        if i["codecs"] == "stpp":
+            yield subtitle(copy.copy(config), "stpp", url, i["lang"], output=copy.copy(loutput), files=i["files"], **kwargs)
         if subtitles[i]["mimetype"] == "text/vtt":
-            streams[i] = subtitle(
-                copy.copy(config), "webvtt", url, subtitles[i]["lang"], output=copy.copy(loutput), files=subtitles[i]["files"], **kwargs
-            )
-    return streams
+            yield subtitle(copy.copy(config), "webvtt", url, i["lang"], output=copy.copy(loutput), files=i["files"], **kwargs)
 
 
 def parse_duration(duration):

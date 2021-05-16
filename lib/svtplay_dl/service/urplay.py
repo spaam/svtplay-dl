@@ -41,14 +41,10 @@ class Urplay(Service, OpenGraphThumbMixin):
             if streaminfo == "raw":
                 if "sd" in stream:
                     url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
-                    streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
                 if "hd" in stream:
                     url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["hd"]["location"])
-                    streams = hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                    for n in list(streams.keys()):
-                        yield streams[n]
+                    yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
             if not (self.config.get("get_all_subtitles")) and streaminfo == "sweComplete":
                 yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), output=self.output)
 

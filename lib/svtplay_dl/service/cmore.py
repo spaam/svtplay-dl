@@ -47,14 +47,12 @@ class Cmore(Service):
             return
 
         if res.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
                 res.json()["playbackItem"]["manifestUrl"],
                 output=self.output,
             )
-            for n in list(streams.keys()):
-                yield streams[n]
 
     def find_all_episodes(self, config):
         episodes = []

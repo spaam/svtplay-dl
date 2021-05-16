@@ -83,6 +83,4 @@ class Disney(Service, OpenGraphThumbMixin):
                 "?ks={}&referrer=aHR0cDovL3d3dy5kaXNuZXkuc2U=&".format(partnerid[1:], partnerid[1:], entryid, ks)
             )
             redirect = self.http.check_redirect(url)
-            streams = hlsparse(self.config, self.http.request("get", redirect), redirect, output=self.output)
-            for n in list(streams.keys()):
-                yield streams[n]
+            yield from hlsparse(self.config, self.http.request("get", redirect), redirect, output=self.output)

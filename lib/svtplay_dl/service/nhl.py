@@ -25,9 +25,7 @@ class NHL(Service, OpenGraphThumbMixin):
             for i in janson["metaData"]["playbacks"]:
                 if "CLOUD" in i["name"]:
                     streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"])
-                    if streams:
-                        for n in list(streams.keys()):
-                            yield streams[n]
+                    yield from streams
         else:
             match = re.search(r"var mediaConfig\s+= ({[^;]+);", self.get_urldata())
             if not match:
@@ -47,6 +45,4 @@ class NHL(Service, OpenGraphThumbMixin):
             res = self.http.get(url)
             janson = res.json()
             for i in janson["user_verified_event"][0]["user_verified_content"][0]["user_verified_media_item"]:
-                streams = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)

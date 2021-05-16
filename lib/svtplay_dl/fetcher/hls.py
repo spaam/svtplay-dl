@@ -3,7 +3,6 @@
 import binascii
 import copy
 import os
-import random
 import re
 import time
 from datetime import datetime
@@ -36,14 +35,12 @@ class LiveHLSException(HLSException):
 
 
 def hlsparse(config, res, url, output, **kwargs):
-    streams = {}
-
     if not res:
-        return streams
+        return
 
     if res.status_code > 400:
-        streams[0] = ServiceError(f"Can't read HLS playlist. {res.status_code}")
-        return streams
+        yield ServiceError(f"Can't read HLS playlist. {res.status_code}")
+        return
     m3u8 = M3U8(res.text)
 
     keycookie = kwargs.pop("keycookie", None)
@@ -62,6 +59,7 @@ def hlsparse(config, res, url, output, **kwargs):
             audio_url = None
             vcodec = None
             chans = None
+            language = ""
             resolution = ""
             if i["TAG"] == "EXT-X-MEDIA":
                 if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
@@ -74,7 +72,9 @@ def hlsparse(config, res, url, output, **kwargs):
                             if "CHANNELS" in i:
                                 if i["CHANNELS"] == "6":
                                     chans = "51"
-                            media[i["GROUP-ID"]].append([i["URI"], chans])
+                            if "LANGUAGE" in i:
+                                language = i["LANGUAGE"]
+                            media[i["GROUP-ID"]].append([i["URI"], chans, language])
                         else:
                             segments = False
                 if i["TYPE"] == "SUBTITLES":
@@ -99,6 +99,7 @@ def hlsparse(config, res, url, output, **kwargs):
                         vcodec = "h264"
                 if "AUDIO" in i and (i["AUDIO"] in media):
                     chans = media[i["AUDIO"]][0][1]
+                    language = media[i["AUDIO"]][0][2]
                     audio_url = get_full_url(media[i["AUDIO"]][0][0], url)
                 urls = get_full_url(i["URI"], url)
             else:
@@ -106,7 +107,7 @@ def hlsparse(config, res, url, output, **kwargs):
             chans = chans if audio_url else channels
             codec = vcodec if vcodec else codec
 
-            streams[int(bit_rate)] = HLS(
+            yield HLS(
                 copy.copy(config),
                 urls,
                 bit_rate,
@@ -119,6 +120,7 @@ def hlsparse(config, res, url, output, **kwargs):
                 channels=chans,
                 codec=codec,
                 resolution=resolution,
+                language=language,
                 **kwargs,
             )
 
@@ -130,7 +132,7 @@ def hlsparse(config, res, url, output, **kwargs):
                         subtype = "wrstsegment"  # this have been seen in tv4play
                     else:
                         subtype = "wrst"
-                    streams[int(random.randint(1, 40))] = subtitle(
+                    yield subtitle(
                         copy.copy(config),
                         subtype,
                         get_full_url(m3u8s.media_segment[0]["URI"], url),
@@ -141,7 +143,7 @@ def hlsparse(config, res, url, output, **kwargs):
 
     elif m3u8.media_segment:
         config.set("segments", False)
-        streams[0] = HLS(
+        yield HLS(
             copy.copy(config),
             url,
             0,
@@ -153,9 +155,7 @@ def hlsparse(config, res, url, output, **kwargs):
         )
 
     else:
-        streams[0] = ServiceError("Can't find HLS playlist in m3u8 file.")
-
-    return streams
+        yield ServiceError("Can't find HLS playlist in m3u8 file.")
 
 
 class HLS(VideoRetriever):

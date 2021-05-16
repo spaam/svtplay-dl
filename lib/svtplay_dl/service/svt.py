@@ -36,5 +36,4 @@ class Svt(Svtplay):
                 if i["format"] == "websrt" and "url" in i:
                     yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
 
-        videos = self._get_video(janson)
-        yield from videos
+        yield from self._get_video(janson)

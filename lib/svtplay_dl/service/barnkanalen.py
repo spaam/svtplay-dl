@@ -71,8 +71,7 @@ class Barnkanalen(Svtplay):
         self.output["episodename"] = episodename
         res = self.http.get(f"https://api.svt.se/video/{vid}")
         janson = res.json()
-        videos = self._get_video(janson)
-        yield from videos
+        yield from self._get_video(janson)
 
     def find_all_episodes(self, config):
         data = self.get_urldata()

@@ -55,13 +55,9 @@ class Solidtango(Service):
         match = re.search('html5_source: "([^"]+)"', data)
         match2 = re.search('hlsURI: "([^"]+)"', data)
         if match:
-            streams = hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)
-            for n in list(streams.keys()):
-                yield streams[n]
+            yield from hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)
         elif match2:
-            streams = hlsparse(self.config, self.http.request("get", match2.group(1)), match2.group(1), output=self.output)
-            for n in list(streams.keys()):
-                yield streams[n]
+            yield from hlsparse(self.config, self.http.request("get", match2.group(1)), match2.group(1), output=self.output)
         else:
             parse = urlparse(self.url)
             url2 = "https://{}/api/v1/play/{}.xml".format(parse.netloc, parse.path[parse.path.rfind("/") + 1 :])
@@ -72,6 +68,4 @@ class Solidtango(Service):
             xmldoc = data.text
             xml = ET.XML(xmldoc)
             elements = xml.findall(".//manifest")
-            streams = hlsparse(self.config, self.http.request("get", elements[0].text), elements[0].text, output=self.output)
-            for n in list(streams.keys()):
-                yield streams[n]
+            yield from hlsparse(self.config, self.http.request("get", elements[0].text), elements[0].text, output=self.output)

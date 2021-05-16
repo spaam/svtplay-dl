@@ -78,15 +78,14 @@ class Viafree(Service, OpenGraphThumbMixin):
         stream = janson["embedded"]["prioritizedStreams"][0]["links"]["stream"]
 
         if video["_embedded"]["program"]["_links"]["streamLink"]:
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.request("get", stream["href"]),
                 stream["href"],
                 output=self.output,
                 authorization=f"MTG-AT {self.token}",
             )
-            for n in list(streams.keys()):
-                yield streams[n]
+
         if "subtitles" in janson["embedded"] and len(janson["embedded"]["subtitles"]) > 0:
             lang = re.search(r"(\.\w\w)$", urlparse(self.url).netloc).group(1)
             if lang in country:

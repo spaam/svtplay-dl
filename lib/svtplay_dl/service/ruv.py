@@ -24,9 +24,7 @@ class Ruv(Service):
             if match:
                 janson = json.loads(match.group(1))
                 self.config.get("live", checklive(janson["result"][1]))
-                streams = hlsparse(self.config, self.http.request("get", janson["result"][1]), janson["result"][1], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                yield from hlsparse(self.config, self.http.request("get", janson["result"][1]), janson["result"][1], output=self.output)
             else:
                 yield ServiceError("Can't find json info")
         else:

@@ -72,6 +72,4 @@ class Sportlib(Service, OpenGraphThumbMixin):
         postjson = {"name": cookiename, "value": token}
         res = self.http.post("https://playlist.oz.com/cookie", json=postjson)
         cookies = res.cookies
-        streams = hlsparse(self.config, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies, output=self.output)
-        for n in list(streams.keys()):
-            yield streams[n]
+        yield from hlsparse(self.config, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies, output=self.output)

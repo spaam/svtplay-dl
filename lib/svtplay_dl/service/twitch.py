@@ -77,10 +77,7 @@ class Twitch(Service):
 
         url = f"http://usher.twitch.tv/vod/{videoid}?nauth={nauth}&nauthsig={authsig}"
 
-        streams = hlsparse(copy.copy(self.config), self.http.request("get", url), url, output=self.output)
-        if streams:
-            for n in list(streams.keys()):
-                yield streams[n]
+        yield from hlsparse(copy.copy(self.config), self.http.request("get", url), url, output=self.output)
 
     def _get_archive(self, vid):
         try:
@@ -140,9 +137,7 @@ class Twitch(Service):
         if data.status_code == 404:
             yield ServiceError("Stream is not online.")
             return
-        streams = hlsparse(self.output, data, hls_url, output=self.output)
-        for n in list(streams.keys()):
-            yield streams[n]
+        yield from hlsparse(self.output, data, hls_url, output=self.output)
 
     def _get_clips(self):
         match = re.search(r"quality_options: (\[[^\]]+\])", self.get_urldata())

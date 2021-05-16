@@ -66,14 +66,12 @@ class Koket(Service, OpenGraphThumbMixin):
 
         videoDataRes = self.http.get(url)
         if videoDataRes.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.get(videoDataRes.json()["playbackItem"]["manifestUrl"]),
                 videoDataRes.json()["playbackItem"]["manifestUrl"],
                 output=self.output,
             )
-            for n in list(streams.keys()):
-                yield streams[n]
 
     def _login(self):
         if self._getAuthToken() is None:

@@ -18,31 +18,31 @@ def parse(playlist):
 
 class dashtest(unittest.TestCase):
     def test_parse_cmore(self):
-        data = parse("cmore.mpd")
+        data = yield from parse("cmore.mpd")
         assert len(data[3261.367].files) == 410
         assert len(data[3261.367].audio) == 615
         assert data[3261.367].segments
 
     def test_parse_fff(self):
-        data = parse("fff.mpd")
+        data = yield from parse("fff.mpd")
         assert len(data[3187.187].files) == 578
         assert len(data[3187.187].audio) == 577
         assert data[3187.187].segments
 
     def test_parse_nya(self):
-        data = parse("svtvod.mpd")
+        data = yield from parse("svtvod.mpd")
         assert len(data[2793.0].files) == 350
         assert len(data[2793.0].audio) == 350
         assert data[2793.0].segments
 
     def test_parse_live(self):
-        data = parse("svtplay-live.mpd")
+        data = yield from parse("svtplay-live.mpd")
         assert len(data[2795.9959999999996].files) == 6
         assert len(data[2795.9959999999996].audio) == 6
         assert data[2795.9959999999996].segments
 
     def test_parse_live2(self):
-        data = parse("svtplay-live2.mpd")
+        data = yield from parse("svtplay-live2.mpd")
         assert len(data[2892.0].files) == 11
         assert len(data[2892.0].audio) == 11
         assert data[2892.0].segments

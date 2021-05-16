@@ -71,15 +71,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't play this because the video is geoblocked or not available.")
             return
         if res.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
                 res.json()["playbackItem"]["manifestUrl"],
                 output=self.output,
                 httpobject=self.http,
             )
-            for n in list(streams.keys()):
-                yield streams[n]
 
     def _getjson(self):
         match = re.search(r"application\/json\">(.*\})<\/script><script", self.get_urldata())
@@ -213,11 +211,9 @@ class Tv4(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
         if res.json()["playbackItem"]["type"] == "hls":
-            streams = hlsparse(
+            yield from hlsparse(
                 self.config,
                 self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
                 res.json()["playbackItem"]["manifestUrl"],
                 output=self.output,
             )
-            for n in list(streams.keys()):
-                yield streams[n]

@@ -192,6 +192,18 @@ def gen_parser(version="unknown"):
         metavar="h264,h264-51",
         help="Choose the format you prefer, --list-quality to show which one to choose from",
     )
+    quality.add_argument(
+        "--audio-language",
+        dest="audio_language",
+        default=None,
+        help="Choose the language of the audio (it can override the default one), --list-quality to show which one to choose from",
+    )
+    quality.add_argument(
+        "--audio-role",
+        dest="audio_role",
+        default=None,
+        help="Choose the role of the audio (it can override the default one), --list-quality to show which one to choose from",
+    )
 
     subtitle = parser.add_argument_group("Subtitle")
     subtitle.add_argument(
@@ -306,6 +318,8 @@ def setup_defaults():
     options.set("ssl_verify", True)
     options.set("http_headers", None)
     options.set("format_preferred", None)
+    options.set("audio_language", None)
+    options.set("audio_role", None)
     options.set("stream_prio", None)
     options.set("remux", False)
     options.set("silent_semi", False)
@@ -352,6 +366,8 @@ def parsertoconfig(config, parser):
     config.set("http_headers", parser.http_headers)
     config.set("cookies", parser.cookies)
     config.set("format_preferred", parser.format_preferred)
+    config.set("audio_role", parser.audio_role)
+    config.set("audio_language", parser.audio_language)
     config.set("stream_prio", parser.stream_prio)
     config.set("remux", parser.remux)
     config.set("get_all_subtitles", parser.get_all_subtitles)

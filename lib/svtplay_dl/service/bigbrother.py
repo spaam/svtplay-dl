@@ -59,9 +59,7 @@ class Bigbrother(Service, OpenGraphThumbMixin):
 
         for i in renditions:
             if i["defaultURL"].endswith("m3u8"):
-                streams = hlsparse(self.config, self.http.request("get", i["defaultURL"]), i["defaultURL"], output=self.output)
-                for n in list(streams.keys()):
-                    yield streams[n]
+                yield from hlsparse(self.config, self.http.request("get", i["defaultURL"]), i["defaultURL"], output=self.output)
 
             if i["defaultURL"].endswith("mp4"):
                 yield HTTP(copy.copy(self.config), i["defaultURL"], i["encodingRate"] / 1024, output=self.output)
