@@ -134,7 +134,7 @@ def adaptionset(attributes, elements, url, baseurl=None):
         if role_elemets:
             role = role_elemets[0].attrib["value"]
 
-        resolution = None
+        resolution = ""
         if "maxWidth" in element.attrib and "maxHeight" in element.attrib:
             resolution = f'{element.attrib["maxWidth"]}x{element.attrib["maxHeight"]}'
 
@@ -163,7 +163,9 @@ def adaptionset(attributes, elements, url, baseurl=None):
             else:
                 codec = codecs
             if not resolution and "maxWidth" in i.attrib and "maxHeight" in i.attrib:
-                resolution = f'{element.attrib["maxWidth"]}x{element.attrib["maxHeight"]}'
+                resolution = f'{i.attrib["maxWidth"]}x{i.attrib["maxHeight"]}'
+            elif not resolution and "width" in i.attrib and "height" in i.attrib:
+                resolution = f'{i.attrib["width"]}x{i.attrib["height"]}'
             if i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration") is not None:
                 chan = i.find("{urn:mpeg:dash:schema:mpd:2011}AudioChannelConfiguration").attrib["value"]
                 if chan == "6":
@@ -199,7 +201,7 @@ def adaptionset(attributes, elements, url, baseurl=None):
                         "role": role,
                     },
                 )
-
+            resolution = ""
     return streams
 
 
