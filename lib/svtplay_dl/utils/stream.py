@@ -25,7 +25,7 @@ def list_quality(videos):
     data.extend(sort_quality(videos))
     for i in range(len(data)):
         logging.info(
-            f"{str(data[i][0]):<10s} {data[i][1].upper():<10s} {data[i][2]:<10s} {data[i][3]:<15s} {data[i][4]:<20s} {data[i][5]:<20s}",
+            f"{str(data[i][0]):<10s} {data[i][1].upper():<8s} {data[i][2]:<8s} {data[i][3]:<12s} {data[i][4]:<20s} {data[i][5]:<20s}",
         )
 
 
