@@ -99,15 +99,15 @@ class Discoveryplus(Service):
             httpobject=self.http,
             output=self.output,
         )
-        for n in list(streams.keys()):
-            if isinstance(streams[n], subtitle):  # we get the subtitles from the hls playlist.
+        for stream in streams:
+            if isinstance(stream, subtitle):  # we get the subtitles from the hls playlist.
                 if self.config.get("get_all_subtitles"):
-                    yield streams[n]
+                    yield stream
                 else:
-                    if streams[n].subfix in country and country[streams[n].subfix] in self.domain:
-                        yield streams[n]
+                    if stream.subfix in country and country[stream.subfix] in self.domain:
+                        yield stream
             else:
-                yield streams[n]
+                yield stream
 
     def _autoname(self, jsondata):
         match = re.search("^([^/]+)/", jsondata["data"]["attributes"]["path"])
