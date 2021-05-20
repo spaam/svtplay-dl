@@ -98,7 +98,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if i["format"] == "webvtt" and "url" in i:
-                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
+                    yield subtitle(copy.copy(self.config), "wrst", i["url"], "sv", output=self.output)
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:
