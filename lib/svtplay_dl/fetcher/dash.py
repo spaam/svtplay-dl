@@ -278,7 +278,7 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
         if sub["codecs"] == "stpp":
             yield subtitle(copy.copy(config), "stpp", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
         if sub["mimetype"] == "text/vtt":
-            yield subtitle(copy.copy(config), "webvtt", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
+            yield subtitle(copy.copy(config), "wrst", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
 
 
 def parse_duration(duration):
