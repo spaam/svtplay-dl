@@ -20,6 +20,7 @@ from svtplay_dl.utils.output import find_dupes
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.stream import list_quality
 from svtplay_dl.utils.stream import select_quality
+from svtplay_dl.utils.stream import subtitle_decider
 from svtplay_dl.utils.text import exclude
 
 
@@ -104,7 +105,7 @@ def get_one_media(stream):
             sys.exit(2)
 
     videos = []
-    subs = []
+    subtitles = []
     subfixes = []
     error = []
     streams = stream.get()
@@ -120,7 +121,7 @@ def get_one_media(stream):
                     else:
                         videos.append(i)
                 if isinstance(i, subtitle):
-                    subs.append(i)
+                    subtitles.append(i)
     except Exception:
         if stream.config.get("verbose"):
             raise
@@ -151,44 +152,15 @@ def get_one_media(stream):
         )
         return
 
-    if stream.config.get("require_subtitle") and not subs:
+    if stream.config.get("require_subtitle") and not subtitles:
         logging.info("No subtitles available")
         return
 
-    if stream.config.get("subtitle") and stream.config.get("get_url"):
-        if subs:
-            if stream.config.get("get_all_subtitles"):
-                for sub in subs:
-                    print(sub.url)
-            else:
-                print(subs[0].url)
+    if not stream.config.get("list_quality"):
+        subtitle_decider(stream, subtitles)
         if stream.config.get("force_subtitle"):
             return
 
-    def options_subs_dl(subfixes):
-        if subs:
-            if stream.config.get("get_all_subtitles"):
-                for sub in subs:
-                    sub.download()
-                    if stream.config.get("merge_subtitle"):
-                        if sub.subfix:
-                            subfixes += [sub.subfix]
-                        else:
-                            stream.config.set("get_all_subtitles", False)
-            else:
-                subs[0].download()
-        elif stream.config.get("merge_subtitle"):
-            stream.config.set("merge_subtitle", False)
-
-    if stream.config.get("subtitle") and not stream.config.get("get_url"):
-        options_subs_dl(subfixes)
-        if stream.config.get("force_subtitle"):
-            if not subs:
-                logging.info("No subtitles available")
-            return
-
-    if stream.config.get("merge_subtitle") and not stream.config.get("subtitle"):
-        options_subs_dl(subfixes)
     if not videos:
         errormsg = None
         for exc in error:

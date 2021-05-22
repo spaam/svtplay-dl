@@ -73,6 +73,44 @@ def audio_role(config, streams) -> List:
     return prioritized
 
 
+def subtitle_filter(subtitles) -> List:
+    languages = []
+    subs = []
+    preferred = subtitles[0].config.get("subtitle_preferred")
+    all_subs = subtitles[0].config.get("get_all_subtitles")
+
+    for sub in subtitles:
+        if sub.subfix not in languages:
+            if not all_subs and sub.subfix == preferred:
+                subs.append(sub)
+                languages.append(sub.subfix)
+            else:
+                subs.append(sub)
+                languages.append(sub.subfix)
+    return subs
+
+
+def subtitle_decider(stream, subtitles):
+    if subtitles and (stream.config.get("merge_subtitle") or stream.config.get("subtitle")):
+        subtitles = subtitle_filter(subtitles)
+        if stream.config.get("get_all_subtitles"):
+            for sub in subtitles:
+                if stream.config.get("get_url"):
+                    print(sub.url)
+                else:
+                    sub.download()
+                if stream.config.get("merge_subtitle"):
+                    if not sub.subfix:
+                        stream.config.set("get_all_subtitles", False)
+        else:
+            if stream.config.get("get_url"):
+                print(subtitles[0].url)
+            else:
+                subtitles[0].download()
+    elif stream.config.get("merge_subtitle"):
+        stream.config.set("merge_subtitle", False)
+
+
 def select_quality(config, streams):
     high = 0
     if isinstance(config.get("quality"), str):
