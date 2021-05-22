@@ -17,6 +17,7 @@ from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.http import get_full_url
+from svtplay_dl.utils.http import HTTP
 from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
@@ -154,12 +155,17 @@ def _hlsparse(config, text, url, output, **kwargs):
                     **kwargs,
                 )
 
-        if subtitles and httpobject:
+        if subtitles:
+            if httpobject:
+                http = httpobject
+            else:
+                http = HTTP(config)
+
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
-                    m3u8s = M3U8(httpobject.request("get", get_full_url(n[0], url), cookies=cookies).text)
-                    if "cmore" in url:
-                        subtype = "wrstsegment"  # this have been seen in tv4play
+                    m3u8s = M3U8(http.request("get", get_full_url(n[0], url), cookies=cookies).text)
+                    if "cmore" in url or "viaplay" in url:
+                        subtype = "wrstsegment"
                     else:
                         subtype = "wrst"
                     yield subtitle(
