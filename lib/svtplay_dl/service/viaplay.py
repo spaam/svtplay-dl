@@ -98,6 +98,7 @@ class Viafree(Service, OpenGraphThumbMixin):
                 language = country[lang]
             else:
                 language = None
+            self.config.set("subtitle_preferred", language)
 
             if not self.config.get("get_all_subtitles"):
                 if not language:
