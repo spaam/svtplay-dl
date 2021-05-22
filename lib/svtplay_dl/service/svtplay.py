@@ -200,7 +200,8 @@ class Svtplay(Service, MetadataThumbMixin):
             name = other
             other = None
         elif other is None:
-            other = data["moreDetails"]["titleHeading"]
+            if name != data["moreDetails"]["titleHeading"]:
+                other = data["moreDetails"]["titleHeading"]
 
         season, episode = self.seasoninfo(data)
         if "accessibility" in data:
