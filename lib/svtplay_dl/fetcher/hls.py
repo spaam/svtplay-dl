@@ -41,9 +41,14 @@ def hlsparse(config, res, url, output, **kwargs):
     if res.status_code > 400:
         yield ServiceError(f"Can't read HLS playlist. {res.status_code}")
         return
-    m3u8 = M3U8(res.text)
 
+    yield from _hlsparse(config, res.text, url, output, cookies=res.cookies, **kwargs)
+
+
+def _hlsparse(config, text, url, output, **kwargs):
+    m3u8 = M3U8(text)
     keycookie = kwargs.pop("keycookie", None)
+    cookies = kwargs.pop("cookies", None)
     authorization = kwargs.pop("authorization", None)
     httpobject = kwargs.pop("httpobject", None)
     loutput = copy.copy(output)
@@ -59,24 +64,28 @@ def hlsparse(config, res, url, output, **kwargs):
             audio_url = None
             vcodec = None
             chans = None
+            audio_group = None
             language = ""
             resolution = ""
             if i["TAG"] == "EXT-X-MEDIA":
-                if "AUTOSELECT" in i and (i["AUTOSELECT"].upper() == "YES"):
-                    if i["TYPE"] and i["TYPE"] != "SUBTITLES":
-                        if "URI" in i:
-                            if segments is None:
-                                segments = True
-                            if i["GROUP-ID"] not in media:
-                                media[i["GROUP-ID"]] = []
-                            if "CHANNELS" in i:
-                                if i["CHANNELS"] == "6":
-                                    chans = "51"
-                            if "LANGUAGE" in i:
-                                language = i["LANGUAGE"]
-                            media[i["GROUP-ID"]].append([i["URI"], chans, language])
+                if i["TYPE"] and i["TYPE"] != "SUBTITLES":
+                    if "URI" in i:
+                        if segments is None:
+                            segments = True
+                        if i["GROUP-ID"] not in media:
+                            media[i["GROUP-ID"]] = []
+                        if "CHANNELS" in i:
+                            if i["CHANNELS"] == "6":
+                                chans = "51"
+                        if "LANGUAGE" in i:
+                            language = i["LANGUAGE"]
+                        if "AUTOSELECT" in i and i["AUTOSELECT"].upper() == "YES":
+                            role = "main"
                         else:
-                            segments = False
+                            role = "alt"
+                        media[i["GROUP-ID"]].append([i["URI"], chans, language, role])
+                    else:
+                        segments = False
                 if i["TYPE"] == "SUBTITLES":
                     if "URI" in i:
                         if i["GROUP-ID"] not in subtitles:
@@ -98,36 +107,57 @@ def hlsparse(config, res, url, output, **kwargs):
                     if i["CODECS"][:3] == "avc":
                         vcodec = "h264"
                 if "AUDIO" in i and (i["AUDIO"] in media):
-                    chans = media[i["AUDIO"]][0][1]
-                    language = media[i["AUDIO"]][0][2]
-                    audio_url = get_full_url(media[i["AUDIO"]][0][0], url)
+                    audio_group = i["AUDIO"]
                 urls = get_full_url(i["URI"], url)
             else:
                 continue  # Needs to be changed to utilise other tags.
-            chans = chans if audio_url else channels
-            codec = vcodec if vcodec else codec
 
-            yield HLS(
-                copy.copy(config),
-                urls,
-                bit_rate,
-                cookies=res.cookies,
-                keycookie=keycookie,
-                authorization=authorization,
-                audio=audio_url,
-                output=loutput,
-                segments=bool(segments),
-                channels=chans,
-                codec=codec,
-                resolution=resolution,
-                language=language,
-                **kwargs,
-            )
+            if audio_group:
+                for group in media[audio_group]:
+                    audio_url = get_full_url(group[0], url)
+                    chans = group[1] if audio_url else channels
+                    codec = vcodec if vcodec else codec
+
+                    yield HLS(
+                        copy.copy(config),
+                        urls,
+                        bit_rate,
+                        cookies=cookies,
+                        keycookie=keycookie,
+                        authorization=authorization,
+                        audio=audio_url,
+                        output=loutput,
+                        segments=bool(segments),
+                        channels=chans,
+                        codec=codec,
+                        resolution=resolution,
+                        language=group[2],
+                        role=group[3],
+                        **kwargs,
+                    )
+            else:
+                chans = channels
+                codec = vcodec if vcodec else codec
+                yield HLS(
+                    copy.copy(config),
+                    urls,
+                    bit_rate,
+                    cookies=cookies,
+                    keycookie=keycookie,
+                    authorization=authorization,
+                    audio=audio_url,
+                    output=loutput,
+                    segments=bool(segments),
+                    channels=chans,
+                    codec=codec,
+                    resolution=resolution,
+                    **kwargs,
+                )
 
         if subtitles and httpobject:
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
-                    m3u8s = M3U8(httpobject.request("get", get_full_url(n[0], url), cookies=res.cookies).text)
+                    m3u8s = M3U8(httpobject.request("get", get_full_url(n[0], url), cookies=cookies).text)
                     if "cmore" in url:
                         subtype = "wrstsegment"  # this have been seen in tv4play
                     else:
@@ -147,13 +177,12 @@ def hlsparse(config, res, url, output, **kwargs):
             copy.copy(config),
             url,
             0,
-            cookies=res.cookies,
+            cookies=cookies,
             keycookie=keycookie,
             authorization=authorization,
             output=loutput,
             segments=False,
         )
-
     else:
         yield ServiceError("Can't find HLS playlist in m3u8 file.")
 
