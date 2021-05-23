@@ -52,6 +52,13 @@ def test_parse_live2():
     assert data[2892.0].segments
 
 
+def test_parse_live_vod():
+    data = parse("direct-live.mpd")
+    assert len(data[4720.0].files) == 4424
+    assert len(data[4720.0].audio) == 4424
+    assert data[4720.0].segments
+
+
 def test_parse_duration():
     assert parse_duration("PT3459.520S") == 3459.52
     assert parse_duration("PT2.00S") == 2.0

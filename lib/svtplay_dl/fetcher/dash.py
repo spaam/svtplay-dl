@@ -80,19 +80,23 @@ def templateelemt(attributes, element, filename, idnumber):
                 segments.append({"number": number, "duration": math.ceil(duration / attributes.get("timescale")), "time": t})
                 t += duration
                 number += 1
-    else:  # Saw this on dynamic live content
-        start = 0
-        now = time.time()
-        periodStartWC = time.mktime(attributes.get("availabilityStartTime").timetuple()) + start
-        periodEndWC = now + attributes.get("minimumUpdatePeriod")
-        periodDuration = periodEndWC - periodStartWC
-        segmentCount = math.ceil(periodDuration * attributes.get("timescale") / attributes.get("duration"))
-        availableStart = math.floor(
-            (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration"),
-        )
-        availableEnd = math.floor((now - periodStartWC) * attributes.get("timescale") / attributes.get("duration"))
-        start = max(0, availableStart)
-        end = min(segmentCount, availableEnd)
+    else:
+        if attributes.get("type") == "static":
+            end = math.ceil(attributes.get("mediaPresentationDuration") / (attributes.get("duration") / attributes.get("timescale")))
+        else:
+            # Saw this on dynamic live content
+            start = 0
+            now = time.time()
+            periodStartWC = time.mktime(attributes.get("availabilityStartTime").timetuple()) + start
+            periodEndWC = now + attributes.get("minimumUpdatePeriod")
+            periodDuration = periodEndWC - periodStartWC
+            segmentCount = math.ceil(periodDuration * attributes.get("timescale") / attributes.get("duration"))
+            availableStart = math.floor(
+                (now - periodStartWC - attributes.get("timeShiftBufferDepth")) * attributes.get("timescale") / attributes.get("duration"),
+            )
+            availableEnd = math.floor((now - periodStartWC) * attributes.get("timescale") / attributes.get("duration"))
+            start = max(0, availableStart)
+            end = min(segmentCount, availableEnd)
         for number in range(start, end):
             segments.append({"number": number, "duration": int(attributes.get("duration") / attributes.get("timescale"))})
 
