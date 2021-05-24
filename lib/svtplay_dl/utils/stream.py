@@ -81,12 +81,13 @@ def subtitle_filter(subtitles) -> List:
 
     for sub in subtitles:
         if sub.subfix not in languages:
-            if not all_subs and sub.subfix == preferred:
+            if all_subs:
                 subs.append(sub)
                 languages.append(sub.subfix)
             else:
-                subs.append(sub)
-                languages.append(sub.subfix)
+                if sub.subfix == preferred:
+                    subs.append(sub)
+                    languages.append(sub.subfix)
     return subs
 
 
