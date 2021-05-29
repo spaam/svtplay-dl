@@ -291,6 +291,8 @@ class subtitle:
                 cont.encoding = "utf-8"
             if "mtgx" in self.url:
                 cont.encoding = "utf-8"
+            if "viaplay" in self.url:
+                cont.encoding = "utf-8"
             text = cont.text.split("\n")
             for t in text:  # is in text[1] for tv4play, but this should be more future proof
                 if "X-TIMESTAMP-MAP=MPEGTS" in t:
