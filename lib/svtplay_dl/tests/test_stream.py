@@ -152,7 +152,7 @@ class streamSubtile(unittest.TestCase):
             subtitle(setup_defaults(), "wrst", "http://example.com", "sv"),
         ]
         subs = subtitle_filter(test_subs)
-        assert len(subs) == 1
+        assert len(subs) == 3
 
     def test_subtitleFilter2(self):
         config = setup_defaults()
