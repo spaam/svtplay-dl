@@ -1,9 +1,9 @@
 import logging
 import re
-from urllib.parse import urljoin
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import Service
 
@@ -46,27 +46,61 @@ class Cmore(Service):
             yield ServiceError("Can't play this because the video is geoblocked.")
             return
 
-        if res.json()["playbackItem"]["type"] == "hls":
+        jansson = res.json()
+        if jansson["playbackItem"]["type"] == "hls":
             yield from hlsparse(
                 self.config,
-                self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
-                res.json()["playbackItem"]["manifestUrl"],
+                self.http.request("get", jansson["playbackItem"]["manifestUrl"]),
+                jansson["playbackItem"]["manifestUrl"],
                 output=self.output,
+                httpobject=self.http,
+            )
+            yield from dashparse(
+                self.config,
+                self.http.request("get", jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd")),
+                jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd"),
+                output=self.output,
+                httpobject=self.http,
             )
 
     def find_all_episodes(self, config):
         episodes = []
+        seasons = []
 
         token, message = self._login()
         if not token:
             logging.error(message)
             return
-        res = self.http.get(self.url)
-        tags = re.findall('<a class="card__link" href="([^"]+)"', res.text)
-        for i in tags:
-            url = urljoin(f"https://www.cmore.{self._gettld()}/", i)
-            if url not in episodes:
-                episodes.append(url)
+
+        parse = urlparse(self.url)
+        url = f"https://www.cmore.{self._gettld()}/page-data{parse.path}/page-data.json"
+        res = self.http.get(url)
+        if res.status_code > 400:
+            logging.warning("Bad url? it only work with series")
+            return seasons
+
+        janson = res.json()
+
+        if "mutualSeasonData" in janson["result"]["pageContext"]:
+            path = janson["result"]["pageContext"]["mutualSeasonData"]["serieRelativeUrl"]
+            seasons = janson["result"]["pageContext"]["mutualSeasonData"]["seasonNumbers"]
+        elif "mutualEpisodeData" in janson["result"]["pageContext"]:
+            path = janson["result"]["pageContext"]["mutualEpisodeData"]["serieRelativeUrl"]
+            seasons = janson["result"]["pageContext"]["mutualEpisodeData"]["seasonNumbers"]
+        elif "serie" in janson["result"]["pageContext"]:
+            path = janson["result"]["pageContext"]["serie"]["relativeUrl"]
+            seasons = janson["result"]["pageContext"]["serie"]["seasonNumbers"]
+        else:
+            logging.warning("Can't find info needed to find episodes")
+
+        for season in seasons:
+            url = f"https://www.cmore.se/page-data{path}/sasong-{season}/page-data.json"
+            res = self.http.get(url)
+            janson = res.json()
+            for episode in janson["result"]["pageContext"]["season"]["selectedEpisodes"]:
+                episode_url = f'https://www.cmore.{self._gettld()}{episode["relativeUrl"]}'
+                if episode_url not in episodes:
+                    episodes.append(episode_url)
 
         if config.get("all_last") > 0:
             return sorted(episodes[-config.get("all_last") :])
