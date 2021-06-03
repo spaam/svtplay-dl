@@ -7,6 +7,7 @@ from datetime import timedelta
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
@@ -70,11 +71,20 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked or not available.")
             return
-        if res.json()["playbackItem"]["type"] == "hls":
+
+        jansson = res.json()
+        if jansson["playbackItem"]["type"] == "hls":
             yield from hlsparse(
                 self.config,
-                self.http.request("get", res.json()["playbackItem"]["manifestUrl"]),
-                res.json()["playbackItem"]["manifestUrl"],
+                self.http.request("get", jansson["playbackItem"]["manifestUrl"]),
+                jansson["playbackItem"]["manifestUrl"],
+                output=self.output,
+                httpobject=self.http,
+            )
+            yield from dashparse(
+                self.config,
+                self.http.request("get", jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd")),
+                jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd"),
                 output=self.output,
                 httpobject=self.http,
             )
