@@ -277,7 +277,11 @@ def gen_parser(version="unknown"):
     )
     postprocessing.add_argument("--no-postprocess", dest="no_postprocess", default=False, action="store_true", help="Do not postprocess anything")
     postprocessing.add_argument(
-        "--keep-original", dest="keep_original", default=False, action="store_true", help="Do postprocessing while also keeping original files"
+        "--keep-original",
+        dest="keep_original",
+        default=False,
+        action="store_true",
+        help="Do postprocessing while also keeping original files",
     )
 
     parser.add_argument("urls", nargs="*")
