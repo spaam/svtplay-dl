@@ -76,6 +76,8 @@ def audio_role(config, streams) -> List:
 def subtitle_filter(subtitles) -> List:
     languages = []
     subs = []
+    if not subtitles:
+        return subs
     preferred = subtitles[0].config.get("subtitle_preferred")
     all_subs = subtitles[0].config.get("get_all_subtitles")
 
