@@ -12,94 +12,19 @@ from requests import post
 from requests import Timeout
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
+from svtplay_dl.utils.stream import subtitle_filter
 
 
 class postprocess:
     def __init__(self, stream, config, subfixes=None):
         self.stream = stream
         self.config = config
-        self.subfixes = subfixes
+        self.subfixes = [x.subfix for x in subtitle_filter(subfixes)]
         self.detect = None
         for i in ["ffmpeg", "avconv"]:
             self.detect = which(i)
             if self.detect:
                 break
-
-    def remux(self):
-        if self.detect is None:
-            logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
-            return
-        if self.stream.finished is False:
-            return
-
-        if formatname(self.stream.output, self.config).suffix != ".mp4":
-            orig_filename = formatname(self.stream.output, self.config)
-
-            new_name = orig_filename.with_suffix(".mp4")
-
-            cmd = [self.detect, "-i", str(orig_filename)]
-            _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
-            streams = _streams(stderr)
-            videotrack, audiotrack = _checktracks(streams)
-
-            if self.config.get("merge_subtitle"):
-                logging.info(f"Muxing {orig_filename.name} and merging its subtitle into {new_name.name}")
-            else:
-                logging.info(f"Muxing {orig_filename.name} into {new_name.name}")
-
-            tempfile = orig_filename.with_suffix(".temp")
-            arguments = []
-            if videotrack:
-                arguments += ["-map", f"{videotrack}"]
-            if audiotrack:
-                arguments += ["-map", f"{audiotrack}"]
-            arguments += ["-c", "copy", "-f", "mp4"]
-            if orig_filename.suffix == ".ts" and streams and "aac" in _getcodec(streams, audiotrack):
-                arguments += ["-bsf:a", "aac_adtstoasc"]
-
-            if self.config.get("merge_subtitle"):
-                langs = _sublanguage(self.stream, self.config, self.subfixes)
-                for stream_num, language in enumerate(langs):
-                    arguments += [
-                        "-map",
-                        str(stream_num + 1),
-                        "-c:s:" + str(stream_num),
-                        "mov_text",
-                        "-metadata:s:s:" + str(stream_num),
-                        "language=" + language,
-                    ]
-                if self.subfixes and len(self.subfixes) >= 2:
-                    for subfix in self.subfixes:
-                        # subfile = f"{name + subfix}.srt"
-                        subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
-                        cmd += ["-i", str(subfile)]
-                else:
-                    subfile = orig_filename.with_suffix(".srt")
-                    cmd += ["-i", str(subfile)]
-
-            arguments += ["-y", str(tempfile)]
-            cmd += arguments
-            returncode, stdout, stderr = run_program(cmd)
-            if returncode != 0:
-                return
-
-            if self.config.get("keep_original") is True:
-                logging.info("Muxing done, keeping original file(s).")
-                os.rename(tempfile, new_name)
-                return
-
-            if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
-                logging.info("Muxing done, removing the old files.")
-                if self.subfixes and len(self.subfixes) >= 2:
-                    for subfix in self.subfixes:
-                        subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
-                        os.remove(subfile)
-                else:
-                    os.remove(subfile)
-            else:
-                logging.info("Muxing done, removing the old file.")
-            os.remove(orig_filename)
-            os.rename(tempfile, new_name)
 
     def merge(self):
         if self.detect is None:
@@ -120,26 +45,27 @@ class postprocess:
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
             cmd += ["-i", str(orig_filename)]
-        if self.config.get("only_audio") or not self.config.get("only_video"):
+        if self.stream.audio and self.config.get("only_audio") or not self.config.get("only_video"):
             cmd += ["-i", str(audio_filename)]
         _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
 
         if self.config.get("merge_subtitle"):
-            logging.info(f"Merge audio, video and subtitle into {orig_filename.name}")
+            logging.info(f"Merge audio, video and subtitle into {new_name.name}")
         else:
-            logging.info(f"Merge audio and video into {orig_filename.name}")
+            logging.info(f"Merge audio and video into {new_name.name}")
 
         tempfile = orig_filename.with_suffix(".temp")
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
+
         cmd = [self.detect]
         if self.config.get("only_video") or not self.config.get("only_audio"):
             cmd += ["-i", str(orig_filename)]
-        if self.config.get("only_audio") or not self.config.get("only_video"):
+        if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
             cmd += ["-i", str(audio_filename)]
         if videotrack:
             arguments += ["-map", f"{videotrack}"]
@@ -151,13 +77,13 @@ class postprocess:
             for stream_num, language in enumerate(langs, start=len(tracks)):
                 arguments += [
                     "-map",
-                    str(stream_num),
+                    f"{str(stream_num - 1)}:0",
                     "-c:s:" + str(stream_num - 2),
                     "mov_text",
                     "-metadata:s:s:" + str(stream_num - 2),
                     "language=" + language,
                 ]
-            if self.subfixes:
+            if self.subfixes and self.config.get("get_all_subtitles"):
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                     cmd += ["-i", str(subfile)]
@@ -179,7 +105,7 @@ class postprocess:
         logging.info("Merging done, removing old files.")
         if self.config.get("only_video") or not self.config.get("only_audio"):
             os.remove(orig_filename)
-        if self.config.get("only_audio") or not self.config.get("only_video"):
+        if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
             os.remove(audio_filename)
 
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
@@ -258,10 +184,7 @@ def _sublanguage(stream, config, subfixes):
 
     langs = []
     exceptions = {"lulesamiska": "smj", "meankieli": "fit", "jiddisch": "yid"}
-    if subfixes and len(subfixes) >= 2:
-        logging.info("Determining the languages of the subtitles.")
-    else:
-        logging.info("Determining the language of the subtitle.")
+    logging.info("Determining the language of the subtitle(s).")
     if config.get("get_all_subtitles"):
         for subfix in subfixes:
             if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip("-"))]:

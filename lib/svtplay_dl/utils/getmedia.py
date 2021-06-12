@@ -106,7 +106,6 @@ def get_one_media(stream):
 
     videos = []
     subtitles = []
-    subfixes = []
     error = []
     streams = stream.get()
     try:
@@ -215,16 +214,10 @@ def get_one_media(stream):
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")
             return
 
-        post = postprocess(fstream, fstream.config, subfixes)
+        post = postprocess(fstream, fstream.config, subtitles)
         if fstream.audio and not post.detect and fstream.finished:
             logging.warning("Can't find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
-
-        if fstream.audio and post.detect and fstream.config.get("no_merge") is False:
+        if post.detect and fstream.config.get("no_merge") is False:
             post.merge()
-        elif fstream.name == "hls" and post.detect and fstream.config.get("no_remux") is False:
-            if fstream.config.get("no_merge") is True:
-                logging.warning("Can't remux HLS streams without merging. Use --no-postprocess to leave content completely untouched.")
-            post.merge()
-            post.remux()
         else:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")
