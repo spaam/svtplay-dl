@@ -91,7 +91,11 @@ def _hlsparse(config, text, url, output, **kwargs):
                     if "URI" in i:
                         if i["GROUP-ID"] not in subtitles:
                             subtitles[i["GROUP-ID"]] = []
-                        item = [i["URI"], i["LANGUAGE"]]
+                        if "LANGUAGE" in i:
+                            lang = i["LANGUAGE"]
+                        else:
+                            lang = "und"
+                        item = [i["URI"], lang]
                         if item not in subtitles[i["GROUP-ID"]]:
                             subtitles[i["GROUP-ID"]].append(item)
                 continue
