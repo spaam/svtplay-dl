@@ -4,7 +4,6 @@ import platform
 import re
 from json import dumps
 from random import sample
-from re import match
 from shutil import which
 
 from requests import codes
@@ -187,7 +186,7 @@ def _sublanguage(stream, config, subfixes):
     logging.info("Determining the language of the subtitle(s).")
     if config.get("get_all_subtitles"):
         for subfix in subfixes:
-            if [exceptions[key] for key in exceptions.keys() if match(key, subfix.strip("-"))]:
+            if [exceptions[key] for key in exceptions.keys() if re.match(key, subfix.strip("-"))]:
                 if "oversattning" in subfix.strip("-"):
                     subfix = subfix.strip("-").split(".")[0]
                 else:
