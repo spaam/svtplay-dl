@@ -34,7 +34,7 @@ class postprocess:
 
         orig_filename = formatname(self.stream.output, self.config)
         ext = orig_filename.suffix
-        new_name = orig_filename.with_suffix(".mp4")
+        new_name = orig_filename.with_suffix(f".{self.config.get('output_format')}")
 
         if ext == ".ts":
             audio_filename = orig_filename.with_suffix(".audio.ts")
@@ -56,7 +56,7 @@ class postprocess:
             logging.info(f"Merge audio and video into {new_name.name}")
 
         tempfile = orig_filename.with_suffix(".temp")
-        arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "mp4"]
+        arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "matroska" if self.config.get("output_format") == "mkv" else "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
@@ -78,7 +78,7 @@ class postprocess:
                     "-map",
                     f"{str(stream_num - 1)}:0",
                     "-c:s:" + str(stream_num - 2),
-                    "mov_text",
+                    "mov_text" if self.config.get("output_format") == "mp4" else "copy",
                     "-metadata:s:s:" + str(stream_num - 2),
                     "language=" + language,
                 ]

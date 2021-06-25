@@ -195,6 +195,9 @@ def get_one_media(stream):
         if dupe and not stream.config.get("force"):
             logging.warning(f"File ({fileame.name}) already exists. Use --force to overwrite")
             return
+        if fstream.config.get("output_format") and fstream.config.get("output_format").lower() not in ["mkv", "mp4"]:
+            logging.error("Unknown output format. please choose mp4 or mkv")
+            sys.exit(2)
         try:
             logging.info("Selected to download %s, bitrate: %s format: %s", fstream.name, fstream.bitrate, fstream.format)
             fstream.download()

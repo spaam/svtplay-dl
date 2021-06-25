@@ -283,6 +283,13 @@ def gen_parser(version="unknown"):
         action="store_true",
         help="Do postprocessing while also keeping original files",
     )
+    postprocessing.add_argument(
+        "--output-format",
+        dest="output_format",
+        default="mp4",
+        choices=["mp4", "mkv"],
+        help="format you want resulting file in (mkv or mp4), mp4 is default",
+    )
 
     parser.add_argument("urls", nargs="*")
 
@@ -349,6 +356,7 @@ def setup_defaults():
     options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
     options.set("only_audio", False)
     options.set("only_video", False)
+    options.set("output_format", "mp4")
     return _special_settings(options)
 
 
@@ -402,6 +410,7 @@ def parsertoconfig(config, parser):
     config.set("proxy", parser.proxy)
     config.set("only_audio", parser.only_audio)
     config.set("only_video", parser.only_video)
+    config.set("output_format", parser.output_format)
     return _special_settings(config)
 
 
