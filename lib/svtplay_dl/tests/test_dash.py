@@ -69,6 +69,11 @@ def test_parse_duration():
 
 def test_parse_date():
     assert isinstance(parse_dates("2021-05-10T06:00:11.451554796Z"), datetime.datetime)
+    assert isinstance(parse_dates("2021-05-10T06:00:11.45155479Z"), datetime.datetime)
+    assert isinstance(parse_dates("2021-05-10T06:00:11.4515547Z"), datetime.datetime)
+    assert isinstance(parse_dates("2021-05-10T06:00:11.451554Z"), datetime.datetime)
+    assert isinstance(parse_dates("2021-05-10T06:00:11.45155Z"), datetime.datetime)
+    assert isinstance(parse_dates("2021-05-10T06:00:11.4515Z"), datetime.datetime)
     assert isinstance(parse_dates("2021-05-10T06:00:11.45Z"), datetime.datetime)
     assert isinstance(parse_dates("2021-05-10T06:00:11Z"), datetime.datetime)
     assert isinstance(parse_dates("2021-05-10T06:00:11"), datetime.datetime)
