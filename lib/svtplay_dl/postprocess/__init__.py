@@ -73,15 +73,23 @@ class postprocess:
         if self.config.get("merge_subtitle"):
             langs = _sublanguage(self.stream, self.config, self.subfixes)
             tracks = [x for x in [videotrack, audiotrack] if x]
-            for stream_num, language in enumerate(langs, start=len(tracks)):
+            subs_nr = 0
+            sub_start = 0
+            # find what sub track to start with. when a/v is in one file it start with 1
+            # if seperate it will start with 2
+            for i in tracks:
+                if int(i[0]) >= sub_start:
+                    sub_start += 1
+            for stream_num, language in enumerate(langs, start=sub_start):
                 arguments += [
                     "-map",
-                    f"{str(stream_num - 1)}:0",
-                    "-c:s:" + str(stream_num - 2),
+                    f"{str(stream_num)}:0",
+                    "-c:s:" + str(subs_nr),
                     "mov_text" if self.config.get("output_format") == "mp4" else "copy",
-                    "-metadata:s:s:" + str(stream_num - 2),
+                    "-metadata:s:s:" + str(subs_nr),
                     "language=" + language,
                 ]
+                subs_nr += 1
             if self.subfixes and self.config.get("get_all_subtitles"):
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
