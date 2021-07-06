@@ -106,7 +106,8 @@ class Svtplay(Service, MetadataThumbMixin):
                 return
 
             for i in janson["videoReferences"]:
-                if i["url"].find(".m3u8") > 0:
+                logging.info(i)
+                if i["url"].find(".m3u8") > 0 and (i["format"] == "hls-cmaf-full" or i["format"] == "hls-cmaf-live"):
                     yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
                 elif i["url"].find(".mpd") > 0:
                     yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
@@ -126,63 +127,110 @@ class Svtplay(Service, MetadataThumbMixin):
                     video_data = data
         if not video_data:
             return videos
-        for i in video_data["selections"][0]["items"]:
-            videos.append(i["item"]["urls"]["svtplay"])
+        for section in video_data["selections"]:
+            for i in section["items"]:
+                videos.append(i["item"]["urls"]["svtplay"])
         return videos
 
-    def find_all_episodes(self, config):
-        parse = urlparse(self._url)
-
+    def _genre(self):
         videos = []
+        episodes = []
+        singles = []
+        parse = urlparse(self.url)
+        url = f"https://www.svtplay.se{parse.path}?tab=all"
+        data = self.http.get(url).text
+        match = re.search(self.info_search_expr, data)
+        if not match:
+            logging.error("Can't find video info.")
+            return
+        janson = json.loads(match.group(1))
+        video_data = None
+        for data_entry in janson["props"]["urqlState"].values():
+            entry = json.loads(data_entry["data"])
+            for key, data in entry.items():
+                if key == "categoryPage":
+                    if "lazyLoadedTabs" in data:
+                        video_data = data["lazyLoadedTabs"]
+        if not video_data:
+            return videos
+        for lazytab in video_data:
+            if "selections" in lazytab:
+                for section in lazytab["selections"]:
+                    for i in section["items"]:
+                        if i["item"]["__typename"] == "Single":
+                            singles.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+                        else:
+                            videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+        for i in videos:
+            episodes.extend(self._all_episodes(i))
+        if singles:
+            episodes.extend(singles)
+        return episodes
+
+    def _all_episodes(self, url):
+        parse = urlparse(url)
         tab = None
         if parse.query:
             query = parse_qs(parse.query)
             if "tab" in query:
                 tab = query["tab"][0]
 
-        if re.search("sista-chansen", parse.path):
-            videos = self._last_chance()
+        data = self.http.get(url).text
+        match = re.search(self.info_search_expr, data)
+        if not match:
+            logging.error("Can't find video info.")
+            return
+
+        janson = json.loads(match.group(1))
+        video_data = None
+        for data_entry in janson["props"]["urqlState"].values():
+            if "data" in data_entry:
+                entry = json.loads(data_entry["data"])
+                # logging.info(json.dumps(entry))
+                for key, data in entry.items():
+                    if key == "detailsPage" and data and "heading" in data:
+                        video_data = data
+                        break
+
+        collections = []
+        videos = []
+        if video_data["item"]["parent"]["__typename"] == "Single":
+            videos.append(urljoin("http://www.svtplay.se", video_data["item"]["urls"]["svtplay"]))
+        for i in video_data["associatedContent"]:
+            if tab:
+                if tab == i["id"]:
+                    collections.append(i)
+            else:
+                if i["id"] == "upcoming":
+                    continue
+                elif self.config.get("include_clips") and "clips" in i["id"]:
+                    collections.append(i)
+                elif "clips" not in i["id"]:
+                    collections.append(i)
+
+        for i in collections:
+            for epi in i["items"]:
+                if epi["item"]["urls"]["svtplay"] not in videos:
+                    videos.append(urljoin("http://www.svtplay.se", epi["item"]["urls"]["svtplay"]))
+        return videos
+
+    def find_all_episodes(self, config):
+        parse = urlparse(self._url)
+
+        episodes = []
+        logging.info(parse.path)
+        if re.search("^/sista-chansen", parse.path):
+            episodes = self._last_chance()
+        elif re.search("^/genre", parse.path):
+            episodes = self._genre()
         else:
-            match = re.search(self.info_search_expr, self.get_urldata())
-            if not match:
-                logging.error("Can't find video info.")
-                return
+            episodes = self._all_episodes(self.url)
 
-            janson = json.loads(match.group(1))
-            video_data = None
-            for data_entry in janson["props"]["urqlState"].values():
-                if "data" in data_entry:
-                    entry = json.loads(data_entry["data"])
-                    for key, data in entry.items():
-                        if key == "detailsPage" and data and "heading" in data:
-                            video_data = data
-                            break
-
-            collections = []
-            videos = []
-            for i in video_data["associatedContent"]:
-                if tab:
-                    if tab == i["id"]:
-                        collections.append(i)
-                else:
-                    if i["id"] == "upcoming":
-                        continue
-                    elif self.config.get("include_clips") and "clips" in i["id"]:
-                        collections.append(i)
-                    elif "clips" not in i["id"]:
-                        collections.append(i)
-
-            if not collections:
-                logging.error("Can't find other episodes.")
-
-            for i in collections:
-                for epi in i["items"]:
-                    if epi["item"]["urls"]["svtplay"] not in videos:
-                        videos.append(epi["item"]["urls"]["svtplay"])
-
-        episodes = [urljoin("http://www.svtplay.se", x) for x in videos]
-        if config.get("all_last") > 0:
-            return episodes[-config.get("all_last") :]
+        if not episodes:
+            logging.error("Can't find any videos.")
+        else:
+            if config.get("all_last") > 0:
+                return episodes[-config.get("all_last") :]
         return episodes
 
     def outputfilename(self, data):
