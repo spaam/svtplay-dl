@@ -1,5 +1,6 @@
 import logging
 import re
+from html import unescape
 from urllib.parse import urljoin
 
 from requests import Session
@@ -47,6 +48,8 @@ class HTTP(Session):
 
 def download_thumbnails(output, config, urls):
     for show, url in urls:
+        if "&amp;" in url:
+            url = unescape(url)
         data = Session().get(url).content
         loutout = output.copy()
         loutout["ext"] = "tbn"
