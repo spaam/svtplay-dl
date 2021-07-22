@@ -110,24 +110,33 @@ class Discoveryplus(Service):
                 yield stream
 
     def _autoname(self, jsondata):
-        match = re.search("^([^/]+)/", jsondata["data"]["attributes"]["path"])
-        self.output["title"] = match.group(1)
-        self.output["season"] = int(jsondata["data"]["attributes"]["seasonNumber"])
-        self.output["episode"] = int(jsondata["data"]["attributes"]["episodeNumber"])
-        self.output["episodename"] = jsondata["data"]["attributes"]["name"]
+        if "seasonNumber" in jsondata["data"]["attributes"]:
+            match = re.search("^([^/]+)/", jsondata["data"]["attributes"]["path"])
+            self.output["title"] = match.group(1)
+            self.output["season"] = int(jsondata["data"]["attributes"]["seasonNumber"])
+            self.output["episode"] = int(jsondata["data"]["attributes"]["episodeNumber"])
+            self.output["episodename"] = jsondata["data"]["attributes"]["name"]
+        else:
+            self.output["title"] = jsondata["data"]["attributes"]["name"]
+            self.output["episodename"] = jsondata["data"]["attributes"]["secondaryTitle"]
         return self.output["title"]
 
     def find_all_episodes(self, config):
         parse = urlparse(self.url)
         self.domain = re.search(r"(discoveryplus\.\w\w)", parse.netloc).group(1)
-        programid = None
-        seasons = []
         episodes = []
 
-        match = re.search("^/(program|programmer|videos|videoer)/([^/]+)", parse.path)
+        route = None
+        program_video = True
+        match = re.search("^/((program|programmer|videos|videoer)/[^/]+)", parse.path)
         if not match:
-            logging.error("Can't find show name")
-            return None
+            match = re.search("^/(olympics.*)", parse.path)
+            if not match:
+                logging.error("Can't find show name")
+                return None
+            program_video = False
+
+        route = match.group(1)
 
         if not self._login():
             logging.error("Need the 'st' cookie to work")
@@ -138,17 +147,28 @@ class Discoveryplus(Service):
 
         self._getpackages()
 
-        urllocal = ""
-        if self.domain in ["discoveryplus.no", "discoveryplus.dk"]:
-            urllocal = "mer"
+        if program_video:
+            episodes = self._program_videos(route)
+        else:
+            episodes = self._sports(route)
 
-        url = f"http://disco-api.{self.domain}/cms/routes/program{urllocal}/{match.group(2)}?decorators=viewingHistory&include=default"
+        if not episodes:
+            logging.error("Cant find any playable files")
+        if config.get("all_last") > 0:
+            return episodes[: config.get("all_last")]
+        return episodes
+
+    def _program_videos(self, route):
+        seasons = []
+        episodes = []
+        showid = None
+
+        url = f"http://disco-api.{self.domain}/cms/routes/{route}?decorators=viewingHistory&include=default"
         res = self.http.get(url)
         if res.status_code > 400:
             logging.error("Cant find any videos. wrong url?")
             return episodes
 
-        showid = None
         for what in res.json()["included"]:
             if "attributes" in what and "component" in what["attributes"] and what["attributes"]["component"]["id"] == "tabbed-content":
                 programid = what["id"]
@@ -186,10 +206,28 @@ class Discoveryplus(Service):
                                 continue
                             episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
                     page += 1
-        if not episodes:
-            logging.error("Cant find any playable files")
-        if config.get("all_last") > 0:
-            return episodes[: config.get("all_last")]
+        return episodes
+
+    def _sports(self, route):
+        episodes = []
+        page = 1
+        totalpages = 1
+        while page <= totalpages:
+            querystring = f"decorators=viewingHistory&include=default&page[items.size]=100&page[items.number]={page}"
+            url = f"http://disco-api.{self.domain}/cms/routes/{route}?{querystring}"
+            res = self.http.get(url)
+            if res.status_code > 400:
+                logging.error("Cant find any videos. wrong url?")
+                return episodes
+
+            for i in res.json()["included"]:
+                if i["type"] != "video":
+                    continue
+                if i["attributes"]["videoType"] == "STANDALONE":
+                    if not self._playablefile(i["attributes"]["availabilityWindows"]):
+                        continue
+                    episodes.append("https://www.{}/videos/{}".format(self.domain, i["attributes"]["path"]))
+            page += 1
         return episodes
 
     def _login(self):
