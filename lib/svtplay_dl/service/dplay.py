@@ -70,6 +70,8 @@ class Discoveryplus(Service):
                 return
         else:
             match = re.search("(videos|videoer)/(.*)$", parse.path)
+            if not match:
+                match = re.search("olympics/([^/]+)/(.*)$", parse.path)
             url = f"https://disco-api.{self.domain}/content/videos/{match.group(2)}"
         res = self.http.get(url, headers={"x-disco-client": "WEB:UNKNOWN:dplay-client:0.0.1"})
         janson = res.json()
