@@ -24,7 +24,7 @@ class VideoRetriever:
         self.format = f"{codec}-{channels}" if channels else codec
 
     def __repr__(self):
-        return f"<Video(fetcher={self.__class__.__name__}, bitrate={self.bitrate} format={self.format}, languare={self.language}, audio_role={self.audio_role}>"
+        return f"<Video(fetcher={self.__class__.__name__}, bitrate={self.bitrate} format={self.format}, language={self.language}, audio_role={self.audio_role}>"
 
     @property
     def name(self):
