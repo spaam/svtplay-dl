@@ -58,6 +58,7 @@ def _hlsparse(config, text, url, output, **kwargs):
     codec = kwargs.pop("codec", "h264")
     media = {}
     subtitles = {}
+    videos = {}
     segments = None
 
     if m3u8.master_playlist:
@@ -111,12 +112,15 @@ def _hlsparse(config, text, url, output, **kwargs):
                         vcodec = "hevc"
                     if i["CODECS"][:3] == "avc":
                         vcodec = "h264"
-                if "AUDIO" in i and (i["AUDIO"] in media):
+                if "AUDIO" in i:
                     audio_group = i["AUDIO"]
                 urls = get_full_url(i["URI"], url)
+                videos[bit_rate] = [urls, resolution, vcodec, audio_group]
             else:
                 continue  # Needs to be changed to utilise other tags.
 
+        for bit_rate in list(videos.keys()):
+            urls, resolution, vcodec, audio_group = videos[bit_rate]
             if audio_group:
                 for group in media[audio_group]:
                     audio_url = get_full_url(group[0], url)
