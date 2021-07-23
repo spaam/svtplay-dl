@@ -106,7 +106,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 return
 
             for i in janson["videoReferences"]:
-                if i["url"].find(".m3u8") > 0 and (i["format"] == "hls-cmaf-full" or i["format"] == "hls-cmaf-live"):
+                if i["url"].find(".m3u8") > 0 and "hls-cmaf" in i["format"]:
                     yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
                 elif i["url"].find(".mpd") > 0:
                     yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
