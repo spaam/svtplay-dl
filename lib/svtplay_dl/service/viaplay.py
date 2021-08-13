@@ -49,8 +49,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant find necessary info")
             return
-
-        janson = json.loads("{}{}".format("{", match.group(1)))
+        janson = json.loads("{}{}".format("{", match.group(1).replace("undefined", "null")))
         video = None
         for play in janson["page"]["blocks"]:
             if "componentName" in play and play["componentName"] == "player":
