@@ -121,7 +121,7 @@ def _hlsparse(config, text, url, output, **kwargs):
 
         for bit_rate in list(videos.keys()):
             urls, resolution, vcodec, audio_group = videos[bit_rate]
-            if audio_group:
+            if audio_group and media:
                 for group in media[audio_group]:
                     audio_url = get_full_url(group[0], url)
                     chans = group[1] if audio_url else channels
