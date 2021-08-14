@@ -1,6 +1,7 @@
 tox
 nose
 mock
+requests-mock
 wheel
 pre-commit
 pytest
