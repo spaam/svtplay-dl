@@ -434,6 +434,9 @@ def _special_settings(config):
     if config.get("get_only_episode_url"):
         config.set("get_url", True)
 
+    if config.get("get_all_subtitles"):
+        config.set("subtitle", True)
+
     return config
 
 
