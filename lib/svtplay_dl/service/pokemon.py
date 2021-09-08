@@ -8,31 +8,32 @@ from svtplay_dl.service import Service
 
 
 class Pokemon(Service, OpenGraphThumbMixin):
-    supported_domains = ["pokemon.com"]
+    supported_domains = ["watch.pokemon.com"]
 
     def get(self):
-        data = self.get_urldata()
-
         parse = urlparse(self.url)
-        match = re.search(r"^/([a-z]{2})/", parse.path)
-        if not match:
-            yield ServiceError("Cant county code")
+        if parse.fragment == "":
+            yield ServiceError("need the whole url")
             return
 
-        res = self.http.get(f"http://www.pokemon.com/api/pokemontv/channels?region={match.group(1)}")
-        janson = res.json()
-        match = re.search('data-video-season="([0-9]+)"', data)
-        season = match.group(1)
-        match = re.search('data-video-episode="([0-9]+)"', data)
-        episode = match.group(1)
+        match = re.search(r"id=([a-f0-9]+)\&", parse.fragment)
+        if not match:
+            yield ServiceError("Cant find the ID in the url")
+            return
 
+        res = self.http.get("https://www.pokemon.com/api/pokemontv/v2/channels/us/")
+
+        janson = res.json()
+        stream = None
         for i in janson:
             for n in i["media"]:
-                if season == n["season"] and episode == n["episode"]:
-                    stream = n["stream_url"]
+                if n["id"] == match.group(1):
+                    stream = n
+                    break
 
         self.output["title"] = "pokemon"
-        self.output["season"] = season
-        self.output["episode"] = episode
+        self.output["season"] = stream["season"]
+        self.output["episode"] = stream["episode"]
+        self.output["episodename"] = stream["title"]
 
-        yield from hlsparse(self.config, self.http.request("get", stream), stream, output=self.output)
+        yield from hlsparse(self.config, self.http.request("get", stream["stream_url"]), stream["stream_url"], output=self.output)
