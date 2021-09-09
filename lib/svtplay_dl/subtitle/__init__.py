@@ -315,7 +315,7 @@ class subtitle:
                     ha = strdate(subs[-1][0])
                     ha3 = strdate(item)
                     second = str2sec(ha3.group(2)) + time
-                    subs[-1][0] = f"{ha.group(1)} --> {sec2str(second)}"
+                    subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
                     skip = True
                     pre_date_skip = False
                     continue
@@ -327,7 +327,7 @@ class subtitle:
                     skip = False
                     first = str2sec(has_date.group(1)) + time
                     second = str2sec(has_date.group(2)) + time
-                    sub.append(f"{sec2str(first)} --> {sec2str(second)}")
+                    sub.append(f"{sec2str(first).replace('.', ',')} --> {sec2str(second).replace('.', ',')}")
                     several_items = True
                     pre_date_skip = False
                 elif has_date is None and skip is False and pre_date_skip is False:
