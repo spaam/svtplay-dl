@@ -142,9 +142,9 @@ def formatname(output, config):
         elif config.get("subfolder") and not tvshow:
             # Add subfolder with name movies
             name = pathlib.Path("movies") / name.name
-    if config.get("output") and pathlib.Path(config.get("output")).is_dir():
+    if config.get("output") and pathlib.Path(config.get("output")).expanduser().is_dir():
         name = pathlib.Path(config.get("output")) / name.name
-    elif config.get("path") and pathlib.Path(config.get("path")).is_dir():
+    elif config.get("path") and pathlib.Path(config.get("path")).expanduser().is_dir():
         name = pathlib.Path(config.get("path")) / name.name
     elif config.get("output"):
         if output["ext"]:
