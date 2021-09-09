@@ -41,11 +41,11 @@ class Barnkanalen(Svtplay):
             return
 
         vid = janson["query"]["episodeId"]
-        title = janson["props"]["pageProps"]["initialState"]["gridContent"]["featuredContent"]["name"]
+        title = janson["props"]["pageProps"]["initialState"]["featuredTitle"]["name"]
         seasonnr = None
         episodenr = None
         episodename = None
-        for season in janson["props"]["pageProps"]["initialState"]["gridContent"]["featuredContent"]["associatedContent"]:
+        for season in janson["props"]["pageProps"]["initialState"]["featuredTitle"]["associatedContent"]:
             tmp_season = season["name"]
             for episode in season["items"]:
                 if "variants" in episode["item"]:
@@ -83,7 +83,7 @@ class Barnkanalen(Svtplay):
         janson = json.loads(match.group(1))
         title = janson["query"]["titleSlug"]
         episodes = []
-        for season in janson["props"]["pageProps"]["initialState"]["gridContent"]["featuredContent"]["associatedContent"]:
+        for season in janson["props"]["pageProps"]["initialState"]["featuredTitle"]["associatedContent"]:
             for episode in season["items"]:
                 if "variants" in episode["item"]:
                     svtID = episode["item"]["variants"][0]
