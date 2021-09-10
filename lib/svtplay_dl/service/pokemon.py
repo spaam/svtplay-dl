@@ -21,8 +21,12 @@ class Pokemon(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find the ID in the url")
             return
 
-        res = self.http.get("https://www.pokemon.com/api/pokemontv/v2/channels/us/")
+        match2 = re.search(r'region: "(\w+)"', self.get_urldata())
+        if not match2:
+            yield ServiceError("Can't find region data")
+            return
 
+        res = self.http.get(f"https://www.pokemon.com/api/pokemontv/v2/channels/{match2.group(1)}/")
         janson = res.json()
         stream = None
         for i in janson:
@@ -30,6 +34,10 @@ class Pokemon(Service, OpenGraphThumbMixin):
                 if n["id"] == match.group(1):
                     stream = n
                     break
+
+        if stream is None:
+            yield ServiceError("Can't find video")
+            return
 
         self.output["title"] = "pokemon"
         self.output["season"] = stream["season"]
