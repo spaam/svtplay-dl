@@ -143,14 +143,14 @@ def formatname(output, config):
             # Add subfolder with name movies
             name = pathlib.Path("movies") / name.name
     if config.get("output") and pathlib.Path(config.get("output")).expanduser().is_dir():
-        name = pathlib.Path(config.get("output")) / name.name
+        name = pathlib.Path(config.get("output")).expanduser() / name.name
     elif config.get("path") and pathlib.Path(config.get("path")).expanduser().is_dir():
-        name = pathlib.Path(config.get("path")) / name.name
+        name = pathlib.Path(config.get("path")).expanduser() / name.name
     elif config.get("output"):
         if output["ext"]:
-            name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
+            name = pathlib.Path(f"{config.get('output')}.{output['ext']}").expanduser()
         else:
-            name = pathlib.Path(config.get("output"))
+            name = pathlib.Path(config.get("output")).expanduser()
     return name
 
 
