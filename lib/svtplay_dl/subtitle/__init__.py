@@ -450,7 +450,7 @@ def tt_text(node, data):
 
 
 def strdate(datestring):
-    match = re.search(r"^(\d+:\d+:[\.0-9]+) --> (\d+:\d+:[\.0-9]+)", datestring)
+    match = re.search(r"^(\d+:\d+:[\.,0-9]+) --> (\d+:\d+:[\.,0-9]+)", datestring)
     return match
 
 
