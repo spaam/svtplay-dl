@@ -1,9 +1,7 @@
-import copy
 import re
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
-from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
 
@@ -28,9 +26,5 @@ class Riksdagen(Service, OpenGraphThumbMixin):
             return
 
         for i in janson:
-            if i["mimetype"] == "application/x-mpegurl":
-                data2 = self.http.get(i["url"]).json()
-                yield from hlsparse(self.config, self.http.request("get", data2["url"]), data2["url"], output=self.output)
-            if i["mimetype"] == "video/mp4":
-                for n in i["bandwidth"]:
-                    yield HTTP(copy.copy(self.config), n["url"], n["quality"], output=self.output)
+            for n in i["bandwidth"]:
+                yield from hlsparse(self.config, self.http.request("get", n["url"]), n["url"], output=self.output)
