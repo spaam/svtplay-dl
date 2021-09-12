@@ -197,24 +197,16 @@ class Tv4(Service, OpenGraphThumbMixin):
     supported_domains = ["tv4.se"]
 
     def get(self):
-        match = re.search(r"[\/-](\d+)$", self.url)
+        match = re.search(r"application\/json\"\>(\{.*\})\<\/script", self.get_urldata())
         if not match:
-            yield ServiceError("Cant find video id")
+            yield ServiceError("Can't find video data'")
             return
-        self.output["id"] = match.group(1)
-
-        match = re.search("data-program-format='([^']+)'", self.get_urldata())
-        if not match:
-            yield ServiceError("Cant find program name")
-            return
-        self.output["title"] = match.group(1)
-
-        match = re.search('img alt="([^"]+)" class="video-image responsive"', self.get_urldata())
-        if not match:
-            yield ServiceError("Cant find title of the video")
-            return
-        self.output["episodename"] = match.group(1)
-
+        janson = json.loads(match.group(1))
+        self.output["id"] = janson["query"]["id"]
+        self.output["title"] = janson["query"]["slug"]
+        if janson["query"]["type"] == "Article":
+            vidasset = janson["props"]["pageProps"]["apolloState"][f"Article:{janson['query']['id']}"]["featured"]["__ref"]
+            self.output["id"] = janson["props"]["pageProps"]["apolloState"][vidasset]["id"]
         url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
