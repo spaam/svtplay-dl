@@ -40,11 +40,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         jansson = json.loads(match.group(1))
-        if "assetId" not in jansson["props"]["pageProps"]:
+        if "assetId" not in jansson["query"]:
             yield ServiceError("Cant find video id for the video")
             return
 
-        vid = jansson["props"]["pageProps"]["assetId"]
+        vid = jansson["query"]["assetId"]
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
         item = janson2[f"VideoAsset:{vid}"]
 
