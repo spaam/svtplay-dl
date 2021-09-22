@@ -1,7 +1,9 @@
 import logging
 import os
+import pathlib
 import platform
 import re
+import sys
 from json import dumps
 from random import sample
 from shutil import which
@@ -24,6 +26,10 @@ class postprocess:
             self.detect = which(i)
             if self.detect:
                 break
+        if self.detect is None and platform.system() == "Windows":
+            path = pathlib.Path(sys.executable).parent / "ffmpeg.exe"
+            if path.is_file:
+                self.detect = path
 
     def merge(self):
         if self.detect is None:
