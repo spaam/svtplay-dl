@@ -92,7 +92,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             )
 
     def _getjson(self):
-        match = re.search(r"application\/json\">(.*\})<\/script><script", self.get_urldata())
+        match = re.search(r"application\/json\">(.*\})<\/script>", self.get_urldata())
         return match
 
     def find_all_episodes(self, config):
