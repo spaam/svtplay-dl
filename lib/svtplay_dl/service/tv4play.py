@@ -11,6 +11,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
+from svtplay_dl.utils.http import download_thumbnails
 
 
 class Tv4play(Service, OpenGraphThumbMixin):
@@ -61,6 +62,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         self.output["title"] = item["program_nid"]
         self.output["episodename"] = item["title"]
         self.output["id"] = str(vid)
+        self.output["episodethumbnailurl"] = item["image"]
 
         if vid is None:
             yield ServiceError("Cant find video id for the video")
@@ -191,6 +193,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 if offset >= total:
                     moreData = False
         return items
+
+    def get_thumbnail(self, options):
+        download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
 
 
 class Tv4(Service, OpenGraphThumbMixin):
