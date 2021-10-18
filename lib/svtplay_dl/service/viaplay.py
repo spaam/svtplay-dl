@@ -49,7 +49,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant find necessary info")
             return
-        janson = json.loads("{}{}".format("{", match.group(1).replace("undefined", "null")))
+        janson = self._jansonpage(match.group(1))
         video = None
         for play in janson["page"]["blocks"]:
             if "componentName" in play and play["componentName"] == "player":
@@ -127,7 +127,7 @@ class Viafree(Service, OpenGraphThumbMixin):
             logging.error("Cant find necessary info")
             return
 
-        janson = json.loads("{}{}".format("{", match.group(1)))
+        janson = self._jansonpage(match.group(1))
         seasons = []
 
         if janson["page"]["pageType"] == "player":
@@ -138,7 +138,7 @@ class Viafree(Service, OpenGraphThumbMixin):
                 logging.error("Cant find necessary info")
                 return
 
-            janson = json.loads("{}{}".format("{", match.group(1)))
+            janson = self._jansonpage(match.group(1))
 
         for i in janson["page"]["blocks"]:
             if i["slug"] == "series_header" and "seasons" in i["seriesHeader"]:
@@ -219,3 +219,6 @@ class Viafree(Service, OpenGraphThumbMixin):
             self.token = res.json()["data"]["accessToken"]
             return True
         return False
+
+    def _jansonpage(text):
+        return json.loads("{}{}".format("{", text.replace("undefined", "null")))
