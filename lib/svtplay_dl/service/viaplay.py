@@ -220,5 +220,5 @@ class Viafree(Service, OpenGraphThumbMixin):
             return True
         return False
 
-    def _jansonpage(text):
+    def _jansonpage(self, text):
         return json.loads("{}{}".format("{", text.replace("undefined", "null")))
