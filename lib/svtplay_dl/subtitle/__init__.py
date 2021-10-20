@@ -293,6 +293,8 @@ class subtitle:
                 cont.encoding = "utf-8"
             if "viaplay" in self.url:
                 cont.encoding = "utf-8"
+            if "dr" in self.url:
+                cont.encoding = "utf-8"
             text = cont.text.split("\n")
             for t in text:  # is in text[1] for tv4play, but this should be more future proof
                 if "X-TIMESTAMP-MAP=MPEGTS" in t:
@@ -341,6 +343,7 @@ class subtitle:
             string += "{}\n{}\n\n".format(nr, "\n".join(sub))
             nr += 1
 
+        string = re.sub("\r", "", string)
         return string
 
     def stpp(self, subdata):

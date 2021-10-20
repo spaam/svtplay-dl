@@ -172,7 +172,7 @@ def _hlsparse(config, text, url, output, **kwargs):
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
                     m3u8s = M3U8(http.request("get", get_full_url(n[0], url), cookies=cookies).text)
-                    if "cmore" in url or "viaplay" in url:
+                    if "cmore" in url or "viaplay" in url or "dr" in url:
                         subtype = "wrstsegment"
                     else:
                         subtype = "wrst"
