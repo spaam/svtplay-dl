@@ -59,7 +59,8 @@ class Dr(Service, OpenGraphThumbMixin):
                             yield ServiceError("Can't play this because the video is geoblocked or not available.")
                         else:
                             yield from hlsparse(self.config, res, video["url"], output=self.output)
-                            yield subtitle(copy.copy(self.config), "wrst", video["subtitles"][0]["link"], output=self.output)
+                            if len(video["subtitles"]) > 0:
+                                yield subtitle(copy.copy(self.config), "wrst", video["subtitles"][0]["link"], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []
