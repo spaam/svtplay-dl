@@ -73,7 +73,7 @@ class Svtplay(Service, MetadataThumbMixin):
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if key == "detailsPage" and data and "moreDetails" in data:
+                    if key == "detailsPageByPath" and data and "moreDetails" in data:
                         video_data = data
                         vid = data["video"]["svtId"]
                         break
@@ -128,7 +128,7 @@ class Svtplay(Service, MetadataThumbMixin):
             return videos
         for section in video_data["selections"]:
             for i in section["items"]:
-                videos.append(i["item"]["urls"]["svtplay"])
+                videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
         return videos
 
     def _genre(self):
@@ -187,12 +187,14 @@ class Svtplay(Service, MetadataThumbMixin):
                 entry = json.loads(data_entry["data"])
                 # logging.info(json.dumps(entry))
                 for key, data in entry.items():
-                    if key == "detailsPage" and data and "heading" in data:
+                    if key == "detailsPageByPath" and data and "heading" in data:
                         video_data = data
                         break
 
         collections = []
         videos = []
+        if video_data is None:
+            return
         if video_data["item"]["parent"]["__typename"] == "Single":
             videos.append(urljoin("http://www.svtplay.se", video_data["item"]["urls"]["svtplay"]))
         for i in video_data["associatedContent"]:
@@ -217,7 +219,6 @@ class Svtplay(Service, MetadataThumbMixin):
         parse = urlparse(self._url)
 
         episodes = []
-        logging.info(parse.path)
         if re.search("^/sista-chansen", parse.path):
             episodes = self._last_chance()
         elif re.search("^/genre", parse.path):
