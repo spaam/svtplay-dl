@@ -121,7 +121,7 @@ class postprocess:
         if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
             os.remove(audio_filename)
 
-        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
+        if self.config.get("merge_subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.name + "." + subfix + ".srt")
