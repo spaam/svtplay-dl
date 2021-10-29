@@ -91,6 +91,9 @@ class Svtplay(Service, MetadataThumbMixin):
         except json.decoder.JSONDecodeError:
             yield ServiceError(f"Can't decode api request: {res.request.url}")
             return
+        if res.status_code >= 400:
+            yield ServiceError("Can't find any videos. its removed?")
+            return
         videos = self._get_video(janson)
         yield from videos
 
