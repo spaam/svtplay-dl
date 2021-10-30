@@ -28,7 +28,7 @@ class postprocess:
                 break
         if self.detect is None and platform.system() == "Windows":
             path = pathlib.Path(sys.executable).parent / "ffmpeg.exe"
-            if path.is_file:
+            if os.path.isfile(path):
                 self.detect = path
 
     def merge(self):
