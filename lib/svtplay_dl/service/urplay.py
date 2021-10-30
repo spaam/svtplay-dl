@@ -5,6 +5,7 @@ import json
 import logging
 import re
 from html import unescape
+from urllib.parse import urljoin
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
@@ -18,25 +19,22 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def get(self):
         urldata = self.get_urldata()
-        key = "currentProduct"
-        match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', urldata)
+        match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", urldata)
         if not match:
-            key = "program"
-            match = re.search(r'/ProgramContainer" data-react-props="([^\"]+)\"', self.get_urldata())
-            if not match:
-                yield ServiceError("Can't find json info")
-                return
+            yield ServiceError("Can't find video info.")
+            return
 
         data = unescape(match.group(1))
         jsondata = json.loads(data)
 
         res = self.http.get("https://streaming-loadbalancer.ur.se/loadbalancer.json")
         loadbalancer = res.json()["redirect"]
+        jsondata = jsondata["props"]["pageProps"]["program"]
 
-        self.outputfilename(jsondata[key], urldata)
+        self.outputfilename(jsondata, urldata)
 
-        for streaminfo in jsondata[key]["streamingInfo"].keys():
-            stream = jsondata[key]["streamingInfo"][streaminfo]
+        for streaminfo in jsondata["streamingInfo"].keys():
+            stream = jsondata["streamingInfo"][streaminfo]
 
             if streaminfo == "raw":
                 if "sd" in stream:
@@ -57,18 +55,22 @@ class Urplay(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, config):
         episodes = []
 
-        match = re.search(r'/Player/Player" data-react-props="([^\"]+)\"', self.get_urldata())
+        match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", self.get_urldata())
         if not match:
-            match = re.search(r'/ProgramContainer" data-react-props="([^\"]+)\"', self.get_urldata())
-            if not match:
-                logging.error("Can't find json info")
-                return
+            logging.error("Can't find video info.")
+            return
 
         data = unescape(match.group(1))
         jsondata = json.loads(data)
-
-        for episode in jsondata["accessibleEpisodes"]:
-            episodes.append("https://urplay.se/program/{}".format(episode["slug"]))
+        seasons = jsondata["props"]["pageProps"]["superSeriesSeasons"]
+        if seasons:
+            for season in seasons:
+                res = self.http.get(f'https://urplay.se/api/v1/series?id={season["id"]}')
+                for episode in res.json()["programs"]:
+                    episodes.append(urljoin("https://urplay.se", episode["link"]))
+        else:
+            for episode in jsondata["props"]["pageProps"]["accessibleEpisodes"]:
+                episodes.append(urljoin("https://urplay.se", episode["link"]))
         episodes_new = []
         n = 0
         for i in episodes:
@@ -94,7 +96,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             self.output["id"] = str(data["id"])
 
         # Try to match Season info from HTML (not available in json, it seems), e.g.: <button class="SeasonsDropdown-module__seasonButton___25Uyt" type="button"><span>Säsong 6</span>
-        seasonmatch = re.search(r"class..SeasonsDropdown-module__seasonButton.*span.S.song (\d+)..span", urldata)
+        seasonmatch = re.search(r"data-testid=\"season-name-label\">S.song (\d+)...<\/span", urldata)
         if seasonmatch:
             self.output["season"] = seasonmatch.group(1)
         else:
