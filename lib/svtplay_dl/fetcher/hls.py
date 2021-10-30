@@ -236,11 +236,6 @@ class HLS(VideoRetriever):
         filename = formatname(self.output, self.config)
         file_d = open(filename, "wb")
 
-        if "EXT-X-MAP" in m3u8.media_segment[0]:
-            entry = {"URI": get_full_url(m3u8.media_segment[0]["EXT-X-MAP"]["URI"], url), "EXTINF": {"duration": 0}}
-            if "EXT-X-KEY" in m3u8.media_segment[0]:
-                entry["EXT-X-KEY"] = {"URI": m3u8.media_segment[0]["EXT-X-KEY"]["URI"]}
-            m3u8.media_segment.insert(0, entry)
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
         decryptor = None
         size_media = len(m3u8.media_segment)
@@ -430,6 +425,7 @@ class M3U8:
                     # 4.3.2.5.  EXT-X-MAP
                     elif tag == "EXT-X-MAP":
                         info = _get_tuple_attribute(attr)
+                        self.media_segment.insert(0, {"URI": info["URI"], "EXTINF": {"duration": 0}})
 
                     # 4.3.2.6.  EXT-X-PROGRAM-DATE-TIME"
                     elif tag == "EXT-X-PROGRAM-DATE-TIME":
