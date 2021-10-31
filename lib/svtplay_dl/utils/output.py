@@ -129,7 +129,10 @@ def filename(stream):
 
 
 def formatname(output, config):
-    name = pathlib.Path(_formatname(output, config)).expanduser().resolve()
+    name = pathlib.Path(_formatname(output, config))
+    subfolder = None
+    dirname = None
+
     if not output.get("basedir", False):
         # If tvshow have not been derived by service do it by if season and episode is set
         if output.get("tvshow", None) is None:
@@ -138,20 +141,27 @@ def formatname(output, config):
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
             # Add subfolder with name title
-            name = pathlib.Path(output["title"]) / name.name
+            subfolder = pathlib.Path(output["title"])
         elif config.get("subfolder") and not tvshow:
             # Add subfolder with name movies
-            name = pathlib.Path("movies") / name.name
+            subfolder = pathlib.Path("movies")
     if config.get("output") and pathlib.Path(config.get("output")).expanduser().is_dir():
-        name = pathlib.Path(config.get("output")).expanduser() / name.name
+        dirname = pathlib.Path(config.get("output"))
     elif config.get("path") and pathlib.Path(config.get("path")).expanduser().is_dir():
-        name = pathlib.Path(config.get("path")).expanduser() / name.name
+        dirname = pathlib.Path(config.get("path"))
     elif config.get("output"):
         if output["ext"]:
-            name = pathlib.Path(f"{config.get('output')}.{output['ext']}").expanduser()
+            name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
         else:
-            name = pathlib.Path(config.get("output")).expanduser()
-    return name
+            name = pathlib.Path(config.get("output"))
+    if subfolder and dirname:
+        return dirname / subfolder / name.expanduser()
+    elif subfolder:
+        return subfolder / name.expanduser()
+    elif dirname:
+        return dirname / name.expanduser()
+    else:
+        return name.expanduser()
 
 
 def _formatname(output, config):
