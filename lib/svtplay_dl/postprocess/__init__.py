@@ -124,7 +124,7 @@ class postprocess:
         if self.config.get("merge_subtitle"):
             if self.subfixes and len(self.subfixes) >= 2:
                 for subfix in self.subfixes:
-                    subfile = orig_filename.parent / (orig_filename.name + "." + subfix + ".srt")
+                    subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                     os.remove(subfile)
             else:
                 os.remove(subfile)
