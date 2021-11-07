@@ -330,7 +330,7 @@ class Svtplay(Service, MetadataThumbMixin):
 
     def extrametadata(self, episode):
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
-        if "validFrom" in episode:
+        if "validFrom" in episode["item"]:
 
             def _fix_broken_timezone_implementation(value):
                 # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
