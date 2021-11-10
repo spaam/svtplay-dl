@@ -29,7 +29,7 @@ class Discoveryplus(Service):
             logging.error("Something went wrong getting token for requests")
 
         if not self._login():
-            yield ServiceError("You need the 'st' cookie from your web brower for the site to make it work")
+            yield ServiceError("You need the 'st' cookie from your web browser for the site to make it work")
             return
 
         channel = False
