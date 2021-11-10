@@ -77,7 +77,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         janson = res.json()
         stream = janson["embedded"]["prioritizedStreams"][0]["links"]["stream"]
 
-        if video["_embedded"]["program"]["_links"]["streamLink"]:
+        if video["_embedded"]["program"]["_links"]["streamLink"] and stream["href"]:
             parse = urlparse(stream["href"])
             query = parse_qs(parse.query)
             query.pop("filter", None)
