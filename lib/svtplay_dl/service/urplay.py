@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils.http import download_thumbnails
 
 
 class Urplay(Service, OpenGraphThumbMixin):
@@ -95,9 +96,14 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "id" in data and data["id"]:
             self.output["id"] = str(data["id"])
 
+        self.output["episodethumbnailurl"] = data["image"]["1280x720"]
+
         # Try to match Season info from HTML (not available in json, it seems), e.g.: <button class="SeasonsDropdown-module__seasonButton___25Uyt" type="button"><span>Säsong 6</span>
         seasonmatch = re.search(r"data-testid=\"season-name-label\">S.song (\d+)...<\/span", urldata)
         if seasonmatch:
             self.output["season"] = seasonmatch.group(1)
         else:
             self.output["season"] = "1"  # No season info - probably show without seasons
+
+    def get_thumbnail(self, options):
+        download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
