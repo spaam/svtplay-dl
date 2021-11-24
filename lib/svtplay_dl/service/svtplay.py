@@ -205,7 +205,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 if tab == i["id"]:
                     collections.append(i)
             else:
-                if i["id"] == "upcoming":
+                if i["id"] == "upcoming" or i["id"] == "related":
                     continue
                 elif self.config.get("include_clips") and "clips" in i["id"]:
                     collections.append(i)
