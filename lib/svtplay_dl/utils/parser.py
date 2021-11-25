@@ -420,9 +420,6 @@ def _special_settings(config):
             config.set("merge_subtitle", True)
         else:
             config.set("subtitle", True)
-    if config.get("merge_subtitle"):
-        config.set("remux", True)
-        config.set("subtitle", True)
 
     if config.get("silent_semi"):
         config.set("silent", True)
