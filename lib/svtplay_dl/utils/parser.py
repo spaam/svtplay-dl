@@ -211,7 +211,7 @@ def gen_parser(version="unknown"):
         action="store_true",
         dest="subtitle",
         default=False,
-        help="download subtitle from the site if available",
+        help="download subtitle from the site if available. both merged and separately stored if used with -M",
     )
     subtitle.add_argument(
         "-M",
@@ -219,7 +219,7 @@ def gen_parser(version="unknown"):
         action="store_true",
         dest="merge_subtitle",
         default=False,
-        help="merge subtitle with video/audio file with corresponding ISO639-3 language code." "this invokes --remux automatically.",
+        help="merge subtitle with video/audio file with corresponding ISO639-3 language code. also saved separately if used with -S",
     )
     subtitle.add_argument(
         "--force-subtitle",
