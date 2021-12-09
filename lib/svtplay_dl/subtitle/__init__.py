@@ -93,6 +93,8 @@ class subtitle:
         subdata = re.sub(' xmlns="[^"]+"', "", subs, count=1)
         tree = ET.XML(subdata)
         xml = tree.find("body").find("div")
+        if not xml:
+            return data
         plist = list(xml.findall("p"))
         for node in plist:
             tag = norm(node.tag)
