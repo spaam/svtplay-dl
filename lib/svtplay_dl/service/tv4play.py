@@ -104,7 +104,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         janson2 = jansson["props"]["pageProps"]["initialApolloState"]
         show = jansson["query"]["nid"]
 
-        program = janson2[f"Program:{show}"]
+        program = janson2[f'Program:{{"nid":"{show}"}}']
         episodes_panel = []
         clips_panel = []
         for panel in program["panels"]:
