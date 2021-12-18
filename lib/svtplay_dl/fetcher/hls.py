@@ -359,13 +359,10 @@ class M3U8:
         self.parse_m3u(data)
 
     def __str__(self):
-        return "Version: {}\nMedia Segment: {}\nMedia Playlist: {}\nMaster Playlist: {}\nEncrypted: {}\tIndependent_segments: {}".format(
-            self.version,
-            self.media_segment,
-            self.media_playlist,
-            self.master_playlist,
-            self.encrypted,
-            self.independent_segments,
+        return (
+            f"Version: {self.version}\nMedia Segment: {self.media_segment}\n"
+            f"Media Playlist: {self.media_playlist}\nMaster Playlist: {self.master_playlist}\n"
+            f"Encrypted: {self.encrypted}\tIndependent_segments: {self.independent_segments}"
         )
 
     def parse_m3u(self, data):

@@ -32,7 +32,7 @@ class Picsearch(Service, OpenGraphThumbMixin):
 
         jsondata = self.http.request(
             "get",
-            "http://csp.screen9.com/player?eventParam=1&" "ajaxauth={}&method=embed&mediaid={}".format(ajax_auth.group(1), mediaid),
+            f"http://csp.screen9.com/player?eventParam=1&ajaxauth={ajax_auth.group(1)}&method=embed&mediaid={mediaid}",
         ).text
         jsondata = json.loads(jsondata)
 

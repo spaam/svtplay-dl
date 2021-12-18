@@ -89,7 +89,7 @@ class Barnkanalen(Svtplay):
                     svtID = episode["item"]["variants"][0]
                 else:
                     svtID = episode["item"]
-                episodes.append("https://www.svt.se/barnkanalen/barnplay/{}/{}/".format(title, svtID["svtId"]))
+                episodes.append(f"https://www.svt.se/barnkanalen/barnplay/{title}/{svtID['svtId']}/")
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]
         return episodes

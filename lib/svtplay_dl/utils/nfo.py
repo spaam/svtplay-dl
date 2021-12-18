@@ -52,7 +52,7 @@ def write_nfo_tvshow(output, config):
         ET.SubElement(root, "plot").text = output["showdescription"]
     if config.get("thumbnail"):
         # Set the thumbnail relative path to downloaded thumbnail
-        ET.SubElement(root, "thumb").text = "{}.tvshow.tbn".format(output["title"])
+        ET.SubElement(root, "thumb").text = f"{output['title']}.tvshow.tbn"
     elif output["episodethumbnailurl"]:
         # Set the thumbnail path to download link if not thumbnail downloaded
         ET.SubElement(root, "thumb").text = output["showthumbnailurl"]

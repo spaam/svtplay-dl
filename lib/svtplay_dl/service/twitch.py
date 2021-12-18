@@ -67,7 +67,7 @@ class Twitch(Service):
             yield ServiceError("Can't find the video")
             return
         info = json.loads(data.text)
-        self.output["title"] = "twitch-{}".format(info["channel"]["name"])
+        self.output["title"] = f"twitch-{info['channel']['name']}"
         self.output["episodename"] = info["title"]
 
         if "token" not in access:
@@ -116,7 +116,7 @@ class Twitch(Service):
     def _get_hls_url(self, channel):
         access = self._get_access_token(channel, "channels")
 
-        query = "token={}&sig={}&allow_source=true&allow_spectre=true".format(quote_plus(access["token"]), access["sig"])
+        query = f"token={quote_plus(access['token'])}&sig={access['sig']}&allow_source=true&allow_spectre=true"
         return f"{self.hls_base_url}/{channel}.m3u8?{query}"
 
     def _get_channel(self, urlp):

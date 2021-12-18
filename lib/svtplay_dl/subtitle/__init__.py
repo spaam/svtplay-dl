@@ -112,10 +112,10 @@ class subtitle:
                         sec = float(begin2[2]) + float(duration2[2])
                     except ValueError:
                         sec = 0.000
-                    end = "%02d:%02d:%06.3f" % (int(begin2[0]), int(begin2[1]), sec)
+                    end = f"{int(begin2[0]):02d}:{int(begin2[1]):02d}:{sec:06.3f}"
                 else:
                     end = node.attrib["end"]
-                data += "{}\n{} --> {}\n".format(i, begin.replace(".", ","), end.replace(".", ","))
+                data += f"{i}\n{begin.replace('.', ',')} --> {end.replace('.', ',')}\n"
                 data = tt_text(node, data)
                 data += "\n"
                 i += 1
@@ -127,8 +127,8 @@ class subtitle:
         number = 1
         subs = ""
         for i in data:
-            subs += "{}\n{} --> {}\n".format(number, timestr(int(i["startMillis"])), timestr(int(i["endMillis"])))
-            subs += "%s\n\n" % i["text"]
+            subs += f"{number}\n{timestr(int(i['startMillis']))} --> {timestr(int(i['endMillis']))}\n"
+            subs += f"{i['text']}\n\n"
             number += 1
 
         return subs
@@ -155,7 +155,7 @@ class subtitle:
                 for txt in text.itertext():
                     line += f"{txt}"
                 all += f"{decode_html_entities(line.lstrip())}\n"
-            subs += "{}\n{} --> {}\n{}\n".format(n, timecolon(sub.attrib["TimeIn"]), timecolon(sub.attrib["TimeOut"]), all)
+            subs += f"{n}\n{timecolon(sub.attrib['TimeIn'])} --> {timecolon(sub.attrib['TimeOut'])}\n{all}\n"
         subs = re.sub("&amp;", r"&", subs)
         return subs
 
@@ -217,7 +217,7 @@ class subtitle:
                 srt += "\n"
             elif match2:
                 if not subnr:
-                    srt += "%s\n" % number_b
+                    srt += f"{number_b}\n"
                 matchx = re.search(r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                 if matchx:
                     hour1 = int(matchx.group("h1"))
@@ -232,14 +232,7 @@ class subtitle:
                     matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                     hour1 = 0
                     hour2 = 0
-                time = "{:02d}:{}:{} --> {:02d}:{}:{}\n".format(
-                    hour1,
-                    matchx.group("m1"),
-                    matchx.group("s1").replace(".", ","),
-                    hour2,
-                    matchx.group("m2"),
-                    matchx.group("s2").replace(".", ","),
-                )
+                time = f"{hour1:02d}:{matchx.group('m1')}:{matchx.group('s1').replace('.', ',')} --> {hour2:02d}:{matchx.group('m2')}:{matchx.group('s2').replace('.', ',')}\n"
                 srt += time
                 block = 1
                 subnr = False
@@ -247,7 +240,7 @@ class subtitle:
 
             elif match3 and block == 0:
                 number = match3.group(1)
-                srt += "%s\n" % number
+                srt += f"{number}\n"
                 subnr = True
             else:
                 if self.config.get("convert_subtitle_colors"):
@@ -424,8 +417,7 @@ def timestr(msec):
     minutes = int(sec / 60)
     sec -= minutes * 60
 
-    output = "%02d:%02d:%06.3f" % (hours, minutes, sec)
-    return output.replace(".", ",")
+    return f"{hours:02d}:{minutes:02d}:{sec:06.3f}".replace(".", ",")
 
 
 def timecolon(data):
@@ -450,7 +442,7 @@ def tt_text(node, data):
         if i.tail:
             text = i.tail.strip(" \t\n\r")
             if text:
-                data += "%s\n" % text
+                data += f"{text}\n"
     return data
 
 

@@ -12,7 +12,7 @@ class VideoRetriever:
         self.name = proto
 
     def __repr__(self):
-        return "%s(%d)" % (self.proto.upper(), self.bitrate)
+        return f"{self.proto.upper()}({self.bitrate})"
 
 
 class PrioStreamsTest(unittest.TestCase):

@@ -43,7 +43,7 @@ class Koket(Service, OpenGraphThumbMixin):
         janson = json.loads(match.group(1))
         self.output["id"] = janson[0]["video"]
 
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
+        url = f"https://playback-api.b17g.net/media/{self.output['id']}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine"
 
         videoDataRes = self.http.get(url)
         if videoDataRes.json()["playbackItem"]["type"] == "hls":

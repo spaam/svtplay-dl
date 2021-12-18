@@ -33,8 +33,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
 
             wanted_id = match_id.group(1)
             url_service = (
-                "http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{}"
-                "&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c".format(wanted_id)
+                f"http://feeds.mtvnservices.com/od/feed/intl-mrss-player-feed?mgid=mgid:arc:episode:nick.intl:{wanted_id}"
+                "&arcEp=nickelodeon.se&imageEp=nickelodeon.se&stage=staging&accountOverride=intl.mtvi.com&ep=a9cc543c"
             )
             service_asset = self.http.request("get", url_service)
             match_guid = re.search('<guid isPermaLink="false">(.*)</guid>', service_asset.text)
@@ -44,8 +44,8 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 return
 
             hls_url = (
-                "https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{}?arcStage=staging&accountOverride=intl.mtvi.com&"
-                "billingSection=intl&ep=a9cc543c&acceptMethods=hls".format(match_guid.group(1))
+                f"https://mediautilssvcs-a.akamaihd.net/services/MediaGenerator/{match_guid.group(1)}?arcStage=staging&accountOverride=intl.mtvi.com&"
+                "billingSection=intl&ep=a9cc543c&acceptMethods=hls"
             )
             hls_asset = self.http.request("get", hls_url)
             xml = ET.XML(hls_asset.text)
@@ -133,10 +133,7 @@ class MtvMusic(Service, OpenGraphThumbMixin):
 
         for n in janson:
             if wanted_id == str(n["id"]):
-
-                mrssxmlurl = "http://media-utils.mtvnservices.com/services/MediaGenerator/" "mgid:arc:video:mtv.se:{}?acceptMethods=hls".format(
-                    n["video_token"],
-                )
+                mrssxmlurl = f"http://media-utils.mtvnservices.com/services/MediaGenerator/mgid:arc:video:mtv.se:{n['video_token']}?acceptMethods=hls"
                 hls_asset = self.http.request("get", mrssxmlurl)
                 xml = ET.XML(hls_asset.text)
 

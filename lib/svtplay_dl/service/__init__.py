@@ -179,7 +179,7 @@ class Generic(Service):
 
         match = re.search(r"tv4play.se/iframe/video/(\d+)?", data)
         if match:
-            url = "http://www.tv4play.se/?video_id=%s" % match.group(1)
+            url = f"http://www.tv4play.se/?video_id={match.group(1)}"
             for i in sites:
                 if i.handles(url):
                     return url, i(self.config, url)
@@ -200,7 +200,7 @@ class Generic(Service):
 
         match = re.search('iframe src="(//csp.screen9.com[^"]+)"', data)
         if match:
-            url = "http:%s" % match.group(1)
+            url = f"https:{match.group(1)}"
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)

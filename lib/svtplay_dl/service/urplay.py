@@ -39,10 +39,10 @@ class Urplay(Service, OpenGraphThumbMixin):
 
             if streaminfo == "raw":
                 if "sd" in stream:
-                    url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["sd"]["location"])
+                    url = f"https://{loadbalancer}/{stream['sd']['location']}playlist.m3u8"
                     yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
                 if "hd" in stream:
-                    url = "https://{}/{}playlist.m3u8".format(loadbalancer, stream["hd"]["location"])
+                    url = f"https://{loadbalancer}/{stream['hd']['location']}playlist.m3u8"
                     yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
             if not (self.config.get("get_all_subtitles")) and streaminfo == "sweComplete":
                 yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), output=self.output)
@@ -50,7 +50,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             if self.config.get("get_all_subtitles") and "tt" in stream:
                 label = stream["tt"]["language"]
                 if stream["tt"]["scope"] != "complete":
-                    label = "{}-{}".format(label, stream["tt"]["scope"])
+                    label = f"{label}-{stream['tt']['scope']}"
                 yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), label, output=copy.copy(self.output))
 
     def find_all_episodes(self, config):

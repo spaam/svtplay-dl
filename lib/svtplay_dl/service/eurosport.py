@@ -86,7 +86,7 @@ class Eurosport(Service):
 
             url = (
                 "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/"
-                "query/eurosport/web/Airings/onAir?variables={}".format(quote(json.dumps(query)))
+                f"query/eurosport/web/Airings/onAir?variables={quote(json.dumps(query))}"
             )
             res = self.http.get(url, headers={"authorization": access_token})
             vid2 = res.json()["data"]["Airings"][0]["channel"]["id"]
@@ -103,9 +103,7 @@ class Eurosport(Service):
             query["title"], query["contentId"] = match.groups()
             query["pageType"] = pagetype
 
-            url = "https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/" "persisted/query/eurosport/Airings?variables={}".format(
-                quote(json.dumps(query)),
-            )
+            url = f"https://search-api.svcs.eurosportplayer.com/svc/search/v2/graphql/persisted/query/eurosport/Airings?variables={quote(json.dumps(query))}"
             res = self.http.get(url, headers={"authorization": access_token})
             programid = res.json()["data"]["Airings"][0]["programId"]
             mediaid = res.json()["data"]["Airings"][0]["mediaId"]

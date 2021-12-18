@@ -23,10 +23,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
             end_time_stamp = (datetime.utcnow() - timedelta(minutes=1, seconds=20)).replace(microsecond=0)
             start_time_stamp = end_time_stamp - timedelta(minutes=1)
 
-            url = "https://bbr-l2v.akamaized.net/live/{}/master.m3u8?in={}&out={}?".format(
-                parse.path[9:],
-                start_time_stamp.isoformat(),
-                end_time_stamp.isoformat(),
+            url = (
+                f"https://bbr-l2v.akamaized.net/live/{parse.path[9:]}/master.m3u8?in={start_time_stamp.isoformat()}&out={end_time_stamp.isoformat()}?"
             )
 
             self.config.set("live", True)
@@ -212,7 +210,7 @@ class Tv4(Service, OpenGraphThumbMixin):
         if janson["query"]["type"] == "Article":
             vidasset = janson["props"]["pageProps"]["apolloState"][f"Article:{janson['query']['id']}"]["featured"]["__ref"]
             self.output["id"] = janson["props"]["pageProps"]["apolloState"][vidasset]["id"]
-        url = "https://playback-api.b17g.net/media/{}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"])
+        url = f"https://playback-api.b17g.net/media/{self.output['id']}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine"
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")

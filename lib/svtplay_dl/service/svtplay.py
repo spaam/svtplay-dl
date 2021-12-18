@@ -362,7 +362,7 @@ class Svtplay(Service, MetadataThumbMixin):
         except KeyError:
             t = ""
         if isinstance(t, dict):
-            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            url = f"https://www.svtstatic.se/image/original/default/{t['id']}/{t['changed']}?format=auto&quality=100"
             self.output["showthumbnailurl"] = url
         elif t:
             # Get the image if size/format is not specified in the URL set it to large
@@ -373,7 +373,7 @@ class Svtplay(Service, MetadataThumbMixin):
         except KeyError:
             t = ""
         if isinstance(t, dict):
-            url = "https://www.svtstatic.se/image/original/default/{id}/{changed}?format=auto&quality=100".format(**t)
+            url = f"https://www.svtstatic.se/image/original/default/{t['id']}/{t['changed']}?format=auto&quality=100"
             self.output["episodethumbnailurl"] = url
         elif t:
             # Get the image if size/format is not specified in the URL set it to large

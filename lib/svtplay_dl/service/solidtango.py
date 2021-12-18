@@ -60,7 +60,7 @@ class Solidtango(Service):
             yield from hlsparse(self.config, self.http.request("get", match2.group(1)), match2.group(1), output=self.output)
         else:
             parse = urlparse(self.url)
-            url2 = "https://{}/api/v1/play/{}.xml".format(parse.netloc, parse.path[parse.path.rfind("/") + 1 :])
+            url2 = f"https://{parse.netloc}/api/v1/play/{parse.path[parse.path.rfind('/') + 1 :]}.xml"
             data = self.http.request("get", url2)
             if data.status_code != 200:
                 yield ServiceError("Can't find video info. if there is a video on the page. its a bug.")

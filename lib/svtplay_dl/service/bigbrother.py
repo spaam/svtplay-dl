@@ -42,8 +42,8 @@ class Bigbrother(Service, OpenGraphThumbMixin):
         videoplayer = match.group(1)
 
         dataurl = (
-            "http://c.brightcove.com/services/viewer/htmlFederated?flashID={}&playerID={}&playerKey={}"
-            "&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer={}".format(flashid, playerid, playerkey, videoplayer)
+            f"http://c.brightcove.com/services/viewer/htmlFederated?flashID={flashid}&"
+            f"playerID={playerid}&playerKey={playerkey}&isVid=true&isUI=true&dynamicStreaming=true&@videoPlayer={videoplayer}"
         )
         data = self.http.request("get", dataurl).content
         match = re.search(r"experienceJSON = ({.*});", data)

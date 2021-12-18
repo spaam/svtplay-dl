@@ -29,10 +29,7 @@ class Cmore(Service):
         tld = self._gettld()
         self.output["id"] = vid
 
-        metaurl = "https://playback-api.b17g.net/asset/{}?service=cmore.{}" "&device=browser&drm=widevine&protocol=dash%2Chls".format(
-            self.output["id"],
-            tld,
-        )
+        metaurl = f"https://playback-api.b17g.net/asset/{self.output['id']}?service=cmore.{tld}&device=browser&drm=widevine&protocol=dash%2Chls"
         res = self.http.get(metaurl)
         janson = res.json()
         self._autoname(janson)
@@ -40,7 +37,7 @@ class Cmore(Service):
             yield ServiceError("Can't play this because the video got drm.")
             return
 
-        url = "https://playback-api.b17g.net/media/{}?service=cmore.{}&device=browser&protocol=hls%2Cdash&drm=widevine".format(self.output["id"], tld)
+        url = f"https://playback-api.b17g.net/media/{self.output['id']}?service=cmore.{tld}&device=browser&protocol=hls%2Cdash&drm=widevine"
         res = self.http.request("get", url, cookies=self.cookies, headers={"authorization": f"Bearer {token}"})
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")
@@ -116,11 +113,7 @@ class Cmore(Service):
     def _login(self):
         tld = self._gettld()
         if self.config.get("cmoreoperator"):
-            url = "https://tve.cmore.se/country/{}/operator/{}/user/{}/exists?client=cmore-web-prod".format(
-                tld,
-                self.config.get("cmoreoperator"),
-                self.config.get("username"),
-            )
+            url = f"https://tve.cmore.se/country/{tld}/operator/{self.config.get('cmoreoperator')}/user/{self.config.get('username')}/exists?client=cmore-web-prod"
             post = {
                 "password": self.config.get("password"),
             }
@@ -144,7 +137,7 @@ class Cmore(Service):
     def operatorlist(self):
         res = self.http.get(f"https://tve.cmore.se/country/{self._gettld()}/operator?client=cmore-web-prod")
         for i in res.json()["data"]["operators"]:
-            print("operator: '{}'".format(i["name"].lower()))
+            print(f"operator: '{i['name'].lower()}")
 
     def _get_vid(self):
         res = self.http.get(self.url)

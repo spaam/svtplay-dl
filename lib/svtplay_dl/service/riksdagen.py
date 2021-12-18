@@ -16,7 +16,7 @@ class Riksdagen(Service, OpenGraphThumbMixin):
             return
 
         vid = match.group(1)
-        res = self.http.get("http://www.riksdagen.se/api/videostream/get/%s" % vid)
+        res = self.http.get(f"http://www.riksdagen.se/api/videostream/get/{vid}")
         data = res.json()
 
         try:

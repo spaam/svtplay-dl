@@ -41,7 +41,7 @@ def get_multiple_media(urls, config):
 
 def get_media(url, options, version="Unknown"):
     if "http" not in url[:4]:
-        url = "http://%s" % url
+        url = f"http://{url}"
 
     if options.get("verbose"):
         logging.debug(f"version: {version}")
@@ -141,13 +141,8 @@ def get_one_media(stream):
         pub_date = None
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
         logging.info(
-            "Video {}S{}E{} skipped since published {} before {}. ".format(
-                stream.output["title"],
-                stream.output["season"],
-                stream.output["episode"],
-                pub_date.date(),
-                after_date.date(),
-            ),
+            f"Video {stream.output['title']}S{stream.output['season']}E{stream.output['episode']}"
+            f" skipped since published {pub_date.date()} before {after_date.date()}.",
         )
         return
 
@@ -211,7 +206,7 @@ def get_one_media(stream):
             stream.get_thumbnail(stream.config)
 
         if fstream.config.get("silent_semi") and fstream.finished:
-            logging.log(25, "Download of %s was completed" % formatname(fstream.output, fstream.config, fstream.output_extention))
+            logging.log(25, f"Download of {formatname(fstream.output, fstream.config, fstream.output_extention)} was completed")
 
         if fstream.config.get("no_postprocess") is True or all(fstream.config.get(x) for x in ["no_remux", "no_merge"]) is True:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")

@@ -131,7 +131,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         seasons = []
 
         if janson["page"]["pageType"] == "player":
-            res = self.http.get("{}://{}{}".format(parse.scheme, parse.netloc, janson["page"]["blocks"][0]["_links"]["back"]["publicPath"]))
+            res = self.http.get(f"{parse.scheme}://{parse.netloc}{janson['page']['blocks'][0]['_links']['back']['publicPath']}")
             data = res.text
             match = re.search('}}}},("staticPages".*}}); windo', data)
             if not match:
@@ -164,14 +164,14 @@ class Viafree(Service, OpenGraphThumbMixin):
                         if i["episode"]["episodeNumber"]:
                             videos_tmp.append(
                                 [
-                                    int("{}{}".format(i["episode"]["seasonNumber"], i["episode"]["episodeNumber"])),
-                                    "{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]),
+                                    int(f"{i['episode']['seasonNumber']}{i['episode']['episodeNumber']}"),
+                                    f"{parse.scheme}://{parse.netloc}{i['publicPath']}",
                                 ],
                             )
                         elif config.get("include_clips"):
-                            clips.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))
+                            clips.append(f"{parse.scheme}://{parse.netloc}{i['publicPath']}")
                     else:
-                        episodes.append("{}://{}{}".format(parse.scheme, parse.netloc, i["publicPath"]))
+                        episodes.append(f"{parse.scheme}://{parse.netloc}{i['publicPath']}")
         if videos_tmp:
             for i in sorted(videos_tmp, key=lambda x: x[0]):
                 episodes.append(i[1])
@@ -221,4 +221,4 @@ class Viafree(Service, OpenGraphThumbMixin):
         return False
 
     def _jansonpage(self, text):
-        return json.loads("{}{}".format("{", text.replace("undefined", "null")))
+        return json.loads(f"{{{text.replace('undefined', 'null')}")
