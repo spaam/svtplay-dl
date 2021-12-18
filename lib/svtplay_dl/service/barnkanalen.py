@@ -74,15 +74,16 @@ class Barnkanalen(Svtplay):
         yield from self._get_video(janson)
 
     def find_all_episodes(self, config):
+        episodes = []
         data = self.get_urldata()
         match = re.search(self.info_search_expr, data)
         if not match:
             logging.error("Can't find video info.")
-            return
+            return episodes
 
         janson = json.loads(match.group(1))
         title = janson["query"]["titleSlug"]
-        episodes = []
+
         for season in janson["props"]["pageProps"]["initialState"]["featuredTitle"]["associatedContent"]:
             for episode in season["items"]:
                 if "variants" in episode["item"]:

@@ -89,19 +89,20 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                     yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
 
     def find_all_episodes(self, config):
+        episodes = []
         match = re.search(r"data-franchise='([^']+)'", self.get_urldata())
         if match is None:
             logging.error("Couldn't program id")
-            return
+            return episodes
         programid = match.group(1)
         match = re.findall(r"<li class='([a-z]+ )?playlist-item( [a-z]+)*?'( data-[-a-z]+='[^']+')* data-item-id='([^']+)'", self.get_urldata())
         if not match:
             logging.error("Couldn't retrieve episode list")
-            return
+            return episodes
         episodNr = []
         for i in match:
             episodNr.append(i[3])
-        episodes = []
+
         n = 0
         for i in sorted(episodNr):
             if n == config.get("all_last"):

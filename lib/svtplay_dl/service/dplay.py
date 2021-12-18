@@ -9,4 +9,3 @@ class Discoveryplus(Service):
 
     def get(self):
         yield ServiceError("Can't download videos from this site anymore because of DRM")
-        return

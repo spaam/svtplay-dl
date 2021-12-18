@@ -125,7 +125,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         match = re.search('}}}},("staticPages".*}}); windo', data)
         if not match:
             logging.error("Cant find necessary info")
-            return
+            return episodes
 
         janson = self._jansonpage(match.group(1))
         seasons = []
@@ -136,7 +136,7 @@ class Viafree(Service, OpenGraphThumbMixin):
             match = re.search('}}}},("staticPages".*}}); windo', data)
             if not match:
                 logging.error("Cant find necessary info")
-                return
+                return episodes
 
             janson = self._jansonpage(match.group(1))
 

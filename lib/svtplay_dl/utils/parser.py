@@ -45,6 +45,7 @@ class Options:
     def get(self, key):
         if key in self.default:
             return self.default[key]
+        return None
 
     def get_variable(self):
         return self.default

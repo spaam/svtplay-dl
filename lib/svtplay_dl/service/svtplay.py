@@ -119,7 +119,7 @@ class Svtplay(Service, MetadataThumbMixin):
         match = re.search(self.info_search_expr, self.get_urldata())
         if not match:
             logging.error("Can't find video info.")
-            return
+            return videos
         janson = json.loads(match.group(1))
         video_data = None
         for data_entry in janson["props"]["urqlState"].values():
@@ -172,6 +172,7 @@ class Svtplay(Service, MetadataThumbMixin):
     def _all_episodes(self, url):
         parse = urlparse(url)
         tab = None
+        videos = []
         if parse.query:
             query = parse_qs(parse.query)
             if "tab" in query:
@@ -181,7 +182,7 @@ class Svtplay(Service, MetadataThumbMixin):
         match = re.search(self.info_search_expr, data)
         if not match:
             logging.error("Can't find video info.")
-            return
+            return videos
 
         janson = json.loads(match.group(1))
         video_data = None
@@ -195,9 +196,8 @@ class Svtplay(Service, MetadataThumbMixin):
                         break
 
         collections = []
-        videos = []
         if video_data is None:
-            return
+            return videos
         if video_data["item"]["parent"]["__typename"] == "Single":
             videos.append(urljoin("http://www.svtplay.se", video_data["item"]["urls"]["svtplay"]))
         for i in video_data["associatedContent"]:

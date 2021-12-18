@@ -59,7 +59,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", self.get_urldata())
         if not match:
             logging.error("Can't find video info.")
-            return
+            return episodes
 
         data = unescape(match.group(1))
         jsondata = json.loads(data)

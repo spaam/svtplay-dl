@@ -71,6 +71,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         return None
 
     def find_all_episodes(self, config):
+        episodes = []
         page = 1
         data = self.get_urldata()
         match = re.search(r'"/etikett/titel/([^"/]+)', data)
@@ -78,9 +79,8 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
             match = re.search(r'"http://www.oppetarkiv.se/etikett/titel/([^/]+)/', self.url)
             if match is None:
                 logging.error("Couldn't find title")
-                return
+                return episodes
         program = match.group(1)
-        episodes = []
 
         n = 0
         if self.config.get("all_last") > 0:
@@ -111,7 +111,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
         datatitle = re.search('data-title="([^"]+)"', self.get_urldata())
         if not datatitle:
-            return None
+            return
         datat = decode_html_entities(datatitle.group(1))
         self.output["title"] = self.name(datat)
         self.seasoninfo(datat)
