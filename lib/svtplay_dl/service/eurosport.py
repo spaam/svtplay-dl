@@ -21,50 +21,50 @@ class Eurosport(Service):
         janson = json.loads(match.group(1))
         clientapikey = janson["sdk"]["clientApiKey"]
 
-        devices = "https://eu.edge.bamgrid.com/devices"
-        postdata = {"deviceFamily": "browser", "applicationRuntime": "firefox", "deviceProfile": "macosx", "attributes": {}}
         header = {"authorization": f"Bearer {clientapikey}"}
-        res = self.http.post(devices, headers=header, json=postdata)
+        res = self.http.post(
+            "https://eu.edge.bamgrid.com/devices",
+            headers=header,
+            json={"deviceFamily": "browser", "applicationRuntime": "firefox", "deviceProfile": "macosx", "attributes": {}},
+        )
+        res = self.http.post(
+            "https://eu.edge.bamgrid.com/token",
+            headers=header,
+            data={
+                "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+                "latitude": 0,
+                "longitude": 0,
+                "platform": "browser",
+                "subject_token": res.json()["assertion"],
+                "subject_token_type": "urn:bamtech:params:oauth:token-type:device",
+            },
+        )
 
-        assertion = res.json()["assertion"]
-
-        token = "https://eu.edge.bamgrid.com/token"
-        data = {
-            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
-            "latitude": 0,
-            "longitude": 0,
-            "platform": "browser",
-            "subject_token": assertion,
-            "subject_token_type": "urn:bamtech:params:oauth:token-type:device",
-        }
-
-        res = self.http.post(token, headers=header, data=data)
-        access_token = res.json()["access_token"]
-
-        login = "https://eu.edge.bamgrid.com/idp/login"
-        header = {"authorization": f"Bearer {access_token}"}
-        res = self.http.post(login, headers=header, json={"email": self.config.get("username"), "password": self.config.get("password")})
+        header = {"authorization": f"Bearer {res.json()['access_token']}"}
+        res = self.http.post(
+            "https://eu.edge.bamgrid.com/idp/login",
+            headers=header,
+            json={"email": self.config.get("username"), "password": self.config.get("password")},
+        )
         if res.status_code > 400:
             yield ServiceError("Wrong username or password")
             return
 
-        id_token = res.json()["id_token"]
-
         grant = "https://eu.edge.bamgrid.com/accounts/grant"
-        res = self.http.post(grant, headers=header, json={"id_token": id_token})
-        assertion = res.json()["assertion"]
-
-        token = "https://eu.edge.bamgrid.com/token"
-        data = {
-            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
-            "latitude": 0,
-            "longitude": 0,
-            "platform": "browser",
-            "subject_token": assertion,
-            "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
-        }
+        res = self.http.post(grant, headers=header, json={"id_token": res.json()["id_token"]})
         header = {"authorization": f"Bearer {clientapikey}"}
-        res = self.http.post(token, headers=header, data=data)
+        res = self.http.post(
+            "https://eu.edge.bamgrid.com/token",
+            headers=header,
+            data={
+                "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+                "latitude": 0,
+                "longitude": 0,
+                "platform": "browser",
+                "subject_token": res.json()["assertion"],
+                "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
+            },
+        )
         access_token = res.json()["access_token"]
 
         query = {"preferredLanguages": ["en"], "mediaRights": ["GeoMediaRight"], "uiLang": "en", "include_images": True}

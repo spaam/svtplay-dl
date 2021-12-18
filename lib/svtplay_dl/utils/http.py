@@ -16,7 +16,7 @@ retry = Retry(total=5, read=5, connect=5, backoff_factor=0.3, status_forcelist=(
 
 
 class HTTP(Session):
-    def __init__(self, config=dict(), *args, **kwargs):
+    def __init__(self, config={}, *args, **kwargs):
         Session.__init__(self, *args, **kwargs)
         adapter = HTTPAdapter(max_retries=retry)
 

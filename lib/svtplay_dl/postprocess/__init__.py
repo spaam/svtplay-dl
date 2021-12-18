@@ -52,7 +52,7 @@ class postprocess:
             cmd += ["-i", str(orig_filename)]
         if self.stream.audio and self.config.get("only_audio") or not self.config.get("only_video"):
             cmd += ["-i", str(audio_filename)]
-        _, stdout, stderr = run_program(cmd, False)  # return 1 is good here.
+        _, _, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
 
@@ -215,7 +215,7 @@ def _sublanguage(stream, config, subfixes):
         subfile = formatname(stream.output, config).with_suffix(".srt")
         langs += [query(subfile)]
     if len(langs) >= 2:
-        logging.info("Language codes: " + ", ".join(langs))
+        logging.info("Language codes: %s", ", ".join(langs))
     else:
-        logging.info("Language code: " + langs[0])
+        logging.info("Language code: %s", langs[0])
     return langs

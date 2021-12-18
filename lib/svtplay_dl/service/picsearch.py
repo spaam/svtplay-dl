@@ -14,10 +14,9 @@ from svtplay_dl.service import Service
 
 class Picsearch(Service, OpenGraphThumbMixin):
     supported_domains = ["dn.se", "mobil.dn.se", "di.se", "csp.picsearch.com", "csp.screen9.com"]
+    backupapi = None
 
     def get(self):
-        self.backupapi = None
-
         ajax_auth = self.get_auth()
         if not ajax_auth:
             yield ServiceError("Cant find token for video")

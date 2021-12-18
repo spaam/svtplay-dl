@@ -67,14 +67,14 @@ class Cmore(Service):
         token, message = self._login()
         if not token:
             logging.error(message)
-            return
+            return episodes
 
         parse = urlparse(self.url)
         url = f"https://www.cmore.{self._gettld()}/page-data{parse.path}/page-data.json"
         res = self.http.get(url)
         if res.status_code > 400:
             logging.warning("Bad url? it only work with series")
-            return seasons
+            return episodes
 
         janson = res.json()
 
@@ -113,7 +113,10 @@ class Cmore(Service):
     def _login(self):
         tld = self._gettld()
         if self.config.get("cmoreoperator"):
-            url = f"https://tve.cmore.se/country/{tld}/operator/{self.config.get('cmoreoperator')}/user/{self.config.get('username')}/exists?client=cmore-web-prod"
+            url = (
+                f"https://tve.cmore.se/country/{tld}/operator/{self.config.get('cmoreoperator')}"
+                f"/user/{self.config.get('username')}/exists?client=cmore-web-prod"
+            )
             post = {
                 "password": self.config.get("password"),
             }
@@ -156,7 +159,6 @@ class Cmore(Service):
         if "seriesTitle" in janson["metadata"]:
             self.output["title"] = janson["metadata"]["seriesTitle"]
             self.output["episodename"] = janson["metadata"]["episodeTitle"]
-
         else:
             self.output["title"] = janson["metadata"]["title"]
         self.output["season"] = janson["metadata"]["seasonNumber"]

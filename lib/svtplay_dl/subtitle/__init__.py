@@ -98,7 +98,7 @@ class subtitle:
         plist = list(xml.findall("p"))
         for node in plist:
             tag = norm(node.tag)
-            if tag == "p" or tag == "span":
+            if tag in ("p", "span"):
                 begin = node.attrib["begin"]
                 if not ("dur" in node.attrib):
                     if "end" not in node.attrib:
@@ -179,8 +179,7 @@ class subtitle:
                 if int(sync.group(1)) != int(timea):
                     if data and data != "&nbsp;":
                         subs += f"{number}\n{timestr(timea)} --> {timestr(sync.group(1))}\n"
-                        text = "%s\n" % TAG_RE.sub("", data.replace("<br>", "\n"))
-                        text = decode_html_entities(text)
+                        text = decode_html_entities("%s\n" % TAG_RE.sub("", data.replace("<br>", "\n")))
                         if text[len(text) - 2] != "\n":
                             text += "\n"
                         subs += text
@@ -232,7 +231,10 @@ class subtitle:
                     matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
                     hour1 = 0
                     hour2 = 0
-                time = f"{hour1:02d}:{matchx.group('m1')}:{matchx.group('s1').replace('.', ',')} --> {hour2:02d}:{matchx.group('m2')}:{matchx.group('s2').replace('.', ',')}\n"
+                time = (
+                    f"{hour1:02d}:{matchx.group('m1')}:{matchx.group('s1').replace('.', ',')} --> "
+                    f"{hour2:02d}:{matchx.group('m2')}:{matchx.group('s2').replace('.', ',')}\n"
+                )
                 srt += time
                 block = 1
                 subnr = False

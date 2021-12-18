@@ -17,7 +17,7 @@ class Disney(Service, OpenGraphThumbMixin):
 
     def get(self):
         parse = urlparse(self.url)
-        if parse.hostname == "video.disney.se" or parse.hostname == "disneyjunior.disney.se":
+        if parse.hostname in ("video.disney.se", "disneyjunior.disney.se"):
             data = self.get_urldata()
             match = re.search(r"Grill.burger=({.*}):", data)
             if not match:

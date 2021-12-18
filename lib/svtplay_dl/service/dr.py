@@ -49,18 +49,20 @@ class Dr(Service, OpenGraphThumbMixin):
 
         for i in offerlist:
             vid, resolution = i
-            url = f"https://isl.dr-massive.com/api/account/items/{vid}/videos?delivery=stream&device=web_browser&ff=idp%2Cldp&lang=da&resolution={resolution}&sub=Anonymous"
+            url = (
+                f"https://isl.dr-massive.com/api/account/items/{vid}/videos?delivery=stream&device=web_browser&"
+                f"ff=idp%2Cldp&lang=da&resolution={resolution}&sub=Anonymous"
+            )
             res = self.http.request("get", url, headers={"authorization": f"Bearer {token}"})
             for video in res.json():
-                if video["accessService"] == "StandardVideo":
-                    if video["format"] == "video/hls":
-                        res = self.http.request("get", video["url"])
-                        if res.status_code > 400:
-                            yield ServiceError("Can't play this because the video is geoblocked or not available.")
-                        else:
-                            yield from hlsparse(self.config, res, video["url"], output=self.output)
-                            if len(video["subtitles"]) > 0:
-                                yield subtitle(copy.copy(self.config), "wrst", video["subtitles"][0]["link"], output=self.output)
+                if video["accessService"] == "StandardVideo" and video["format"] == "video/hls":
+                    res = self.http.request("get", video["url"])
+                    if res.status_code > 400:
+                        yield ServiceError("Can't play this because the video is geoblocked or not available.")
+                    else:
+                        yield from hlsparse(self.config, res, video["url"], output=self.output)
+                        if len(video["subtitles"]) > 0:
+                            yield subtitle(copy.copy(self.config), "wrst", video["subtitles"][0]["link"], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []

@@ -44,8 +44,7 @@ class Viafree(Service, OpenGraphThumbMixin):
             yield ServiceError("You need to login")
             return
 
-        data = self.get_urldata()
-        match = re.search('}}}},("staticPages".*}}); windo', data)
+        match = re.search('}}}},("staticPages".*}}); windo', self.get_urldata())
         if not match:
             yield ServiceError("Cant find necessary info")
             return
@@ -93,10 +92,8 @@ class Viafree(Service, OpenGraphThumbMixin):
 
         if "subtitles" in janson["embedded"] and len(janson["embedded"]["subtitles"]) > 0:
             lang = re.search(r"(\.\w\w)$", urlparse(self.url).netloc).group(1)
-            if lang in country:
-                language = country[lang]
-            else:
-                language = None
+
+            language = country.get(lang, None)
             self.config.set("subtitle_preferred", language)
 
             if not self.config.get("get_all_subtitles"):

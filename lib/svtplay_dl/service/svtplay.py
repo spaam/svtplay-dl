@@ -32,16 +32,17 @@ LIVE_CHANNELS = {
 class Svtplay(Service, MetadataThumbMixin):
     supported_domains = ["svtplay.se", "svt.se", "beta.svtplay.se", "svtflow.se"]
     info_search_expr = r"<script id=\"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>"
+    access = None
 
     def get(self):
         parse = urlparse(self.url)
-        if parse.netloc == "www.svtplay.se" or parse.netloc == "svtplay.se":
+        if parse.netloc in ("www.svtplay.se", "svtplay.se"):
             if parse.path[:6] != "/video" and parse.path[:6] != "/klipp" and parse.path[:8] != "/kanaler":
                 yield ServiceError("This mode is not supported anymore. Need the url with the video.")
                 return
 
         query = parse_qs(parse.query)
-        self.access = None
+
         if "accessService" in query:
             self.access = query["accessService"]
 
@@ -144,7 +145,7 @@ class Svtplay(Service, MetadataThumbMixin):
         match = re.search(self.info_search_expr, data)
         if not match:
             logging.error("Can't find video info.")
-            return
+            return episodes
         janson = json.loads(match.group(1))
         video_data = None
         for data_entry in janson["props"]["urqlState"].values():
@@ -154,7 +155,7 @@ class Svtplay(Service, MetadataThumbMixin):
                     if "lazyLoadedTabs" in data:
                         video_data = data["lazyLoadedTabs"]
         if not video_data:
-            return videos
+            return episodes
         for lazytab in video_data:
             if "selections" in lazytab:
                 for section in lazytab["selections"]:
@@ -242,8 +243,7 @@ class Svtplay(Service, MetadataThumbMixin):
 
         name = data["moreDetails"]["heading"]
         other = data["moreDetails"]["episodeHeading"]
-        vid = data["video"]["svtId"]
-        id = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
+        vid = hashlib.sha256(data["video"]["svtId"].encode("utf-8")).hexdigest()[:7]
 
         if name == other:
             other = None
@@ -267,7 +267,7 @@ class Svtplay(Service, MetadataThumbMixin):
             other += f"-{desc}"
 
         self.output["title"] = filenamify(name)
-        self.output["id"] = id
+        self.output["id"] = vid
         self.output["season"] = season
         self.output["episode"] = episode
         self.output["episodename"] = other

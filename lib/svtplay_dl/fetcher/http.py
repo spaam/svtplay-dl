@@ -14,7 +14,7 @@ class HTTP(VideoRetriever):
         return "http"
 
     def download(self):
-        """ Get the stream from HTTP """
+        """Get the stream from HTTP"""
         _, ext = os.path.splitext(self.url)
         if ext == ".mp3":
             self.output["ext"] = "mp3"

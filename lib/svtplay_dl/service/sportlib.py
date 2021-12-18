@@ -31,45 +31,48 @@ class Sportlib(Service, OpenGraphThumbMixin):
         if not match:
             yield ServiceError("Cant fint login info")
             return
-        cid = match.group(1)
+
         res = self.http.get("https://core.oz.com/channels?slug=sportlib&org=www.sportlib.se")
         janson = res.json()
         sid = janson["data"][0]["id"]
 
-        data = {
-            "client_id": cid,
-            "client_secret": cs,
-            "grant_type": "password",
-            "username": self.config.get("username"),
-            "password": self.config.get("password"),
-        }
-        res = self.http.post(f"https://core.oz.com/oauth2/token?channelId={sid}", data=data)
+        res = self.http.post(
+            f"https://core.oz.com/oauth2/token?channelId={sid}",
+            data={
+                "client_id": match.group(1),
+                "client_secret": cs,
+                "grant_type": "password",
+                "username": self.config.get("username"),
+                "password": self.config.get("password"),
+            },
+        )
         if res.status_code > 200:
             yield ServiceError("Wrong username / password?")
             return
         janson = res.json()
-        token_type = janson["token_type"].title()
-        access_token = janson["access_token"]
-
         parse = urlparse(self.url)
         match = re.search("video/([-a-fA-F0-9]+)", parse.path)
         if not match:
             yield ServiceError("Cant find video id")
             return
-        vid = match.group(1)
 
-        headers = {"content-type": "application/json", "authorization": f"{token_type} {access_token}"}
-        url = f"https://core.oz.com/channels/{sid}/videos/{vid}?include=collection,streamUrl"
-        res = self.http.get(url, headers=headers)
+        url = f"https://core.oz.com/channels/{sid}/videos/{match.group(1)}?include=collection,streamUrl"
+        res = self.http.get(
+            url,
+            headers={"content-type": "application/json", "authorization": f"{janson['token_type'].title()} {janson['access_token']}"},
+        )
         janson = res.json()
-        cookiename = janson["data"]["streamUrl"]["cookieName"]
-        token = janson["data"]["streamUrl"]["token"]
-        hlsplaylist = janson["data"]["streamUrl"]["cdnUrl"]
 
         self.output["title"] = janson["data"]["title"]
 
         # get cookie
-        postjson = {"name": cookiename, "value": token}
+        postjson = {"name": janson["data"]["streamUrl"]["cookieName"], "value": janson["data"]["streamUrl"]["token"]}
         res = self.http.post("https://playlist.oz.com/cookie", json=postjson)
         cookies = res.cookies
-        yield from hlsparse(self.config, self.http.request("get", hlsplaylist), hlsplaylist, keycookie=cookies, output=self.output)
+        yield from hlsparse(
+            self.config,
+            self.http.request("get", janson["data"]["streamUrl"]["cdnUrl"]),
+            janson["data"]["streamUrl"]["cdnUrl"],
+            keycookie=cookies,
+            output=self.output,
+        )

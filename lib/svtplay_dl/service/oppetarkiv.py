@@ -83,7 +83,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         program = match.group(1)
 
         n = 0
-        if self.config.get("all_last") > 0:
+        if config.get("all_last") > 0:
             sort = "tid_fallande"
         else:
             sort = "tid_stigande"
@@ -106,8 +106,8 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
         return episodes
 
     def outputfilename(self, data):
-        id = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
-        self.output["id"] = id
+        vid = hashlib.sha256(data["programVersionId"].encode("utf-8")).hexdigest()[:7]
+        self.output["id"] = vid
 
         datatitle = re.search('data-title="([^"]+)"', self.get_urldata())
         if not datatitle:

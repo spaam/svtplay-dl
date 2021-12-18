@@ -40,7 +40,7 @@ def setup_log(silent, verbose=False):
 
 
 def main():
-    """ Main program """
+    """Main program"""
     parse, options = parser(__version__)
 
     if options.flexibleq and not options.quality:

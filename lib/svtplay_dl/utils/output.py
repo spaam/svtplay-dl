@@ -78,7 +78,7 @@ class ETA:
 
 
 def progress(byte, total, extra=""):
-    """ Print some info about how much we have downloaded """
+    """Print some info about how much we have downloaded"""
     if total == 0:
         progresstr = f"Downloaded {byte >> 10}kB bytes"
         progress_stream.write(progresstr + "\r")

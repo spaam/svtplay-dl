@@ -98,7 +98,6 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         self.output["episodethumbnailurl"] = data["image"]["1280x720"]
 
-        # Try to match Season info from HTML (not available in json, it seems), e.g.: <button class="SeasonsDropdown-module__seasonButton___25Uyt" type="button"><span>Säsong 6</span>
         seasonmatch = re.search(r"data-testid=\"season-name-label\">S.song (\d+)...<\/span", urldata)
         if seasonmatch:
             self.output["season"] = seasonmatch.group(1)

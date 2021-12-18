@@ -144,7 +144,7 @@ class MetadataThumbMixin:
 
 
 class Generic(Service):
-    """ Videos embed in sites """
+    """Videos embed in sites"""
 
     def get(self, sites):
         data = self.http.request("get", self.url).text
