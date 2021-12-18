@@ -463,7 +463,7 @@ def readconfig(config, configfile, service=None, preset=None):
                 data = fd.read()
                 configdata = safe_load(data)
         except PermissionError:
-            logging.error(f"Permission denied while reading config: {configfile}")
+            logging.error("Permission denied while reading config: %s", configfile)
 
     if configdata is None:
         return config

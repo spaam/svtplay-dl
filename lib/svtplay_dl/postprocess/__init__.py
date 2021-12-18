@@ -57,9 +57,9 @@ class postprocess:
         videotrack, audiotrack = _checktracks(streams)
 
         if self.config.get("merge_subtitle"):
-            logging.info(f"Merge audio, video and subtitle into {new_name.name}")
+            logging.info("Merge audio, video and subtitle into %s", new_name.name)
         else:
-            logging.info(f"Merge audio and video into {new_name.name}")
+            logging.info("Merge audio and video into %s", new_name.name)
 
         tempfile = orig_filename.with_suffix(".temp")
         arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "matroska" if self.config.get("output_format") == "mkv" else "mp4"]

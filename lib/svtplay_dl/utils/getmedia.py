@@ -44,7 +44,7 @@ def get_media(url, options, version="Unknown"):
         url = f"http://{url}"
 
     if options.get("verbose"):
-        logging.debug(f"version: {version}")
+        logging.debug("version: %s", version)
 
     stream = service_handler(sites, options, url)
     if not stream:
@@ -141,8 +141,11 @@ def get_one_media(stream):
         pub_date = None
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
         logging.info(
-            f"Video {stream.output['title']}S{stream.output['season']}E{stream.output['episode']}"
-            f" skipped since published {pub_date.date()} before {after_date.date()}.",
+            "Video %sS%dE%d skipped since published %s.",
+            stream.output["title"],
+            stream.output["season"],
+            stream.output["episode"],
+            pub_date.date(),
         )
         return
 
@@ -163,7 +166,7 @@ def get_one_media(stream):
             else:
                 errormsg = str(exc)
         if errormsg:
-            logging.error(f"No videos found. {errormsg}")
+            logging.error("No videos found. %s", errormsg)
         else:
             logging.error("No videos found.")
     else:
@@ -188,7 +191,7 @@ def get_one_media(stream):
 
         dupe, fileame = find_dupes(fstream.output, stream.config)
         if dupe and not stream.config.get("force"):
-            logging.warning(f"File ({fileame.name}) already exists. Use --force to overwrite")
+            logging.warning("File (%s) already exists. Use --force to overwrite", fileame.name)
             return
         if fstream.config.get("output_format") and fstream.config.get("output_format").lower() not in ["mkv", "mp4"]:
             logging.error("Unknown output format. please choose mp4 or mkv")
@@ -206,7 +209,7 @@ def get_one_media(stream):
             stream.get_thumbnail(stream.config)
 
         if fstream.config.get("silent_semi") and fstream.finished:
-            logging.log(25, f"Download of {formatname(fstream.output, fstream.config, fstream.output_extention)} was completed")
+            logging.log(25, "Download of %s was completed", formatname(fstream.output, fstream.config, fstream.output_extention))
 
         if fstream.config.get("no_postprocess") is True or all(fstream.config.get(x) for x in ["no_remux", "no_merge"]) is True:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")

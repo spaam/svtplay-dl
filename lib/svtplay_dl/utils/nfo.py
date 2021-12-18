@@ -33,7 +33,7 @@ def write_nfo_episode(output, config):
     filename = formatname(loutout, config)
     dupe, fileame = find_dupes(loutout.copy(), config, False)
     if dupe and not config.get("force_nfo"):
-        logging.warning(f"File ({fileame.name}) already exists. Use --force-nfo to overwrite")
+        logging.warning("File (%s) already exists. Use --force-nfo to overwrite", fileame.name)
         return
     logging.info("NFO episode: %s", filename)
 
@@ -67,7 +67,7 @@ def write_nfo_tvshow(output, config):
     filename = formatname(loutput, cconfig)
     dupe, fileame = find_dupes(loutput, cconfig, False)
     if dupe and not cconfig.get("force_nfo"):
-        logging.warning(f"File ({fileame.name}) already exists. Use --force-nfo to overwrite")
+        logging.warning("File (%s) already exists. Use --force-nfo to overwrite", fileame.name)
         return
 
     logging.info("NFO show: %s", filename)

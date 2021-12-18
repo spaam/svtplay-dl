@@ -38,7 +38,7 @@ class subtitle:
             self.output["ext"] = output_ext
         dupe, fileame = find_dupes(self.output, self.config, False)
         if dupe and not self.config.get("force_subtitle"):
-            logging.warning(f"File ({fileame.name}) already exists. Use --force-subtitle to overwrite")
+            logging.warning("File (%s) already exists. Use --force-subtitle to overwrite", fileame.name)
             return
         subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
