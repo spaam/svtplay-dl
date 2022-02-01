@@ -136,7 +136,10 @@ def get_one_media(stream):
     except (ValueError, TypeError, KeyError, AttributeError):  # gotta catch em all..
         after_date = None
     try:
-        pub_date = datetime.fromtimestamp(stream.output["publishing_datetime"])
+        if datetime.strptime(stream.output["publishing_datetime"], "%Y-%m-%dT%H:%M:%SZ"):
+            pub_date= datetime.strptime(stream.output["publishing_datetime"], '%Y-%m-%dT%H:%M:%SZ')
+        else: 
+            pub_date = datetime.fromtimestamp(stream.output["publishing_datetime"])
     except (ValueError, TypeError, KeyError):
         pub_date = None
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():

@@ -59,6 +59,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             self.output["episode"] = item["episode"]
         self.output["title"] = item["program_nid"]
         self.output["episodename"] = item["title"]
+        self.output["publishing_datetime"] = item["broadcastDateTime"]
         self.output["id"] = str(vid)
         self.output["episodethumbnailurl"] = item["image"]
 
