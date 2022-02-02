@@ -2,6 +2,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import json
 import re
+import time
 from datetime import datetime
 from datetime import timedelta
 from urllib.parse import urlparse
@@ -60,6 +61,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
         self.output["title"] = item["program_nid"]
         self.output["episodename"] = item["title"]
         self.output["publishing_datetime"] = item["broadcastDateTime"]
+        try: 
+            self.output["publishing_datetime"] = datetime.strptime(item["broadcastDateTime"], '%Y-%m-%dT%H:%M:%SZ').timestamp()
+        except (ValueError, TypeError, KeyError):
+            self.output["publishing_datetime"] = None
         self.output["id"] = str(vid)
         self.output["episodethumbnailurl"] = item["image"]
 
