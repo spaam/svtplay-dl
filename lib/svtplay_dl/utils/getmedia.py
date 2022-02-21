@@ -209,7 +209,7 @@ def get_one_media(stream):
             stream.get_thumbnail(stream.config)
 
         if fstream.config.get("silent_semi") and fstream.finished:
-            logging.log(25, "Download of %s was completed", formatname(fstream.output, fstream.config, fstream.output_extention))
+            logging.log(25, "Download of %s was completed", formatname(fstream.output, fstream.config))
 
         if fstream.config.get("no_postprocess") is True or all(fstream.config.get(x) for x in ["no_remux", "no_merge"]) is True:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")
