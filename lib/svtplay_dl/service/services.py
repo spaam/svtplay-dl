@@ -1,5 +1,6 @@
 from svtplay_dl.service.aftonbladet import Aftonbladet
 from svtplay_dl.service.aftonbladet import Aftonbladettv
+from svtplay_dl.service.angelstudios import Angelstudios
 from svtplay_dl.service.barnkanalen import Barnkanalen
 from svtplay_dl.service.bigbrother import Bigbrother
 from svtplay_dl.service.cmore import Cmore
@@ -43,6 +44,7 @@ from svtplay_dl.service.youplay import Youplay
 sites = [
     Aftonbladet,
     Aftonbladettv,
+    Angelstudios,
     Barnkanalen,
     Bigbrother,
     Cmore,
