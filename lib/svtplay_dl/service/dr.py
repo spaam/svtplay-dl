@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import uuid
+from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
@@ -19,7 +20,16 @@ class Dr(Service, OpenGraphThumbMixin):
 
         match = re.search("__data = ([^<]+)</script>", data)
         if not match:
-            yield ServiceError("Cant find info for this video")
+            match = re.search('source src="([^"]+)"', data)
+            if not match:
+                yield ServiceError("Cant find info for this video")
+                return
+
+            res = self.http.request("get", match.group(1))
+            if res.status_code > 400:
+                yield ServiceError("Can't play this because the video is geoblocked or not available.")
+            else:
+                yield from hlsparse(self.config, res, match.group(1), output=self.output)
             return
         janson = json.loads(match.group(1))
         page = janson["cache"]["page"][list(janson["cache"]["page"].keys())[0]]
@@ -70,8 +80,21 @@ class Dr(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         match = re.search("__data = ([^<]+)</script>", data)
         if not match:
-            logging.error("Can't find video info.")
-            return episodes
+            if "bonanza" in self.url:
+                parse = urlparse(self.url)
+                match = re.search(r"(\/bonanza\/serie\/[0-9]+\/[\-\w]+)", parse.path)
+                if match:
+                    match = re.findall(rf"a href=\"({match.group(1)}\/\d+[^\"]+)\"", data)
+                    if not match:
+                        logging.error("Can't find video info.")
+                    for url in match:
+                        episodes.append(f"https://www.dr.dk{url}")
+                else:
+                    logging.error("Can't find video info.")
+                return episodes
+            else:
+                logging.error("Can't find video info.")
+                return episodes
         janson = json.loads(match.group(1))
         page = janson["cache"]["page"][list(janson["cache"]["page"].keys())[0]]
 
