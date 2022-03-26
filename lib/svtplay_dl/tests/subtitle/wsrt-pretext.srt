@@ -1,0 +1,9 @@
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:1000000,LOCAL:00:00:00.000
+
+00:00:10.040 --> 00:00:12.520 align:middle
+Nån försökte slå ihjäl mig.
+
+00:00:12.600 --> 00:00:16.200 align:middle
+-Var fan har du varit?
+-Vad?

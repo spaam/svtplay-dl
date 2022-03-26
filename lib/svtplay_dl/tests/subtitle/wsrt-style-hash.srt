@@ -1,0 +1,31 @@
+WEBVTT
+
+STYLE
+::cue {
+    color: #DFDFDF;
+}
+::cue(.huvudpratare) {
+    color: #00FFFF;
+}
+::cue(.ljud) {
+    color: #FF00FF;
+}
+::cue(.ljudskylt) {
+    color: #FF00FF;
+}
+::cue(.relivemark) {
+    color: #FF0000;
+}
+::cue(.sang) {
+    color: #00FF00;
+}
+
+ac7ff7a0ad304689abbc836bf0248323
+00:00:06.360 --> 00:00:10.080 align:left position:18%
+<c.teletext>1845 gav sig
+en brittisk expedition ut-</c>
+
+901ad1de734b4b048110baa4068b2bf1
+00:00:10.240 --> 00:00:15.040 align:left position:18%
+<c.teletext>-för att söka ett av forsknings-
+resornas mest eftertraktade mål:</c>
