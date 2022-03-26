@@ -193,28 +193,30 @@ class subtitle:
         return text
 
     def wrst(self, subdata):
-        ssubdata = StringIO(subdata.text)
+        return self._wrst(subdata.text)
+
+    def _wrst(self, data):
+        ssubdata = StringIO(data)
         srt = ""
         subtract = False
         number_b = 1
         number = 0
         block = 0
         subnr = False
+        cuetime = False
 
         for i in ssubdata.readlines():
             match = re.search(r"^[\r\n]+", i)
             match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
             match3 = re.search(r"^(\d+)\s", i)
-            if i[:6] == "WEBVTT":
-                continue
-            elif "X-TIMESTAMP" in i:
-                continue
-            elif match and number_b == 1 and self.bom:
+            if match and number_b == 1 and self.bom:
                 continue
             elif match and number_b > 1:
                 block = 0
                 srt += "\n"
+                cuetime = False
             elif match2:
+                cuetime = True
                 if not subnr:
                     srt += f"{number_b}\n"
                 matchx = re.search(r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)", i)
@@ -239,12 +241,13 @@ class subtitle:
                 block = 1
                 subnr = False
                 number_b += 1
-
             elif match3 and block == 0:
                 number = match3.group(1)
                 srt += f"{number}\n"
                 subnr = True
             else:
+                if not cuetime:
+                    continue
                 if self.config.get("convert_subtitle_colors"):
                     colors = {
                         "30": "#000000",
