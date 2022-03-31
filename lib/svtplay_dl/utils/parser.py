@@ -491,4 +491,4 @@ def readconfig(config, configfile, service=None, preset=None):
     if preset and "presets" in configdata and preset in configdata["presets"]:
         config = merge(config.get_variable(), configdata["presets"][preset])
 
-    return config
+    return _special_settings(config)
