@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import Service
 
@@ -18,23 +19,35 @@ class Solidtango(Service):
         parse = urlparse(self.url)
         if "solidsport" in parse.netloc:
             if self.config.get("username") and self.config.get("password"):
-                res = self.http.request("get", "https://solidsport.com/login")
-                match = re.search('authenticity_token" value="([^"]+)"', res.text)
-                if not match:
-                    yield ServiceError("Cant find auth token for login")
-                    return
+                self.http.request("get", "https://solidsport.com/login")
                 pdata = {
-                    "authenticity_token": match.group(1),
-                    "user[email]": self.config.get("username"),
-                    "user[password]": self.config.get("password"),
-                    "commit": "Sign in",
-                    "utf8": "✓",
+                    "username": self.config.get("username"),
+                    "password": self.config.get("password"),
                 }
-                res = self.http.request("post", "https://solidsport.com/login", data=pdata)
-                if "Wrong passwor" in res.text or "Can't find account" in res.text:
+                res = self.http.request("post", "https://solidsport.com/api/play_v1/session/auth", json=pdata)
+                if res.status_code > 400:
                     yield ServiceError("Wrong username or password")
                     return
-                data = self.http.request("get", self.url).text
+
+                auth_token = res.json()["token"]
+                slug = parse.path[parse.path.rfind("/") + 1 :]
+                company = re.search(r"/([^\/]+)/", parse.path).group(1)
+                url = f"https://solidsport.com/api/play_v1/media_object/watch?company={company}&"
+                if "/watch/" in self.url:
+                    url += f"media_object_slug={slug}"
+                elif "/games/" in self.url:
+                    url += f"game_ident={slug}"
+                res = self.http.request("get", url, headers={"Authorization": f"Bearer {auth_token}"})
+                videoid = res.json()["id"]
+                self.output["title"] = res.json()["title"]
+                self.output["id"] = res.json()["id"]
+                url = f"https://solidsport.com/api/play_v1/media_object/{videoid}/request_stream_urls?admin_access=false&company={company}"
+                res = self.http.request("get", url, headers={"Authorization": f"Bearer {auth_token}"})
+                if "dash" in res.json()["urls"]:
+                    yield from dashparse(self.config, self.http.request("get", res.json()["urls"]["dash"]), res.json()["urls"]["dash"], self.output)
+                if "hls" in res.json()["urls"]:
+                    yield from hlsparse(self.config, self.http.request("get", res.json()["urls"]["hls"]), res.json()["urls"]["hls"], self.output)
+                return
 
         match = re.search('src="(http://mm-resource-service.herokuapp.com[^"]*)"', data)
         if match:
