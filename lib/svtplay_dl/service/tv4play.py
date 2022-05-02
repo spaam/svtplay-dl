@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import json
+import logging
 import re
 from datetime import datetime
 from datetime import timedelta
@@ -99,40 +100,16 @@ class Tv4play(Service, OpenGraphThumbMixin):
         show = None
         match = self._getjson()
         jansson = json.loads(match.group(1))
-        janson2 = jansson["props"]["pageProps"]["initialApolloState"]
+        if "nid" not in jansson["query"]:
+            logging.info("Can't find show name.")
+            return episodes
         show = jansson["query"]["nid"]
-
-        program = janson2[f'Program:{{"nid":"{show}"}}']
-        episodes_panel = []
-        clips_panel = []
-        for panel in program["panels"]:
-            if panel["assetType"] == "EPISODE":
-                params = json.loads(panel["loadMoreParams"])
-                if "tags" in params:
-                    for tag in params["tags"].split(","):
-                        if re.search(r"\d+", tag):
-                            episodes_panel.append(tag)
-                for key in panel.keys():
-                    if "videoList" in key:
-                        for video in panel[key]["videoAssets"]:
-                            match = re.search(r"VideoAsset:(\d+)", video["__ref"])
-                            if match:
-                                if match.group(1) not in items:
-                                    items.append(int(match.group(1)))
-            if config.get("include_clips") and panel["assetType"] == "CLIP":
-                params = json.loads(panel["loadMoreParams"])
-                if "tags" in params:
-                    for tag in params["tags"].split(","):
-                        if re.search(r"\d+", tag):
-                            clips_panel.append(tag)
-
-        if episodes_panel:
-            graph_list = self._graphql(show, episodes_panel, "EPISODE")
-            for i in graph_list:
-                if i not in items:
-                    items.append(i)
-        if clips_panel:
-            items.extend(self._graphql(show, clips_panel, "CLIP"))
+        graph_list = self._graphql(show, "EPISODE")
+        for i in graph_list:
+            if i not in items:
+                items.append(i)
+        if config.get("include_clips"):
+            items.extend(self._graphql(show, "CLIP"))
 
         items = sorted(items)
         for item in items:
@@ -142,54 +119,60 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return episodes[-config.get("all_last") :]
         return episodes
 
-    def _graphql(self, show, panels, panel_type):
+    def _graphql(self, show, panel_type):
         items = []
-        for panel in panels:
+        gql = {
+            "variables": {
+                "programPanelsInput": {"offset": 0, "limit": 1000},
+                "videoAssetListInput": {"limit": 100, "offset": 0, "sortOrder": "ASCENDING"},
+                "programNid": show,
+            },
+            "query": "query Seasons($programNid: String, $videoAssetListInput: VideoAssetListInput!, $programPanelsInput: ProgramPanelsInput!)"
+            " {\n  program(nid: $programNid) {\n    __typename\n    upcoming {\n      __typename\n      ...EpisodeVideoAssetField\n    }\n"
+            "    panels2(input: $programPanelsInput) {\n      __typename\n      pageInfo {\n        __typename\n        totalCount\n"
+            "        hasNextPage\n        nextPageOffset\n      }\n      items {\n        __typename\n        ...EpisodePanelField\n      }\n"
+            "    }\n  }\n}fragment EpisodeVideoAssetField on VideoAsset {\n  __typename\n  id\n  title\n  description\n  expireDateTime\n"
+            "  humanDuration\n  freemium\n  broadcastDateTime\n  live\n  daysLeftInService\n  duration\n  season\n  episode\n"
+            "  humanBroadcastDateTime\n  humanBroadcastDateWithWeekday\n  program {\n    __typename\n    nid\n    name\n    displayCategory\n"
+            "    images2 {\n      __typename\n      main16x9 {\n        __typename\n        url\n      }\n    }\n  }\n  progress {\n"
+            "    __typename\n    position\n    percentage\n  }\n  image2 {\n    __typename\n    url\n  }\n}fragment"
+            " EpisodePanelField on VideoPanel {\n  __typename\n  id\n  name\n  assetType\n  totalNumberOfEpisodes\n"
+            "  videoList2(input: $videoAssetListInput) {\n    __typename\n    pageInfo {\n      __typename\n      totalCount\n"
+            "      hasNextPage\n      nextPageOffset\n    }\n    initialSortOrder\n    items {\n      __typename\n      id\n"
+            "      title\n      ...EpisodeVideoAssetField\n    }\n  }\n}",
+        }
+        res = self.http.request("post", "https://graphql.tv4play.se/graphql", json=gql)
+        janson = res.json()
+
+        for mediatype in janson["data"]["program"]["panels2"]["items"]:
             offset = 0
-            total = 9999
-            moreData = True
+            if mediatype["assetType"] != panel_type:
+                continue
+            moreData = mediatype["videoList2"]["pageInfo"]["hasNextPage"]
+            seasonid = mediatype["id"]
+            for video in mediatype["videoList2"]["items"]:
+                items.append(video["id"])
 
             while moreData:
-                gql = {
-                    "variables": {
-                        "offset": offset,
-                        "limit": 50,
-                        "serializedParams": '{"tags":"'
-                        + panel
-                        + '","tags_mode":"any","sort_order":"asc","type":"'
-                        + panel_type.lower()
-                        + '","is_live":false,"node_nids_mode":"any","nodes_mode":"any"}',
-                        "query": show,
-                    },
-                    "query": "query SearchVideoAsset($query: String, $limit: Int, $offset: Int, $serializedParams: String)"
-                    " {\n  videoAssetSearch(q: $query, offset: $offset, type: "
-                    + panel_type
-                    + ", limit: $limit, serializedParams: $serializedParams) {\n    __typename\n    totalHits\n    "
-                    "videoAssets {\n      __typename\n      ...VideoAssetField\n    }\n  }\n}fragment VideoAssetField "
-                    "on VideoAsset {\n  __typename\n  id\n  title\n  tags\n  description\n  image\n  live\n  clip\n  "
-                    "season\n  episode\n  hideAds\n  categories\n  publishedDateTime\n  humanPublishedDateTime\n  "
-                    "broadcastDateTime\n  humanBroadcastDateTime\n  humanDaysLeftInService\n  humanBroadcastShortDateTime\n  "
-                    "expireDateTime\n  productGroups\n  productGroupNids\n  duration\n  humanDuration\n  drmProtected\n  "
-                    "freemium\n  geoRestricted\n  startOver\n  progress {\n    __typename\n    ...ProgressField\n  }\n  "
-                    "program {\n    __typename\n    ...ProgramField\n  }\n  nextEpisode {\n    __typename\n    id\n    "
-                    "title\n    publishedDateTime\n    humanPublishedDateTime\n    duration\n    image\n  }\n}"
-                    "fragment ProgressField on Progress {\n  __typename\n  percentage\n  position\n}"
-                    "fragment ProgramField on Program {\n  __typename\n  nid\n  name\n  description\n  geoRestricted\n  "
-                    "carouselImage\n  image\n  displayCategory\n  genres\n  logo\n  type\n  webview2 {\n    __typename\n    "
-                    "id\n    url\n    name\n  }\n  label {\n    __typename\n    label\n    cdpText\n  }\n  actors\n  "
-                    "directors\n  upcoming {\n    __typename\n    id\n    image\n    episode\n    humanBroadcastDateWithWeekday\n    "
-                    "title\n  }\n  images {\n    __typename\n    main4x3\n    main16x9\n    main16x7\n    main16x9Annotated\n  }\n  "
-                    "favorite\n  keepWatchingIgnored\n  cmoreInfo {\n    __typename\n    text\n    link\n  }\n  trailers "
-                    "{\n    __typename\n    mp4\n  }\n  trackingData {\n    __typename\n    burt {\n      __typename\n"
-                    "      vmanId\n      category\n      tags\n    }\n  }\n}",
+                offset += 100
+                gql2 = {
+                    "variables": {"id": seasonid, "videoAssetListInput": {"limit": 100, "sortOrder": "ASCENDING", "offset": offset}},
+                    "query": "query MoreEpisodes($id: String!, $videoAssetListInput: VideoAssetListInput!) {\n"
+                    "  videoPanel(id: $id) {\n    __typename\n    videoList2(input: $videoAssetListInput) {\n      __typename\n"
+                    "      pageInfo {\n        __typename\n        totalCount\n        hasNextPage\n        nextPageOffset\n"
+                    "      }\n      items {\n        __typename\n        id\n        title\n        ...EpisodeVideoAssetField\n"
+                    "      }\n    }\n  }\n}fragment EpisodeVideoAssetField on VideoAsset {\n  __typename\n  id\n  title\n"
+                    "  description\n  expireDateTime\n  humanDuration\n  freemium\n  broadcastDateTime\n  live\n  daysLeftInService\n"
+                    "  duration\n  season\n  episode\n  humanBroadcastDateTime\n  humanBroadcastDateWithWeekday\n  program {\n"
+                    "    __typename\n    nid\n    name\n    displayCategory\n    images2 {\n      __typename\n      main16x9 {\n"
+                    "        __typename\n        url\n      }\n    }\n  }\n  progress {\n    __typename\n    position\n    percentage\n"
+                    "  }\n  image2 {\n    __typename\n    url\n  }\n}",
                 }
-                res = self.http.post("https://graphql.tv4play.se/graphql", json=gql)
-                total = res.json()["data"]["videoAssetSearch"]["totalHits"]
-                for asset in res.json()["data"]["videoAssetSearch"]["videoAssets"]:
-                    items.append(asset["id"])
-                offset += len(res.json()["data"]["videoAssetSearch"]["videoAssets"])
-                if offset >= total:
-                    moreData = False
+                res = self.http.request("post", "https://graphql.tv4play.se/graphql", json=gql2)
+                moreData = res.json()["data"]["videoPanel"]["videoList2"]["pageInfo"]["hasNextPage"]
+                for video in res.json()["data"]["videoPanel"]["videoList2"]["items"]:
+                    items.append(video["id"])
+
         return items
 
     def get_thumbnail(self, options):
