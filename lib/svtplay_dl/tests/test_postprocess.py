@@ -93,38 +93,32 @@ class getcodec(unittest.TestCase):
 
 class checktracks(unittest.TestCase):
     def test_cktracks1(self):
-        assert (
-            _checktracks(
-                [
-                    ("1:0", "", "", "Audio", "aac (LC), 48000 Hz, stereo, fltp, 126 kb/s"),
-                    (
-                        "0:0",
-                        "[0x21]",
-                        "",
-                        "Video",
-                        "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
-                    ),
-                ],
-            )
-            == ("0:0", "1:0")
-        )
+        assert _checktracks(
+            [
+                ("1:0", "", "", "Audio", "aac (LC), 48000 Hz, stereo, fltp, 126 kb/s"),
+                (
+                    "0:0",
+                    "[0x21]",
+                    "",
+                    "Video",
+                    "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
+                ),
+            ],
+        ) == ("0:0", "1:0")
 
     def test_cktracks2(self):
-        assert (
-            _checktracks(
-                [
-                    ("1:0", "", "", "Substr", "aac (LC), 48000 Hz, stereo, fltp, 126 kb/s"),
-                    (
-                        "0:0",
-                        "[0x21]",
-                        "",
-                        "Video",
-                        "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
-                    ),
-                ],
-            )
-            == ("0:0", None)
-        )
+        assert _checktracks(
+            [
+                ("1:0", "", "", "Substr", "aac (LC), 48000 Hz, stereo, fltp, 126 kb/s"),
+                (
+                    "0:0",
+                    "[0x21]",
+                    "",
+                    "Video",
+                    "h264 (High) ([27][0][0][0] / 0x001B), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc",
+                ),
+            ],
+        ) == ("0:0", None)
 
     def test_cktracks3(self):
         assert _checktracks([("1:0", "", "", "Audio", "aac (LC), 48000 Hz, stereo, fltp, 126 kb/s")]) == (None, "1:0")
