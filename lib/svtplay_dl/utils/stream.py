@@ -117,6 +117,15 @@ def subtitle_decider(stream, subtitles):
         stream.config.set("merge_subtitle", False)
 
 
+def resolution(streams, resolutions: List) -> List:
+    videos = []
+    for stream in streams:
+        for resolution in resolutions:
+            if stream.resolution.split("x")[1] == resolution:
+                videos.append(stream)
+    return videos
+
+
 def select_quality(config, streams):
     high = 0
     if isinstance(config.get("quality"), str):
@@ -155,6 +164,12 @@ def select_quality(config, streams):
     streams = language_prio(config, streams)
     if not streams:
         raise error.UIException(f"Can't find any streams with that audio language {config.get('audio_language')}")
+
+    if config.get("resolution"):
+        resolutions = config.get("resolution").split(",")
+        streams = resolution(streams, resolutions)
+        if not streams:
+            raise error.UIException(f"Can't find any streams with that video resolution {config.get('resolution')}")
 
     # Extract protocol prio, in the form of "hls,http",
     # we want it as a list

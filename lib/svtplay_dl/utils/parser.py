@@ -204,6 +204,12 @@ def gen_parser(version="unknown"):
         default=None,
         help="Choose the role of the audio (it can override the default one), --list-quality to show which one to choose from",
     )
+    quality.add_argument(
+        "--resolution",
+        dest="resolution",
+        default=None,
+        help="Choose what video resolution to download e.g. 480,720,1080. comma seperated",
+    )
 
     subtitle = parser.add_argument_group("Subtitle")
     subtitle.add_argument(
@@ -345,6 +351,7 @@ def setup_defaults():
     options.set("format_preferred", None)
     options.set("audio_language", None)
     options.set("audio_role", None)
+    options.set("resolution", None)
     options.set("stream_prio", None)
     options.set("no_remux", False)
     options.set("no_merge", False)
@@ -396,6 +403,7 @@ def parsertoconfig(config, parser):
     config.set("cookies", parser.cookies)
     config.set("format_preferred", parser.format_preferred)
     config.set("audio_role", parser.audio_role)
+    config.set("resolution", parser.resolution)
     config.set("audio_language", parser.audio_language)
     config.set("stream_prio", parser.stream_prio)
     config.set("no_remux", parser.no_remux)
