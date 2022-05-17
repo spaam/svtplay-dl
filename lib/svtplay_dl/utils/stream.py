@@ -121,7 +121,7 @@ def resolution(streams, resolutions: List) -> List:
     videos = []
     for stream in streams:
         for resolution in resolutions:
-            if stream.resolution.split("x")[1] == resolution:
+            if stream.resolution.find("x") > 0 and stream.resolution.split("x")[1] == resolution:
                 videos.append(stream)
     return videos
 
