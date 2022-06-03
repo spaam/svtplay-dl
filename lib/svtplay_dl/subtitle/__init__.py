@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from io import StringIO
 
 from requests import __build__ as requests_version
-from svtplay_dl.fetcher.hls import _filter_files
+from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.http import HTTP
 from svtplay_dl.utils.output import find_dupes
@@ -288,7 +288,7 @@ class subtitle:
         time = 0
         subs = []
         if self.kwargs.get("filter", False):
-            self.kwargs["m3u8"] = _filter_files(self.kwargs["m3u8"])
+            self.kwargs["m3u8"] = filter_files(self.kwargs["m3u8"])
 
         for _, i in enumerate(self.kwargs["m3u8"].media_segment):
             itemurl = get_full_url(i["URI"], self.url)

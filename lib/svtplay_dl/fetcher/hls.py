@@ -7,7 +7,6 @@ import re
 import time
 from datetime import datetime
 from datetime import timedelta
-from difflib import SequenceMatcher
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import algorithms
@@ -17,6 +16,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.http import HTTP
 from svtplay_dl.utils.output import ETA
@@ -240,7 +240,7 @@ class HLS(VideoRetriever):
 
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
         if self.kwargs.get("filter", False):
-            m3u8 = _filter_files(m3u8)
+            m3u8 = filter_files(m3u8)
         decryptor = None
         size_media = len(m3u8.media_segment)
         eta = ETA(size_media)
@@ -559,13 +559,3 @@ def _get_tuple_attribute(attribute):
             attr_tuple[name] = value
 
     return attr_tuple
-
-
-def _filter_files(m3u8):
-    files = []
-    good = m3u8.media_segment[1]["URI"]
-    for segment in m3u8.media_segment:
-        if SequenceMatcher(None, good, segment["URI"]).ratio() > 0.6:
-            files.append(segment)
-    m3u8.media_segment = files
-    return m3u8
