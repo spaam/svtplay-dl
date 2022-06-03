@@ -21,6 +21,7 @@ from svtplay_dl.service.nhl import NHL
 from svtplay_dl.service.nrk import Nrk
 from svtplay_dl.service.oppetarkiv import OppetArkiv
 from svtplay_dl.service.picsearch import Picsearch
+from svtplay_dl.service.plutotv import Plutotv
 from svtplay_dl.service.pokemon import Pokemon
 from svtplay_dl.service.radioplay import Radioplay
 from svtplay_dl.service.raw import Raw
@@ -65,6 +66,7 @@ sites = [
     NHL,
     Nrk,
     Picsearch,
+    Plutotv,
     Pokemon,
     Ruv,
     Radioplay,
