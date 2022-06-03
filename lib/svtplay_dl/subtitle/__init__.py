@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from io import StringIO
 
 from requests import __build__ as requests_version
+from svtplay_dl.fetcher.hls import _filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.http import HTTP
 from svtplay_dl.utils.output import find_dupes
@@ -36,10 +37,7 @@ class subtitle:
             self.output["ext"] = f"{self.subfix}.{output_ext}"
         else:
             self.output["ext"] = output_ext
-        dupe, fileame = find_dupes(self.output, self.config, False)
-        if dupe and not self.config.get("force_subtitle"):
-            logging.warning("File (%s) already exists. Use --force-subtitle to overwrite", fileame.name)
-            return
+
         subdata = self.http.request("get", self.url)
         if subdata.status_code != 200:
             logging.warning("Can't download subtitle file")
@@ -73,7 +71,12 @@ class subtitle:
         if self.config.get("get_raw_subtitles"):
             data = self.raw(subdata)
 
-        self.save_file(data)
+        if len(data) > 0:
+            dupe, fileame = find_dupes(self.output, self.config, False)
+            if dupe and not self.config.get("force_subtitle"):
+                logging.warning("File (%s) already exists. Use --force-subtitle to overwrite", fileame.name)
+                return
+            self.save_file(data)
 
     def save_file(self, data):
         filename = formatname(self.output, self.config)
@@ -284,7 +287,10 @@ class subtitle:
     def wrstsegment(self, subdata):
         time = 0
         subs = []
-        for i in self.kwargs["m3u8"].media_segment:
+        if self.kwargs.get("filter", False):
+            self.kwargs["m3u8"] = _filter_files(self.kwargs["m3u8"])
+
+        for _, i in enumerate(self.kwargs["m3u8"].media_segment):
             itemurl = get_full_url(i["URI"], self.url)
             cont = self.http.get(itemurl)
             if "cmore" in self.url:
