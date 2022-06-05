@@ -248,7 +248,7 @@ class HLS(VideoRetriever):
         duration = 0
         max_duration = 0
         for index, i in enumerate(m3u8.media_segment):
-            if "duration" in i["EXTINF"]:
+            if "EXTINF" in i and "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
                 max_duration = max(max_duration, duration)
                 total_duration += duration
@@ -261,7 +261,10 @@ class HLS(VideoRetriever):
                     eta.increment()
                     progressbar(size_media, index + 1, "".join(["ETA: ", str(eta)]))
 
-            data = self.http.request("get", item, cookies=cookies)
+            headers = {}
+            if "EXT-X-BYTERANGE" in i:
+                headers["Range"] = f'bytes={i["EXT-X-BYTERANGE"]["o"]}-{i["EXT-X-BYTERANGE"]["o"] + i["EXT-X-BYTERANGE"]["n"] - 1}'
+            data = self.http.request("get", item, cookies=cookies, headers=headers)
             if data.status_code == 404:
                 break
             data = data.content
@@ -426,7 +429,19 @@ class M3U8:
                     # 4.3.2.5.  EXT-X-MAP
                     elif tag == "EXT-X-MAP":
                         info = _get_tuple_attribute(attr)
-                        self.media_segment.insert(0, {"URI": info["URI"], "EXTINF": {"duration": 0}})
+                        if "BYTERANGE" in info:
+                            if "@" in info["BYTERANGE"]:
+                                n, o = info["BYTERANGE"].split("@", 1)
+                                info["EXT-X-BYTERANGE"] = {}
+                                info["EXT-X-BYTERANGE"]["n"], info["EXT-X-BYTERANGE"]["o"] = (int(n), int(o))
+                            else:
+                                info["EXT-X-BYTERANGE"] = {}
+                                info["EXT-X-BYTERANGE"]["n"] = int(attr)
+                                info["EXT-X-BYTERANGE"]["o"] = 0
+                        if "BYTERANGE" not in info:
+                            info["EXTINF"] = {}
+                            info["EXTINF"]["duration"] = 0
+                        self.media_segment.insert(0, info)
 
                     # 4.3.2.6.  EXT-X-PROGRAM-DATE-TIME"
                     elif tag == "EXT-X-PROGRAM-DATE-TIME":

@@ -25,6 +25,12 @@ def parse(playlist):
     return streams
 
 
+def parse_m3u8(playlist):
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "m3u8-playlists", playlist)) as fd:
+        manifest = fd.read()
+    return M3U8(manifest)
+
+
 # Example HLS playlist, source:
 # loosly inspired by
 # https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8
@@ -130,3 +136,16 @@ def test_audio_bottom():
     data = parse("audio-uri-bottom.m3u8")
     assert data[2639].segments
     assert data[2639].audio
+
+
+def test_x_byterange():
+    data = parse_m3u8("ext-x-byterange.m3u8")
+    assert data.media_segment[0]["EXT-X-BYTERANGE"]["n"] == 748
+    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] == 242398
+    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] + data.media_segment[1]["EXT-X-BYTERANGE"]["o"] - 1 == 245225
+
+
+def test_x_map():
+    data = parse_m3u8("x-map.m3u8")
+    assert data.media_segment[0]["URI"] == "video/init.mp4"
+    assert data.media_segment[2]["URI"] == "video/2s.m4s"
