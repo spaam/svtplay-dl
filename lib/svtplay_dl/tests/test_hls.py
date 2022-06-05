@@ -148,4 +148,4 @@ def test_x_byterange():
 def test_x_map():
     data = parse_m3u8("x-map.m3u8")
     assert data.media_segment[0]["URI"] == "video/init.mp4"
-    assert data.media_segment[2]["URI"] == "video/2s.m4s"
+    assert data.media_segment[2]["URI"] == "video/2.m4s"
