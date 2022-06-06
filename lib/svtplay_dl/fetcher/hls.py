@@ -180,7 +180,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                     yield subtitle(
                         copy.copy(config),
                         subtype,
-                        get_full_url(m3u8s.media_segment[0]["URI"], url),
+                        get_full_url(n[0], url),
                         subfix=n[1],
                         output=copy.copy(output),
                         m3u8=m3u8s,
