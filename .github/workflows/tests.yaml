@@ -100,8 +100,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: Windows, python: '3.9', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
-          - {name: WindowsX86, python: '3.9', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
+          - {name: Windows, python: '3.8', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
+          - {name: WindowsX86, python: '3.8', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
       - uses: actions/checkout@v2
         with:
