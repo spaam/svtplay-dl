@@ -48,7 +48,7 @@ class postprocess:
             audio_filename = orig_filename.with_suffix(".m4a")
 
         cmd = [self.detect]
-        if self.config.get("only_video") or not self.config.get("only_audio"):
+        if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
             cmd += ["-i", str(orig_filename)]
         if self.stream.audio and self.config.get("only_audio") or not self.config.get("only_video"):
             cmd += ["-i", str(audio_filename)]
@@ -62,13 +62,19 @@ class postprocess:
             logging.info("Merge audio and video into %s", new_name.name)
 
         tempfile = orig_filename.with_suffix(".temp")
-        arguments = ["-c:v", "copy", "-c:a", "copy", "-f", "matroska" if self.config.get("output_format") == "mkv" else "mp4"]
+
+        arguments = []
+        if self.config.get("only_audio"):
+            arguments += ["-vn"]
+        if self.config.get("only_video"):
+            arguments += ["-an"]
+        arguments += ["-c:v", "copy", "-c:a", "copy", "-f", "matroska" if self.config.get("output_format") == "mkv" else "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
                 arguments += ["-bsf:a", "aac_adtstoasc"]
 
         cmd = [self.detect]
-        if self.config.get("only_video") or not self.config.get("only_audio"):
+        if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
             cmd += ["-i", str(orig_filename)]
         if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
             cmd += ["-i", str(audio_filename)]
@@ -116,7 +122,7 @@ class postprocess:
             return
 
         logging.info("Merging done, removing old files.")
-        if self.config.get("only_video") or not self.config.get("only_audio"):
+        if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
             os.remove(orig_filename)
         if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
             os.remove(audio_filename)

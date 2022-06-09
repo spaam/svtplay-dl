@@ -214,7 +214,7 @@ class HLS(VideoRetriever):
             if self.audio and not self.config.get("only_video"):
                 # self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
                 self._download(self.audio, True)
-            if not self.config.get("only_audio"):
+            if not self.audio or not self.config.get("only_audio"):
                 self._download(self.url)
 
         else:
