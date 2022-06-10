@@ -285,8 +285,7 @@ class subtitle:
         return srt
 
     def wrstsegment(self, subdata):
-        time = 0
-        subs = []
+        pretext = []
         if self.kwargs.get("filter", False):
             self.kwargs["m3u8"] = filter_files(self.kwargs["m3u8"])
 
@@ -301,56 +300,10 @@ class subtitle:
                 cont.encoding = "utf-8"
             if "dr" in self.url:
                 cont.encoding = "utf-8"
-            text = cont.text.split("\n")
-            for t in text:  # is in text[1] for tv4play, but this should be more future proof
-                if "X-TIMESTAMP-MAP=MPEGTS" in t:
-                    time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000 - 10
-            text = text[3 : len(text) - 2]
-            itmes = []
-            if len(text) > 1:
-                for n in text:
-                    if n:  # don't get the empty lines.
-                        itmes.append(n)
-
-            several_items = False
-            skip = False
-            pre_date_skip = True
-            sub = []
-
-            for x in range(len(itmes)):
-                item = itmes[x]
-                if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
-                    ha = strdate(subs[-1][0])
-                    ha3 = strdate(item)
-                    second = str2sec(ha3.group(2)) + time
-                    subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
-                    skip = True
-                    pre_date_skip = False
-                    continue
-                has_date = strdate(item)
-                if has_date:
-                    if several_items:
-                        subs.append(sub)
-                        sub = []
-                    skip = False
-                    first = str2sec(has_date.group(1)) + time
-                    second = str2sec(has_date.group(2)) + time
-                    sub.append(f"{sec2str(first).replace('.', ',')} --> {sec2str(second).replace('.', ',')}")
-                    several_items = True
-                    pre_date_skip = False
-                elif has_date is None and skip is False and pre_date_skip is False:
-                    sub.append(item)
-
-            if sub:
-                subs.append(sub)
-        string = ""
-        nr = 1
-        for sub in subs:
-            string += "{}\n{}\n\n".format(nr, "\n".join(sub))
-            nr += 1
-
-        string = re.sub("\r", "", string)
-        return string
+            pretext.append(cont.text)
+        with open("kalle.json", "wt") as fd:
+            json.dump(pretext, fd)
+        return _wrstsegments(pretext)
 
     def stpp(self, subdata):
         nr = 1
@@ -384,6 +337,64 @@ class subtitle:
             data += "\n"
 
         return data
+
+
+def _wrstsegments(entries: list) -> str:
+    time = 0
+    subs = []
+    for cont in entries:
+        text = cont.split("\n")
+        for t in text:  # is in text[1] for tv4play, but this should be more future proof
+            if "X-TIMESTAMP-MAP=MPEGTS" in t:
+                time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000
+                if time > 0:
+                    time -= 10
+        text = text[3 : len(text) - 2]
+        itmes = []
+        if len(text) > 1:
+            for n in text:
+                if n:  # don't get the empty lines.
+                    itmes.append(n)
+
+        several_items = False
+        skip = False
+        pre_date_skip = True
+        sub = []
+        for x in range(len(itmes)):
+            item = itmes[x]
+            if not item.rstrip():
+                continue
+            if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
+                ha = strdate(subs[-1][0])
+                ha3 = strdate(item)
+                second = str2sec(ha3.group(2)) + time
+                subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
+                skip = True
+                pre_date_skip = False
+                continue
+            has_date = strdate(item)
+            if has_date:
+                if several_items:
+                    subs.append(sub)
+                    sub = []
+                skip = False
+                first = str2sec(has_date.group(1)) + time
+                second = str2sec(has_date.group(2)) + time
+                sub.append(f"{sec2str(first).replace('.', ',')} --> {sec2str(second).replace('.', ',')}")
+                several_items = True
+                pre_date_skip = False
+            elif has_date is None and skip is False and pre_date_skip is False:
+                sub.append(item)
+        if sub:
+            subs.append(sub)
+    string = ""
+    nr = 1
+    for sub in subs:
+        string += "{}\n{}\n\n".format(nr, "\n".join(sub))
+        nr += 1
+
+    string = re.sub("\r", "", string)
+    return string
 
 
 def _resolv(entries):

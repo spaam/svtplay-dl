@@ -1,4 +1,6 @@
+import json
 import os
+import platform
 
 import svtplay_dl.subtitle
 from svtplay_dl.utils.parser import setup_defaults
@@ -6,6 +8,15 @@ from svtplay_dl.utils.parser import setup_defaults
 
 def parse(subfile):
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "subtitle", subfile), encoding="utf8") as fd:
+        data = fd.read()
+    return data
+
+
+def parse2(subfile):
+    encoding = None
+    if platform.system() == "Windows":
+        encoding = "utf8"
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "subtitle", subfile), encoding=encoding) as fd:
         data = fd.read()
     return data
 
@@ -32,3 +43,15 @@ def test_wsrt_style_hash():
         subtitle._wrst(data)
         == "1\n00:00:06,360 --> 00:00:10,080\n1845 gav sig\nen brittisk expedition ut-\n\n2\n00:00:10,240 --> 00:00:15,040\n-för att söka ett av forsknings-\nresornas mest eftertraktade mål:\n"
     )
+
+
+def test_wrst_segment():
+    dataj = json.loads(parse("wsrt-segments.json"))
+    data = parse2("wrst-correct.srt") + "\n"  # last \n to fix UT with extra new line
+    assert svtplay_dl.subtitle._wrstsegments(dataj) == data
+
+
+def test_wrst_segment2():
+    dataj = json.loads(parse("wsrt-segments-2.json"))
+    data = parse2("wrst-correct-2.srt") + "\n"  # last \n to fix UT with extra new line
+    assert svtplay_dl.subtitle._wrstsegments(dataj) == data
