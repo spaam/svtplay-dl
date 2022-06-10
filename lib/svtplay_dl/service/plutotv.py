@@ -1,5 +1,4 @@
 import datetime
-import logging
 import re
 import uuid
 from typing import Union
@@ -56,7 +55,6 @@ class Plutotv(Service, OpenGraphThumbMixin):
         if not HLSplaylist:
             yield ServiceError("Can't find video info")
             return
-        logging.info(self.output)
         playlistURL = f"{mediaserver}{HLSplaylist}?{stitcherParams}"
         yield from hlsparse(
             self.config,
