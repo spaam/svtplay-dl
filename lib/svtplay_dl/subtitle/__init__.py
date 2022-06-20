@@ -301,8 +301,6 @@ class subtitle:
             if "dr" in self.url:
                 cont.encoding = "utf-8"
             pretext.append(cont.text)
-        with open("kalle.json", "wt") as fd:
-            json.dump(pretext, fd)
         return _wrstsegments(pretext)
 
     def stpp(self, subdata):
