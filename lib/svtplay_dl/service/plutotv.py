@@ -1,8 +1,6 @@
 import datetime
 import re
 import uuid
-from typing import Union
-from urllib.parse import ParseResult
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
@@ -13,52 +11,49 @@ from svtplay_dl.service import Service
 
 class Plutotv(Service, OpenGraphThumbMixin):
     supported_domains = ["pluto.tv"]
+    urlreg = r"/on-demand/(movies|series)/([^/]+)(/season/\d+/episode/([^/]+))?"
 
     def get(self):
-        data = self.get_urldata()
+        self.data = self.get_urldata()
         parse = urlparse(self.url)
 
-        match = re.search("episode/([^/]+)$", parse.path)
-        if not match:
-            match = re.search("movies/([^/]+)$", parse.path)
-            if not match:
-                yield ServiceError("Can't find what video it is")
-                return
-        episodename = match.group(1)
-        janson = self._janson(data, parse)
+        urlmatch = re.search(self.urlreg, parse.path)
+        if not urlmatch:
+            yield ServiceError("Can't find what video it is or live is not supported")
+            return
 
-        mediaserver = janson["servers"]["stitcher"]
-        stitcherParams = janson["stitcherParams"]
-        sessionToken = janson["sessionToken"]
+        self.slug = urlmatch.group(2)
+        episodename = urlmatch.group(4)
+        self._janson()
         HLSplaylist = None
-        for show in janson["VOD"]:
-            if "seasons" in show:
-                self.output["title"] = show["name"]
-                for season in show["seasons"]:
-                    for episode in season["episodes"]:
-                        if episode["slug"] == episodename:
-                            match = re.search(r" (\d+)$", episode["name"])
-                            if match:
-                                self.output["season"] = int(match.group(1)) // 100
-                                self.output["episode"] = int(match.group(1)) % 100
-                            for stich in episode["stitched"]["paths"]:
-                                if stich["type"] == "hls":
-                                    HLSplaylist = stich["path"]
 
-            else:
-                if show["slug"] == episodename:
-                    self.output["title"] == show["name"]
-                    for stich in show["stitched"]["paths"]:
-                        if stich["type"] == "hls":
-                            HLSplaylist = stich["path"]
+        servicevod = f"https://service-vod.clusters.pluto.tv/v4/vod/slugs/{self.slug}"
+        res = self.http.request("get", servicevod, params=self.query, headers={"Authorization": f"Bearer {self.sessionToken}"})
+        janson2 = res.json()
+        if janson2["type"] == "series":
+            self.output["title"] = janson2["name"]
+            for season in janson2["seasons"]:
+                for episode in season["episodes"]:
+                    if episode["slug"] == episodename:
+                        self.output["season"] = episode["season"]
+                        self.output["episode"] = episode["number"]
+                        for stich in episode["stitched"]["paths"]:
+                            if stich["type"] == "hls":
+                                HLSplaylist = stich["path"]
+        else:
+            self.output["title"] == janson2["name"]
+            for stich in janson2["stitched"]["paths"]:
+                if stich["type"] == "hls":
+                    HLSplaylist = stich["path"]
 
         if not HLSplaylist:
             yield ServiceError("Can't find video info")
             return
-        playlistURL = f"{mediaserver}{HLSplaylist}?{stitcherParams}"
+
+        playlistURL = f"{self.mediaserver}{HLSplaylist}?{self.stitcherParams}"
         yield from hlsparse(
             self.config,
-            self.http.request("get", playlistURL, headers={"Authorization": f"Bearer {sessionToken}"}),
+            self.http.request("get", playlistURL, headers={"Authorization": f"Bearer {self.sessionToken}"}),
             playlistURL,
             self.output,
             filter=True,
@@ -66,36 +61,45 @@ class Plutotv(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, options):
         episodes = []
-        data = self.get_urldata()
+        self.data = self.get_urldata()
         parse = urlparse(self.url)
-        janson = self._janson(data, parse)
+        urlmatch = re.search(self.urlreg, parse.path)
+        if urlmatch.group(1) != "series":
+            return episodes
+        self.slug = urlmatch.group(2)
+        self._janson()
 
         match = re.search(r"^/([^\/]+)/", parse.path)
         language = match.group(1)
 
-        for show in janson["VOD"]:
-            showname = show["slug"]
-            if "seasons" in show:
-                for season in show["seasons"]:
-                    seasonnr = season["number"]
-                    for episode in season["episodes"]:
-                        episodes.append(f"https://pluto.tv/{language}/on-demand/series/{showname}/{seasonnr}/episode/{episode['slug']}")
+        servicevod = f"https://service-vod.clusters.pluto.tv/v4/vod/slugs/{self.slug}"
+        res = self.http.request("get", servicevod, params=self.query, headers={"Authorization": f"Bearer {self.sessionToken}"})
+        janson2 = res.json()
+        for season in janson2["seasons"]:
+            seasonnr = season["number"]
+            for episode in season["episodes"]:
+                episodes.append(f"https://pluto.tv/{language}/on-demand/series/{self.slug}/season/{seasonnr}/episode/{episode['slug']}")
         return episodes
 
-    def _janson(self, data: str, parse: ParseResult) -> Union[dict, None]:
-        match = re.search(r"on-demand/\w+/([^/]+)", parse.path)
-        if not match:
-            return None
-
-        series = match.group(1)
-
-        match = re.search('appVersion" content="([^"]+)"', data)
-        if not match:
-            return None
-
-        appversion = match.group(1)
-        res = self.http.request(
-            "get",
-            f"https://boot.pluto.tv/v4/start?appName=web&appVersion={appversion}&deviceVersion=100.0.0&deviceModel=web&deviceMake=firefox&deviceType=web&clientID={uuid.uuid1()}&clientModelNumber=1.0.0&episodeSlugs={series}&serverSideAds=true&constraints=&drmCapabilities=widevine%3AL3&clientTime={datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}",
-        )
-        return res.json()
+    def _janson(self) -> None:
+        self.appversion = re.search('appVersion" content="([^"]+)"', self.data)
+        self.query = {
+            "appName": "web",
+            "appVersion": self.appversion.group(1) if self.appversion else "na",
+            "deviceVersion": "100.0.0",
+            "deviceModel": "web",
+            "deviceMake": "firefox",
+            "deviceType": "web",
+            "clientID": uuid.uuid1(),
+            "clientModelNumber": "1.0.0",
+            "episodeSlugs": self.slug,
+            "serverSideAds": "false",
+            "constraints": "",
+            "drmCapabilities": "widevine%3AL3",
+            "clientTime": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        res = self.http.request("get", "https://boot.pluto.tv/v4/start", params=self.query)
+        janson = res.json()
+        self.mediaserver = janson["servers"]["stitcher"]
+        self.stitcherParams = janson["stitcherParams"]
+        self.sessionToken = janson["sessionToken"]
