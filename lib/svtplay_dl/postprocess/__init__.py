@@ -43,14 +43,18 @@ class postprocess:
         new_name = orig_filename.with_suffix(f".{self.config.get('output_format')}")
 
         if ext == ".ts":
-            audio_filename = orig_filename.with_suffix(".audio.ts")
+            if self.stream.audio:
+                if not str(orig_filename).endswith(".audio.ts"):
+                    audio_filename = orig_filename.with_suffix(".audio.ts")
+                else:
+                    audio_filename = orig_filename
         else:
             audio_filename = orig_filename.with_suffix(".m4a")
-
         cmd = [self.detect]
-        if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
+        if (self.config.get("only_video") or not self.config.get("only_audio")) or (not self.stream.audio and self.config.get("only_audio")):
             cmd += ["-i", str(orig_filename)]
-        if self.stream.audio and self.config.get("only_audio") or not self.config.get("only_video"):
+
+        if self.stream.audio:
             cmd += ["-i", str(audio_filename)]
         _, _, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
@@ -59,7 +63,7 @@ class postprocess:
         if self.config.get("merge_subtitle"):
             logging.info("Merge audio, video and subtitle into %s", new_name.name)
         else:
-            logging.info("Merge audio and video into %s", new_name.name)
+            logging.info(f"Merge audio and video into {str(new_name.name).replace('.audio', '')}")
 
         tempfile = orig_filename.with_suffix(".temp")
 
@@ -76,7 +80,7 @@ class postprocess:
         cmd = [self.detect]
         if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
             cmd += ["-i", str(orig_filename)]
-        if (self.stream.audio and self.config.get("only_audio")) or (self.stream.audio and not self.config.get("only_video")):
+        if self.stream.audio:
             cmd += ["-i", str(audio_filename)]
         if videotrack:
             arguments += ["-map", f"{videotrack}"]
@@ -135,7 +139,7 @@ class postprocess:
                     os.remove(subfile)
             else:
                 os.remove(subfile)
-        os.rename(tempfile, new_name)
+        os.rename(tempfile, str(new_name).replace(".audio", ""))
 
 
 def _streams(output):
