@@ -26,6 +26,7 @@ class Plutotv(Service, OpenGraphThumbMixin):
         episodename = urlmatch.group(4)
         self._janson()
         HLSplaylist = None
+        found = False
 
         servicevod = f"https://service-vod.clusters.pluto.tv/v4/vod/slugs/{self.slug}"
         res = self.http.request("get", servicevod, params=self.query, headers={"Authorization": f"Bearer {self.sessionToken}"})
@@ -34,27 +35,28 @@ class Plutotv(Service, OpenGraphThumbMixin):
             self.output["title"] = janson2["name"]
             for season in janson2["seasons"]:
                 for episode in season["episodes"]:
-                    if episode["slug"] == episodename:
+                    if episode["slug"] == episodename and not found:
                         self.output["season"] = episode["season"]
                         self.output["episode"] = episode["number"]
                         for stich in episode["stitched"]["paths"]:
                             if stich["type"] == "hls":
-                                HLSplaylist = stich["path"]
+                                HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
+                                if self.http.request("get", HLSplaylist, headers={"Authorization": f"Bearer {self.sessionToken}"}).status_code < 400:
+                                    found = True
         else:
             self.output["title"] == janson2["name"]
             for stich in janson2["stitched"]["paths"]:
                 if stich["type"] == "hls":
-                    HLSplaylist = stich["path"]
+                    HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
 
         if not HLSplaylist:
             yield ServiceError("Can't find video info")
             return
 
-        playlistURL = f"{self.mediaserver}{HLSplaylist}?{self.stitcherParams}"
         yield from hlsparse(
             self.config,
-            self.http.request("get", playlistURL, headers={"Authorization": f"Bearer {self.sessionToken}"}),
-            playlistURL,
+            self.http.request("get", HLSplaylist, headers={"Authorization": f"Bearer {self.sessionToken}"}),
+            HLSplaylist,
             self.output,
             filter=True,
         )
