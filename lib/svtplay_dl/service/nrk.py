@@ -1,7 +1,6 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import copy
-import json
 import re
 
 from svtplay_dl.error import ServiceError
@@ -23,26 +22,19 @@ class Nrk(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find video id.")
             return
 
-        # Get media element details
-        match = re.search('psapi-base-url="([^"]+)"', self.get_urldata())
-        if not match:
-            yield ServiceError("Cant find apiurl.")
-            return
-        dataurl = f"{match.group(1)}/mediaelement/{video_id}"
-        data = self.http.request("get", dataurl).text
-        data = json.loads(data)
-        manifest_url = data["mediaUrl"]
-        self.config.set("live", data["isLive"])
-        if manifest_url is None:
-            yield ServiceError(data["messageType"])
-            return
-        # Check if subtitles are available
-        if data["subtitlesUrlPath"]:
-            yield subtitle(copy.copy(self.config), "tt", data["subtitlesUrlPath"], output=self.output)
+        dataurl = f"https://psapi.nrk.no/playback/manifest/program/{video_id}?eea-portability=true"
+        janson = self.http.request("get", dataurl).json()
 
-        hlsurl = manifest_url.replace("/z/", "/i/").replace("manifest.f4m", "master.m3u8")
-        data = self.http.request("get", hlsurl)
-        if data.status_code == 403:
-            yield ServiceError("Can't fetch the video because of geoblocking")
-            return
-        yield from hlsparse(self.config, data, hlsurl, output=self.output)
+        if janson["playable"]:
+            if janson["playable"]["assets"][0]["format"] == "HLS":
+                yield from hlsparse(
+                    self.config,
+                    self.http.request("get", janson["playable"]["assets"][0]["url"]),
+                    janson["playable"]["assets"][0]["url"],
+                    output=self.output,
+                )
+
+            # Check if subtitles are available
+            for sub in janson["playable"]["subtitles"]:
+                if sub["defaultOn"]:
+                    yield subtitle(copy.copy(self.config), "tt", sub["webVtt"], output=self.output)
