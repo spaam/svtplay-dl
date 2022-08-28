@@ -50,7 +50,7 @@ def filenamify(title):
     title = re.sub(r"\s+", ".", title)
     title = re.sub(r"\.-\.", "-", title)
 
-    return title
+    return title.replace("..", ".")
 
 
 def exclude(config, name):
