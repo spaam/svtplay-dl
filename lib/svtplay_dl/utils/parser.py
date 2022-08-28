@@ -13,6 +13,8 @@ if platform.system() == "Windows":
 else:
     CONFIGFILE = os.path.expanduser("~/.svtplay-dl.yaml")
 
+FILENAME = "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}"
+
 
 class Options:
     """
@@ -60,6 +62,7 @@ def gen_parser(version="unknown"):
 
     general.add_argument("--version", action="version", version=f"%(prog)s {version}")
     general.add_argument("-o", "--output", metavar="output", default=None, help="outputs to the given filename or folder")
+    general.add_argument("--filename", metavar="filename", default=FILENAME, help=f"filename format {FILENAME}")
     general.add_argument(
         "--subfolder",
         action="store_true",
@@ -361,7 +364,7 @@ def setup_defaults():
     options.set("proxy", None)
     options.set("include_clips", False)
     options.set("cmoreoperatorlist", False)
-    options.set("filename", "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}")
+    options.set("filename", FILENAME)
     options.set("only_audio", False)
     options.set("only_video", False)
     options.set("output_format", "mp4")
@@ -370,6 +373,7 @@ def setup_defaults():
 
 def parsertoconfig(config, parser):
     config.set("output", parser.output)
+    config.set("filename", parser.filename)
     config.set("subfolder", parser.subfolder)
     config.set("configfile", parser.configfile)
     config.set("resume", parser.resume)
