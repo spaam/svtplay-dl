@@ -7,6 +7,7 @@ from datetime import datetime
 from datetime import timedelta
 from urllib.parse import urlparse
 
+import requests
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -68,7 +69,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         url = f"https://playback-api.b17g.net/media/{vid}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome"
-        res = self.http.request("get", url, cookies=self.cookies)
+        try:
+            res = self.http.request("get", url, cookies=self.cookies)
+        except requests.exceptions.RetryError:
+            res = requests.get(url, cookies=self.cookies)
+            yield ServiceError(f"Can't play this because the video is geoblocked: {res.json()['message']}")
+            return
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked or not available.")
             return
