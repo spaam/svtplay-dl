@@ -6,5 +6,5 @@ wheel
 pre-commit
 pytest
 pytest-cov
-cx_Freeze==6.9
+cx_Freeze
 twine

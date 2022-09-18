@@ -45,7 +45,6 @@ deps.append("pyyaml")
 setup(
     name="svtplay-dl",
     version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
     packages=find_packages("lib", exclude=["tests", "*.tests", "*.tests.*"]),
     install_requires=deps,
     package_dir={"": "lib"},
