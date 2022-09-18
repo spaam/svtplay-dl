@@ -10,7 +10,7 @@ If you have [Homebrew](https://brew.sh/) on your machine you can install by runn
 ```
     brew install svtplay-dl
 ```
-You will need to run `brew install ffmpeg` or `brew install libav` afterwards, if you don't already have one of these packages.
+You will need to run `brew install ffmpeg` afterwards, if you don't already have one of these packages.
 
 ### Debian and Ubuntu
 
@@ -92,7 +92,7 @@ you don’t have them, some features will not be working.
 -  [PyYaml](https://github.com/yaml/pyyaml) for configure file
 -  [Requests](https://2.python-requests.org)
 -  [PySocks](https://github.com/Anorov/PySocks) to enable proxy support
--  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org) for postprocessing and/or for DASH streams ([ffmpeg](https://ffmpeg.zeranoe.com) for Windows)
+-  [ffmpeg](https://ffmpeg.org) for postprocessing and/or for DASH streams ([ffmpeg](https://ffmpeg.zeranoe.com) for Windows)
 
 ##### To install it, run:
 
