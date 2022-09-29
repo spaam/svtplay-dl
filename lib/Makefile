@@ -20,7 +20,7 @@ PYTHON ?= /usr/bin/env python3
 VERSION = $(shell git describe --tags --dirty --always 2>/dev/null || echo $(LATEST_RELEASE)-unknown)
 
 svtplay-dl: $(PYFILES)
-	@# Verify that there's no .build already \
+	@# "Verify that there's no .build already"
 	! [ -d .build ] || { \
 		echo "ERROR: build already in progress? (or remove $(CURDIR)/.build/)"; \
 		exit 1; \
@@ -33,7 +33,7 @@ svtplay-dl: $(PYFILES)
 		install $$py .build/$$py; \
 	done
 
-	# Add git version info to __version__, seen in --version
+	@# Add git version info to __version__, seen in --version
 	sed -i -e 's/^__version__ = \(.*\)$$/__version__ = "$(VERSION)"/' \
 		.build/svtplay_dl/__init__.py
 
