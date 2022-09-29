@@ -22,7 +22,7 @@ VERSION = $(shell git describe --tags --dirty --always 2>/dev/null || echo $(LAT
 svtplay-dl: $(PYFILES)
 	@# Verify that there's no .build already \
 	! [ -d .build ] || { \
-		echo "ERROR: build already in progress? (or remove $(PWD)/.build/)"; \
+		echo "ERROR: build already in progress? (or remove $(CURDIR)/.build/)"; \
 		exit 1; \
 	}; \
 	mkdir -p .build
