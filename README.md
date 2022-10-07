@@ -129,13 +129,11 @@ This script works for:
 -  nickelodeon.se
 -  nrk.no
 -  oppetarkiv.se
+-  pluto.tv (former viafree.se, viafree.dk, viafree.no)
 -  ruv.is
 -  svd.se
 -  sverigesradio.se
 -  svtplay.se
--  viafree.se (former tv3play.se, tv6play.se, tv8play.se, tv10play.se)
--  viafree.dk (former tv3play.dk)
--  viafree.no (former tv3play.no, viasat4play.no)
 -  tv3play.ee
 -  tv3play.lt
 -  tv3play.lv
