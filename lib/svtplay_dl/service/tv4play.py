@@ -46,7 +46,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return
 
         vid = jansson["query"]["assetId"]
-        janson2 = jansson["props"]["pageProps"]["initialApolloState"]
+        janson2 = jansson["props"]["initialApolloState"]
         item = janson2[f"VideoAsset:{vid}"]
 
         if item["is_drm_protected"]:
