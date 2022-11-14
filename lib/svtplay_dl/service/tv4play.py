@@ -68,7 +68,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
-        url = f"https://playback-api.b17g.net/media/{vid}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome"
+        url = f"https://playback2.a2d.tv/play/{vid}?service=tv4&device=browser&browser=GoogleChrome&protocol=hls%2Cdash&drm=widevine&capabilities=live-drm-adstitch-2%2Cexpired_assets"
         try:
             res = self.http.request("get", url, cookies=self.cookies)
         except requests.exceptions.RetryError:
