@@ -129,11 +129,14 @@ def filename(stream):
 
 
 def sanitize(name):
+    dirname = name.parent
+    basename = str(name.name)
     blocklist = [":", "*", "?", '"', "<", ">", "|", "\0"]
     for i in blocklist:
-        if i in name:
-            name = name.replace(i, "")
-    return name
+        if i in basename:
+            basename = basename.replace(i, "")
+
+    return dirname.joinpath(basename.replace("..", "."))
 
 
 def formatname(output, config):
@@ -158,11 +161,11 @@ def formatname(output, config):
     elif config.get("path") and pathlib.Path(config.get("path")).expanduser().is_dir():
         dirname = pathlib.Path(config.get("path"))
     elif config.get("output"):
-        if output["ext"]:
+        if "ext" in output and output["ext"]:
             name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
         else:
             name = pathlib.Path(config.get("output"))
-    name = pathlib.Path(sanitize(str(name.expanduser())).replace("..", "."))
+    name = pathlib.Path(sanitize(name.expanduser()))
     if subfolder and dirname:
         return dirname / subfolder / name.expanduser()
     elif subfolder:
