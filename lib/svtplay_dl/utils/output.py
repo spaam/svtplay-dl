@@ -128,6 +128,14 @@ def filename(stream):
     return True
 
 
+def sanitize(name):
+    blocklist = [":", "*", "?", '"', "<", ">", "|", "\0"]
+    for i in blocklist:
+        if i in name:
+            name = name.replace(i, "")
+    return name
+
+
 def formatname(output, config):
     name = pathlib.Path(_formatname(output, config))
     subfolder = None
@@ -154,6 +162,7 @@ def formatname(output, config):
             name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
         else:
             name = pathlib.Path(config.get("output"))
+    name = pathlib.Path(sanitize(str(name.expanduser())).replace("..", "."))
     if subfolder and dirname:
         return dirname / subfolder / name.expanduser()
     elif subfolder:
