@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-# The unittest framwork doesn't play nice with pylint:
+# The unittest framework doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
 # We're a test, we go where ever we want (within reason, of course):
 #   pylint: disable-msg=protected-access
@@ -32,7 +32,7 @@ def parse_m3u8(playlist):
 
 
 # Example HLS playlist, source:
-# loosly inspired by
+# loosely inspired by
 # https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8
 M3U_EXAMPLE = """#EXTM3U
 

@@ -282,7 +282,7 @@ class HLS(VideoRetriever):
                 if "EXT-X-KEY" in i:
                     keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
                     if keyurl and keyurl[:4] == "skd:":
-                        raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
+                        raise HLSException(keyurl, "Can't decrypt because of DRM")
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
                     iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else random_iv()
                     backend = default_backend()

@@ -217,7 +217,7 @@ def get_one_media(stream):
 
         post = postprocess(fstream, fstream.config, subtitles)
         if fstream.audio and not post.detect and fstream.finished:
-            logging.warning("Can't find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
+            logging.warning("Can't find ffmpeg/avconv. audio and video is in separate files. if you dont want this use -P hls or hds")
         if post.detect and fstream.config.get("no_merge") is False:
             post.merge()
         else:

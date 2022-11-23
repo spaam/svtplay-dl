@@ -12,7 +12,7 @@ class Efn(Service, OpenGraphThumbMixin):
     def get(self):
         match = re.search('data-hls="([^"]+)"', self.get_urldata())
         if not match:
-            yield ServiceError("Cant find video info")
+            yield ServiceError("Can't find video info")
             return
 
         yield from hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)

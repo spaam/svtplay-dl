@@ -17,7 +17,7 @@ if echo "" | sed -r "" > /dev/null 2>&1 ; then
 elif echo "" | sed -E "" > /dev/null 2>&1 ; then
 	extended_regexp="-E"
 else
-	echo "Cant find extented regex"
+	echo "Can't find extended regex"
 fi
 
 # FIXME: *Currently* we don't have any =head3 that doesn't

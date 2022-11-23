@@ -153,14 +153,14 @@ def gen_parser(version="unknown"):
         action="store_true",
         dest="only_audio",
         default=False,
-        help="only download audio if audio and video is seperated",
+        help="only download audio if audio and video is separated",
     )
     general.add_argument(
         "--only-video",
         action="store_true",
         dest="only_video",
         default=False,
-        help="only download video if audio and video is seperated",
+        help="only download video if audio and video is separated",
     )
 
     quality = parser.add_argument_group("Quality")
@@ -211,7 +211,7 @@ def gen_parser(version="unknown"):
         "--resolution",
         dest="resolution",
         default=None,
-        help="Choose what video resolution to download e.g. 480,720,1080. comma seperated",
+        help="Choose what video resolution to download e.g. 480,720,1080. comma separated",
     )
 
     subtitle = parser.add_argument_group("Subtitle")

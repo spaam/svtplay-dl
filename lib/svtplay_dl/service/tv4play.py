@@ -42,7 +42,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         jansson = json.loads(match.group(1))
         if "assetId" not in jansson["query"]:
-            yield ServiceError("Cant find video id for the video")
+            yield ServiceError("Can't find video id for the video")
             return
 
         vid = jansson["query"]["assetId"]
@@ -65,7 +65,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         self.output["episodethumbnailurl"] = item["image"]
 
         if vid is None:
-            yield ServiceError("Cant find video id for the video")
+            yield ServiceError("Can't find video id for the video")
             return
 
         url = f"https://playback2.a2d.tv/play/{vid}?service=tv4&device=browser&browser=GoogleChrome&protocol=hls%2Cdash&drm=widevine&capabilities=live-drm-adstitch-2%2Cexpired_assets"

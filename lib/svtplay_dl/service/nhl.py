@@ -14,7 +14,7 @@ class NHL(Service, OpenGraphThumbMixin):
     def get(self):
         match = re.search(r"var initialMedia\s+= ({[^;]+);", self.get_urldata())
         if not match:
-            yield ServiceError("Cant find any media on that page")
+            yield ServiceError("Can't find any media on that page")
             return
         janson = json.loads(match.group(1))
         vid = janson["content_id"]
@@ -29,7 +29,7 @@ class NHL(Service, OpenGraphThumbMixin):
         else:
             match = re.search(r"var mediaConfig\s+= ({[^;]+);", self.get_urldata())
             if not match:
-                yield ServiceError("Cant find any media on that page")
+                yield ServiceError("Can't find any media on that page")
                 return
             janson = json.loads(match.group(1))
             try:

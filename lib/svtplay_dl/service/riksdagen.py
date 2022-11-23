@@ -12,7 +12,7 @@ class Riksdagen(Service, OpenGraphThumbMixin):
     def get(self):
         match = re.search("_([a-zA-Z0-9]+)$", self.url)
         if not match:
-            yield ServiceError("Cant find video id.")
+            yield ServiceError("Can't find video id.")
             return
 
         vid = match.group(1)
@@ -22,7 +22,7 @@ class Riksdagen(Service, OpenGraphThumbMixin):
         try:
             janson = data["videodata"][0]["streams"]["files"]
         except TypeError:
-            yield ServiceError("Cant find video.")
+            yield ServiceError("Can't find video.")
             return
 
         for i in janson:

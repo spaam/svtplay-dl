@@ -103,7 +103,7 @@ Username, if the service requires authentication.
 
 =head3 --password=PASSWORD  -p PASSWORD
 
-Password, if the serivce requires authentication.
+Password, if the service requires authentication.
 
 =head3 --thumbnail, -t
 

@@ -17,7 +17,7 @@ class Svt(Svtplay):
         if not match:
             match = re.search(r"stateData = JSON.parse\(\"(.*)\"\)\<\/script", data)
             if not match:
-                yield ServiceError("Cant find video info.")
+                yield ServiceError("Can't find video info.")
                 return
             janson = json.loads(codecs.escape_decode(match.group(1))[0].decode("utf-8"))
             if janson["recipe"]["content"]["data"]["videoClips"]:

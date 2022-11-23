@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ex:ts=4:sw=4:sts=4:et:fenc=utf-8
-# The unittest framwork doesn't play nice with pylint:
+# The unittest framework doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
 import pathlib
 import unittest
