@@ -101,7 +101,7 @@ class Svtplay(Service, MetadataThumbMixin):
     def _get_video(self, janson):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
-                if i["format"] == "webvtt" and "url" in i:
+                if i["format"] == "VTT" and "url" in i:
                     yield subtitle(copy.copy(self.config), "wrst", i["url"], "sv", output=self.output)
 
         if "videoReferences" in janson:
@@ -113,7 +113,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 if i["format"] == "hls-cmaf-full":
                     continue
                 if i["url"].find(".m3u8") > 0:
-                    yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], self.output)
+                    yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
                 elif i["url"].find(".mpd") > 0:
                     yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
 
