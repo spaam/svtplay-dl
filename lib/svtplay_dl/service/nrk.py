@@ -7,7 +7,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 
 
 class Nrk(Service, OpenGraphThumbMixin):
@@ -37,4 +37,4 @@ class Nrk(Service, OpenGraphThumbMixin):
             # Check if subtitles are available
             for sub in janson["playable"]["subtitles"]:
                 if sub["defaultOn"]:
-                    yield subtitle(copy.copy(self.config), "tt", sub["webVtt"], output=self.output)
+                    yield from subtitle_probe(copy.copy(self.config), sub["webVtt"], output=self.output)

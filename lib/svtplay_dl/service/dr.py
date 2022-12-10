@@ -9,7 +9,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 
 
 class Dr(Service, OpenGraphThumbMixin):
@@ -70,9 +70,10 @@ class Dr(Service, OpenGraphThumbMixin):
                     if res.status_code > 400:
                         yield ServiceError("Can't play this because the video is geoblocked or not available.")
                     else:
+                        logging.info("suuubu")
                         yield from hlsparse(self.config, res, video["url"], output=self.output)
                         if len(video["subtitles"]) > 0:
-                            yield subtitle(copy.copy(self.config), "wrst", video["subtitles"][0]["link"], output=self.output)
+                            yield from subtitle_probe(copy.copy(self.config), video["subtitles"][0]["link"], output=self.output)
 
     def find_all_episodes(self, config):
         episodes = []

@@ -12,7 +12,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.text import decode_html_entities
 
 
@@ -39,10 +39,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
 
         if "subtitleReferences" in data:
             for i in data["subtitleReferences"]:
-                if i["format"] == "websrt":
-                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
-                if i["format"] == "webvtt" and "url" in i:
-                    yield subtitle(copy.copy(self.config), "wrst", i["url"], output=self.output)
+                yield from subtitle_probe(copy.copy(self.config), i["url"], output=self.output)
 
         if len(data["videoReferences"]) == 0:
             yield ServiceError("Media doesn't have any associated videos (yet?)")

@@ -16,7 +16,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import MetadataThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.text import filenamify
 
 URL_VIDEO_API = "https://api.svt.se/video/"
@@ -101,8 +101,8 @@ class Svtplay(Service, MetadataThumbMixin):
     def _get_video(self, janson):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
-                if (i["format"] == "VTT" or i["format"] == "webvtt") and "url" in i:
-                    yield subtitle(copy.copy(self.config), "wrst", i["url"], "sv", output=self.output)
+                if "url" in i:
+                    yield from subtitle_probe(copy.copy(self.config), i["url"], output=self.output)
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:

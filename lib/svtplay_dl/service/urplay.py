@@ -11,7 +11,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.http import download_thumbnails
 
 
@@ -48,13 +48,18 @@ class Urplay(Service, OpenGraphThumbMixin):
                     url = f"https://{loadbalancer}/{stream['m4A']['location']}playlist.m3u8"
                     yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
             if not (self.config.get("get_all_subtitles")) and streaminfo == "sweComplete":
-                yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), output=self.output)
+                yield from subtitle_probe(copy.copy(self.config), stream["tt"]["location"].replace(".tt", ".vtt"), output=copy.copy(self.output))
 
             if self.config.get("get_all_subtitles") and "tt" in stream:
                 label = stream["tt"]["language"]
                 if stream["tt"]["scope"] != "complete":
                     label = f"{label}-{stream['tt']['scope']}"
-                yield subtitle(copy.copy(self.config), "wrst", stream["tt"]["location"].replace(".tt", ".vtt"), label, output=copy.copy(self.output))
+                yield from subtitle_probe(
+                    copy.copy(self.config),
+                    stream["tt"]["location"].replace(".tt", ".vtt"),
+                    subfix=label,
+                    output=copy.copy(self.output),
+                )
 
     def find_all_episodes(self, config):
         episodes = []

@@ -11,7 +11,7 @@ import unittest
 import requests_mock
 from svtplay_dl import fetcher
 from svtplay_dl.fetcher.hls import _hlsparse
-from svtplay_dl.fetcher.hls import M3U8
+from svtplay_dl.fetcher.m3u8 import M3U8
 from svtplay_dl.utils.parser import setup_defaults
 
 

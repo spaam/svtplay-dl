@@ -12,7 +12,7 @@ from urllib.parse import urljoin
 from svtplay_dl.error import ServiceError
 from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
@@ -279,10 +279,7 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
                 **kwargs,
             )
     for sub in subtitles:
-        if sub["codecs"] == "stpp":
-            yield subtitle(copy.copy(config), "stpp", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
-        if sub["mimetype"] == "text/vtt":
-            yield subtitle(copy.copy(config), "wrst", url, sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
+        yield from subtitle_probe(copy.copy(config), url, subfix=sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
 
 
 def parse_duration(duration):

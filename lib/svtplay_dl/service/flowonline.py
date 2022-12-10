@@ -8,7 +8,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle
+from svtplay_dl.subtitle import subtitle_probe
 
 
 class Flowonline(Service, OpenGraphThumbMixin):
@@ -27,7 +27,7 @@ class Flowonline(Service, OpenGraphThumbMixin):
 
         match = re.search('src="([^"]+vtt)"', data.text)
         if match:
-            yield subtitle(copy.copy(self.config), "wrst", match.group(1))
+            yield from subtitle_probe(copy.copy(self.config), match.group(1))
 
         match = re.search('source src="([^"]+)" type="application/x-mpegURL"', data.text)
         if not match:

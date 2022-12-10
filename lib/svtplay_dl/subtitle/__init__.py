@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from io import StringIO
 
 from requests import __build__ as requests_version
+from svtplay_dl.fetcher.m3u8 import M3U8
 from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.http import HTTP
@@ -13,14 +14,37 @@ from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.text import decode_html_entities
 
 
+def subtitle_probe(config, url, **kwargs):
+    httpobject = kwargs.get("httpobject", None)
+    if httpobject:
+        http = httpobject
+    else:
+        http = HTTP(config)
+    subdata = http.request("get", url, cookies=kwargs.get("cookies", None))
+
+    if subdata.text.startswith("WEBVTT"):
+        yield subtitle(config, "wrst", url, **kwargs)
+    elif subdata.text.startswith("#EXTM3U"):
+        m3u8 = M3U8(subdata.text)
+        yield subtitle(config, "wrstsegment", url, **kwargs, m3u8=m3u8)
+    elif "<?xml" in subdata.text:
+        xmldata = ET.fromstring(subdata.text)
+        if xmldata.tag.endswith("MPD"):
+            data = http.get(kwargs.get("files")[0]).content
+            if data.find(b"ftyp") > 0:
+                yield subtitle(config, "stpp", url, **kwargs)
+        elif xmldata.tag.endswith("tt"):
+            yield subtitle(config, "tt", url, **kwargs)
+
+
 class subtitle:
-    def __init__(self, config, subtype, url, subfix=None, **kwargs):
+    def __init__(self, config, subtype, url, **kwargs):
         self.url = url
         self.subtitle = None
         self.config = config
         self.subtype = subtype
         self.http = HTTP(config)
-        self.subfix = subfix
+        self.subfix = kwargs.get("subfix", None)
         self.bom = False
         self.output = kwargs.pop("output", None)
         self.kwargs = kwargs
@@ -95,7 +119,10 @@ class subtitle:
         data = ""
         subdata = re.sub(' xmlns="[^"]+"', "", subs, count=1)
         tree = ET.XML(subdata)
-        xml = tree.find("body").find("div")
+        xml = tree.find("body")
+        if not xml:
+            return data
+        xml = xml.find("div")
         if not xml:
             return data
         plist = list(xml.findall("p"))
@@ -292,14 +319,7 @@ class subtitle:
         for _, i in enumerate(self.kwargs["m3u8"].media_segment):
             itemurl = get_full_url(i["URI"], self.url)
             cont = self.http.get(itemurl)
-            if "cmore" in self.url:
-                cont.encoding = "utf-8"
-            if "mtgx" in self.url:
-                cont.encoding = "utf-8"
-            if "viaplay" in self.url:
-                cont.encoding = "utf-8"
-            if "dr" in self.url:
-                cont.encoding = "utf-8"
+            cont.encoding = "utf-8"
             pretext.append(cont.text)
         return _wrstsegments(pretext)
 
