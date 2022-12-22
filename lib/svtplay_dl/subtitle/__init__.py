@@ -367,7 +367,6 @@ def _wrstsegments(entries: list) -> str:
                 time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000
                 if time > 0:
                     time -= 10
-        text = text[3 : len(text) - 2]
         itmes = []
         if len(text) > 1:
             for n in text:
