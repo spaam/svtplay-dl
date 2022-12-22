@@ -278,34 +278,7 @@ class subtitle:
             else:
                 if not cuetime:
                     continue
-                if self.config.get("convert_subtitle_colors"):
-                    colors = {
-                        "30": "#000000",
-                        "31": "#ff0000",
-                        "32": "#00ff00",
-                        "33": "#ffff00",
-                        "34": "#0000ff",
-                        "35": "#ff00ff",
-                        "36": "#00ffff",
-                        "37": "#ffffff",
-                        "c.black": "#000000",
-                        "c.red": "#ff0000",
-                        "c.green": "#00ff00",
-                        "c.yellow": "#ffff00",
-                        "c.blue": "#0000ff",
-                        "c.magenta": "#ff00ff",
-                        "c.cyan": "#00ffff",
-                        "c.gray": "#ffffff",
-                    }
-                    sub = i
-                    for tag, color in colors.items():
-                        regex1 = "<" + tag + ">"
-                        replace = '<font color="' + color + '">'
-                        sub = re.sub(regex1, replace, sub)
-
-                    sub = re.sub("</.+>", "</font>", sub)
-                else:
-                    sub = re.sub("<[^>]*>", "", i)
+                sub = _wsrt_colors(self.config.get("convert_subtitle_colors"), i)
                 srt += sub.strip()
                 srt += "\n"
         srt = decode_html_entities(srt)
@@ -321,7 +294,7 @@ class subtitle:
             cont = self.http.get(itemurl)
             cont.encoding = "utf-8"
             pretext.append(cont.text)
-        return _wrstsegments(pretext)
+        return _wrstsegments(pretext, self.config.get("convert_subtitle_colors"))
 
     def stpp(self, subdata):
         nr = 1
@@ -357,7 +330,7 @@ class subtitle:
         return data
 
 
-def _wrstsegments(entries: list) -> str:
+def _wrstsegments(entries: list, convert=False) -> str:
     time = 0
     subs = []
     for cont in entries:
@@ -401,7 +374,7 @@ def _wrstsegments(entries: list) -> str:
                 several_items = True
                 pre_date_skip = False
             elif has_date is None and skip is False and pre_date_skip is False:
-                sub.append(item)
+                sub.append(_wsrt_colors(convert, item))
         if sub:
             subs.append(sub)
     string = ""
@@ -498,3 +471,33 @@ def sec2str(seconds):
 
 def str2sec(string):
     return sum(x * float(t) for x, t in zip([3600, 60, 1], string.split(":")))
+
+
+def _wsrt_colors(convert, text):
+    if convert:
+        colors = {
+            "30": "#000000",
+            "31": "#ff0000",
+            "32": "#00ff00",
+            "33": "#ffff00",
+            "34": "#0000ff",
+            "35": "#ff00ff",
+            "36": "#00ffff",
+            "37": "#ffffff",
+            "c.black": "#000000",
+            "c.red": "#ff0000",
+            "c.green": "#00ff00",
+            "c.yellow": "#ffff00",
+            "c.blue": "#0000ff",
+            "c.magenta": "#ff00ff",
+            "c.cyan": "#00ffff",
+            "c.gray": "#ffffff",
+        }
+        for tag, color in colors.items():
+            regex1 = "<" + tag + ">"
+            replace = '<font color="' + color + '">'
+            text = re.sub(regex1, replace, text)
+            text = re.sub(f'</{tag.split(".")[0]}>', "</font>", text)
+    else:
+        text = re.sub("<[^>]*>", "", text)
+    return text
