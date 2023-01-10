@@ -334,6 +334,7 @@ def _wrstsegments(entries: list, convert=False) -> str:
     time = 0
     subs = []
     for cont in entries:
+        cont = re.sub(r"\n\n\d+\n", "\n", cont)  # remove sequence numbers
         text = cont.split("\n")
         for t in text:  # is in text[1] for tv4play, but this should be more future proof
             if "X-TIMESTAMP-MAP=MPEGTS" in t:
