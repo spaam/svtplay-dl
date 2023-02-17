@@ -199,7 +199,7 @@ class Tv4(Service, OpenGraphThumbMixin):
         if janson["query"]["type"] == "Article":
             vidasset = janson["props"]["pageProps"]["apolloState"][f"Article:{janson['query']['id']}"]["featured"]["__ref"]
             self.output["id"] = janson["props"]["pageProps"]["apolloState"][vidasset]["id"]
-        url = f"https://playback-api.b17g.net/media/{self.output['id']}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine"
+        url = f"https://playback2.a2d.tv/play/{self.output['id']}?service=tv4&device=browser&protocol=hls%2Cdash&drm=widevine&capabilities=live-drm-adstitch-2%2Cexpired_assets"
         res = self.http.request("get", url, cookies=self.cookies)
         if res.status_code > 200:
             yield ServiceError("Can't play this because the video is geoblocked.")
