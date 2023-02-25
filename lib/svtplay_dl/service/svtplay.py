@@ -304,6 +304,10 @@ class Svtplay(Service, MetadataThumbMixin):
                     match = re.search(r"S.song (\d+)", i["item"]["positionInSeason"])
                     if match:
                         return match.group(1)
+
+        if "productionYearRange" in data["moreDetails"]:
+            return data["moreDetails"]["productionYearRange"]
+
         return None
 
     def _find_episode(self, data):
