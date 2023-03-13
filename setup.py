@@ -1,20 +1,17 @@
 import os
+import platform
 import sys
 
 from setuptools import find_packages
 
-if "build_exe" in sys.argv:
+if platform.system() == "Windows" and "build_exe" in sys.argv:
     from cx_Freeze import setup, Executable
+
+    executable = (Executable("bin/svtplay-dl", base=None),)
 else:
     from setuptools import setup
 
-    # fake Executable class to avoid cx_Freeze on non-Windows
-    # noinspection Mypy
-    class Executable:
-        # noinspection PyUnusedLocal
-        def __init__(self, script=None, base=None):
-            pass
-
+    executable = None
 
 # This is needed for versioneer to be importable when building with PEP 517.
 # See <https://github.com/warner/python-versioneer/issues/193> and links
@@ -75,5 +72,5 @@ setup(
     ],
     # cx_freeze info for Windows builds with Python embedded
     options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"], "includes": "_cffi_backend"}},
-    executables=[Executable("bin/svtplay-dl", base=None)],
+    executables=executable,
 )
