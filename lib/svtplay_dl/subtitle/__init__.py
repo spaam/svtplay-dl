@@ -33,6 +33,8 @@ def subtitle_probe(config, url, **kwargs):
             data = http.get(kwargs.get("files")[0]).content
             if data.find(b"ftyp") > 0:
                 yield subtitle(config, "stpp", url, **kwargs)
+            elif data.startswith(b"WEBVTT"):
+                yield subtitle(config, "wrst", kwargs.get("files")[0], **kwargs)
         elif xmldata.tag.endswith("tt"):
             yield subtitle(config, "tt", url, **kwargs)
 
@@ -352,13 +354,13 @@ def _wrstsegments(entries: list, convert=False) -> str:
         pre_date_skip = True
         sub = []
         for x in range(len(itmes)):
-            item = itmes[x]
+            item = itmes[x].rstrip()
             if not item.rstrip():
                 continue
             if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
                 ha = strdate(subs[-1][0])
                 ha3 = strdate(item)
-                second = str2sec(ha3.group(2)) + time
+                second = str2sec(ha3.group(4)) + time
                 subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
                 skip = True
                 pre_date_skip = False
@@ -370,7 +372,7 @@ def _wrstsegments(entries: list, convert=False) -> str:
                     sub = []
                 skip = False
                 first = str2sec(has_date.group(1)) + time
-                second = str2sec(has_date.group(2)) + time
+                second = str2sec(has_date.group(4)) + time
                 sub.append(f"{sec2str(first).replace('.', ',')} --> {sec2str(second).replace('.', ',')}")
                 several_items = True
                 pre_date_skip = False
@@ -401,9 +403,9 @@ def _resolv(entries):
         if nr + 1 < len(entries):
             time_match_next = strdate(entries[nr + 1][1].replace(",", "."))
         left_time = time_match.group(1)
-        right_time = time_match.group(2)
-        if time_match_next and time_match.group(2) == time_match_next.group(1):
-            right_time = time_match_next.group(2)
+        right_time = time_match.group(4)
+        if time_match_next and time_match.group(4) == time_match_next.group(1):
+            right_time = time_match_next.group(4)
             skip = True
             changed = True
         next_entries = [nr + 1, f"{left_time} --> {right_time}"]
@@ -460,7 +462,7 @@ def tt_text(node, data):
 
 
 def strdate(datestring):
-    match = re.search(r"^(\d+:\d+:[\.,0-9]+) --> (\d+:\d+:[\.,0-9]+)", datestring)
+    match = re.search(r"^((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?) --> ((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?)$", datestring)
     return match
 
 
@@ -471,7 +473,8 @@ def sec2str(seconds):
 
 
 def str2sec(string):
-    return sum(x * float(t) for x, t in zip([3600, 60, 1], string.split(":")))
+    seconds = [3600, 60, 1]
+    return sum(x * float(t) for x, t in zip(seconds[3 - len(string.split(":")) :], string.split(":")))
 
 
 def _wsrt_colors(convert, text):
