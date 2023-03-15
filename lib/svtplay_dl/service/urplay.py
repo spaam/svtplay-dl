@@ -1,6 +1,5 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
-import copy
 import json
 import logging
 import re
@@ -8,10 +7,10 @@ from html import unescape
 from urllib.parse import urljoin
 
 from svtplay_dl.error import ServiceError
+from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
-from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.http import download_thumbnails
 
 
@@ -28,38 +27,22 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = unescape(match.group(1))
         jsondata = json.loads(data)
 
-        res = self.http.get("https://streaming-loadbalancer.ur.se/loadbalancer.json")
-        loadbalancer = res.json()["redirect"]
+        vid = jsondata["props"]["pageProps"]["program"]["id"]
         jsondata = jsondata["props"]["pageProps"]["program"]
 
+        res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
+
+        if "dash" in res.json()["sources"]:
+            yield from dashparse(
+                self.config,
+                self.http.request("get", res.json()["sources"]["dash"]),
+                res.json()["sources"]["dash"],
+                output=self.output,
+            )
+        if "hls" in res.json()["sources"]:
+            yield from hlsparse(self.config, self.http.request("get", res.json()["sources"]["hls"]), res.json()["sources"]["hls"], output=self.output)
+
         self.outputfilename(jsondata, urldata)
-
-        for streaminfo in jsondata["streamingInfo"].keys():
-            stream = jsondata["streamingInfo"][streaminfo]
-
-            if streaminfo == "raw":
-                if "sd" in stream:
-                    url = f"https://{loadbalancer}/{stream['sd']['location']}playlist.m3u8"
-                    yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                if "hd" in stream:
-                    url = f"https://{loadbalancer}/{stream['hd']['location']}playlist.m3u8"
-                    yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-                if "m4A" in stream:
-                    url = f"https://{loadbalancer}/{stream['m4A']['location']}playlist.m3u8"
-                    yield from hlsparse(self.config, self.http.request("get", url), url, output=self.output)
-            if not (self.config.get("get_all_subtitles")) and streaminfo == "sweComplete":
-                yield from subtitle_probe(copy.copy(self.config), stream["tt"]["location"].replace(".tt", ".vtt"), output=copy.copy(self.output))
-
-            if self.config.get("get_all_subtitles") and "tt" in stream:
-                label = stream["tt"]["language"]
-                if stream["tt"]["scope"] != "complete":
-                    label = f"{label}-{stream['tt']['scope']}"
-                yield from subtitle_probe(
-                    copy.copy(self.config),
-                    stream["tt"]["location"].replace(".tt", ".vtt"),
-                    subfix=label,
-                    output=copy.copy(self.output),
-                )
 
     def find_all_episodes(self, config):
         episodes = []
