@@ -1,9 +1,14 @@
+import binascii
 import json
 import logging
 import re
 import xml.etree.ElementTree as ET
 from io import StringIO
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers import modes
 from requests import __build__ as requests_version
 from svtplay_dl.fetcher.m3u8 import M3U8
 from svtplay_dl.utils.fetcher import filter_files
@@ -294,8 +299,19 @@ class subtitle:
         for _, i in enumerate(self.kwargs["m3u8"].media_segment):
             itemurl = get_full_url(i["URI"], self.url)
             cont = self.http.get(itemurl)
-            cont.encoding = "utf-8"
-            pretext.append(cont.text)
+            if self.kwargs["m3u8"].encrypted:
+                keyurl = get_full_url(i["EXT-X-KEY"]["URI"], self.url)
+                key = self.http.request("get", keyurl).content
+                iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else b"\x00" * 16
+                backend = default_backend()
+                cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+                decryptor = cipher.decryptor()
+                if decryptor:
+                    data = decryptor.update(cont.content).decode("utf-8")
+            else:
+                cont.encoding = "utf-8"
+                data = cont.text
+            pretext.append(data)
         return _wrstsegments(pretext, self.config.get("convert_subtitle_colors"))
 
     def stpp(self, subdata):
