@@ -12,8 +12,9 @@ class Svt(Svtplay):
     supported_domains = ["svt.se", "www.svt.se"]
 
     def get(self):
+        vid = None
         data = self.get_urldata()
-        match = re.search("n.reduxState=(.*);", data)
+        match = re.search("n.urqlState=(.*);", data)
         if not match:
             match = re.search(r"stateData = JSON.parse\(\"(.*)\"\)\<\/script", data)
             if not match:
@@ -27,7 +28,13 @@ class Svt(Svtplay):
             res = self.http.get(f"https://api.svt.se/videoplayer-api/video/{vid}")
         else:
             janson = json.loads(match.group(1))
-            vid = janson["areaData"]["articles"][list(janson["areaData"]["articles"].keys())[0]]["media"][0]["image"]["svtId"]
+            for key in list(janson.keys()):
+                janson2 = json.loads(janson[key]["data"])
+                if "page" in janson2 and "topMedia" in janson2["page"]:
+                    vid = janson2["page"]["topMedia"]["svtId"]
+            if not vid:
+                yield ServiceError("Can't find any videos")
+                return
             res = self.http.get(f"https://api.svt.se/video/{vid}")
 
         janson = res.json()
