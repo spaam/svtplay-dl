@@ -185,13 +185,12 @@ def _sublanguage(stream, config, subfixes):
     def query(self):
         _ = parse(self)
         random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
-        url = "https://whatlanguage.herokuapp.com"
+        url = "https://whatlanguage.onrender.com"
         payload = {"query": random_sentences}
         # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
         headers = {"content-type": "application/json"}
         try:
-            # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume,
-            # and it is heroku after all (fast enough)
+            # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume
             r = post(url, data=dumps(payload), headers=headers, timeout=30)
             if r.status_code == codes.ok:
                 try:
