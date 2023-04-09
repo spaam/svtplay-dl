@@ -166,7 +166,7 @@ def select_quality(config, streams):
         raise error.UIException(f"Can't find any streams with that audio language {config.get('audio_language')}")
 
     if config.get("resolution"):
-        resolutions = str(config.get("resolution")).split(",")
+        resolutions = config.get("resolution").split(",")
         streams = resolution(streams, resolutions)
         if not streams:
             raise error.UIException(f"Can't find any streams with that video resolution {config.get('resolution')}")

@@ -322,10 +322,13 @@ class Svtplay(Service, MetadataThumbMixin):
         vid = data["video"]["svtId"]
         for seasons in data["associatedContent"]:
             for i in seasons["items"]:
-                if i["item"]["videoSvtId"] == vid and "positionInSeason" in i["item"]:
-                    match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
-                    if match:
-                        return match.group(1)
+                if i["item"]["videoSvtId"] == vid:
+                    if "positionInSeason" in i["item"]:
+                        match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
+                        if match:
+                            return match.group(1)
+                    if "number" in i["item"]:
+                        return i["item"]["number"]
 
         if "description" in data:
             match = re.search(r"Del (\d+) av (\d+)", data["description"])
