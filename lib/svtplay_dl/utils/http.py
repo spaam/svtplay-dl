@@ -1,3 +1,4 @@
+import http.client
 import logging
 import re
 from html import unescape
@@ -5,9 +6,11 @@ from urllib.parse import urljoin
 
 from requests import Session
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import Retry
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import Options
+
+http.client._MAXHEADERS = 200
 
 # Used for UA spoofing in get_http_data()
 FIREFOX_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
