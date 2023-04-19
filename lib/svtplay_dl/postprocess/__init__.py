@@ -4,13 +4,13 @@ import pathlib
 import platform
 import re
 import sys
-from json import dumps
 from random import sample
 from shutil import which
 
 from requests import codes
 from requests import post
 from requests import Timeout
+from svtplay_dl.utils.http import FIREFOX_UA
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
 from svtplay_dl.utils.stream import subtitle_filter
@@ -185,14 +185,10 @@ def _sublanguage(stream, config, subfixes):
     def query(self):
         _ = parse(self)
         random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
-        url = "https://whatlanguage.herokuapp.com"
-        payload = {"query": random_sentences}
-        # Note: requests handles json from version 2.4.2 and onwards so i use json.dumps for now.
-        headers = {"content-type": "application/json"}
+        url = "https://svtplay-dl.se/langdetect/"
+        headers = {"User-Agent": f"{FIREFOX_UA} {platform.machine()}"}
         try:
-            # Note: reasonable timeout i guess? svtplay-dl is mainly used while multitasking i presume,
-            # and it is heroku after all (fast enough)
-            r = post(url, data=dumps(payload), headers=headers, timeout=30)
+            r = post(url, json={"query": random_sentences}, headers=headers, timeout=30)
             if r.status_code == codes.ok:
                 try:
                     response = r.json()
