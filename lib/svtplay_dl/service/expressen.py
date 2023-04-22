@@ -17,7 +17,7 @@ class Expressen(Service):
 
         match = re.search('data-article-data="([^"]+)"', data)
         if not match:
-            yield ServiceError("Cant find video file info")
+            yield ServiceError("Can't find video file info")
             return
         data = decode_html_entities(match.group(1))
         janson = json.loads(data)

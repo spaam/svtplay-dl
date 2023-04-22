@@ -56,7 +56,7 @@ class Disney(Service, OpenGraphThumbMixin):
                 if entry in jsondata["idlist"]:
                     entryid = jsondata["idlist"][entry]
                 else:
-                    yield ServiceError("Cant find video info")
+                    yield ServiceError("Can't find video info")
                     return
             for i in jsondata["playlists"][0]["playlist"]:
                 if entryid in i["id"]:

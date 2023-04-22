@@ -12,7 +12,7 @@ class ServiceError(Exception):
 
 class NoRequestedProtocols(UIException):
     """
-    This excpetion is thrown when the service provides streams,
+    This exception is thrown when the service provides streams,
     but not using any accepted protocol (as decided by
     options.stream_prio).
     """

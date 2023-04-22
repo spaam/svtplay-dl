@@ -342,7 +342,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if "validFrom" in episode["item"]:
 
             def _fix_broken_timezone_implementation(value):
-                # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
+                # cx_freeze can't include .zip file for dateutil and < py37 have issues with timezones with : in it
                 if "+" in value and ":" == value[-3:-2]:
                     value = value[:-3] + value[-2:]
                 return value

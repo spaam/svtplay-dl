@@ -17,7 +17,7 @@ class Facebook(Service, OpenGraphThumbMixin):
 
         match = re.search('params","([^"]+)"', data)
         if not match:
-            yield ServiceError("Cant find params info. video need to be public.")
+            yield ServiceError("Can't find params info. video need to be public.")
             return
         data2 = json.loads(f'["{match.group(1)}"]')
         data2 = json.loads(unquote_plus(data2[0]))

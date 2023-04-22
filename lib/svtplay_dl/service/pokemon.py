@@ -18,7 +18,7 @@ class Pokemon(Service, OpenGraphThumbMixin):
 
         match = re.search(r"id=([a-f0-9]+)\&", parse.fragment)
         if not match:
-            yield ServiceError("Cant find the ID in the url")
+            yield ServiceError("Can't find the ID in the url")
             return
 
         match2 = re.search(r'region: "(\w+)"', self.get_urldata())

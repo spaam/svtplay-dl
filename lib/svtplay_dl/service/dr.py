@@ -22,7 +22,7 @@ class Dr(Service, OpenGraphThumbMixin):
         if not match:
             match = re.search('source src="([^"]+)"', data)
             if not match:
-                yield ServiceError("Cant find info for this video")
+                yield ServiceError("Can't find info for this video")
                 return
 
             res = self.http.request("get", match.group(1))

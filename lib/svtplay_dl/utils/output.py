@@ -90,7 +90,7 @@ def progressbar(total, pos, msg=""):
     """
     Given a total and a progress position, output a progress bar
     to stderr. It is important to not output anything else while
-    using this, as it relies soley on the behavior of carriage
+    using this, as it relies solely on the behavior of carriage
     return (\\r).
 
     Can also take an optioal message to add after the
@@ -196,7 +196,7 @@ def _formatname(output, config):
         if key == "ext" and output[key]:
             name = name.replace("{ext}", output[key])
 
-    # Remove all {text} we cant replace with something
+    # Remove all {text} we can't replace with something
     for item in re.findall(r"([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
         if "season" in output and output["season"] and re.search(r"(e\{[\w\-]+\})", name):
             name = name.replace(re.search(r"(e\{[\w\-]+\})", name).group(1), "")

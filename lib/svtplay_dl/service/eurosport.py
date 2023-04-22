@@ -15,7 +15,7 @@ class Eurosport(Service):
         parse = urlparse(self.url)
         match = re.search("window.server_path = ({.*});", self.get_urldata())
         if not match:
-            yield ServiceError("Cant find api key")
+            yield ServiceError("Can't find api key")
             return
 
         janson = json.loads(match.group(1))
@@ -73,7 +73,7 @@ class Eurosport(Service):
             pagetype = "channel"
             match = re.search("/([^/]+)$", parse.path)
             if not match:
-                yield ServiceError("Cant find channel")
+                yield ServiceError("Can't find channel")
                 return
 
             (vid,) = match.groups()
@@ -97,7 +97,7 @@ class Eurosport(Service):
             pagetype = "event"
             match = re.search("/([^/]+)/([^/]+)$", parse.path)
             if not match:
-                yield ServiceError("Cant fint event id")
+                yield ServiceError("Can't fint event id")
                 return
 
             query["title"], query["contentId"] = match.groups()

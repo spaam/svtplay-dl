@@ -46,7 +46,7 @@ class Viafree(Service, OpenGraphThumbMixin):
 
         match = re.search('}}}},("staticPages".*}}); windo', self.get_urldata())
         if not match:
-            yield ServiceError("Cant find necessary info")
+            yield ServiceError("Can't find necessary info")
             return
         janson = self._jansonpage(match.group(1))
         video = None
@@ -121,7 +121,7 @@ class Viafree(Service, OpenGraphThumbMixin):
         data = self.get_urldata()
         match = re.search('}}}},("staticPages".*}}); windo', data)
         if not match:
-            logging.error("Cant find necessary info")
+            logging.error("Can't find necessary info")
             return episodes
 
         janson = self._jansonpage(match.group(1))
@@ -132,7 +132,7 @@ class Viafree(Service, OpenGraphThumbMixin):
             data = res.text
             match = re.search('}}}},("staticPages".*}}); windo', data)
             if not match:
-                logging.error("Cant find necessary info")
+                logging.error("Can't find necessary info")
                 return episodes
 
             janson = self._jansonpage(match.group(1))

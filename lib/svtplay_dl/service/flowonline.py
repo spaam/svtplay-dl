@@ -17,7 +17,7 @@ class Flowonline(Service, OpenGraphThumbMixin):
     def get(self):
         match = re.search('iframe src="(/embed/[^"]+)"', self.get_urldata())
         if not match:
-            yield ServiceError("Cant find video")
+            yield ServiceError("Can't find video")
             return
         parse = urlparse(self.url)
 
@@ -31,7 +31,7 @@ class Flowonline(Service, OpenGraphThumbMixin):
 
         match = re.search('source src="([^"]+)" type="application/x-mpegURL"', data.text)
         if not match:
-            yield ServiceError("Cant find video file")
+            yield ServiceError("Can't find video file")
             return
 
         yield from hlsparse(self.config, self.http.request("get", match.group(1)), match.group(1), output=self.output)

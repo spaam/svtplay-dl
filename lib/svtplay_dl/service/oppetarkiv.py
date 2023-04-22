@@ -22,7 +22,7 @@ class OppetArkiv(Service, OpenGraphThumbMixin):
     def get(self):
         vid = self.find_video_id()
         if vid is None:
-            yield ServiceError("Cant find video id for this video")
+            yield ServiceError("Can't find video id for this video")
             return
 
         url = f"http://api.svt.se/videoplayer-api/video/{vid}"

@@ -437,7 +437,7 @@ def timestr(msec):
 
         HH:MM:SS,SS
 
-    with 10 millisecond precision. Note the , seperator in
+    with 10 millisecond precision. Note the , separator in
     the seconds.
     """
     sec = float(msec) / 1000

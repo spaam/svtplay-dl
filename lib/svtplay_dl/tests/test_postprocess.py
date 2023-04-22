@@ -144,7 +144,7 @@ class sublang(unittest.TestCase):
         config = setup_defaults()
         self.setup_mock(req, "swe")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
-        service = Service(config, "http://exmaple.com")
+        service = Service(config, "http://example.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
         self.assertEqual(_sublanguage(stream, config, None), ["swe"])
@@ -154,7 +154,7 @@ class sublang(unittest.TestCase):
         self.setup_mock(req, "swe")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
         config.set("get_all_subtitles", True)
-        service = Service(config, "http://exmaple.com")
+        service = Service(config, "http://example.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
         self.assertEqual(_sublanguage(stream, config, ["grej", "hej"]), ["swe", "swe"])
@@ -164,7 +164,7 @@ class sublang(unittest.TestCase):
         self.setup_mock(req, "smj")
         config.set("output", os.path.join(os.path.dirname(os.path.realpath(__file__)), "postprocess/textfile-service"))
         config.set("get_all_subtitles", True)
-        service = Service(config, "http://exmaple.com")
+        service = Service(config, "http://example.com")
         service.output["title"] = "textfile"
         stream = VideoRetriever(config, "http://example.com", 0, output=service.output)
         self.assertEqual(_sublanguage(stream, config, ["lulesamiska"]), ["smj"])

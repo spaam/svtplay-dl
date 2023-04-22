@@ -33,7 +33,7 @@ class postprocess:
 
     def merge(self):
         if self.detect is None:
-            logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
+            logging.error("Can't detect ffmpeg or avconv. Can't mux files without it.")
             return
         if self.stream.finished is False:
             return
@@ -92,7 +92,7 @@ class postprocess:
             subs_nr = 0
             sub_start = 0
             # find what sub track to start with. when a/v is in one file it start with 1
-            # if seperate it will start with 2
+            # if separate it will start with 2
             for i in tracks:
                 if int(i[0]) >= sub_start:
                     sub_start += 1

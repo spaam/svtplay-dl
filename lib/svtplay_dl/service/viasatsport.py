@@ -13,7 +13,7 @@ class Viasatsport(Service, OpenGraphThumbMixin):
     def get(self):
         match = re.search("__STATE__']=({.*});</script><script>window", self.get_urldata())
         if not match:
-            yield ServiceError("Cant find video info")
+            yield ServiceError("Can't find video info")
             return
 
         dataj = json.loads(match.group(1))

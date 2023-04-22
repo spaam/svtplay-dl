@@ -24,12 +24,12 @@ class Sportlib(Service, OpenGraphThumbMixin):
         data = self.http.get(url).text
         match = re.search('CLIENT_SECRET:"([^"]+)"', data)
         if not match:
-            yield ServiceError("Cant fint login info")
+            yield ServiceError("Can't fint login info")
             return
         cs = match.group(1)
         match = re.search('CLIENT_ID:"([^"]+)"', data)
         if not match:
-            yield ServiceError("Cant fint login info")
+            yield ServiceError("Can't fint login info")
             return
 
         res = self.http.get("https://core.oz.com/channels?slug=sportlib&org=www.sportlib.se")
@@ -53,7 +53,7 @@ class Sportlib(Service, OpenGraphThumbMixin):
         parse = urlparse(self.url)
         match = re.search("video/([-a-fA-F0-9]+)", parse.path)
         if not match:
-            yield ServiceError("Cant find video id")
+            yield ServiceError("Can't find video id")
             return
 
         url = f"https://core.oz.com/channels/{sid}/videos/{match.group(1)}?include=collection,streamUrl"

@@ -19,12 +19,12 @@ class Picsearch(Service, OpenGraphThumbMixin):
     def get(self):
         ajax_auth = self.get_auth()
         if not ajax_auth:
-            yield ServiceError("Cant find token for video")
+            yield ServiceError("Can't find token for video")
             return
 
         mediaid = self.get_mediaid()
         if not mediaid:
-            yield ServiceError("Cant find media id")
+            yield ServiceError("Can't find media id")
             return
         if not isinstance(mediaid, str):
             mediaid = mediaid.group(1)

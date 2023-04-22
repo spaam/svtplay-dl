@@ -35,7 +35,7 @@ svtplay-dl is available in Debian strech and later and on Ubuntu 16.04 and later
 
 ### Solus
 
-svtplay-dl is avaliable in the [Solus](https://getsol.us.com/) repository and can be installed by simply running:
+svtplay-dl is available in the [Solus](https://getsol.us.com/) repository and can be installed by simply running:
 
 ```
 sudo eopkg it svtplay-dl
