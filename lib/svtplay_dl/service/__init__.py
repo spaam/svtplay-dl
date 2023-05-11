@@ -191,9 +191,9 @@ class Generic(Service):
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
 
-        match = re.search("(picsearch_ajax_auth|screen9-ajax-auth)", data)
+        match = re.search("cdn.screen9.com", data)
         if match:
-            url = "http://csp.picsearch.com"
+            url = "https://cdn.screen9.com"
             for i in sites:
                 if i.handles(url):
                     return self.url, i(self.config, self.url)
