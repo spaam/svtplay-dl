@@ -117,6 +117,25 @@ class Svtplay(Service, MetadataThumbMixin):
                 elif i["url"].find(".mpd") > 0:
                     yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
 
+    def _lists(self):
+        videos = []
+        match = re.search(self.info_search_expr, self.get_urldata())
+        if not match:
+            logging.error("Can't find video info.")
+            return videos
+        janson = json.loads(match.group(1))
+        data = None
+        for data_entry in janson["props"]["urqlState"].values():
+            if "data" in data_entry:
+                entry = json.loads(data_entry["data"])
+                if "selectionById" in entry:
+                    data = entry
+
+        if data:
+            for i in data["selectionById"]["items"]:
+                videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+        return videos
+
     def _last_chance(self):
         videos = []
         match = re.search(self.info_search_expr, self.get_urldata())
@@ -229,6 +248,8 @@ class Svtplay(Service, MetadataThumbMixin):
             episodes = self._last_chance()
         elif re.search("^/genre", parse.path):
             episodes = self._genre()
+        elif re.search("^/lista", parse.path):
+            episodes = self._lists()
         else:
             episodes = self._all_episodes(self.url)
 
