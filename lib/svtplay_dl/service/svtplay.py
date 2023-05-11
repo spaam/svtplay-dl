@@ -246,7 +246,7 @@ class Svtplay(Service, MetadataThumbMixin):
         episodes = []
         if re.search("^/sista-chansen", parse.path):
             episodes = self._last_chance()
-        elif re.search("^/genre", parse.path):
+        elif re.search("^/kategori", parse.path):
             episodes = self._genre()
         elif re.search("^/lista", parse.path):
             episodes = self._lists()
