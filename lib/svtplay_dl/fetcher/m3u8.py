@@ -92,6 +92,8 @@ class M3U8:
                     elif tag == "EXT-X-KEY":
                         self.encrypted = True
                         info = _get_tuple_attribute(attr)
+                        if "URI" not in info:
+                            self.encrypted = False
 
                     # 4.3.2.5.  EXT-X-MAP
                     elif tag == "EXT-X-MAP":
