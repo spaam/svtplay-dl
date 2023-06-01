@@ -97,7 +97,7 @@ def subtitle_filter(subtitles) -> List:
 
 
 def subtitle_decider(stream, subtitles):
-    if subtitles and (stream.config.get("merge_subtitle") or stream.config.get("subtitle")):
+    if subtitles and (stream.config.get("merge_subtitle") or stream.config.get("subtitle") or stream.config("get_all_subtitles")):
         subtitles = subtitle_filter(subtitles)
         if stream.config.get("get_all_subtitles"):
             for sub in subtitles:

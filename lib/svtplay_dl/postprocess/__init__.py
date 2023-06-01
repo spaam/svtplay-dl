@@ -133,7 +133,7 @@ class postprocess:
 
         # This if statement is for use cases where both -S and -M are specified to not only merge the subtitle but also store it separately.
         if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
-            if self.subfixes and len(self.subfixes) >= 2:
+            if self.subfixes and len(self.subfixes) >= 2 and self.config.get("get_all_subtitles"):
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
                     os.remove(subfile)
