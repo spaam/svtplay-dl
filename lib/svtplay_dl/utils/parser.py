@@ -368,6 +368,7 @@ def setup_defaults():
     options.set("only_audio", False)
     options.set("only_video", False)
     options.set("output_format", "mp4")
+    options.set("get_all_subtitles", False)
     return _special_settings(options)
 
 
