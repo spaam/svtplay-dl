@@ -5,9 +5,9 @@ import logging
 import re
 from datetime import datetime
 from datetime import timedelta
+from urllib.parse import quote
 from urllib.parse import urlparse
 
-import requests
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
@@ -35,31 +35,50 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 yield streams[n]
             return
 
-        match = self._getjson()
+        token = self._login()
+        if token is None:
+            return ServiceError("You need username / password.")
+
+        match = self._getjson(self.get_urldata())
         if not match:
             yield ServiceError("Can't find json data")
             return
-
         jansson = json.loads(match.group(1))
-        if "assetId" not in jansson["query"]:
+
+        if "params" not in jansson["query"]:
             yield ServiceError("Cant find video id for the video")
             return
 
-        vid = jansson["query"]["assetId"]
-        janson2 = jansson["props"]["initialApolloState"]
-        item = janson2[f"VideoAsset:{vid}"]
+        key_check = None
+        for key in jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"].keys():
+            if key.startswith("media"):
+                key_check = key
+        what = jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"][key_check]["__ref"]
 
-        if item["is_drm_protected"]:
+        if what.startswith("Series:"):
+            seriesid = jansson["props"]["apolloStateFromServer"][what]["id"]
+            url = f"https://client-gateway.tv4.a2d.tv/graphql?operationName=suggestedEpisode&variables=%7B%22id%22%3A%22{seriesid}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%2232df600a3e3efb1362bae9ff73a5e7f929e75c154effb38d7b3516c3985e38e0%22%7D%7D"
+            res = self.http.request("get", url, headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json"})
+            vid = res.json()["data"]["series"]["suggestedEpisode"]["episode"]["id"]
+        else:
+            vid = jansson["props"]["apolloStateFromServer"][what]["id"]
+
+        url = f"https://playback2.a2d.tv/play/{vid}?service=tv4play&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome&capabilities=live-drm-adstitch-2%2Cyospace3"
+        res = self.http.request("get", url, headers={"Authorization": f"Bearer {token}"})
+        jansson = res.json()
+
+        item = jansson["metadata"]
+        if item["isDrmProtected"]:
             yield ServiceError("We can't download DRM protected content from this site.")
             return
 
-        if item["live"]:
+        if item["isLive"]:
             self.config.set("live", True)
-        if item["season"] > 0:
-            self.output["season"] = item["season"]
-        if item["episode"] > 0:
-            self.output["episode"] = item["episode"]
-        self.output["title"] = item["program_nid"]
+        if item["seasonNumber"] > 0:
+            self.output["season"] = item["seasonNumber"]
+        if item["episodeNumber"] and item["episodeNumber"] > 0:
+            self.output["episode"] = item["episodeNumber"]
+        self.output["title"] = item["seriesTitle"]
         self.output["episodename"] = item["title"]
         self.output["id"] = str(vid)
         self.output["episodethumbnailurl"] = item["image"]
@@ -68,18 +87,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
-        url = f"https://playback2.a2d.tv/play/{vid}?service=tv4&device=browser&browser=GoogleChrome&protocol=hls%2Cdash&drm=widevine&capabilities=live-drm-adstitch-2%2Cexpired_assets"
-        try:
-            res = self.http.request("get", url, cookies=self.cookies)
-        except requests.exceptions.RetryError:
-            res = requests.get(url, cookies=self.cookies)
-            yield ServiceError(f"Can't play this because the video is geoblocked: {res.json()['message']}")
-            return
-        if res.status_code > 200:
-            yield ServiceError("Can't play this because the video is geoblocked or not available.")
-            return
-
-        jansson = res.json()
         if jansson["playbackItem"]["type"] == "hls":
             yield from hlsparse(
                 self.config,
@@ -96,89 +103,121 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 httpobject=self.http,
             )
 
-    def _getjson(self):
-        match = re.search(r"application\/json\">(.*\})<\/script>", self.get_urldata())
+    def _getjson(self, data):
+        match = re.search(r"application\/json\">(.*\})<\/script>", data)
         return match
+
+    def _login(self):
+        if self.config.get("username") is None or self.config.get("password") is None:
+            return None
+        res = self.http.request(
+            "post",
+            "https://avod-auth-alb.a2d.tv/oauth/authorize",
+            json={
+                "client_id": "tv4-web",
+                "response_type": "token",
+                "credentials": {"username": self.config.get("username"), "password": self.config.get("password")},
+            },
+        )
+        if res.status_code > 400:
+            return None
+        return res.json()["access_token"]
 
     def find_all_episodes(self, config):
         episodes = []
         items = []
-        show = None
-        match = self._getjson()
-        jansson = json.loads(match.group(1))
-        if "nid" not in jansson["query"]:
-            logging.info("Can't find show name.")
-            return episodes
-        show = jansson["query"]["nid"]
-        graph_list = self._graphql(show, "EPISODE")
-        for i in graph_list:
-            if i not in items:
-                items.append(i)
+
+        showid, jansson = self._get_seriesid(self.get_urldata(), dict())
+        if showid is None:
+            logging.error("Cant find any videos")
+            return
+
+        for season in jansson["props"]["apolloStateFromServer"][f"Series:{showid}"]["allSeasonLinks"]:
+            graph_list = self._graphql(season["seasonId"])
+            for i in graph_list:
+                if i not in items:
+                    items.append(i)
+
         if config.get("include_clips"):
-            items.extend(self._graphql(show, "CLIP"))
+            if jansson["props"]["apolloStateFromServer"][f"Series:{showid}"]["hasPanels"]:
+                key_check = None
+                for key in jansson["props"]["apolloStateFromServer"][f"Series:{showid}"].keys():
+                    if key.startswith("panels("):
+                        key_check = key
+
+                if key_check:
+                    for item in jansson["props"]["apolloStateFromServer"][f"Series:{showid}"][key_check]["items"]:
+                        if item["__ref"].startswith("Clips"):
+                            graph_list = self._graphclips(jansson["props"]["apolloStateFromServer"][item["__ref"]]["id"])
+                            for clip in graph_list:
+                                episodes.append(f"https://www.tv4play.se/klipp/{clip}")
 
         items = sorted(items)
         for item in items:
-            episodes.append(f"https://www.tv4play.se/program/{show}/{item}")
+            episodes.append(f"https://www.tv4play.se/video/{item}")
 
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last") :]
         return episodes
 
-    def _graphql(self, show, panel_type):
+    def _get_seriesid(self, data, jansson):
+        match = self._getjson(data)
+        if not match:
+            return None, jansson
+        jansson = json.loads(match.group(1))
+        if "params" not in jansson["query"]:
+            return None, jansson
+        showid = jansson["query"]["params"][0]
+        key_check = None
+        for key in jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"].keys():
+            if key.startswith("media"):
+                key_check = key
+        what = jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"][key_check]["__ref"]
+        if what.startswith("Episode"):
+            series = jansson["props"]["apolloStateFromServer"][what]["series"]["__ref"].replace("Series:", "")
+            res = self.http.request("get", f"https://www.tv4play.se/program/{series}/")
+            showid, jansson = self._get_seriesid(res.text, jansson)
+        return showid, jansson
+
+    def _graphql(self, show):
         items = []
-        gql = {
-            "variables": {
-                "programPanelsInput": {"offset": 0, "limit": 1000},
-                "videoAssetListInput": {"limit": 100, "offset": 0, "sortOrder": "ASCENDING"},
-                "programNid": show,
-            },
-            "query": "query Seasons($programNid: String, $videoAssetListInput: VideoAssetListInput!, $programPanelsInput: ProgramPanelsInput!)"
-            " {\n  program(nid: $programNid) {\n    __typename\n    upcoming {\n      __typename\n      ...EpisodeVideoAssetField\n    }\n"
-            "    panels2(input: $programPanelsInput) {\n      __typename\n      pageInfo {\n        __typename\n        totalCount\n"
-            "        hasNextPage\n        nextPageOffset\n      }\n      items {\n        __typename\n        ...EpisodePanelField\n      }\n"
-            "    }\n  }\n}fragment EpisodeVideoAssetField on VideoAsset {\n  __typename\n  id\n  title\n  description\n  expireDateTime\n"
-            "  humanDuration\n  freemium\n  broadcastDateTime\n  live\n  daysLeftInService\n  duration\n  season\n  episode\n"
-            "  humanBroadcastDateTime\n  humanBroadcastDateWithWeekday\n  program {\n    __typename\n    nid\n    name\n    displayCategory\n"
-            "    images2 {\n      __typename\n      main16x9 {\n        __typename\n        url\n      }\n    }\n  }\n  progress {\n"
-            "    __typename\n    position\n    percentage\n  }\n  image2 {\n    __typename\n    url\n  }\n}fragment"
-            " EpisodePanelField on VideoPanel {\n  __typename\n  id\n  name\n  assetType\n  totalNumberOfEpisodes\n"
-            "  videoList2(input: $videoAssetListInput) {\n    __typename\n    pageInfo {\n      __typename\n      totalCount\n"
-            "      hasNextPage\n      nextPageOffset\n    }\n    initialSortOrder\n    items {\n      __typename\n      id\n"
-            "      title\n      ...EpisodeVideoAssetField\n    }\n  }\n}",
-        }
-        res = self.http.request("post", "https://graphql.tv4play.se/graphql", json=gql)
-        janson = res.json()
+        nr = 0
+        total = 100
+        while nr <= total:
+            variables = {"seasonId": show, "input": {"limit": 12, "offset": nr}}
+            querystring = f"operationName=SeasonEpisodes&variables={quote(json.dumps(variables, separators=(',', ':')))}&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22ed1681cdf0f538949697babb57e34e399732046422df6ae60949c693362ca744%22%7D%7D"
 
-        for mediatype in janson["data"]["program"]["panels2"]["items"]:
-            offset = 0
-            if mediatype["assetType"] != panel_type:
-                continue
-            moreData = mediatype["videoList2"]["pageInfo"]["hasNextPage"]
-            seasonid = mediatype["id"]
-            for video in mediatype["videoList2"]["items"]:
-                items.append(video["id"])
+            res = self.http.request(
+                "get",
+                f"https://client-gateway.tv4.a2d.tv/graphql?{querystring}",
+                headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json"},
+            )
+            janson = res.json()
 
-            while moreData:
-                offset += 100
-                gql2 = {
-                    "variables": {"id": seasonid, "videoAssetListInput": {"limit": 100, "sortOrder": "ASCENDING", "offset": offset}},
-                    "query": "query MoreEpisodes($id: String!, $videoAssetListInput: VideoAssetListInput!) {\n"
-                    "  videoPanel(id: $id) {\n    __typename\n    videoList2(input: $videoAssetListInput) {\n      __typename\n"
-                    "      pageInfo {\n        __typename\n        totalCount\n        hasNextPage\n        nextPageOffset\n"
-                    "      }\n      items {\n        __typename\n        id\n        title\n        ...EpisodeVideoAssetField\n"
-                    "      }\n    }\n  }\n}fragment EpisodeVideoAssetField on VideoAsset {\n  __typename\n  id\n  title\n"
-                    "  description\n  expireDateTime\n  humanDuration\n  freemium\n  broadcastDateTime\n  live\n  daysLeftInService\n"
-                    "  duration\n  season\n  episode\n  humanBroadcastDateTime\n  humanBroadcastDateWithWeekday\n  program {\n"
-                    "    __typename\n    nid\n    name\n    displayCategory\n    images2 {\n      __typename\n      main16x9 {\n"
-                    "        __typename\n        url\n      }\n    }\n  }\n  progress {\n    __typename\n    position\n    percentage\n"
-                    "  }\n  image2 {\n    __typename\n    url\n  }\n}",
-                }
-                res = self.http.request("post", "https://graphql.tv4play.se/graphql", json=gql2)
-                moreData = res.json()["data"]["videoPanel"]["videoList2"]["pageInfo"]["hasNextPage"]
-                for video in res.json()["data"]["videoPanel"]["videoList2"]["items"]:
-                    items.append(video["id"])
+            total = janson["data"]["season"]["episodes"]["pageInfo"]["totalCount"]
+            for mediatype in janson["data"]["season"]["episodes"]["items"]:
+                items.append(mediatype["id"])
+            nr += 12
+        return items
 
+    def _graphclips(self, show):
+        items = []
+        nr = 0
+        total = 100
+        while nr <= total:
+            variables = {"panelId": show, "offset": nr, "limit": 8}
+            querystring = f"operationName=Panel&variables={quote(json.dumps(variables, separators=(',', ':')))}&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22843e9c11ac0512999fecd7646090d2e358c09ef30a4688d948d69dea17b82967%22%7D%7D"
+            res = self.http.request(
+                "get",
+                f"https://client-gateway.tv4.a2d.tv/graphql?{querystring}",
+                headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json"},
+            )
+            janson = res.json()
+
+            total = janson["data"]["panel"]["content"]["pageInfo"]["totalCount"]
+            for mediatype in janson["data"]["panel"]["content"]["items"]:
+                items.append(mediatype["clip"]["id"])
+            nr += 12
         return items
 
     def get_thumbnail(self, options):
