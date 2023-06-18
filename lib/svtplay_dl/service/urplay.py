@@ -5,6 +5,7 @@ import logging
 import re
 from html import unescape
 from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
@@ -55,14 +56,22 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = unescape(match.group(1))
         jsondata = json.loads(data)
         seasons = jsondata["props"]["pageProps"]["superSeriesSeasons"]
+
+        parse = urlparse(self.url)
+        url = f"https://{parse.netloc}{parse.path}"
+        episodes.append(url)
         if seasons:
             for season in seasons:
                 res = self.http.get(f'https://urplay.se/api/v1/series?id={season["id"]}')
                 for episode in res.json()["programs"]:
-                    episodes.append(urljoin("https://urplay.se", episode["link"]))
+                    url = urljoin("https://urplay.se", episode["link"])
+                    if url not in episodes:
+                        episodes.append(url)
         else:
             for episode in jsondata["props"]["pageProps"]["accessibleEpisodes"]:
-                episodes.append(urljoin("https://urplay.se", episode["link"]))
+                url = urljoin("https://urplay.se", episode["link"])
+                if url not in episodes:
+                    episodes.append(url)
         episodes_new = []
         n = 0
         for i in episodes:
