@@ -37,7 +37,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         token = self._login()
         if token is None:
-            return ServiceError("You need username / password.")
+            yield ServiceError("You need username / password.")
+            return
 
         match = self._getjson(self.get_urldata())
         if not match:
