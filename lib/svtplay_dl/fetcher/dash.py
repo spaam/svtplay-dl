@@ -249,6 +249,8 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
         temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="video"]')
     videofiles = adaptionset(attributes, temp, url, baseurl)
     temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@contentType="text"]')
+    if len(temp) == 0:
+        temp = xml.findall('.//{urn:mpeg:dash:schema:mpd:2011}AdaptationSet[@mimeType="application/mp4"]')
     subtitles = adaptionset(attributes, temp, url, baseurl)
 
     if not audiofiles or not videofiles:
