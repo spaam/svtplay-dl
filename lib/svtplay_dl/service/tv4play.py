@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import time
 from datetime import datetime
 from datetime import timedelta
 from urllib.parse import quote
@@ -81,6 +82,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
             self.output["episode"] = item["episodeNumber"]
         self.output["title"] = item["seriesTitle"]
         self.output["episodename"] = item["title"]
+        self.output["publishing_datetime"] = item["broadcastDateTime"]
+        try: 
+            self.output["publishing_datetime"] = datetime.strptime(item["broadcastDateTime"], '%Y-%m-%dT%H:%M:%SZ').timestamp()
+        except (ValueError, TypeError, KeyError):
+            self.output["publishing_datetime"] = None
         self.output["id"] = str(vid)
         self.output["episodethumbnailurl"] = item["image"]
 
