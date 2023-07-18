@@ -16,31 +16,23 @@ jobs:
           - {name: Windows, python: '3.8', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
           - {name: WindowsX86, python: '3.8', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.architecture }}
+          cache: 'pip'
       - name: update pip
         run: |
           pip install -U wheel
           pip install -U setuptools
           python -m pip install -U pip
-      - name: get pip cache dir
-        id: pip-cache
-        run: echo "::set-output name=dir::$(pip cache dir)"
-      - name: cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
-          restore-keys: pip-${{ runner.os }}-${{ matrix.python }}-
       - name: install deps
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
       - name: cache pre-commit
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pre-commit
           key: per-commit|${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -58,25 +50,17 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          cache: 'pip'
       - name: update pip
         run: |
             pip install -U setuptools
             python -m pip install -U pip
-      - name: get pip cache dir
-        id: pip-cache
-        run: echo "::set-output name=dir::$(pip cache dir)"
-      - name: cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
-          restore-keys: pip-${{ runner.os }}-${{ matrix.python }}-
       - name: install deps
         run: |
           pip install -r requirements.txt
@@ -104,27 +88,19 @@ jobs:
           - {name: Windows, python: '3.8', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
           - {name: WindowsX86, python: '3.8', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.architecture }}
+          cache: 'pip'
       - name: update pip
         run: |
           pip install -U wheel
           pip install -U setuptools
           python -m pip install -U pip
-      - name: get pip cache dir
-        id: pip-cache
-        run: echo "::set-output name=dir::$(pip cache dir)"
-      - name: cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
-          restore-keys: pip-${{ runner.os }}-${{ matrix.python }}-
       - name: install deps
         run: |
           pip install -r requirements.txt
@@ -154,25 +130,17 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.9
+          cache: 'pip'
       - name: update pip
         run: |
           pip install -U setuptools
           python -m pip install -U pip
-      - name: get pip cache dir
-        id: pip-cache
-        run: echo "::set-output name=dir::$(pip cache dir)"
-      - name: cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('setup.py') }}|${{ hashFiles('requirements*.txt') }}
-          restore-keys: pip-${{ runner.os }}-${{ matrix.python }}-
       - name: install deps
         run: |
           pip install -r requirements.txt
