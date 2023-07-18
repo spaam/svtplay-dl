@@ -2,6 +2,7 @@ import datetime
 import os
 
 import pytest
+import requests_mock
 from svtplay_dl.fetcher.dash import _dashparse
 from svtplay_dl.fetcher.dash import parse_dates
 from svtplay_dl.fetcher.dash import parse_duration
@@ -53,7 +54,9 @@ def test_parse_live2():
 
 
 def test_parse_live_vod():
-    data = parse("direct-live.mpd")
+    with requests_mock.Mocker() as mock_request:
+        mock_request.get("http://localhost", text="Hello!")
+        data = parse("direct-live.mpd")
     assert len(data[4720.0].files) == 4424
     assert len(data[4720.0].audio) == 4424
     assert data[4720.0].segments
