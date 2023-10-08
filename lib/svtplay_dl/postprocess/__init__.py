@@ -143,7 +143,7 @@ class postprocess:
 
 
 def _streams(output):
-    return re.findall(r"Stream \#(\d:\d)([\[\(][^\[]+[\]\)])?([\(\)\w]+)?: (Video|Audio): (.*)", output)
+    return re.findall(r"Stream \#(\d:\d)([\[\(][^:\[]+[\]\)])?([\(\)\w]+)?: (Video|Audio): (.*)", output)
 
 
 def _getcodec(streams, number):
