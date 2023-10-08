@@ -102,7 +102,16 @@ class Svtplay(Service, MetadataThumbMixin):
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if "url" in i:
-                    yield from subtitle_probe(copy.copy(self.config), i["url"], output=self.output)
+                    lang = None
+                    subfix = None
+                    if "label" in i:
+                        lang = i["label"][:2].lower()
+                    if "type" in i:
+                        if "sdh" in i["type"]:
+                            subfix = f"{lang}-caption"
+                        else:
+                            subfix = lang
+                    yield from subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output)
 
         if "videoReferences" in janson:
             if len(janson["videoReferences"]) == 0:
