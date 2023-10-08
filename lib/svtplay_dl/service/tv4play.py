@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
@@ -109,6 +110,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, config):
         episodes = []
         items = []
+
+        parse = urlparse(self.url)
+        if parse.path.startswith("/klipp") or parse.path.startswith("/video"):
+            logging.warning("Use program page instead of the clip / video page.")
+            return episodes
 
         token = self._login()
         if token is None:
