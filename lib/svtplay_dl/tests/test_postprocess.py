@@ -63,6 +63,22 @@ class streams(unittest.TestCase):
             ),
         ]
 
+    def test_video4(self):
+        video = _streams(
+            "Stream #0:0: Video: h264 (High), yuv420p(tv, bt709, progressive), 1280x720, 50 fps, 50 tbr, 1k tbn, 100 tbc (default)"
+            "\nStream #1:0(swe): Audio: aac (LC), 48000 Hz, stereo, fltp (default)",
+        )
+        assert video == [
+            (
+                "0:0",
+                "",
+                "",
+                "Video",
+                "h264 (High), yuv420p(tv, bt709, progressive), 1280x720, 50 fps, 50 tbr, 1k tbn, 100 tbc (default)",
+            ),
+            ("1:0", "(swe)", "", "Audio", "aac (LC), 48000 Hz, stereo, fltp (default)"),
+        ]
+
 
 class getcodec(unittest.TestCase):
     def test_codec1(self):
