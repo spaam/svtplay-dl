@@ -281,6 +281,9 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
                 **kwargs,
             )
     for sub in subtitles:
+        if len(subtitles) > 1:
+            if sub["role"] and sub["role"] != "main" and sub["role"] != "subtitle":
+                sub["lang"] = f'{sub["lang"]}-{sub["role"]}'
         yield from subtitle_probe(copy.copy(config), url, subfix=sub["lang"], output=copy.copy(loutput), files=sub["files"], **kwargs)
 
 

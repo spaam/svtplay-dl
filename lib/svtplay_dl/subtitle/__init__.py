@@ -32,7 +32,7 @@ def subtitle_probe(config, url, **kwargs):
     elif subdata.text.startswith("#EXTM3U"):
         m3u8 = M3U8(subdata.text)
         yield subtitle(config, "wrstsegment", url, **kwargs, m3u8=m3u8)
-    elif "<?xml" in subdata.text:
+    elif "<?xml" in subdata.text or "<MPD" in subdata.text:
         xmldata = ET.fromstring(subdata.text)
         if xmldata.tag.endswith("MPD"):
             data = http.get(kwargs.get("files")[0]).content
@@ -57,7 +57,7 @@ class subtitle:
         self.kwargs = kwargs
 
     def __repr__(self):
-        return f"<Subtitle(type={self.subtype}, url={self.url}>"
+        return f"<Subtitle(type={self.subtype}, url={self.url} subfix={self.subfix}>"
 
     def download(self):
         output_ext = "srt"

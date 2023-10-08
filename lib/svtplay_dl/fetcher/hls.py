@@ -89,13 +89,16 @@ def _hlsparse(config, text, url, output, **kwargs):
                         segments = False
                 if i["TYPE"] == "SUBTITLES":
                     if "URI" in i:
+                        caption = None
                         if i["GROUP-ID"] not in subtitles:
                             subtitles[i["GROUP-ID"]] = []
                         if "LANGUAGE" in i:
                             lang = i["LANGUAGE"]
                         else:
                             lang = "und"
-                        item = [i["URI"], lang]
+                        if "CHARACTERISTICS" in i:
+                            caption = True
+                        item = [i["URI"], lang, caption]
                         if item not in subtitles[i["GROUP-ID"]]:
                             subtitles[i["GROUP-ID"]].append(item)
                 continue
@@ -165,8 +168,12 @@ def _hlsparse(config, text, url, output, **kwargs):
         if subtitles:
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
+                    subfix = n[2]
+                    if len(subtitles[sub]) > 1:
+                        if subfix:
+                            subfix = f"{n[1]}-caption"
                     yield from subtitle_probe(
-                        copy.copy(config), get_full_url(n[0], url), output=copy.copy(output), subfix=n[1], cookies=cookies, **kwargs
+                        copy.copy(config), get_full_url(n[0], url), output=copy.copy(output), subfix=subfix, cookies=cookies, **kwargs
                     )
 
     elif m3u8.media_segment:
