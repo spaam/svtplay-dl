@@ -94,6 +94,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def _login(self):
         if self.config.get("username") is None or self.config.get("password") is None:
             return None
+
+        res = self.http.request("get", "https://auth.a2d.tv/_bm/get_params?type=web-jsto")
+        if res.status_code > 400:
+            return None
+        e = res.json()["e"]
         res = self.http.request(
             "post",
             "https://avod-auth-alb.a2d.tv/oauth/authorize",
@@ -102,6 +107,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 "response_type": "token",
                 "credentials": {"username": self.config.get("username"), "password": self.config.get("password")},
             },
+            headers={"akamai-bm-telemetry": f"a=&&&e={e}"},
         )
         if res.status_code > 400:
             return None
