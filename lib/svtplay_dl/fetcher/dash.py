@@ -223,6 +223,7 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
     loutput["ext"] = "mp4"
     attributes = DASHattibutes()
 
+    text = re.sub("&(?!amp;)", "&amp;", text)
     xml = ET.XML(text)
 
     if xml.find("./{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:

@@ -33,7 +33,8 @@ def subtitle_probe(config, url, **kwargs):
         m3u8 = M3U8(subdata.text)
         yield subtitle(config, "wrstsegment", url, **kwargs, m3u8=m3u8)
     elif "<?xml" in subdata.text or "<MPD" in subdata.text:
-        xmldata = ET.fromstring(subdata.text)
+        text = re.sub("&(?!amp;)", "&amp;", subdata.text)
+        xmldata = ET.fromstring(text)
         if xmldata.tag.endswith("MPD"):
             data = http.get(kwargs.get("files")[0]).content
             if data.find(b"ftyp") > 0:
