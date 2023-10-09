@@ -11,7 +11,7 @@ RUN set -xe \
         py3-pip \
         py3-cryptography \
         ffmpeg \
-    && python3 -m pip install *.whl \
+    && python3 -m pip install --break-system-packages *.whl \
     && rm -f *.whl
 
 WORKDIR /data
