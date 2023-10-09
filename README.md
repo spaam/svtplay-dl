@@ -1,5 +1,5 @@
 # svtplay-dl
-[![Build Status Actions](https://github.com/spaam/svtplay-dl/workflows/Tests/badge.svg)](https://github.com/spaam/svtplay-dl/actions) [![Discord](https://img.shields.io/static/v1?label=chat&message=discord&color=green&style=flat&logo=discord)](https://discord.gg/S2YK6Jtb3P)
+[![Build Status Actions](https://img.shields.io/github/actions/workflow/status/spaam/svtplay-dl/tests.yaml?label=Build%20status%20action)](https://github.com/spaam/svtplay-dl/actions) [![Discord](https://img.shields.io/static/v1?label=chat&message=discord&color=green&style=flat&logo=discord)](https://discord.gg/S2YK6Jtb3P)
 
 ## Installation
 
