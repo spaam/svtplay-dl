@@ -84,6 +84,7 @@ def gen_parser(version="unknown"):
     )
     general.add_argument("-u", "--username", default=None, help="username")
     general.add_argument("-p", "--password", default=None, help="password")
+    general.add_argument("--token", default=None, help="token")
     general.add_argument(
         "-t",
         "--thumbnail",
@@ -369,6 +370,7 @@ def setup_defaults():
     options.set("only_video", False)
     options.set("output_format", "mp4")
     options.set("get_all_subtitles", False)
+    options.set("token", None)
     return _special_settings(options)
 
 
@@ -425,6 +427,7 @@ def parsertoconfig(config, parser):
     config.set("only_audio", parser.only_audio)
     config.set("only_video", parser.only_video)
     config.set("output_format", parser.output_format)
+    config.set("token", parser.token)
     return _special_settings(config)
 
 
