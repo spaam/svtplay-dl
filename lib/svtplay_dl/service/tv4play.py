@@ -114,7 +114,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         token = self._login()
         if token is None:
-            logging.error("You need username / password.")
+            logging.error("You need a token to access the website. see https://svtplay-dl.se/tv4play/")
             return episodes
 
         showid, jansson, kind = self._get_seriesid(self.get_urldata(), dict())
