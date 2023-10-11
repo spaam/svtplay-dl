@@ -130,6 +130,10 @@ class Tv4play(Service, OpenGraphThumbMixin):
         return match
 
     def _login(self):
+        existing_access_token = self.config.get("access_token")
+        if existing_access_token is not None:
+            return existing_access_token
+
         if self.config.get("token") is None:
             return None
         res = self.http.request(
