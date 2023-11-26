@@ -14,5 +14,5 @@ with open(initfile) as fd:
     data = fd.read()
 
 newstring = re.sub("(__version__ = get_version[^\n]+)", f'__version__ = "{version}"', data)
-with open(initfile, "wt") as fd:
+with open(initfile, "w") as fd:
     fd.write(newstring)

@@ -186,7 +186,8 @@ def _sublanguage(stream, config, subfixes):
         _ = parse(self)
         random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
         url = "https://svtplay-dl.se/langdetect/"
-        headers = {"User-Agent": f"{FIREFOX_UA} {platform.machine()}"}
+        bits = "64" if sys.maxsize > 2**32 else "32"
+        headers = {"User-Agent": f"{FIREFOX_UA} {platform.machine()} {platform.platform()} {bits}"}
         try:
             r = post(url, json={"query": random_sentences}, headers=headers, timeout=30)
             if r.status_code == codes.ok:

@@ -173,7 +173,12 @@ def _hlsparse(config, text, url, output, **kwargs):
                         if subfix:
                             subfix = f"{n[1]}-caption"
                     yield from subtitle_probe(
-                        copy.copy(config), get_full_url(n[0], url), output=copy.copy(output), subfix=subfix, cookies=cookies, **kwargs
+                        copy.copy(config),
+                        get_full_url(n[0], url),
+                        output=copy.copy(output),
+                        subfix=subfix,
+                        cookies=cookies,
+                        **kwargs,
                     )
 
     elif m3u8.media_segment:

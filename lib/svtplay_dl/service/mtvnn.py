@@ -56,7 +56,6 @@ class Mtvnn(Service, OpenGraphThumbMixin):
                 and xml.find("./video").find("item").find("rendition") is not None
                 and xml.find("./video").find("item").find("rendition").find("src") is not None
             ):
-
                 hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                 stream = hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)
                 for key in list(stream.keys()):
@@ -144,6 +143,5 @@ class MtvMusic(Service, OpenGraphThumbMixin):
                     and xml.find("./video").find("item").find("rendition") is not None
                     and xml.find("./video").find("item").find("rendition").find("src") is not None
                 ):
-
                     hls_url = xml.find("./video").find("item").find("rendition").find("src").text
                     yield from hlsparse(self.config, self.http.request("get", hls_url), hls_url, output=self.output)

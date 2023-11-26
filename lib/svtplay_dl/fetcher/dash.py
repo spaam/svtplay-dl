@@ -392,7 +392,6 @@ class DASH(VideoRetriever):
         file_d.write(data.content)
         eta = ETA(total_size)
         while bytes_so_far < total_size:
-
             if not self.config.get("silent"):
                 eta.update(bytes_so_far)
                 progressbar(total_size, bytes_so_far, "".join(["ETA: ", str(eta)]))

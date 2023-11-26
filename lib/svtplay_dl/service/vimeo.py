@@ -32,7 +32,6 @@ class Vimeo(Service, OpenGraphThumbMixin):
         player_data = self.http.request("get", player_url).text
 
         if player_data:
-
             jsondata = json.loads(player_data)
 
             if ("hls" in jsondata["request"]["files"]) and ("fastly_skyfire" in jsondata["request"]["files"]["hls"]["cdns"]):

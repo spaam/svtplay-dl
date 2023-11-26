@@ -20,7 +20,6 @@ class M3U8:
     TAG_TYPES = {"MEDIA_SEGMENT": 0, "MEDIA_PLAYLIST": 1, "MASTER_PLAYLIST": 2}
 
     def __init__(self, data):
-
         self.version = None
 
         self.media_segment = []
@@ -55,7 +54,6 @@ class M3U8:
             if not l:
                 continue
             elif l.startswith("#EXT"):
-
                 info = {}
                 tag, attr = _get_tag_attribute(l)
                 if tag == "EXT-X-VERSION":
@@ -63,7 +61,6 @@ class M3U8:
 
                 # 4.3.2.  Media Segment Tags
                 elif tag in M3U8.MEDIA_SEGMENT_TAGS:
-
                     tag_type = M3U8.TAG_TYPES["MEDIA_SEGMENT"]
                     # 4.3.2.1.  EXTINF
                     if tag == "EXTINF":
@@ -124,7 +121,6 @@ class M3U8:
 
                 # 4.3.3.  Media Playlist Tags
                 elif tag in M3U8.MEDIA_PLAYLIST_TAGS:
-
                     tag_type = M3U8.TAG_TYPES["MEDIA_PLAYLIST"]
                     # 4.3.3.1.  EXT-X-TARGETDURATION
                     if tag == "EXT-X-TARGETDURATION":
@@ -154,7 +150,6 @@ class M3U8:
 
                 # 4.3.4. Master Playlist Tags
                 elif tag in M3U8.MASTER_PLAYLIST_TAGS:
-
                     tag_type = M3U8.TAG_TYPES["MASTER_PLAYLIST"]
                     # 4.3.4.1.  EXT-X-MEDIA
                     if tag == "EXT-X-MEDIA":
@@ -185,7 +180,6 @@ class M3U8:
 
                 # 4.3.5. Media or Master Playlist Tags
                 elif tag in M3U8.MEDIA_OR_MASTER_PLAYLIST_TAGS:
-
                     tag_type = M3U8.TAG_TYPES["MEDIA_PLAYLIST"]
                     # 4.3.5.1. EXT-X-INDEPENDENT-SEGMENTS
                     if tag == "EXT-X-INDEPENDENT-SEGMENTS":
