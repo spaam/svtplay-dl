@@ -84,6 +84,8 @@ def subtitle_filter(subtitles) -> List:
     for sub in subtitles:
         if sub.subfix not in languages:
             if all_subs:
+                if sub.subfix is None:
+                    continue
                 subs.append(sub)
                 languages.append(sub.subfix)
             else:
@@ -101,13 +103,11 @@ def subtitle_decider(stream, subtitles):
         subtitles = subtitle_filter(subtitles)
         if stream.config.get("get_all_subtitles"):
             for sub in subtitles:
-                if stream.config.get("get_url"):
-                    print(sub.url)
-                else:
-                    sub.download()
-                if stream.config.get("merge_subtitle"):
-                    if not sub.subfix:
-                        stream.config.set("get_all_subtitles", False)
+                if sub.subfix:
+                    if stream.config.get("get_url"):
+                        print(sub.url)
+                    else:
+                        sub.download()
         else:
             if stream.config.get("get_url"):
                 print(subtitles[0].url)
