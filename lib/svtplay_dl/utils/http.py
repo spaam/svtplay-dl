@@ -41,6 +41,9 @@ class HTTP(Session):
         if headers:
             for i in headers.keys():
                 self.headers[i] = headers[i]
+        else:
+            if "Range" in self.headers:  # for some reason headers is always there for each request
+                del self.headers["Range"]  # need to remove it because we dont want it
         logging.debug("HTTP getting %r", url)
         res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, *args, **kwargs)
         return res
