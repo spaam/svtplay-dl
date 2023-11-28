@@ -479,7 +479,9 @@ def tt_text(node, data):
 
 
 def strdate(datestring):
-    match = re.search(r"^((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?) --> ((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?)$", datestring)
+    match = re.search(r"^((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?) --> ((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?)[ ]*", datestring)
+    if match and match.group(5) is None and match.group(6) is not None:
+        return None
     return match
 
 
