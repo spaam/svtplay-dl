@@ -3,6 +3,7 @@
 import binascii
 import copy
 import os
+import struct
 import time
 from datetime import datetime
 from datetime import timedelta
@@ -241,6 +242,8 @@ class HLS(VideoRetriever):
         total_duration = 0
         duration = 0
         max_duration = 0
+        key = None
+        key_iv = None
         for index, i in enumerate(m3u8.media_segment):
             if "EXTINF" in i and "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
@@ -258,11 +261,11 @@ class HLS(VideoRetriever):
             headers = {}
             if "EXT-X-BYTERANGE" in i:
                 headers["Range"] = f'bytes={i["EXT-X-BYTERANGE"]["o"]}-{i["EXT-X-BYTERANGE"]["o"] + i["EXT-X-BYTERANGE"]["n"] - 1}'
-            data = self.http.request("get", item, cookies=cookies, headers=headers)
-            if data.status_code == 404:
+            resb = self.http.request("get", item, cookies=cookies, headers=headers)
+            if resb.status_code == 404:
                 break
-            data = data.content
 
+            data = resb.content
             if m3u8.encrypted:
                 headers = {}
                 if self.keycookie:
@@ -278,7 +281,10 @@ class HLS(VideoRetriever):
                     if keyurl and keyurl[:4] == "skd:":
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
-                    iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else random_iv()
+                    key_iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else None
+
+                if key:
+                    iv = key_iv if key_iv else struct.pack(">8xq", index)
                     backend = default_backend()
                     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                     decryptor = cipher.decryptor()
@@ -286,11 +292,12 @@ class HLS(VideoRetriever):
                 # In some cases the playlist say its encrypted but the files is not.
                 # This happen on svtplay 5.1ch stream where it started with ID3..
                 # Adding the other ones is header for mpeg-ts files. third byte is 10 or 11..
-                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10" and data[4:12] != b"ftypisom":
+                if data[:3] != b"ID3" and data[:3] != b"\x47\x40\x11" and data[:3] != b"\x47\x40\x10" and data[4:12] != b"ftyp":
                     if decryptor:
-                        data = decryptor.update(data)
+                        data = _unpad(decryptor.update(data))
                     else:
-                        raise ValueError("No decryptor found for encrypted hls steam.")
+                        if key:
+                            raise ValueError("No decryptor found for encrypted hls steam.")
             file_d.write(data)
 
             if self.config.get("capture_time") > 0 and total_duration >= self.config.get("capture_time") * 60:
@@ -326,3 +333,7 @@ class HLS(VideoRetriever):
         if not self.config.get("silent"):
             progress_stream.write("\n")
         self.finished = True
+
+
+def _unpad(data):
+    return data[: -data[-1]]
