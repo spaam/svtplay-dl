@@ -168,7 +168,7 @@ def _hlsparse(config, text, url, output, **kwargs):
         if subtitles:
             for sub in list(subtitles.keys()):
                 for n in subtitles[sub]:
-                    subfix = n[2]
+                    subfix = n[1]
                     if len(subtitles[sub]) > 1:
                         if subfix:
                             subfix = f"{n[1]}-caption"
