@@ -115,6 +115,9 @@ def _hlsparse(config, text, url, output, **kwargs):
                         vcodec = "hevc"
                     if i["CODECS"][:3] == "avc":
                         vcodec = "h264"
+                    if i["CODECS"][:3] == "dvh":
+                        vcodec = "dvhevc"
+
                 if "AUDIO" in i:
                     audio_group = i["AUDIO"]
                 urls = get_full_url(i["URI"], url)
