@@ -35,10 +35,23 @@ class Dr(Service, OpenGraphThumbMixin):
         page = janson["cache"]["page"][list(janson["cache"]["page"].keys())[0]]
         resolution = None
         vid = None
+
+        if page["key"] != "Watch":
+            yield ServiceError("Wrong url, need to be video url")
+            return
         if "item" in page["entries"][0]:
             offers = page["entries"][0]["item"]["offers"]
         elif "item" in page:
             offers = page["item"]["offers"]
+
+        self.output["id"] = page["entries"][0]["item"]["id"]
+        if "season" in page["entries"][0]["item"]:
+            self.output["title"] = page["entries"][0]["item"]["season"]["title"]
+            self.output["season"] = page["entries"][0]["item"]["season"]["seasonNumber"]
+            self.output["episode"] = page["entries"][0]["item"]["episodeNumber"]
+            self.output["episodename"] = page["entries"][0]["item"]["contextualTitle"]
+        elif "title" in page["entries"][0]["item"]:
+            self.output["title"] = page["entries"][0]["item"]["title"]
 
         offerlist = []
         for i in offers:
@@ -70,7 +83,6 @@ class Dr(Service, OpenGraphThumbMixin):
                     if res.status_code > 400:
                         yield ServiceError("Can't play this because the video is geoblocked or not available.")
                     else:
-                        logging.info("suuubu")
                         yield from hlsparse(self.config, res, video["url"], output=self.output)
                         if len(video["subtitles"]) > 0:
                             yield from subtitle_probe(copy.copy(self.config), video["subtitles"][0]["link"], output=self.output)
