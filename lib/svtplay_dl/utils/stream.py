@@ -1,4 +1,6 @@
 import logging
+import operator
+import re
 from operator import itemgetter
 from typing import List
 
@@ -10,6 +12,12 @@ from svtplay_dl.utils.http import HTTP
 DEFAULT_PROTOCOL_PRIO = ["dash", "hls", "http"]
 LIVE_PROTOCOL_PRIO = ["hls", "dash", "http"]
 DEFAULT_FORMAT_PRIO = ["h264", "h264-51"]
+OPERATORS = {
+    "<": operator.lt,
+    "<=": operator.le,
+    ">": operator.gt,
+    ">=": operator.ge,
+}
 
 
 def sort_quality(data) -> List:
@@ -121,8 +129,15 @@ def resolution(streams, resolutions: List) -> List:
     videos = []
     for stream in streams:
         for resolution in resolutions:
-            if stream.resolution.find("x") > 0 and stream.resolution.split("x")[1] == resolution:
-                videos.append(stream)
+            match = re.match(r"(?P<op><=|>=|<|>)?(?P<res>[\d+]+)", resolution)
+            op, res = match.group("op", "res")
+            if op:
+                op = OPERATORS.get(op, operator.eq)
+                if op(int(stream.resolution.split("x")[1]), int(res)):
+                    videos.append(stream)
+            else:
+                if stream.resolution.find("x") > 0 and stream.resolution.split("x")[1] == resolution:
+                    videos.append(stream)
     return videos
 
 
