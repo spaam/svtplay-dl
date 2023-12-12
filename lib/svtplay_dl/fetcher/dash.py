@@ -306,7 +306,7 @@ def parse_duration(duration):
 def parse_dates(date_str):
     match = re.search(r"(.*:.*)\.(\d{5,9})Z", date_str)
     if match:
-        date_str = f"{match.group(1)}.{int(int(match.group(2))/1000)}Z"  # Need to translate nanoseconds to milliseconds
+        date_str = f"{match.group(1)}.{int(int(match.group(2)) / 1000)}Z"  # Need to translate nanoseconds to milliseconds
     date_patterns = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"]
     dt = None
     for pattern in date_patterns:
