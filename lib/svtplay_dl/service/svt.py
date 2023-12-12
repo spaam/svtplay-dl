@@ -14,7 +14,7 @@ class Svt(Svtplay):
     def get(self):
         vid = None
         data = self.get_urldata()
-        match = re.search("n.urqlState=(.*);", data)
+        match = re.search("urqlState = (.*);", data)
         if not match:
             match = re.search(r"stateData = JSON.parse\(\"(.*)\"\)\<\/script", data)
             if not match:
