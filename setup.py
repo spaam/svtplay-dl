@@ -23,8 +23,8 @@ srcdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/")
 sys.path.insert(0, srcdir)
 
 vi = sys.version_info
-if vi < (3, 6):
-    raise RuntimeError("svtplay-dl requires Python 3.6 or greater")
+if vi < (3, 8):
+    raise RuntimeError("svtplay-dl requires Python 3.8 or greater")
 
 about = {}
 with open(os.path.join(srcdir, "svtplay_dl", "__version__.py")) as f:
@@ -54,17 +54,18 @@ setup(
     long_description_content_type="text/markdown",
     license="MIT",
     url="https://svtplay-dl.se",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Operating System :: POSIX",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia :: Sound/Audio",
         "Topic :: Multimedia :: Video",
