@@ -272,6 +272,7 @@ def gen_parser(version="unknown"):
     alleps.add_argument("-A", "--all-episodes", action="store_true", dest="all_episodes", default=False, help="try to download all episodes")
     alleps.add_argument("--all-last", dest="all_last", default=-1, type=int, metavar="NN", help="get last NN episodes instead of all episodes")
     alleps.add_argument("--include-clips", dest="include_clips", default=False, action="store_true", help="include clips from websites when using -A")
+    alleps.add_argument("-R", "--reverse", action="store_true", dest="reverse_list", default=False, help="Reverse download order")
 
     cmorep = parser.add_argument_group("C More")
     cmorep.add_argument("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true", help="show operatorlist for cmore")
@@ -371,6 +372,7 @@ def setup_defaults():
     options.set("output_format", "mp4")
     options.set("get_all_subtitles", False)
     options.set("token", None)
+    options.set("reverse_list", False)
     return _special_settings(options)
 
 
@@ -428,6 +430,7 @@ def parsertoconfig(config, parser):
     config.set("only_video", parser.only_video)
     config.set("output_format", parser.output_format)
     config.set("token", parser.token)
+    config.set("reverse_list", parser.reverse_list)
     return _special_settings(config)
 
 

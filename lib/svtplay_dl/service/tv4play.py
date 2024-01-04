@@ -137,11 +137,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
         for item in items:
             episodes.append(f"https://www.tv4play.se/video/{item}")
 
-        episodes = episodes[::-1]
-        if config.get("all_last") > 0:
-            return episodes[: config.get("all_last")]
         if not episodes:
             logging.warning("Can't find any videos")
+        else:
+            if not self.config.get("reverse_list"):
+                episodes = episodes[::-1]
+            if config.get("all_last") > 0:
+                return episodes[: config.get("all_last")]
         return episodes
 
     def _get_seriesid(self, data, jansson):
