@@ -290,6 +290,9 @@ class Svtplay(Service, MetadataThumbMixin):
         if not episodes:
             logging.error("Can't find any videos.")
         else:
+            if not self.config.get("reverse_list"):
+                episodes = episodes[::-1]
+
             if config.get("all_last") > 0:
                 return episodes[: config.get("all_last")]
         return episodes
