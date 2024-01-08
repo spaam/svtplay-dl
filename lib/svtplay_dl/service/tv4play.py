@@ -138,7 +138,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             episodes.append(f"https://www.tv4play.se/video/{item}")
 
         if config.get("all_last") > 0:
-            return episodes[-config.get("all_last") :]
+            return episodes[: config.get("all_last")]
         if not episodes:
             logging.warning("Can't find any videos")
         return episodes
