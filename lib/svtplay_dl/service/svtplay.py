@@ -264,7 +264,7 @@ class Svtplay(Service, MetadataThumbMixin):
             logging.error("Can't find any videos.")
         else:
             if config.get("all_last") > 0:
-                return episodes[-config.get("all_last") :]
+                return episodes[: config.get("all_last")]
         return episodes
 
     def outputfilename(self, data):

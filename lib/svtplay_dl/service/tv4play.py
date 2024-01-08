@@ -133,12 +133,12 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 if i not in items:
                     items.append(i)
 
-        items = sorted(items)
         for item in items:
             episodes.append(f"https://www.tv4play.se/video/{item}")
 
+        episodes = episodes[::-1]
         if config.get("all_last") > 0:
-            return episodes[-config.get("all_last") :]
+            return episodes[: config.get("all_last")]
         if not episodes:
             logging.warning("Can't find any videos")
         return episodes
