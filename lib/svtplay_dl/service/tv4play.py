@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import time
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
@@ -47,7 +48,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         url = f"https://playback2.a2d.tv/play/{vid}?service=tv4play&device=browser&protocol=hls%2Cdash&drm=widevine&browser=GoogleChrome&capabilities=live-drm-adstitch-2%2Cyospace3"
         res = self.http.request("get", url, headers={"Authorization": f"Bearer {token}"})
         if res.status_code > 400:
-            yield ServiceError("Can't play this because the video is geoblocked.")
+            yield ServiceError("Can't play this video because you don't have access to it")
             return
         jansson = res.json()
 
@@ -122,7 +123,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             logging.error("Cant find any videos")
             return episodes
         if showid is False:
-            logging.error("Can't play this because the video is geoblocked.")
+            logging.error("Can't play this video because you don't have access to it")
             return episodes
         if kind == "Movie":
             return [f"https://www.tv4play.se/video/{showid}"]
@@ -203,6 +204,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
             janson = res.json()
             total = janson["data"]["season"]["episodes"]["pageInfo"]["totalCount"]
             for mediatype in janson["data"]["season"]["episodes"]["items"]:
+                if time.time() < mediatype["playableFrom"]["timestamp"] / 1000:
+                    continue
                 items.append(mediatype["id"])
             nr += 12
         return items
