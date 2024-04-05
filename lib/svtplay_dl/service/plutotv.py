@@ -8,6 +8,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
+from svtplay_dl.subtitle import subtitle
 
 
 class Plutotv(Service, OpenGraphThumbMixin):
@@ -55,13 +56,19 @@ class Plutotv(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find video info")
             return
 
-        yield from hlsparse(
+        playlists = hlsparse(
             self.config,
             self.http.request("get", HLSplaylist, headers={"Authorization": f"Bearer {self.sessionToken}"}),
             HLSplaylist,
             self.output,
             filter=True,
         )
+
+        for playlist in playlists:
+            if self.config.get("subtitle") and isinstance(playlist, subtitle):
+                logging.warning("Subtitles are no longer supported for pluto.tv")
+                continue
+            yield playlist
 
     def find_all_episodes(self, options):
         episodes = []
