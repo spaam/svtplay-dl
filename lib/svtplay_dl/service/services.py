@@ -37,6 +37,7 @@ from svtplay_dl.service.tv4play import Tv4
 from svtplay_dl.service.tv4play import Tv4play
 from svtplay_dl.service.twitch import Twitch
 from svtplay_dl.service.urplay import Urplay
+from svtplay_dl.service.vasaloppet import Vasaloppet
 from svtplay_dl.service.vg import Vg
 from svtplay_dl.service.viaplay import Viafree
 from svtplay_dl.service.viasatsport import Viasatsport
@@ -80,6 +81,7 @@ sites = [
     Tv4,
     Tv4play,
     Urplay,
+    Vasaloppet,
     Viafree,
     Viasatsport,
     Vimeo,
