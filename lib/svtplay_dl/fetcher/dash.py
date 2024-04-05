@@ -101,7 +101,10 @@ def templateelemt(attributes, element, filename, idnumber):
             segments.append({"number": number, "duration": int(attributes.get("duration") / attributes.get("timescale"))})
 
     name = media.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth"))
-    files.append(urljoin(filename, init.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth"))))
+    if init[:4] == "http":
+        files.append(init.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth")))
+    else:
+        files.append(urljoin(filename, init.replace("$RepresentationID$", idnumber).replace("$Bandwidth$", attributes.get("bandwidth"))))
     for segment in segments:
         if "$Time$" in media:
             new = name.replace("$Time$", str(segment["time"]))
@@ -112,7 +115,10 @@ def templateelemt(attributes, element, filename, idnumber):
             else:
                 new = name.replace("$Number$", str(segment["number"]))
 
-        files.append(urljoin(filename, new))
+        if new[:4] == "http":
+            files.append(new)
+        else:
+            files.append(urljoin(filename, new))
 
     return files
 
