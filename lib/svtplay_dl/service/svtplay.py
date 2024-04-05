@@ -8,6 +8,7 @@ import logging
 import re
 import time
 from urllib.parse import parse_qs
+from urllib.parse import quote_plus
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
@@ -113,16 +114,44 @@ class Svtplay(Service, MetadataThumbMixin):
                             subfix = lang
                     yield from subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output)
 
-        if "videoReferences" in janson:
-            if len(janson["videoReferences"]) == 0:
+        if "variants" in janson and "default" in janson["variants"]:
+            if len(janson["variants"]["default"]["videoReferences"]) == 0:
                 yield ServiceError("Media doesn't have any associated videos.")
                 return
 
-            for i in janson["videoReferences"]:
-                if i["url"].find(".m3u8") > 0:
-                    yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                elif i["url"].find(".mpd") > 0:
-                    yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+            for videorfc in janson["variants"]["default"]["videoReferences"]:
+                params = {}
+                params["manifestUrl"] = quote_plus(videorfc["url"])
+
+                format = videorfc["format"]
+                if "audioDescribed" in janson["variants"] and janson["variants"]["audioDescribed"]:
+                    for audiodesc in janson["variants"]["audioDescribed"]["videoReferences"]:
+                        if audiodesc["format"] == format:
+                            params["manifestUrlAudioDescription"] = audiodesc["url"]
+                if "signInterpreted" in janson["variants"] and janson["variants"]["signInterpreted"]:
+                    for signinter in janson["variants"]["signInterpreted"]["videoReferences"]:
+                        if signinter["format"] == format:
+                            params["manifestUrlSignLanguage"] = signinter["url"]
+                params = _dict_to_flatstr(params)
+                pl_url = f"https://api.svt.se/ditto/api/v1/web?{params}"
+
+                if pl_url.find(".m3u8") > 0:
+                    yield from hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+                elif pl_url.find(".mpd") > 0:
+                    yield from dashparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+
+        else:
+            if "videoReferences" in janson:
+                if len(janson["videoReferences"]) == 0:
+                    yield ServiceError("Media doesn't have any associated videos.")
+                    return
+
+                for i in janson["videoReferences"]:
+                    if i["url"].find(".m3u8") > 0:
+                        yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                    elif i["url"].find(".mpd") > 0:
+                        yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                # logging.info(json.dumps(janson["videoReferences"], indent=2))
 
     def _lists(self):
         videos = []
@@ -422,3 +451,10 @@ class Svtplay(Service, MetadataThumbMixin):
 
         if "description" in episode:
             self.output["episodedescription"] = episode["description"]
+
+
+def _dict_to_flatstr(flat):
+    text = ""
+    for i in flat:
+        text += f"{i}={flat[i]}&"
+    return text
