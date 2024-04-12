@@ -114,7 +114,8 @@ class Svtplay(Service, MetadataThumbMixin):
                             subfix = lang
                     yield from subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output)
 
-        if "variants" in janson and "default" in janson["variants"]:
+        drm = janson["rights"]["drmCopyProtection"]
+        if not drm and "variants" in janson and "default" in janson["variants"]:
             if len(janson["variants"]["default"]["videoReferences"]) == 0:
                 yield ServiceError("Media doesn't have any associated videos.")
                 return
@@ -149,9 +150,6 @@ class Svtplay(Service, MetadataThumbMixin):
                 for i in janson["videoReferences"]:
                     if i["url"].find(".m3u8") > 0:
                         yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                    elif i["url"].find(".mpd") > 0:
-                        yield from dashparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
-                # logging.info(json.dumps(janson["videoReferences"], indent=2))
 
     def _lists(self):
         videos = []
