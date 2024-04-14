@@ -5,11 +5,11 @@ from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.fetcher.http import HTTP
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.parser import setup_defaults
-from svtplay_dl.utils.stream import audio_role
 from svtplay_dl.utils.stream import format_prio
 from svtplay_dl.utils.stream import language_prio
 from svtplay_dl.utils.stream import sort_quality
 from svtplay_dl.utils.stream import subtitle_filter
+from svtplay_dl.utils.stream import video_role
 
 
 class streamTest_sort(unittest.TestCase):
@@ -94,52 +94,52 @@ class streamTestRole(unittest.TestCase):
             DASH(setup_defaults(), "http://example.com", 3001, None),
             DASH(setup_defaults(), "http://example.com", 3002, None),
         ]
-        streams = audio_role(setup_defaults(), test_streams)
+        streams = video_role(setup_defaults(), test_streams)
         assert len(streams) == 3
 
     def test_language_prio2(self):
         test_streams = [
             DASH(setup_defaults(), "http://example.com", 3000, None),
-            DASH(setup_defaults(), "http://example.com", 3001, None, role="x-sv"),
+            DASH(setup_defaults(), "http://example.com", 3001, None, video_role="x-sv"),
             DASH(setup_defaults(), "http://example.com", 3002, None),
         ]
         config = setup_defaults()
-        config.set("audio_role", "x-sv")
-        streams = audio_role(config, test_streams)
+        config.set("video_role", "x-sv")
+        streams = video_role(config, test_streams)
         assert len(streams) == 1
 
     def test_language_prio3(self):
         test_streams = [
             DASH(setup_defaults(), "http://example.com", 3000, None),
-            DASH(setup_defaults(), "http://example.com", 3001, None, role="x-sv"),
+            DASH(setup_defaults(), "http://example.com", 3001, None, video_role="x-sv"),
             DASH(setup_defaults(), "http://example.com", 3002, None),
         ]
         config = setup_defaults()
-        config.set("audio_role", "sv")
-        streams = audio_role(config, test_streams)
+        config.set("video_role", "sv")
+        streams = video_role(config, test_streams)
         assert len(streams) == 0
 
     def test_language_prio4(self):
         test_streams = [
             DASH(setup_defaults(), "http://example.com", 3000, None),
-            DASH(setup_defaults(), "http://example.com", 3001, None, role="x-sv"),
+            DASH(setup_defaults(), "http://example.com", 3001, None, video_role="x-sv"),
             DASH(setup_defaults(), "http://example.com", 3002, None),
         ]
         config = setup_defaults()
         config.set("audio_language", "sv")
-        streams = audio_role(config, test_streams)
-        assert len(streams) == 3
+        streams = video_role(config, test_streams)
+        assert len(streams) == 2
 
     def test_language_prio5(self):
         test_streams = [
             DASH(setup_defaults(), "http://example.com", 3000, None),
-            DASH(setup_defaults(), "http://example.com", 3001, None, role="x-sv"),
+            DASH(setup_defaults(), "http://example.com", 3001, None, video_role="x-sv"),
             DASH(setup_defaults(), "http://example.com", 3002, None),
         ]
         config = setup_defaults()
-        config.set("audio_role", "isii")
+        config.set("video_role", "isii")
         config.set("audio_language", "sv")
-        streams = audio_role(config, test_streams)
+        streams = video_role(config, test_streams)
         assert len(streams) == 0
 
 

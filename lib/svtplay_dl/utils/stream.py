@@ -24,7 +24,7 @@ def sort_quality(data) -> List:
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
     for i in data:
-        datas.append([i.bitrate, i.name, i.format, i.resolution, i.language, i.audio_role])
+        datas.append([i.bitrate, i.name, i.format, i.resolution, i.language, i.video_role])
     return datas
 
 
@@ -69,15 +69,13 @@ def language_prio(config, streams) -> List:
     return prioritized
 
 
-def audio_role(config, streams) -> List:
-    if config.get("audio_role"):
-        role = config.get("audio_role")
-    elif config.get("audio_role") is None and config.get("audio_language"):
-        return streams
+def video_role(config, streams) -> List:
+    if config.get("video_role"):
+        role = config.get("video_role")
     else:
-        role = "main"
+        return streams
 
-    prioritized = [s for s in streams if s.audio_role == role]
+    prioritized = [s for s in streams if s.video_role == role]
     return prioritized
 
 
@@ -172,9 +170,9 @@ def select_quality(config, streams):
         form_prio = DEFAULT_FORMAT_PRIO
     streams = format_prio(streams, form_prio)
 
-    streams = audio_role(config, streams)
+    streams = video_role(config, streams)
     if not streams:
-        raise error.UIException(f"Can't find any streams with that audio role {config.get('audio_role')}")
+        raise error.UIException(f"Can't find any streams with that video role {config.get('video_role')}")
 
     streams = language_prio(config, streams)
     if not streams:

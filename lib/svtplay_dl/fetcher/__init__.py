@@ -20,11 +20,12 @@ class VideoRetriever:
         codec = kwargs.pop("codec", "h264")
         self.resolution = kwargs.pop("resolution", "")
         self.language = kwargs.pop("language", "")
-        self.audio_role = kwargs.pop("role", "main")
+        self.audio_role = kwargs.pop("role", "main")  # remove..
+        self.video_role = kwargs.pop("video_role", "main")
         self.format = f"{codec}-{channels}" if channels else codec
 
     def __repr__(self):
-        return f"<Video(fetcher={self.__class__.__name__}, bitrate={self.bitrate} format={self.format}, language={self.language}, audio_role={self.audio_role}, resolution={self.resolution}>"
+        return f"<Video(fetcher={self.__class__.__name__}, bitrate={self.bitrate} format={self.format}, language={self.language}, role={self.video_role}, resolution={self.resolution}>"
 
     @property
     def name(self):

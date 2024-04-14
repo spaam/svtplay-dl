@@ -62,6 +62,7 @@ def _hlsparse(config, text, url, output, **kwargs):
     segments = None
 
     if m3u8.master_playlist:
+        video_group = None
         for i in m3u8.master_playlist:
             audio_url = None
             vcodec = None
@@ -71,23 +72,33 @@ def _hlsparse(config, text, url, output, **kwargs):
             resolution = ""
             if i["TAG"] == "EXT-X-MEDIA":
                 if i["TYPE"] and i["TYPE"] != "SUBTITLES":
+                    uri = None
+                    if i["GROUP-ID"] not in media:
+                        media[i["GROUP-ID"]] = []
+                    if i["TYPE"] == "VIDEO":
+                        video_group = i["GROUP-ID"]
+
                     if "URI" in i:
                         if segments is None:
                             segments = True
-                        if i["GROUP-ID"] not in media:
-                            media[i["GROUP-ID"]] = []
-                        if "CHANNELS" in i:
-                            if i["CHANNELS"] == "6":
-                                chans = "51"
-                        if "LANGUAGE" in i:
-                            language = i["LANGUAGE"]
-                        if "AUTOSELECT" in i and i["AUTOSELECT"].upper() == "YES":
-                            role = "main"
-                        else:
-                            role = "alt"
-                        media[i["GROUP-ID"]].append([i["URI"], chans, language, role])
+                        uri = i["URI"]
                     else:
                         segments = False
+
+                    if "CHANNELS" in i:
+                        if i["CHANNELS"] == "6":
+                            chans = "51"
+                    if "LANGUAGE" in i:
+                        language = i["LANGUAGE"]
+                    if "AUTOSELECT" in i and i["AUTOSELECT"].upper() == "YES" and "DEFAULT" in i and i["DEFAULT"].upper() == "YES":
+                        role = "main"
+                    else:
+                        role = "alternate"
+                        if "CHARACTERISTICS" in i:
+                            role = f'{role}-{i["CHARACTERISTICS"].replace("se.svt.accessibility.", "")}'
+
+                    media[i["GROUP-ID"]].append([uri, chans, language, role])
+
                 if i["TYPE"] == "SUBTITLES":
                     if "URI" in i:
                         caption = None
@@ -121,35 +132,68 @@ def _hlsparse(config, text, url, output, **kwargs):
                 if "AUDIO" in i:
                     audio_group = i["AUDIO"]
                 urls = get_full_url(i["URI"], url)
-                videos[bit_rate] = [urls, resolution, vcodec, audio_group]
+                videos[bit_rate] = [urls, resolution, vcodec, audio_group, video_group]
             else:
                 continue  # Needs to be changed to utilise other tags.
 
         for bit_rate in list(videos.keys()):
-            urls, resolution, vcodec, audio_group = videos[bit_rate]
+            urls, resolution, vcodec, audio_group, video_group = videos[bit_rate]
             if audio_group and media:
-                for group in media[audio_group]:
-                    audio_url = get_full_url(group[0], url)
-                    chans = group[1] if audio_url else channels
-                    codec = vcodec if vcodec else codec
+                if video_group and video_group in media:
+                    for vgroup in media[video_group]:
+                        vurl = urls
+                        video_role = vgroup[3]
+                        if vgroup[0]:
+                            vurl = vgroup[0]
+                        for group in media[audio_group]:
+                            audio_url = get_full_url(group[0], url)
+                            chans = group[1] if audio_url else channels
+                            codec = vcodec if vcodec else codec
 
-                    yield HLS(
-                        copy.copy(config),
-                        urls,
-                        bit_rate,
-                        cookies=cookies,
-                        keycookie=keycookie,
-                        authorization=authorization,
-                        audio=audio_url,
-                        output=loutput,
-                        segments=bool(segments),
-                        channels=chans,
-                        codec=codec,
-                        resolution=resolution,
-                        language=group[2],
-                        role=group[3],
-                        **kwargs,
-                    )
+                            yield HLS(
+                                copy.copy(config),
+                                vurl,
+                                bit_rate,
+                                cookies=cookies,
+                                keycookie=keycookie,
+                                authorization=authorization,
+                                audio=audio_url,
+                                video_role=video_role,
+                                output=loutput,
+                                segments=bool(segments),
+                                channels=chans,
+                                codec=codec,
+                                resolution=resolution,
+                                language=group[2],
+                                **kwargs,
+                            )
+                else:
+                    vurl = urls
+                    video_role = "main"
+                    for group in media[audio_group]:
+                        if group[0]:
+                            audio_url = get_full_url(group[0], url)
+                        chans = group[1] if audio_url else channels
+                        codec = vcodec if vcodec else codec
+
+                        yield HLS(
+                            copy.copy(config),
+                            vurl,
+                            bit_rate,
+                            cookies=cookies,
+                            keycookie=keycookie,
+                            authorization=authorization,
+                            audio=audio_url,
+                            video_role=video_role,
+                            output=loutput,
+                            segments=bool(segments),
+                            channels=chans,
+                            codec=codec,
+                            resolution=resolution,
+                            language=group[2],
+                            role=group[3],
+                            **kwargs,
+                        )
             else:
                 chans = channels
                 codec = vcodec if vcodec else codec

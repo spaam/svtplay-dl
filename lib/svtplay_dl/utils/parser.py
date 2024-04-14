@@ -203,10 +203,10 @@ def gen_parser(version="unknown"):
         help="Choose the language of the audio (it can override the default one), --list-quality to show which one to choose from",
     )
     quality.add_argument(
-        "--audio-role",
-        dest="audio_role",
-        default=None,
-        help="Choose the role of the audio (it can override the default one), --list-quality to show which one to choose from",
+        "--video-role",
+        dest="video_role",
+        default="main",
+        help="Choose the role of the video (it can override the default one), --list-quality to show which one to choose from",
     )
     quality.add_argument(
         "--resolution",
@@ -354,7 +354,7 @@ def setup_defaults():
     options.set("http_headers", None)
     options.set("format_preferred", None)
     options.set("audio_language", None)
-    options.set("audio_role", None)
+    options.set("video_role", "main")
     options.set("resolution", None)
     options.set("stream_prio", None)
     options.set("no_remux", False)
@@ -409,7 +409,7 @@ def parsertoconfig(config, parser):
     config.set("http_headers", parser.http_headers)
     config.set("cookies", parser.cookies)
     config.set("format_preferred", parser.format_preferred)
-    config.set("audio_role", parser.audio_role)
+    config.set("video_role", parser.video_role)
     config.set("resolution", parser.resolution)
     config.set("audio_language", parser.audio_language)
     config.set("stream_prio", parser.stream_prio)

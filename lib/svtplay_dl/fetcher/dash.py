@@ -134,6 +134,7 @@ def adaptionset(attributes, elements, url, baseurl=None):
         template = element.find("{urn:mpeg:dash:schema:mpd:2011}SegmentTemplate")
         represtation = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
         role_elemets = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Role")
+        accessibility = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Accessibility[@schemeIdUri='urn:se:svt:accessibility']")
 
         codecs = None
         if "codecs" in element.attrib:
@@ -143,6 +144,8 @@ def adaptionset(attributes, elements, url, baseurl=None):
             lang = element.attrib["lang"]
         if role_elemets:
             role = role_elemets[0].attrib["value"]
+            if accessibility:
+                role = f'{role}-{accessibility[0].get("value")}'
 
         resolution = ""
         if "maxWidth" in element.attrib and "maxHeight" in element.attrib:
@@ -230,6 +233,7 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
     loutput = copy.copy(output)
     loutput["ext"] = "mp4"
     attributes = DASHattibutes()
+    subtitles = []
 
     text = re.sub("&(?!amp;)", "&amp;", text)
     xml = ET.XML(text)
@@ -286,10 +290,11 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
                 channels=audio["channels"],
                 resolution=video["resolution"],
                 language=audio["lang"],
-                role=audio["role"],
+                video_role=video["role"],
                 **kwargs,
             )
     for sub in subtitles:
+        continue
         if len(subtitles) > 1:
             if sub["role"] and sub["role"] != "main" and sub["role"] != "subtitle":
                 sub["lang"] = f'{sub["lang"]}-{sub["role"]}'
