@@ -404,10 +404,11 @@ class Svtplay(Service, MetadataThumbMixin):
 
             validfrom = episode["item"]["validFrom"]
             if "+" in validfrom:
+                timeformat = "%Y-%m-%dT%H:%M:%S.%f%z" if "." in episode["item"]["validFrom"] else "%Y-%m-%dT%H:%M:%S%z"
                 date = time.mktime(
                     datetime.datetime.strptime(
                         _fix_broken_timezone_implementation(episode["item"]["validFrom"].replace("Z", "")),
-                        "%Y-%m-%dT%H:%M:%S%z",
+                        timeformat,
                     ).timetuple(),
                 )
             else:
