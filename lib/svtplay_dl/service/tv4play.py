@@ -109,8 +109,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
         items = []
 
         parse = urlparse(self.url)
-        if parse.path.startswith("/klipp") or parse.path.startswith("/video"):
-            logging.warning("Use program page instead of the clip / video page.")
+        if parse.path.startswith("/klipp"):
+            logging.warning("-A on clips is not supported.")
+            return episodes
+        if parse.path.startswith("/video"):
+            logging.warning("Use program page instead of the video one.")
             return episodes
 
         token = self._login()
