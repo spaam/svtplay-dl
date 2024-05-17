@@ -231,8 +231,8 @@ class Svtplay(Service, MetadataThumbMixin):
         videos = []
         if parse.query:
             query = parse_qs(parse.query)
-            if "tab" in query:
-                tab = query["tab"][0]
+            if "tabs" in query:
+                tab = query["tabs"][0]
 
         data = self.http.get(url).text
         match = re.search(self.info_search_expr, data)
