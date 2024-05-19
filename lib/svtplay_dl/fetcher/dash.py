@@ -290,6 +290,7 @@ def _dashparse(config, text, url, output, cookies, **kwargs):
                 channels=audio["channels"],
                 resolution=video["resolution"],
                 language=audio["lang"],
+                role=audio["role"],
                 video_role=video["role"],
                 **kwargs,
             )

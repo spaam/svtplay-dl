@@ -158,6 +158,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                                 keycookie=keycookie,
                                 authorization=authorization,
                                 audio=audio_url,
+                                role=group[3],
                                 video_role=video_role,
                                 output=loutput,
                                 segments=bool(segments),

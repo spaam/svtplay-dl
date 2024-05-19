@@ -20,7 +20,7 @@ class VideoRetriever:
         codec = kwargs.pop("codec", "h264")
         self.resolution = kwargs.pop("resolution", "")
         self.language = kwargs.pop("language", "")
-        self.audio_role = kwargs.pop("role", "main")  # remove..
+        self.audio_role = kwargs.pop("role", "main")
         self.video_role = kwargs.pop("video_role", "main")
         self.format = f"{codec}-{channels}" if channels else codec
 

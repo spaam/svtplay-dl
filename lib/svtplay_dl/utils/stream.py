@@ -63,9 +63,9 @@ def format_prio(streams, priolist) -> List:
 def language_prio(config, streams) -> List:
     if config.get("audio_language"):
         language = config.get("audio_language")
+        prioritized = [s for s in streams if s.language == language]
     else:
-        return streams
-    prioritized = [s for s in streams if s.language == language]
+        prioritized = [s for s in streams if s.audio_role == "main"]
     return prioritized
 
 
