@@ -103,7 +103,7 @@ class subtitle:
         if self.config.get("get_raw_subtitles"):
             data = self.raw(subdata)
 
-        if len(data) > 0:
+        if data and len(data) > 0:
             dupe, fileame = find_dupes(self.output, self.config, False)
             if dupe and not self.config.get("force_subtitle"):
                 logging.warning("File (%s) already exists. Use --force-subtitle to overwrite", fileame.name)
@@ -481,7 +481,9 @@ def tt_text(node, data):
 def strdate(datestring):
     match = re.search(r"^((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?) --> ((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?)[ ]*", datestring)
     if match and match.group(5) is None and match.group(6) is not None:
-        return None
+        match = re.search(r"^((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?) --> ((\d+:\d+:\d+[\.,]*[0-9]*)?(\d+:\d+[\.,]*[0-9]*)?)$", datestring)
+        if not match:
+            return None
     return match
 
 
