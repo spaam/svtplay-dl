@@ -347,7 +347,7 @@ class Svtplay(Service, MetadataThumbMixin):
         return season, episode
 
     def _find_season(self, data):
-        match = re.search(r"/säsong (\d+)/", data["analyticsIdentifiers"]["viewId"])
+        match = re.search(r"/säsong (\d+)/", data["analytics"]["json"]["viewId"])
         if match:
             return match.group(1)
 
@@ -369,7 +369,7 @@ class Svtplay(Service, MetadataThumbMixin):
         return None
 
     def _find_episode(self, data):
-        match = re.search(r"/avsnitt (\d+)", data["analyticsIdentifiers"]["viewId"])
+        match = re.search(r"/avsnitt (\d+)", data["analytics"]["json"]["viewId"])
         if match:
             return match.group(1)
 
