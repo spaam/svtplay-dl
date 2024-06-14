@@ -51,6 +51,12 @@ class Plutotv(Service, OpenGraphThumbMixin):
                                         HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
                                         if self.http.request("get", HLSplaylist).status_code < 400:
                                             break
+            if "stitched" in vod and "paths" in vod["stitched"]:
+                for stich in vod["stitched"]["paths"]:
+                    if stich["type"] == "hls":
+                        HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
+                        if self.http.request("get", HLSplaylist).status_code < 400:
+                            break
 
         if not HLSplaylist:
             yield ServiceError("Can't find video info")
