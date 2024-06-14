@@ -122,19 +122,25 @@ class Svtplay(Service, MetadataThumbMixin):
 
             for videorfc in janson["variants"]["default"]["videoReferences"]:
                 params = {}
+                special = False
                 params["manifestUrl"] = quote_plus(videorfc["url"])
 
                 format = videorfc["format"]
                 if "audioDescribed" in janson["variants"] and janson["variants"]["audioDescribed"]:
                     for audiodesc in janson["variants"]["audioDescribed"]["videoReferences"]:
                         if audiodesc["format"] == format:
+                            special = True
                             params["manifestUrlAudioDescription"] = audiodesc["url"]
                 if "signInterpreted" in janson["variants"] and janson["variants"]["signInterpreted"]:
                     for signinter in janson["variants"]["signInterpreted"]["videoReferences"]:
                         if signinter["format"] == format:
+                            special = True
                             params["manifestUrlSignLanguage"] = signinter["url"]
-                params = _dict_to_flatstr(params)
-                pl_url = f"https://api.svt.se/ditto/api/v1/web?{params}"
+                if special:
+                    params = _dict_to_flatstr(params)
+                    pl_url = f"https://api.svt.se/ditto/api/v1/web?{params}"
+                else:
+                    pl_url = videorfc["url"]
 
                 if pl_url.find(".m3u8") > 0:
                     yield from hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
