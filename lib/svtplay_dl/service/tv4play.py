@@ -121,6 +121,15 @@ class Tv4play(Service, OpenGraphThumbMixin):
             logging.error("You need a token to access the website. see https://svtplay-dl.se/tv4play/")
             return episodes
 
+        if parse.path.startswith("/lista"):
+            match = re.search(r"/lista/([^\/]+)", parse.path)
+            if not match:
+                logging.error("Bad lista url?")
+                return episodes
+            show = match.group(1)
+            episodes = self._graphlista(token, show)
+            return episodes
+
         showid, jansson, kind = self._get_seriesid(self.get_urldata(), dict())
         if showid is None:
             logging.error("Cant find any videos")
@@ -171,6 +180,55 @@ class Tv4play(Service, OpenGraphThumbMixin):
             showid, jansson = self._get_seriesid(res.text, jansson)
         return showid, jansson, what[: what.index(":")]
 
+    def _graphlista(self, token, show):
+        episodes = []
+        nr = 0
+        total = 100
+        while nr < total:
+            data = {
+                "operationName": "MediaPanel",
+                "query": "query MediaPanel($panelId: ID!, $mediaInput: MediaPanelContentInput!, $skipSuggestedEpisode: Boolean!, $skipProgress: Boolean!) { panel(id: $panelId) { __typename ... on MediaPanel { __typename ...MediaPanelFields } } }\nfragment ImageFieldsFull on Image { source meta { muteBgColor { hex __typename } __typename } __typename }\nfragment ImageFieldsLight on Image { __typename source isFallback }\nfragment LabelFields on Label { __typename airtime announcement recurringBroadcast hideOnPanels }\nfragment MediaPanelFields on MediaPanel { id title displayHint { __typename mediaPanelImageRatio } content(input: $mediaInput) { __typename pageInfo { __typename ...PageInfoFields } items { __typename ...MediaPanelItemFields } } __typename }\nfragment MediaPanelItemFields on MediaPanelItem { __typename ...MediaPanelSeriesItemFields ...MediaPanelMovieItemFields }\nfragment MediaPanelMovieItemFields on MediaPanelMovieItem { __typename movie { __typename ...MovieFieldsLight } }\nfragment MediaPanelSeriesItemFields on MediaPanelSeriesItem { __typename series { __typename ...SeriesFieldsLight } }\nfragment MovieFieldsLight on Movie { id title slug editorialInfoText mediaClassification genres progress @skip(if: $skipProgress) { __typename percent position timeLeft } label { ...LabelFields __typename } images { main16x9 { ...ImageFieldsFull __typename } cover2x3 { ...ImageFieldsFull __typename } main16x9Annotated { ...ImageFieldsFull __typename } brandLogo { ...ImageFieldsLight __typename } __typename } trailers { mp4 webm __typename } duration { readableShort seconds __typename } isDrmProtected isLiveContent vimondId access { __typename hasAccess } playableFrom { __typename isoString readableDate timestamp } playableUntil { __typename isoString timestamp readableRemaining } liveEventEnd { __typename isoString readableDate timestamp } synopsis { __typename brief short } isPollFeatureEnabled upsell { __typename tierId tierName } isStartOverEnabled __typename }\nfragment PageInfoFields on PageInfo { __typename hasNextPage nextPageOffset totalCount }\nfragment SeriesFieldsLight on Series { id title slug editorialInfoText mediaClassification label { ...LabelFields __typename } suggestedEpisode @skip(if: $skipSuggestedEpisode) { __typename episode { __typename id title progress @skip(if: $skipProgress) { __typename percent position } playableFrom { __typename isoString } duration { readableShort seconds __typename } isDrmProtected isLiveContent vimondId access { __typename hasAccess } } } images { cover2x3 { ...ImageFieldsFull __typename } main16x9 { ...ImageFieldsFull __typename } main16x9Annotated { ...ImageFieldsFull __typename } brandLogo { ...ImageFieldsLight __typename } __typename } synopsis { __typename brief } trailers { mp4 webm __typename } isPollFeatureEnabled upsell { __typename tierId tierName } __typename }",
+                "variables": {
+                    "mediaInput": {"limit": 10, "offset": nr},
+                    "panelId": show,
+                    "skipProgress": True,
+                    "skipSuggestedEpisode": True,
+                },
+            }
+            res = self.http.request(
+                "post",
+                "https://client-gateway.tv4.a2d.tv/graphql",
+                headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                json=data,
+            )
+            janson = res.json()
+            total = janson["data"]["panel"]["content"]["pageInfo"]["totalCount"]
+
+            for item in janson["data"]["panel"]["content"]["items"]:
+                stuff = []
+
+                if "movie" in item:
+                    if not item["movie"]["access"]["hasAccess"]:
+                        continue
+                    showid = item["movie"]["id"]
+                    episodes.append(f"https://www.tv4play.se/video/{showid}")
+                    continue
+                elif "series" in item:
+                    showid = item["series"]["id"]
+
+                jansson2 = self._graphdetails(token, showid)
+                for season in jansson2["data"]["media"]["allSeasonLinks"]:
+                    graph_list = self._graphql(season["seasonId"])
+                    for i in graph_list:
+                        if i not in stuff:
+                            stuff.append(i)
+
+                for item in stuff:
+                    episodes.append(f"https://www.tv4play.se/video/{item}")
+
+            nr += 10
+        return episodes
+
     def _graphdetails(self, token, show):
         data = {
             "operationName": "ContentDetailsPage",
@@ -209,7 +267,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             janson = res.json()
             total = janson["data"]["season"]["episodes"]["pageInfo"]["totalCount"]
             for mediatype in janson["data"]["season"]["episodes"]["items"]:
-                if time.time() < mediatype["playableFrom"]["timestamp"] / 1000:
+                if not mediatype["video"]["access"]["hasAccess"]:
+                    continue
+                if time.time() < int(mediatype["playableFrom"]["timestamp"]) / 1000:
                     continue
                 items.append(mediatype["id"])
             nr += 12
