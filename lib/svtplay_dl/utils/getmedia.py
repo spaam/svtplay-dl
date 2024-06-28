@@ -153,8 +153,9 @@ def get_one_media(stream):
         logging.info("No subtitles available")
         return
 
+    merge_subtitle = False
     if not stream.config.get("list_quality"):
-        subtitle_decider(stream, subtitles)
+        merge_subtitle = subtitle_decider(stream, subtitles)
         if stream.config.get("force_subtitle"):
             return
 
@@ -219,6 +220,6 @@ def get_one_media(stream):
         if fstream.audio and not post.detect and fstream.finished:
             logging.warning("Can't find ffmpeg/avconv. audio and video is in seperate files. if you dont want this use -P hls or hds")
         if post.detect and fstream.config.get("no_merge") is False:
-            post.merge()
+            post.merge(merge_subtitle)
         else:
             logging.info("All done. Not postprocessing files, leaving them completely untouched.")

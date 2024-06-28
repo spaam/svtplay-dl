@@ -119,8 +119,8 @@ def subtitle_decider(stream, subtitles):
                 print(subtitles[0].url)
             else:
                 subtitles[0].download()
-    elif stream.config.get("merge_subtitle"):
-        stream.config.set("merge_subtitle", False)
+        return stream.config.get("merge_subtitle")
+    return False
 
 
 def resolution(streams, resolutions: List) -> List:
