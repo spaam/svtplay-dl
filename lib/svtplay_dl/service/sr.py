@@ -16,16 +16,21 @@ class Sr(Service, OpenGraphThumbMixin):
     def get(self):
         data = self.get_urldata()
 
-        match = re.search(r'data-audio-id="(\d+)"', data)
-        match2 = re.search(r'data-audio-type="(\w+)"', data)
-        if match and match2:
-            aid = match.group(1)
-            type = match2.group(1)
-        else:
+        matches = re.finditer(r'data-audio-id="(\d+)"', data)
+        matches2 = re.finditer(r'data-audio-type="(\w+)"', data)
+        streams = [(match.group(1), match2.group(1)) for match, match2 in zip(matches, matches2)]
+        if not streams:
             yield ServiceError("Can't find audio info")
             return
 
-        dataurl = f"https://sverigesradio.se/sida/playerajax/getaudiourl?id={aid}&type={type}&quality=high&format=iis"
-        data = self.http.request("get", dataurl).text
-        playerinfo = json.loads(data)
-        yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output)
+        # Filter on first audio id
+        aid = streams[0][0]
+        streams = sorted({stream for stream in streams if stream[0] == aid})
+
+
+        for aid, type in streams:
+            dataurl = f"https://sverigesradio.se/sida/playerajax/getaudiourl?id={aid}&type={type}&quality=high&format=iis"
+            data = self.http.request("get", dataurl).text
+            playerinfo = json.loads(data)
+            language = "med-musik" if type == "secondary" else "utan-musik"
+            yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output, language=language)
