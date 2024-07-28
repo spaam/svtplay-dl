@@ -46,7 +46,11 @@ setup(
     packages=find_packages("lib", exclude=["tests", "*.tests", "*.tests.*"]),
     install_requires=deps,
     package_dir={"": "lib"},
-    scripts=["bin/svtplay-dl"],
+    entry_points={
+        "console_scripts": [
+            "svtplat-dl = svtplay_dl:main",
+        ],
+    },
     author="Johan Andersson",
     author_email="j@i19.se",
     description="Command-line program to download videos from various video on demand sites",
