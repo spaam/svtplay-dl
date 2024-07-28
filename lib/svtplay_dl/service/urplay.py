@@ -53,17 +53,19 @@ class Urplay(Service, OpenGraphThumbMixin):
             logging.error("Can't find video info.")
             return episodes
 
-        data = unescape(match.group(1))
-        jsondata = json.loads(data)
+        jsondata = json.loads(match.group(1))
         seasons = jsondata["props"]["pageProps"]["superSeriesSeasons"]
+        build = jsondata["buildId"]
 
         parse = urlparse(self.url)
         url = f"https://{parse.netloc}{parse.path}"
         episodes.append(url)
         if seasons:
             for season in seasons:
-                res = self.http.get(f'https://urplay.se/api/v1/series?id={season["id"]}')
-                for episode in res.json()["programs"]:
+                res = self.http.get(
+                    f'https://urplay.se/_next/data/{build}{season["link"]}.json?productType={jsondata["query"]["productType"]}&id={jsondata["props"]["pageProps"]["program"]["seriesId"]}',
+                )
+                for episode in res.json()["pageProps"]["program"]["series"]["programs"]:
                     url = urljoin("https://urplay.se", episode["link"])
                     if url not in episodes:
                         episodes.append(url)
