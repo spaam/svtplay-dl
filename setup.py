@@ -48,7 +48,7 @@ setup(
     package_dir={"": "lib"},
     entry_points={
         "console_scripts": [
-            "svtplat-dl = svtplay_dl:main",
+            "svtplay-dl = svtplay_dl:main",
         ],
     },
     author="Johan Andersson",
