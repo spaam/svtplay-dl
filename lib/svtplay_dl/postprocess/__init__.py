@@ -31,7 +31,7 @@ class postprocess:
             if os.path.isfile(path):
                 self.detect = path
 
-    def merge(self):
+    def merge(self, merge_subtitle):
         if self.detect is None:
             logging.error("Cant detect ffmpeg or avconv. Cant mux files without it.")
             return
@@ -60,7 +60,7 @@ class postprocess:
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
 
-        if self.config.get("merge_subtitle"):
+        if merge_subtitle:
             logging.info("Merge audio, video and subtitle into %s", new_name.name)
         else:
             logging.info(f"Merge audio and video into {str(new_name.name).replace('.audio', '')}")
@@ -89,7 +89,7 @@ class postprocess:
             arguments += ["-map", f"{videotrack}"]
         if audiotrack:
             arguments += ["-map", f"{audiotrack}"]
-        if self.config.get("merge_subtitle"):
+        if merge_subtitle:
             langs = _sublanguage(self.stream, self.config, self.subfixes)
             tracks = [x for x in [videotrack, audiotrack] if x]
             subs_nr = 0
@@ -135,7 +135,7 @@ class postprocess:
             os.remove(audio_filename)
 
         # This if statement is for use cases where both -S and -M are specified to not only merge the subtitle but also store it separately.
-        if self.config.get("merge_subtitle") and not self.config.get("subtitle"):
+        if merge_subtitle and not self.config.get("subtitle"):
             if self.subfixes and len(self.subfixes) >= 2 and self.config.get("get_all_subtitles"):
                 for subfix in self.subfixes:
                     subfile = orig_filename.parent / (orig_filename.stem + "." + subfix + ".srt")
