@@ -41,7 +41,15 @@ svtplay-dl is avaliable in the [Solus](https://getsol.us.com/) repository and ca
 sudo eopkg it svtplay-dl
 ```
 
-### Windows
+### Windows - Recommended method
+
+If you have [Scoop](https://scoop.sh/) on your machine you can install by simply running:
+```
+    scoop bucket add main
+    scoop install main/svtplay-dl
+```
+
+### Windows - Alternative method
 
 You can download the Windows binaries from [svtplay-dl.se](https://svtplay-dl.se/)
 
