@@ -198,7 +198,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             res = self.http.request(
                 "post",
                 "https://client-gateway.tv4.a2d.tv/graphql",
-                headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                 json=data,
             )
             janson = res.json()
@@ -242,7 +242,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         res = self.http.request(
             "post",
             "https://client-gateway.tv4.a2d.tv/graphql",
-            headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+            headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
             json=data,
         )
         return res.json()
@@ -261,7 +261,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             res = self.http.request(
                 "post",
                 "https://client-gateway.tv4.a2d.tv/graphql",
-                headers={"Client-Name": "tv4-web", "Client-Version": "4.0.0", "Content-Type": "application/json"},
+                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json"},
                 json=data,
             )
             janson = res.json()
