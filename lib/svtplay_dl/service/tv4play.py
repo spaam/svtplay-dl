@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import time
+from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
@@ -107,6 +108,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
     def find_all_episodes(self, config):
         episodes = []
         items = []
+        seasonq = None
 
         parse = urlparse(self.url)
         if parse.path.startswith("/klipp"):
@@ -130,6 +132,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             episodes = self._graphlista(token, show)
             return episodes
 
+        query = parse_qs(parse.query)
+        seasonq = query.get("season", None)
+
         showid, jansson, kind = self._get_seriesid(self.get_urldata(), dict())
         if showid is None:
             logging.error("Cant find any videos")
@@ -139,12 +144,20 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return episodes
         if kind == "Movie":
             return [f"https://www.tv4play.se/video/{showid}"]
+
         jansson = self._graphdetails(token, showid)
-        for season in jansson["data"]["media"]["allSeasonLinks"]:
-            graph_list = self._graphql(season["seasonId"])
-            for i in graph_list:
-                if i not in items:
-                    items.append(i)
+        graph_list = None
+        for season in reversed(jansson["data"]["media"]["allSeasonLinks"]):
+            if seasonq:
+                if seasonq[0] == season["seasonId"]:
+                    graph_list = self._graphql(season["seasonId"])
+            else:
+                graph_list = self._graphql(season["seasonId"])
+
+            if graph_list:
+                for i in graph_list:
+                    if i not in items:
+                        items.append(i)
 
         for item in items:
             episodes.append(f"https://www.tv4play.se/video/{item}")
