@@ -194,7 +194,10 @@ def _formatname(output, config):
         if key == "service" and output[key]:
             name = name.replace("{service}", output[key])
         if key == "ext" and output[key]:
-            name = name.replace("{ext}", output[key])
+            if "{ext}" in name:
+                name = name.replace("{ext}", output[key])
+            else:
+                name = f"{name}.{output[key]}"
 
     # Remove all {text} we cant replace with something
     for item in re.findall(r"([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
