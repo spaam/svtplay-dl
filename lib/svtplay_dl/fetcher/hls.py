@@ -97,7 +97,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                         if "CHARACTERISTICS" in i:
                             role = f'{role}-{i["CHARACTERISTICS"].replace("se.svt.accessibility.", "")}'
 
-                    media[i["GROUP-ID"]].append([uri, chans, language, role])
+                    media[i["GROUP-ID"]].append([uri, chans, language, role, segments])
 
                 if i["TYPE"] == "SUBTITLES":
                     if "URI" in i:
@@ -161,7 +161,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                                 role=group[3],
                                 video_role=video_role,
                                 output=loutput,
-                                segments=bool(segments),
+                                segments=bool(group[4]),
                                 channels=chans,
                                 codec=codec,
                                 resolution=resolution,
@@ -187,7 +187,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                             audio=audio_url,
                             video_role=video_role,
                             output=loutput,
-                            segments=bool(segments),
+                            segments=bool(group[4]),
                             channels=chans,
                             codec=codec,
                             resolution=resolution,
