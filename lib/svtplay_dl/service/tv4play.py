@@ -55,7 +55,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         item = jansson["metadata"]
         if item["isDrmProtected"]:
-            yield ServiceError("We can't download DRM protected content from this site.")
+            yield ServiceError("We can't download DRM protected content from this site. This isn't a svtplay-dl issue.")
             return
 
         if item["isLive"]:
