@@ -134,7 +134,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
         query = parse_qs(parse.query)
         seasonq = query.get("season", None)
-
         showid, jansson, kind = self._get_seriesid(self.get_urldata(), dict())
         if showid is None:
             logging.error("Cant find any videos")
@@ -150,9 +149,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
         for season in reversed(jansson["data"]["media"]["allSeasonLinks"]):
             if seasonq:
                 if seasonq[0] == season["seasonId"]:
-                    graph_list = self._graphql(season["seasonId"])
+                    graph_list = self._graphql(token, season["seasonId"])
             else:
-                graph_list = self._graphql(season["seasonId"])
+                graph_list = self._graphql(token, season["seasonId"])
 
             if graph_list:
                 for i in graph_list:
@@ -210,7 +209,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             }
             res = self.http.request(
                 "post",
-                "https://client-gateway.tv4.a2d.tv/graphql",
+                "https://nordic-gateway.tv4.a2d.tv/graphql",
                 headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                 json=data,
             )
@@ -254,13 +253,13 @@ class Tv4play(Service, OpenGraphThumbMixin):
         }
         res = self.http.request(
             "post",
-            "https://client-gateway.tv4.a2d.tv/graphql",
+            "https://nordic-gateway.tv4.a2d.tv/graphql",
             headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
             json=data,
         )
         return res.json()
 
-    def _graphql(self, show):
+    def _graphql(self, token, show):
         items = []
         nr = 0
         total = 100
@@ -273,8 +272,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
             res = self.http.request(
                 "post",
-                "https://client-gateway.tv4.a2d.tv/graphql",
-                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json"},
+                "https://nordic-gateway.tv4.a2d.tv/graphql",
+                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                 json=data,
             )
             janson = res.json()
