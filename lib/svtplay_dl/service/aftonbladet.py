@@ -14,7 +14,6 @@ class Aftonbladettv(Service):
     supported_domains = ["svd.se", "tv.aftonbladet.se"]
     
     def get(self):
-        hdnea = self._login()
         data = self.get_urldata()
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
@@ -24,8 +23,11 @@ class Aftonbladettv(Service):
                 if not match:
                     yield ServiceError("Can't find video info")
                     return
-        data = json.loads(decode_html_entities(match.group(1)))
-        url = f"{data['streamUrls']['hls']}{hdnea}"
+        
+        url = json.loads(decode_html_entities(match.group(1)))['streamUrls']['hls']
+        hdnea = self._login(url)
+        url += hdnea
+        print("url",url)
         yield from hlsparse(
             config=self.config, 
             res=self.http.request("get", url), 
@@ -33,16 +35,29 @@ class Aftonbladettv(Service):
             output=self.output
         )
     
-    def _login(self):   
-        service = 375826
-        if self.config.get("token") is None:
+    def get_service(self):
+        try:
+            url = self.url
+            if not "video/" in url:
+                return None
+            i = url.find("video/")+len("video/")
+            service = url[i:].split("/")[0]
+            return service
+        except Exception as e:
+            logging.error(f"Can't find service: {e}")
+            return None
+
+    def _login(self, url):
+        if (service := self.get_service()) is None:
+            return None 
+        if (token := self.config.get("token")) is None:
             return None
         
         # Get token
         if (t := self.http.request(
             "get",
             f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus",
-            headers={"x-sp-id":self.config.get("token")},
+            headers={"x-sp-id":token}
             )
         ).status_code != 200:
             logging.info(f"Can't get token")
