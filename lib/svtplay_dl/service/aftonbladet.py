@@ -12,6 +12,7 @@ from svtplay_dl.utils.text import decode_html_entities
 
 class Aftonbladettv(Service):
     supported_domains = ["svd.se", "tv.aftonbladet.se"]
+    
     def get(self):
         data = self.get_urldata()
 
