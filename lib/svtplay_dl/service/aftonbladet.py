@@ -25,7 +25,7 @@ class Aftonbladettv(Service):
                     return
         data = json.loads(decode_html_entities(match.group(1)))
         hdnea = self._login()
-        url = data['streamUrls']['hls'] + hdnea
+        url = data['streamUrls']['hls'] + hdnea if hdnea else data['streamUrls']['hls']
         yield from hlsparse(
             config=self.config, 
             res=self.http.request("get", url), 
