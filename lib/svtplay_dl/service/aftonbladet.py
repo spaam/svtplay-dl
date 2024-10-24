@@ -12,9 +12,9 @@ from svtplay_dl.utils.text import decode_html_entities
 
 class Aftonbladettv(Service):
     supported_domains = ["svd.se", "tv.aftonbladet.se"]
-    
     def get(self):
         data = self.get_urldata()
+
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
             match = re.search('data-svpPlayer-video="([^"]+)"', data)
@@ -23,10 +23,9 @@ class Aftonbladettv(Service):
                 if not match:
                     yield ServiceError("Can't find video info")
                     return
-        
-        url = json.loads(decode_html_entities(match.group(1)))['streamUrls']['hls']
+        data = json.loads(decode_html_entities(match.group(1)))
         hdnea = self._login()
-        url += hdnea
+        url = data['streamUrls']['hls'] + hdnea
         yield from hlsparse(
             config=self.config, 
             res=self.http.request("get", url), 
@@ -47,6 +46,8 @@ class Aftonbladettv(Service):
         except Exception as e:
             logging.error(f"Can't find service in video link")
             return None
+
+
 
     def _login(self):
         if (service := self._get_service()) is None:
