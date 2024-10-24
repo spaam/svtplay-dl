@@ -12,10 +12,9 @@ from svtplay_dl.utils.text import decode_html_entities
 
 class Aftonbladettv(Service):
     supported_domains = ["svd.se", "tv.aftonbladet.se"]
-    
+
     def get(self):
         data = self.get_urldata()
-
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
             match = re.search('data-svpPlayer-video="([^"]+)"', data)
@@ -48,37 +47,26 @@ class Aftonbladettv(Service):
             logging.error(f"Can't find service in video link")
             return None
 
-
-
     def _login(self):
         if (service := self._get_service()) is None:
             return None 
         if (token := self.config.get("token")) is None:
             return None
         
-        # Get token
-        if (r := self.http.request(
+        res = self.http.request(
             "get",
             f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus",
             headers={"x-sp-id":token}
-            )
-        ).status_code != 200:
-            logging.info(f"Can't get token")
+        )
+        if res.status_code != 200:
             return None
-        
-        #hdnea-header with hmac encryption
-        if (h:= self.http.request(
-            "get",
-            f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={r.json()['expiry']}&hmac={r.json()['value']}",
-            )
-        ).status_code != 200:
-            logging.info(f"Can't get hdnea header with hmac encryption")
+        expires = res.json()['expiry']
+        hmac = res.json()['value']
+
+        res = self.http.request("get",f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={expires}&hmac={hmac}")
+        if res.status_code != 200:
             return None
-        
-        #URL encode hdnea
-        hdnea =f"?hdnea={h.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}" 
-        
-        return hdnea 
+        return f"?hdnea={res.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}" 
 
 
 class Aftonbladet(Service):
