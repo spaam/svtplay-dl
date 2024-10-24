@@ -25,9 +25,8 @@ class Aftonbladettv(Service):
                     return
         
         url = json.loads(decode_html_entities(match.group(1)))['streamUrls']['hls']
-        hdnea = self._login(url)
+        hdnea = self._login()
         url += hdnea
-        print("url",url)
         yield from hlsparse(
             config=self.config, 
             res=self.http.request("get", url), 
@@ -35,26 +34,28 @@ class Aftonbladettv(Service):
             output=self.output
         )
     
-    def get_service(self):
+    def _get_service(self):
         try:
             url = self.url
-            if not "video/" in url:
+            vid_ref = "video/"
+            if not vid_ref in url:
                 return None
-            i = url.find("video/")+len("video/")
-            service = url[i:].split("/")[0]
+            index = url.find(vid_ref)+len(vid_ref)
+            service = url[index:].split("/")[0]
             return service
+        
         except Exception as e:
-            logging.error(f"Can't find service: {e}")
+            logging.error(f"Can't find service in video link")
             return None
 
-    def _login(self, url):
-        if (service := self.get_service()) is None:
+    def _login(self):
+        if (service := self._get_service()) is None:
             return None 
         if (token := self.config.get("token")) is None:
             return None
         
         # Get token
-        if (t := self.http.request(
+        if (r := self.http.request(
             "get",
             f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus",
             headers={"x-sp-id":token}
@@ -63,16 +64,18 @@ class Aftonbladettv(Service):
             logging.info(f"Can't get token")
             return None
         
-        #hmac encrypt token
-        if (hdnea:= self.http.request(
+        #hdnea-header with hmac encryption
+        if (h:= self.http.request(
             "get",
-            f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={t.json()['expiry']}&hmac={t.json()['value']}",
+            f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={r.json()['expiry']}&hmac={r.json()['value']}",
             )
         ).status_code != 200:
-            logging.info(f"Can't get hdnea encryption")
+            logging.info(f"Can't get hdnea header with hmac encryption")
             return None
         
-        hdnea =f"?hdnea={hdnea.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}" 
+        #URL encode hdnea
+        hdnea =f"?hdnea={h.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}" 
+        
         return hdnea 
 
 
