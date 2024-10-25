@@ -1,5 +1,5 @@
 # using edge to get ffmpeg-4.x
-FROM alpine:edge
+FROM alpine:latest
 LABEL maintainer="j@i19.se"
 
 COPY dist/*.whl .
