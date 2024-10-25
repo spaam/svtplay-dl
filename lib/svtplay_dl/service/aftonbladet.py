@@ -14,7 +14,6 @@ class Aftonbladettv(Service):
 
     def get(self):
         data = self.get_urldata()
-
         match = re.search('data-player-config="([^"]+)"', data)
         if not match:
             match = re.search('data-svpPlayer-video="([^"]+)"', data)
@@ -24,7 +23,27 @@ class Aftonbladettv(Service):
                     yield ServiceError("Can't find video info")
                     return
         data = json.loads(decode_html_entities(match.group(1)))
-        yield from hlsparse(self.config, self.http.request("get", data["streamUrls"]["hls"]), data["streamUrls"]["hls"], output=self.output)
+        hdnea = self._login()
+        url = data["streamUrls"]["hls"] + hdnea if hdnea else data["streamUrls"]["hls"]
+        yield from hlsparse(config=self.config, res=self.http.request("get", url), url=url, output=self.output)
+
+    def _login(self):
+        if (token := self.config.get("token")) is None:
+            return None
+        if (match := re.search(r"^.*tv.aftonbladet.+video/([a-zA-Z0-9]+)/.*$", self.url)) is None:
+            return None
+
+        service = match.group(1)
+        res = self.http.request("get", f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus", headers={"x-sp-id": token})
+        if res.status_code != 200:
+            return None
+        expires = res.json()["expiry"]
+        hmac = res.json()["value"]
+
+        res = self.http.request("get", f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={expires}&hmac={hmac}")
+        if res.status_code != 200:
+            return None
+        return f"?hdnea={res.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}"
 
 
 class Aftonbladet(Service):
