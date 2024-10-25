@@ -2,7 +2,6 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import json
 import re
-import logging
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
@@ -25,48 +24,26 @@ class Aftonbladettv(Service):
                     return
         data = json.loads(decode_html_entities(match.group(1)))
         hdnea = self._login()
-        url = data['streamUrls']['hls'] + hdnea if hdnea else data['streamUrls']['hls']
-        yield from hlsparse(
-            config=self.config, 
-            res=self.http.request("get", url), 
-            url=url, 
-            output=self.output
-        )
-    
-    def _get_service(self):
-        try:
-            url = self.url
-            vid_ref = "video/"
-            if not vid_ref in url:
-                return None
-            index = url.find(vid_ref)+len(vid_ref)
-            service = url[index:].split("/")[0]
-            return service
-        
-        except Exception as e:
-            logging.error(f"Can't find service in video link")
-            return None
+        url = data["streamUrls"]["hls"] + hdnea if hdnea else data["streamUrls"]["hls"]
+        yield from hlsparse(config=self.config, res=self.http.request("get", url), url=url, output=self.output)
 
     def _login(self):
-        if (service := self._get_service()) is None:
-            return None 
         if (token := self.config.get("token")) is None:
             return None
-        
-        res = self.http.request(
-            "get",
-            f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus",
-            headers={"x-sp-id":token}
-        )
-        if res.status_code != 200:
+        if (match := re.search(r"^.*tv.aftonbladet.+video/([a-zA-Z0-9]+)/.*$", self.url)) is None:
             return None
-        expires = res.json()['expiry']
-        hmac = res.json()['value']
 
-        res = self.http.request("get",f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={expires}&hmac={hmac}")
+        service = match.group(1)
+        res = self.http.request("get", f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus", headers={"x-sp-id": token})
         if res.status_code != 200:
             return None
-        return f"?hdnea={res.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}" 
+        expires = res.json()["expiry"]
+        hmac = res.json()["value"]
+
+        res = self.http.request("get", f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={expires}&hmac={hmac}")
+        if res.status_code != 200:
+            return None
+        return f"?hdnea={res.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}"
 
 
 class Aftonbladet(Service):
