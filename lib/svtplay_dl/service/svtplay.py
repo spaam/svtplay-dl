@@ -116,11 +116,11 @@ class Svtplay(Service, MetadataThumbMixin):
 
         drm = janson["rights"]["drmCopyProtection"]
         if not drm and "variants" in janson and "default" in janson["variants"]:
-            if len(janson["variants"]["default"]["videoReferences"]) == 0:
+            if len(janson["videoReferences"]) == 0:
                 yield ServiceError("Media doesn't have any associated videos.")
                 return
 
-            for videorfc in janson["variants"]["default"]["videoReferences"]:
+            for videorfc in janson["videoReferences"]:
                 params = {}
                 special = False
                 params["manifestUrl"] = quote_plus(videorfc["url"])
