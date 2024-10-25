@@ -236,25 +236,25 @@ class formatnameTest(unittest.TestCase):
         [
             "{episodename}a{title}-{service}",
             {"title": "title", "season": 99, "episode": 21, "episodename": "episodename", "id": "0xdeadface", "ext": "ext"},
-            "episodenameatitle-service",
+            "episodenameatitle-service.mp4",
         ],
         [
             "{episodename}a{title}-{service}",
             {"title": "title", "season": 99, "episodename": "episodename", "id": "0xdeadface", "ext": "ext"},
-            "episodenameatitle-service",
+            "episodenameatitle-service.mp4",
         ],
-        ["{episodename}a{title}-{service}", {"title": "title", "season": 99, "id": "0xdeadface", "ext": "ext"}, "atitle-service"],
+        ["{episodename}a{title}-{service}", {"title": "title", "season": 99, "id": "0xdeadface", "ext": "ext"}, "atitle-service.mp4"],
         [
             "{episodename}a{title}-{service}",
             {"title": "title", "episode": 21, "episodename": "episodename", "id": "0xdeadface", "ext": "ext"},
-            "episodenameatitle-service",
+            "episodenameatitle-service.mp4",
         ],
         [
             "{episodename}a{title}-{service}",
             {"title": "title", "episodename": "episodename", "id": "0xdeadface", "ext": "ext"},
-            "episodenameatitle-service",
+            "episodenameatitle-service.mp4",
         ],
-        ["{episodename}a{title}-{service}", {"title": "title", "episodename": "episodename", "id": "0xdeadface"}, "episodenameatitle-service"],
+        ["{episodename}a{title}-{service}", {"title": "title", "episodename": "episodename", "id": "0xdeadface"}, "episodenameatitle-service.mp4"],
         [
             "{title}.{episode}.{episodename}-{id}-{service}.{ext}",
             {"title": "title", "season": 99, "episode": 21, "episodename": "episodename", "id": "0xdeadface", "ext": "ext"},
