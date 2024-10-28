@@ -30,7 +30,7 @@ class Aftonbladettv(Service):
     def _login(self):
         if (token := self.config.get("token")) is None:
             return None
-        if (match := re.search(r"^.*tv.aftonbladet.+video/([a-zA-Z0-9]+)/.*$", self.url)) is None:
+        if (match := re.search(r"^.*tv.aftonbladet.+video/([a-zA-Z0-9]+).*$", self.url)) is None:
             return None
 
         service = match.group(1)
