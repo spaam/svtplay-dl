@@ -114,6 +114,9 @@ class Svtplay(Service, MetadataThumbMixin):
                             subfix = lang
                     yield from subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output)
 
+        if not janson["videoReferences"]:
+            yield ServiceError("Media doesn't have any associated videos.")
+            return
         drm = janson["rights"]["drmCopyProtection"]
         if not drm and "variants" in janson and "default" in janson["variants"]:
             if len(janson["videoReferences"]) == 0:
