@@ -274,10 +274,6 @@ def gen_parser(version="unknown"):
     alleps.add_argument("--include-clips", dest="include_clips", default=False, action="store_true", help="include clips from websites when using -A")
     alleps.add_argument("-R", "--reverse", action="store_true", dest="reverse_list", default=False, help="Reverse download order")
 
-    cmorep = parser.add_argument_group("C More")
-    cmorep.add_argument("--cmore-operatorlist", dest="cmoreoperatorlist", default=False, action="store_true", help="show operatorlist for cmore")
-    cmorep.add_argument("--cmore-operator", dest="cmoreoperator", default=None, metavar="operator")
-
     postprocessing = parser.add_argument_group("Post-processing")
     postprocessing.add_argument("--no-remux", dest="no_remux", default=False, action="store_true", help="Do not automatically remux to mp4")
     postprocessing.add_argument(
@@ -365,7 +361,6 @@ def setup_defaults():
     options.set("silent_semi", False)
     options.set("proxy", None)
     options.set("include_clips", False)
-    options.set("cmoreoperatorlist", False)
     options.set("filename", FILENAME)
     options.set("only_audio", False)
     options.set("only_video", False)
@@ -423,8 +418,6 @@ def parsertoconfig(config, parser):
     config.set("get_raw_subtitles", parser.get_raw_subtitles)
     config.set("convert_subtitle_colors", parser.convert_subtitle_colors)
     config.set("include_clips", parser.include_clips)
-    config.set("cmoreoperatorlist", parser.cmoreoperatorlist)
-    config.set("cmoreoperator", parser.cmoreoperator)
     config.set("proxy", parser.proxy)
     config.set("only_audio", parser.only_audio)
     config.set("only_video", parser.only_video)
