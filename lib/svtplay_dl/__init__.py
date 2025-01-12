@@ -4,7 +4,6 @@ import logging
 import sys
 
 import yaml
-from svtplay_dl.service.cmore import Cmore
 from svtplay_dl.utils.getmedia import get_media
 from svtplay_dl.utils.getmedia import get_multiple_media
 from svtplay_dl.utils.parser import parser
@@ -57,12 +56,6 @@ def main():
     if len(urls) < 1:
         parse.error("Incorrect number of arguments")
     setup_log(config.get("silent"), config.get("verbose"))
-
-    if options.cmoreoperatorlist:
-        config = parsertoconfig(setup_defaults(), options)
-        c = Cmore(config, urls)
-        c.operatorlist()
-        sys.exit(0)
 
     try:
         if len(urls) == 1:
