@@ -31,10 +31,9 @@ def sort_quality(data) -> List:
 def list_quality(videos):
     data = [["Quality:", "Method:", "Codec:", "Resolution:", "Language:", "Role:"]]
     data.extend(sort_quality(videos))
-    for i in range(len(data)):
-        logging.info(
-            f"{str(data[i][0]):<10s} {data[i][1].upper():<8s} {data[i][2]:<8s} {data[i][3]:<12s} {data[i][4]:<20s} {data[i][5]:<20s}",
-        )
+    col_widths = [max(len(str(item)) for item in col) for col in zip(*data)]
+    for row in data:
+        logging.info("  ".join(f"{str(item).ljust(col_widths[i])}" for i, item in enumerate(row)))
 
 
 def protocol_prio(streams, priolist) -> List:
