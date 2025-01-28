@@ -21,7 +21,7 @@ log = logging.getLogger("svtplay_dl")
 
 def setup_log(silent, verbose=False):
     logging.addLevelName(25, "INFO")
-    fmt = "%(levelname)s: %(message)s"
+    fmt = "%(message)s"
     if silent:
         stream = sys.stderr
         level = 25
