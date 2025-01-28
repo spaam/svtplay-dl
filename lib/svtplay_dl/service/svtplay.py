@@ -145,6 +145,8 @@ class Svtplay(Service, MetadataThumbMixin):
                 else:
                     pl_url = videorfc["url"]
 
+                if "hls-ts-full" == format:
+                    continue
                 if pl_url.find(".m3u8") > 0:
                     yield from hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
                 elif pl_url.find(".mpd") > 0:
@@ -157,6 +159,8 @@ class Svtplay(Service, MetadataThumbMixin):
                     return
 
                 for i in janson["videoReferences"]:
+                    if "hls-ts-full" == i["format"]:
+                        continue
                     if i["url"].find(".m3u8") > 0:
                         yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
 
@@ -254,7 +258,7 @@ class Svtplay(Service, MetadataThumbMixin):
         for data_entry in janson["props"]["urqlState"].values():
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
-                # logging.info(json.dumps(entry))
+
                 for key, data in entry.items():
                     if key == "detailsPageByPath" and data and "heading" in data:
                         video_data = data
