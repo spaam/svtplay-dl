@@ -183,6 +183,11 @@ def adaptionset(attributes, elements, url, baseurl=None):
                     channels = "51"
                 else:
                     channels = None
+                jocs = i.findall("{urn:mpeg:dash:schema:mpd:2011}SupplementalProperty[@schemeIdUri='tag:dolby.com,2018:dash:EC3_ExtensionType:2018']")
+                if jocs:
+                    for joc in jocs:
+                        if joc.attrib["value"] == "JOC":
+                            channels = "atmos"
             if i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL") is not None:
                 filename = urljoin(filename, i.find("{urn:mpeg:dash:schema:mpd:2011}BaseURL").text)
 

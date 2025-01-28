@@ -88,6 +88,8 @@ def _hlsparse(config, text, url, output, **kwargs):
                     if "CHANNELS" in i:
                         if i["CHANNELS"] == "6":
                             chans = "51"
+                        elif "JOC" in i["CHANNELS"]:
+                            chans = "atmos"
                     if "LANGUAGE" in i:
                         language = i["LANGUAGE"]
                     if "AUTOSELECT" in i and i["AUTOSELECT"].upper() == "YES" and "DEFAULT" in i and i["DEFAULT"].upper() == "YES":

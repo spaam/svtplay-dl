@@ -27,6 +27,7 @@ def subtitle_probe(config, url, **kwargs):
         http = HTTP(config)
     subdata = http.request("get", url, cookies=kwargs.get("cookies", None))
 
+    # print(f"iMMMMM {url}")
     if subdata.text.startswith("WEBVTT"):
         yield subtitle(config, "wrst", url, **kwargs)
     elif subdata.text.startswith("#EXTM3U"):
@@ -374,14 +375,15 @@ def _wrstsegments(entries: list, convert=False) -> str:
             item = itmes[x].rstrip()
             if not item.rstrip():
                 continue
-            if strdate(item) and len(subs) > 0 and itmes[x + 1] == subs[-1][1]:
-                ha = strdate(subs[-1][0])
-                ha3 = strdate(item)
-                second = str2sec(ha3.group(4)) + time
-                subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
-                skip = True
-                pre_date_skip = False
-                continue
+            if strdate(item) and len(subs) > 0:
+                if len(subs[-1]) > 1 and len(itmes) > x + 1 and itmes[x + 1] == subs[-1][1]:
+                    ha = strdate(subs[-1][0])
+                    ha3 = strdate(item)
+                    second = str2sec(ha3.group(4)) + time
+                    subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
+                    skip = True
+                    pre_date_skip = False
+                    continue
             has_date = strdate(item)
             if has_date:
                 if several_items:
