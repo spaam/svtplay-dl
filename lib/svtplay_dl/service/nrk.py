@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import copy
+import json
 import re
 
 from svtplay_dl.error import ServiceError
@@ -14,15 +15,20 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ["nrk.no", "tv.nrk.no", "p3.no", "tv.nrksuper.no"]
 
     def get(self):
-        # First, fint the video ID from the html document
-        match = re.search('program-id" content="([^"]+)"', self.get_urldata())
+        match = re.search('({"initialState.*})', self.get_urldata())
         if match:
-            video_id = match.group(1)
+            self.janson = json.loads(match.group(1))
         else:
             yield ServiceError("Can't find video id.")
             return
 
-        dataurl = f"https://psapi.nrk.no/playback/manifest/program/{video_id}?eea-portability=true"
+        if "selectedEpisodePrfId" in self.janson["initialState"]:
+            self.video_id = self.janson["initialState"]["selectedEpisodePrfId"]
+            self.outputfilename()
+        elif "program" in self.janson["initialState"]:
+            self.video_id = self.janson["initialState"]["program"]["prfId"]
+
+        dataurl = f"https://psapi.nrk.no/playback/manifest/program/{self.video_id}?eea-portability=true"
         janson = self.http.request("get", dataurl).json()
 
         if janson["playable"]:
@@ -38,3 +44,14 @@ class Nrk(Service, OpenGraphThumbMixin):
             for sub in janson["playable"]["subtitles"]:
                 if sub["defaultOn"]:
                     yield from subtitle_probe(copy.copy(self.config), sub["webVtt"], output=self.output)
+
+    def outputfilename(self):
+        self.output["title"] = self.janson["initialState"]["series"]["title"]
+        self.output["id"] = self.video_id.lower()
+        for season in self.janson["initialState"]["seasons"]:
+            for episode in season["episodes"]:
+                if self.video_id == episode["prfId"]:
+                    self.output["season"] = episode["season"]["id"]
+                    if "sequenceNumber" in episode:
+                        self.output["episode"] = episode["sequenceNumber"]
+                    self.output["episodename"] = episode["title"]
