@@ -59,6 +59,9 @@ class postprocess:
         _, _, stderr = run_program(cmd, False)  # return 1 is good here.
         streams = _streams(stderr)
         videotrack, audiotrack = _checktracks(streams)
+        tracks = [x for x in [videotrack, audiotrack] if x]
+        subs_nr = 0
+        sub_start = 0
 
         if merge_subtitle:
             logging.info("Merge audio, video and subtitle into %s", new_name.name)
@@ -72,6 +75,13 @@ class postprocess:
             arguments += ["-vn"]
         if self.config.get("only_video"):
             arguments += ["-an"]
+
+        if self.config.get("chapters") and self.stream.output["chapters"]:
+            self.chapters(orig_filename)
+            chapter_track = len(tracks)
+            arguments += ["-i", orig_filename.with_suffix(".FFMETADATAFILE"), "-map_metadata", str(chapter_track)]
+            sub_start += 1
+
         arguments += ["-c:v", "copy", "-c:a", "copy", "-f", "matroska" if self.config.get("output_format") == "mkv" else "mp4"]
         if ext == ".ts":
             if audiotrack and "aac" in _getcodec(streams, audiotrack):
@@ -91,9 +101,6 @@ class postprocess:
             arguments += ["-map", f"{audiotrack}"]
         if merge_subtitle:
             langs = _sublanguage(self.stream, self.config, self.subfixes)
-            tracks = [x for x in [videotrack, audiotrack] if x]
-            subs_nr = 0
-            sub_start = 0
             # find what sub track to start with. when a/v is in one file it start with 1
             # if seperate it will start with 2
             for i in tracks:
@@ -142,7 +149,28 @@ class postprocess:
                     os.remove(subfile)
             else:
                 os.remove(subfile)
+        if self.config.get("chapters") and self.stream.output["chapters"]:
+            os.remove(orig_filename.with_suffix(".FFMETADATAFILE"))
         os.rename(tempfile, str(new_name).replace(".audio", ""))
+
+    def chapters(self, filename):
+        chapters = self.stream.output["chapters"]
+        text = ";FFMETADATA1"
+        for i in range(len(chapters) - 1):
+            chap = chapters[i]
+            title = chap["title"]
+            start = chap["startime"]
+            end = chapters[i + 1]["startime"] - 1
+            text += f"""
+[CHAPTER]
+TIMEBASE=1/1000
+START={start}
+END={end}
+title={title}
+"""
+        with open(filename.with_suffix(".FFMETADATAFILE"), "w") as fd:
+            fd.write(text)
+        return True
 
 
 def _streams(output):
