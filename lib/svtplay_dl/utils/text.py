@@ -44,6 +44,7 @@ def filenamify(title):
     # Convert to lowercase
     # Drop any non ascii letters/digits
     # Drop any leading/trailing whitespace that may have appeared
+    title = title.replace("æ", "ae").replace("ø", "oe")
     title = re.sub(r"[^a-z0-9 .-]", "", title.lower().strip())
 
     # Replace whitespace with dot
