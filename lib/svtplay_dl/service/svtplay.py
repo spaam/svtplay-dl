@@ -86,6 +86,7 @@ class Svtplay(Service, MetadataThumbMixin):
 
         self.outputfilename(video_data)
         self.extrametadata(video_data)
+        self.chaptersdata(video_data)
 
         res = self.http.get(URL_VIDEO_API + vid)
         try:
@@ -466,6 +467,13 @@ class Svtplay(Service, MetadataThumbMixin):
 
         if "description" in episode:
             self.output["episodedescription"] = episode["description"]
+
+    def chaptersdata(self, video_data):
+        chapters = []
+        for chapter in video_data["highlights"]:
+            chap = {"title": chapter["name"], "startime": chapter["positionInSeconds"] * 1000}
+            chapters.append(chap)
+        self.output["chapters"] = chapters
 
 
 def _dict_to_flatstr(flat):
