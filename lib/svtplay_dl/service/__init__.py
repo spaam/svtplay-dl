@@ -39,6 +39,7 @@ class Service:
             "publishing_datetime": None,
             "language": None,
             "ext": None,
+            "chapters": None,
         }
 
         #  Config

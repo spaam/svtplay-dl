@@ -298,6 +298,13 @@ def gen_parser(version="unknown"):
         choices=["mp4", "mkv"],
         help="format you want resulting file in (mkv or mp4), mp4 is default",
     )
+    postprocessing.add_argument(
+        "--chapters",
+        dest="chapters",
+        default=False,
+        action="store_true",
+        help="Get chapters and add it to the file",
+    )
 
     parser.add_argument("urls", nargs="*")
 
@@ -368,6 +375,7 @@ def setup_defaults():
     options.set("get_all_subtitles", False)
     options.set("token", None)
     options.set("reverse_list", False)
+    options.set("chapters", False)
     return _special_settings(options)
 
 
@@ -424,6 +432,7 @@ def parsertoconfig(config, parser):
     config.set("output_format", parser.output_format)
     config.set("token", parser.token)
     config.set("reverse_list", parser.reverse_list)
+    config.set("chapters", parser.chapters)
     return _special_settings(config)
 
 
