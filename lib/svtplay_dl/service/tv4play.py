@@ -189,7 +189,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
                 return False, jansson, what[: what.index(":")]
             series = jansson["props"]["apolloStateFromServer"][what]["series"]["__ref"].replace("Series:", "")
             res = self.http.request("get", f"https://www.tv4play.se/program/{series}/")
-            showid, jansson = self._get_seriesid(res.text, jansson)
+            showid, jansson, _ = self._get_seriesid(res.text, jansson)
         return showid, jansson, what[: what.index(":")]
 
     def _graphlista(self, token, show):
@@ -210,7 +210,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             res = self.http.request(
                 "post",
                 "https://nordic-gateway.tv4.a2d.tv/graphql",
-                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                headers={"Client-Name": "tv4-web", "Client-Version": "5.4.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                 json=data,
             )
             janson = res.json()
@@ -230,7 +230,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
 
                 jansson2 = self._graphdetails(token, showid)
                 for season in jansson2["data"]["media"]["allSeasonLinks"]:
-                    graph_list = self._graphql(season["seasonId"])
+                    graph_list = self._graphql(token, season["seasonId"])
                     for i in graph_list:
                         if i not in stuff:
                             stuff.append(i)
@@ -254,7 +254,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         res = self.http.request(
             "post",
             "https://nordic-gateway.tv4.a2d.tv/graphql",
-            headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+            headers={"Client-Name": "tv4-web", "Client-Version": "5.4.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
             json=data,
         )
         return res.json()
@@ -273,7 +273,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             res = self.http.request(
                 "post",
                 "https://nordic-gateway.tv4.a2d.tv/graphql",
-                headers={"Client-Name": "tv4-web", "Client-Version": "5.2.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                headers={"Client-Name": "tv4-web", "Client-Version": "5.4.0", "Content-Type": "application/json", "Authorization": f"Bearer {token}"},
                 json=data,
             )
             janson = res.json()
