@@ -139,12 +139,12 @@ class subtitle:
             tag = norm(node.tag)
             if tag in ("p", "span"):
                 begin = node.attrib["begin"]
-                if not ("dur" in node.attrib):
+                if "dur" not in node.attrib:
                     if "end" not in node.attrib:
                         duration = node.attrib["duration"]
                 else:
                     duration = node.attrib["dur"]
-                if not ("end" in node.attrib):
+                if "end" not in node.attrib:
                     begin2 = begin.split(":")
                     duration2 = duration.split(":")
                     try:
