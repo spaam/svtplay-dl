@@ -32,6 +32,9 @@ class Urplay(Service, OpenGraphThumbMixin):
         jsondata = jsondata["props"]["pageProps"]["program"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
+        if res.status_code == 403:
+            yield ServiceError("The video is geoblocked. Can't download this video")
+            return
 
         if "dash" in res.json()["sources"]:
             yield from dashparse(
