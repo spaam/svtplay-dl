@@ -38,6 +38,8 @@ class Tv4play(Service, OpenGraphThumbMixin):
         for key in jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"].keys():
             if key.startswith("media"):
                 key_check = key
+            if key.startswith("short"):
+                key_check = key
         what = jansson["props"]["apolloStateFromServer"]["ROOT_QUERY"][key_check]["__ref"]
 
         if what.startswith("Series:"):
