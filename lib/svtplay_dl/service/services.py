@@ -32,6 +32,7 @@ from svtplay_dl.service.solidtango import Solidtango
 from svtplay_dl.service.sportlib import Sportlib
 from svtplay_dl.service.sr import Sr
 from svtplay_dl.service.svt import Svt
+from svtplay_dl.service.svtbarn import Svtbarn
 from svtplay_dl.service.svtplay import Svtplay
 from svtplay_dl.service.tv4play import Tv4
 from svtplay_dl.service.tv4play import Tv4play
@@ -76,6 +77,7 @@ sites = [
     Sportlib,
     Sr,
     Svt,
+    Svtbarn,
     Svtplay,
     OppetArkiv,
     Tv4,
