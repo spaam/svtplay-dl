@@ -105,7 +105,7 @@ class subtitle:
             data = self.raw(subdata)
 
         if data and len(data) > 0:
-            dupe, fileame = find_dupes(self.output, self.config, False)
+            dupe, fileame = find_dupes(self.output, self.config)
             if dupe and not self.config.get("force_subtitle"):
                 logging.warning("File (%s) already exists. Use --force-subtitle to overwrite", fileame.name)
                 return
