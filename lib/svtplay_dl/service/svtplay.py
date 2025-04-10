@@ -380,6 +380,9 @@ class Svtplay(Service, MetadataThumbMixin):
         if "productionYearRange" in data["moreDetails"]:
             return data["moreDetails"]["productionYearRange"]
 
+        if "productionYear" in data["moreDetails"]:
+            return data["moreDetails"]["productionYear"]
+
         return None
 
     def _find_episode(self, data):
