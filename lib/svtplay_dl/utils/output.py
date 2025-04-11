@@ -159,12 +159,12 @@ def formatname(output, config):
     if config.get("output") and pathlib.Path(config.get("output")).expanduser().is_dir():
         dirname = pathlib.Path(config.get("output"))
     elif config.get("path") and pathlib.Path(config.get("path")).expanduser().is_dir():
-        dirname = pathlib.Path(config.get("path"))
+        dirname = pathlib.Path(config.get("path")).expanduser()
     elif config.get("output"):
         if "ext" in output and output["ext"]:
-            name = pathlib.Path(f"{config.get('output')}.{output['ext']}")
+            name = pathlib.Path(f"{config.get('output')}.{output['ext']}").expanduser()
         else:
-            name = pathlib.Path(config.get("output"))
+            name = pathlib.Path(config.get("output")).expanduser()
     name = pathlib.Path(sanitize(name.expanduser()))
     if subfolder and dirname:
         return dirname / subfolder / name.expanduser()
