@@ -250,14 +250,16 @@ class Svtplay(Service, MetadataThumbMixin):
                         video_data = data["lazyLoadedTabs"]
         if not video_data:
             return episodes
+
         for lazytab in video_data:
-            if "selections" in lazytab:
-                for section in lazytab["selections"]:
-                    for i in section["items"]:
-                        if i["item"]["__typename"] == "Single":
-                            singles.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
-                        else:
-                            videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+            if lazytab["slug"] == "all":
+                for module in lazytab["modules"]:
+                    if "selection" in module:
+                        for i in module["selection"]["items"]:
+                            if i["item"]["__typename"] == "Single":
+                                singles.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+                            else:
+                                videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
         for i in videos:
             episodes.extend(self._all_episodes(i))
         if singles:
