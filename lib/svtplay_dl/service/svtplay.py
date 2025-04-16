@@ -17,6 +17,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import MetadataThumbMixin
 from svtplay_dl.service import Service
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.text import filenamify
 
@@ -101,6 +102,9 @@ class Svtplay(Service, MetadataThumbMixin):
         yield from videos
 
     def _get_video(self, janson):
+        entries = []
+        subs = []
+
         if "subtitleReferences" in janson:
             for i in janson["subtitleReferences"]:
                 if "url" in i:
@@ -113,11 +117,13 @@ class Svtplay(Service, MetadataThumbMixin):
                             subfix = f"{lang}-caption"
                         else:
                             subfix = lang
-                    yield from subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output)
+                    for x in subtitle_probe(copy.copy(self.config), i["url"], subfix=subfix, output=self.output):
+                        subs.append(x)
 
         if not janson["videoReferences"]:
             yield ServiceError("Media doesn't have any associated videos.")
             return
+
         drm = janson["rights"]["drmCopyProtection"]
         if not drm and "variants" in janson and "default" in janson["variants"]:
             if len(janson["videoReferences"]) == 0:
@@ -149,9 +155,11 @@ class Svtplay(Service, MetadataThumbMixin):
                 if "hls-ts-full" == format:
                     continue
                 if pl_url.find(".m3u8") > 0:
-                    yield from hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+                    hls = hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+                    entries.append(hls)
                 elif pl_url.find(".mpd") > 0:
-                    yield from dashparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+                    mpd = dashparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
+                    entries.append(mpd)
 
         else:
             if "videoReferences" in janson:
@@ -163,7 +171,24 @@ class Svtplay(Service, MetadataThumbMixin):
                     if "hls-ts-full" == i["format"]:
                         continue
                     if i["url"].find(".m3u8") > 0:
-                        yield from hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                        hls = hlsparse(self.config, self.http.request("get", i["url"]), i["url"], output=self.output)
+                        entries.append(hls)
+
+        for entry in entries:
+            for i in entry:
+                if isinstance(i, subtitle):
+                    subs.append(i)
+                else:
+                    yield i
+
+        if check_exists(["sv", "sv-caption"], subs):
+            for i in subs:
+                if i.subfix == "sv-caption":
+                    i.subfix = "sv"
+                    yield i
+        else:
+            for i in subs:
+                yield i
 
     def _lists(self):
         videos = []
@@ -484,3 +509,7 @@ def _dict_to_flatstr(flat):
     for i in flat:
         text += f"{i}={flat[i]}&"
     return text
+
+
+def check_exists(valuea, valueb):
+    return all(any(x == y.subfix for y in valueb) for x in valuea)
