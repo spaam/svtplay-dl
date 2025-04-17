@@ -3,7 +3,6 @@ import logging
 import os
 import pathlib
 import platform
-import sys
 
 from yaml import safe_load
 
@@ -11,7 +10,7 @@ configdata = None
 
 if platform.system() == "Windows":
     APPDATA = os.environ["APPDATA"]
-    cwd = pathlib.Path(sys.executable).parent / "svtplay-dl.yaml"
+    cwd = pathlib.Path(os.getcwd()) / "svtplay-dl.yaml"
     if os.path.isfile(cwd):
         CONFIGFILE = cwd
     else:
@@ -19,7 +18,7 @@ if platform.system() == "Windows":
 else:
     xdg_config_home = os.getenv("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
     xdg_config = os.path.join(xdg_config_home, "svtplay-dl", "svtplay-dl.yaml")
-    cwd = pathlib.Path(sys.executable).parent / "svtplay-dl.yaml"
+    cwd = pathlib.Path(os.getcwd()) / "svtplay-dl.yaml"
     if os.path.isfile(cwd):
         CONFIGFILE = cwd
     elif os.path.isfile(xdg_config):
