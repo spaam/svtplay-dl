@@ -10,10 +10,13 @@ from shutil import which
 from requests import codes
 from requests import post
 from requests import Timeout
+from svtplay_dl import __version__
 from svtplay_dl.utils.http import FIREFOX_UA
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.proc import run_program
 from svtplay_dl.utils.stream import subtitle_filter
+
+version = __version__.get_versions()["version"]
 
 
 class postprocess:
@@ -211,14 +214,14 @@ def _sublanguage(stream, config, subfixes):
             fd = open(self, encoding="utf8")
         else:
             fd = open(self)
-        return list(map(parse_block, fd.read().strip().replace("\r", "").split("\n\n")))
+        return list(map(parse_block, fd.read().strip().replace("\r", " ").split("\n\n")))
 
     def query(self):
         _ = parse(self)
-        random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", "")
+        random_sentences = " ".join(sample(_, len(_) if len(_) < 8 else 8)).replace("\r\n", " ")
         url = "https://svtplay-dl.se/langdetect/"
         bits = "64" if sys.maxsize > 2**32 else "32"
-        headers = {"User-Agent": f"{FIREFOX_UA} {platform.machine()} {platform.platform()} {bits}"}
+        headers = {"User-Agent": f"{FIREFOX_UA} {platform.machine()} {platform.platform()} {bits} {version}"}
         try:
             r = post(url, json={"query": random_sentences}, headers=headers, timeout=30)
             if r.status_code == codes.ok:
