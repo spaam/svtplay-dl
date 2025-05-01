@@ -13,8 +13,8 @@ jobs:
           - {name: '3.11', python: '3.11', os: ubuntu-latest, architecture: 'x64', cibuild: "no"}
           - {name: '3.10', python: '3.10', os: ubuntu-latest, architecture: 'x64', cibuild: "no"}
           - {name: '3.9', python: '3.9', os: ubuntu-latest, architecture: 'x64', cibuild: "yes"}
-          - {name: Windows, python: '3.9', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
-          - {name: WindowsX86, python: '3.9', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
+          - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
+          - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -85,8 +85,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: Windows, python: '3.8', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
-          - {name: WindowsX86, python: '3.8', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
+          - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
+          - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
       - uses: actions/checkout@v4
         with:
