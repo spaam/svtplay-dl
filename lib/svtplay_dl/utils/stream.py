@@ -2,7 +2,6 @@ import logging
 import operator
 import re
 from operator import itemgetter
-from typing import List
 
 from svtplay_dl import error
 from svtplay_dl.utils.http import HTTP
@@ -20,7 +19,7 @@ OPERATORS = {
 }
 
 
-def sort_quality(data) -> List:
+def sort_quality(data) -> list:
     data = sorted(data, key=lambda x: (x.bitrate, x.name), reverse=True)
     datas = []
     for i in data:
@@ -36,7 +35,7 @@ def list_quality(videos):
         logging.info("  ".join(f"{str(item).ljust(col_widths[i])}" for i, item in enumerate(row)))
 
 
-def protocol_prio(streams, priolist) -> List:
+def protocol_prio(streams, priolist) -> list:
     """
     Given a list of VideoRetriever objects and a prioritized list of
     accepted protocols (as strings) (highest priority first), return
@@ -53,13 +52,13 @@ def protocol_prio(streams, priolist) -> List:
     return [x[2] for x in sorted(prioritized, key=itemgetter(0, 1), reverse=True)]
 
 
-def format_prio(streams, priolist) -> List:
+def format_prio(streams, priolist) -> list:
     logging.debug("Format priority: %s", str(priolist))
     prioritized = [s for s in streams if s.format in priolist]
     return prioritized
 
 
-def language_prio(config, streams) -> List:
+def language_prio(config, streams) -> list:
     if config.get("audio_language"):
         language = config.get("audio_language")
         prioritized = [s for s in streams if s.language == language]
@@ -68,7 +67,7 @@ def language_prio(config, streams) -> List:
     return prioritized
 
 
-def video_role(config, streams) -> List:
+def video_role(config, streams) -> list:
     if config.get("video_role"):
         role = config.get("video_role")
     else:
@@ -78,7 +77,7 @@ def video_role(config, streams) -> List:
     return prioritized
 
 
-def subtitle_filter(subtitles) -> List:
+def subtitle_filter(subtitles) -> list:
     languages = []
     subs = []
     if not subtitles:
@@ -122,7 +121,7 @@ def subtitle_decider(stream, subtitles):
     return False
 
 
-def resolution(streams, resolutions: List) -> List:
+def resolution(streams, resolutions: list) -> list:
     videos = []
     for stream in streams:
         for resolution in resolutions:

@@ -315,7 +315,6 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Callable
-from typing import Dict
 
 have_tomllib = True
 if sys.version_info >= (3, 11):
@@ -414,8 +413,8 @@ class NotThisMethod(Exception):
 
 
 # these dictionaries contain VCS-specific tools
-LONG_VERSION_PY: Dict[str, str] = {}
-HANDLERS: Dict[str, Dict[str, Callable]] = {}
+LONG_VERSION_PY: dict[str, str] = {}
+HANDLERS: dict[str, dict[str, Callable]] = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
@@ -495,7 +494,7 @@ import os
 import re
 import subprocess
 import sys
-from typing import Callable, Dict
+from typing import Callable
 import functools
 
 
@@ -534,8 +533,8 @@ class NotThisMethod(Exception):
     """Exception raised if a method is not valid for the current scenario."""
 
 
-LONG_VERSION_PY: Dict[str, str] = {}
-HANDLERS: Dict[str, Dict[str, Callable]] = {}
+LONG_VERSION_PY: dict[str, str] = {}
+HANDLERS: Dict[str, dict[str, Callable]] = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
