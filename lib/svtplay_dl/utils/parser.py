@@ -176,6 +176,14 @@ def gen_parser(version="unknown"):
         default=False,
         help="only download video if audio and video is seperated",
     )
+    general.add_argument(
+        "--socket-timeout",
+        dest="socket_timeout",
+        metavar="SECONDS",
+        default=20,
+        type=float,
+        help="Time to wait before giving up in seconds",
+    )
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
@@ -389,6 +397,7 @@ def setup_defaults():
     options.set("token", None)
     options.set("reverse_list", False)
     options.set("chapters", False)
+    options.set("socket_timeout", 20)
     return _special_settings(options)
 
 
@@ -446,6 +455,7 @@ def parsertoconfig(config, parser):
     config.set("token", parser.token)
     config.set("reverse_list", parser.reverse_list)
     config.set("chapters", parser.chapters)
+    config.set("socket_timeout", parser.socket_timeout)
     return _special_settings(config)
 
 
