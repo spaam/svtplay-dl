@@ -23,26 +23,51 @@ class Aftonbladettv(Service):
                     yield ServiceError("Can't find video info")
                     return
         data = json.loads(decode_html_entities(match.group(1)))
-        hdnea = self._login()
-        url = data["streamUrls"]["hls"] + hdnea if hdnea else data["streamUrls"]["hls"]
+        query = self._login()
+        base_url = data["streamUrls"]["hls"]
+        url = base_url + query if query else base_url
         yield from hlsparse(config=self.config, res=self.http.request("get", url), url=url, output=self.output)
 
     def _login(self):
-        if (token := self.config.get("token")) is None:
-            return None
-        if (match := re.search(r"^.*tv.aftonbladet.+video/([a-zA-Z0-9]+).*$", self.url)) is None:
+        token = self.config.get("token")
+        if not token:
             return None
 
-        service = match.group(1)
-        res = self.http.request("get", f"https://svp-token-api.aftonbladet.se/svp/token/{service}?access=plus", headers={"x-sp-id": token})
-        if res.status_code != 200:
+        match = re.search(r"^https://tv\.aftonbladet\.se/video/(\d+)", self.url)
+        if not match:
             return None
-        expires = res.json()["expiry"]
-        hmac = res.json()["value"]
+        video_id = match.group(1)
 
-        res = self.http.request("get", f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={service}&expires={expires}&hmac={hmac}")
+        details_url = f"https://svp.vg.no/svp/api/v1/ab/assets/{video_id}?additional=access&appName=abtv-frontend-production"
+        res = self.http.request("get", details_url)
         if res.status_code != 200:
             return None
+
+        access_info = res.json().get("additional", {}).get("access", {})
+        if not access_info:
+            return None
+
+        access_type = None
+        if access_info.get("login"):
+            access_type = "login"
+        elif access_info.get("plus"):
+            access_type = "plus"
+        else:
+            return None
+
+        token_url = f"https://svp-token-api.aftonbladet.se/svp/token/{video_id}?access={access_type}"
+        res = self.http.request("get", token_url, headers={"x-sp-id": token})
+        if res.status_code != 200:
+            return None
+        auth_data = res.json()
+        expiry = auth_data["expiry"]
+        hmac_token = auth_data["value"]
+
+        hdnea_url = f"https://svp.vg.no/svp/token/v1/?vendor=ab&assetId={video_id}&expires={expiry}&hmac={hmac_token}"
+        res = self.http.request("get", hdnea_url)
+        if res.status_code != 200:
+            return None
+
         return f"?hdnea={res.text.replace('/', '%2F').replace('=', '%3D').replace(',', '%2C')}"
 
 
