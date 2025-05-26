@@ -76,9 +76,9 @@ class Svtplay(Service, MetadataThumbMixin):
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "moreDetails" in data:
+                    if key == "detailsPageByPath" and data and "smartStart" in data:
                         video_data = data
-                        vid = data["video"]["svtId"]
+                        vid = data["smartStart"]["videoSvtId"]
                         break
 
         if not vid:
@@ -286,9 +286,8 @@ class Svtplay(Service, MetadataThumbMixin):
         for data_entry in janson["props"]["urqlState"].values():
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
-
                 for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "heading" in data:
+                    if key == "detailsPageByPath" and data and "smartStart" in data:
                         video_data = data
                         break
 
@@ -297,12 +296,13 @@ class Svtplay(Service, MetadataThumbMixin):
             return videos
         if video_data["item"]["parent"]["__typename"] == "Single":
             videos.append(urljoin("http://www.svtplay.se", video_data["item"]["urls"]["svtplay"]))
-        for i in video_data["associatedContent"]:
+
+        for i in video_data["modules"]:
             if tab:
                 if tab == i["id"]:
                     collections.append(i)
             else:
-                if i["id"] == "upcoming" or i["id"] == "related":
+                if i["id"] == "upcoming" or i["id"] == "related" or i["id"].startswith("details"):
                     continue
                 elif self.config.get("include_clips") and "clips" in i["id"]:
                     collections.append(i)
@@ -310,7 +310,7 @@ class Svtplay(Service, MetadataThumbMixin):
                     collections.append(i)
 
         for i in collections:
-            for epi in i["items"]:
+            for epi in i["selection"]["items"]:
                 if epi["item"]["urls"]["svtplay"] not in videos:
                     videos.append(urljoin("http://www.svtplay.se", epi["item"]["urls"]["svtplay"]))
         return videos
@@ -341,10 +341,16 @@ class Svtplay(Service, MetadataThumbMixin):
     def outputfilename(self, data):
         name = None
         desc = None
+        modulej = None
 
-        name = data["moreDetails"]["heading"]
-        other = data["moreDetails"]["episodeHeading"]
-        vid = hashlib.sha256(data["video"]["svtId"].encode("utf-8")).hexdigest()[:7]
+        for module in data["modules"]:
+            if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
+                modulej = module
+        if modulej is None:
+            return
+        name = modulej["details"]["heading"]
+        other = modulej["details"]["smartStart"]["item"]["videos"][0]["name"]
+        vid = hashlib.sha256(modulej["details"]["smartStart"]["videoSvtId"].encode("utf-8")).hexdigest()[:7]
 
         if name == other:
             other = None
@@ -352,8 +358,7 @@ class Svtplay(Service, MetadataThumbMixin):
             name = other
             other = None
         elif other is None:
-            if name != data["moreDetails"]["titleHeading"]:
-                other = data["moreDetails"]["titleHeading"]
+            pass
 
         season, episode = self.seasoninfo(data)
         if "accessibility" in data:
@@ -388,6 +393,12 @@ class Svtplay(Service, MetadataThumbMixin):
         return season, episode
 
     def _find_season(self, data):
+        modulej = None
+        for module in data["modules"]:
+            if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
+                modulej = module
+        if modulej is None:
+            return
         match = re.search(r"/säsong (\d+)/", data["analytics"]["json"]["viewId"])
         if match:
             return match.group(1)
@@ -396,23 +407,19 @@ class Svtplay(Service, MetadataThumbMixin):
         if match:
             return match.group(1)
 
-        vid = data["video"]["svtId"]
-        for seasons in data["associatedContent"]:
-            for i in seasons["items"]:
-                if i["item"]["videoSvtId"] == vid and "positionInSeason" in i["item"]:
-                    match = re.search(r"S.song (\d+)", i["item"]["positionInSeason"])
-                    if match:
-                        return match.group(1)
-
-        if "productionYearRange" in data["moreDetails"]:
-            return data["moreDetails"]["productionYearRange"]
-
         if "productionYear" in data["moreDetails"]:
             return data["moreDetails"]["productionYear"]
 
         return None
 
     def _find_episode(self, data):
+        modulej = None
+        for module in data["modules"]:
+            if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
+                modulej = module
+        if modulej is None:
+            return
+
         match = re.search(r"/avsnitt (\d+)", data["analytics"]["json"]["viewId"])
         if match:
             return match.group(1)
@@ -420,17 +427,6 @@ class Svtplay(Service, MetadataThumbMixin):
         match = re.search(r"Avsnitt (\d+)", data["item"]["name"])
         if match:
             return match.group(1)
-
-        vid = data["video"]["svtId"]
-        for seasons in data["associatedContent"]:
-            for i in seasons["items"]:
-                if i["item"]["videoSvtId"] == vid:
-                    if "positionInSeason" in i["item"]:
-                        match = re.search(r"Avsnitt (\d+)", i["item"]["positionInSeason"])
-                        if match:
-                            return match.group(1)
-                    if "number" in i["item"]:
-                        return i["item"]["number"]
 
         if "description" in data:
             match = re.search(r"Del (\d+) av (\d+)", data["description"])
@@ -440,6 +436,12 @@ class Svtplay(Service, MetadataThumbMixin):
         return None
 
     def extrametadata(self, episode):
+        modulej = None
+        for module in episode["modules"]:
+            if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
+                modulej = module
+        if modulej is None:
+            return
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode["item"]:
 
@@ -467,7 +469,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 )
             self.output["publishing_datetime"] = int(date)
 
-        self.output["title_nice"] = episode["moreDetails"]["heading"]
+        self.output["title_nice"] = modulej["details"]["heading"]
 
         try:
             t = episode["item"]["parent"]["image"]["wide"]
