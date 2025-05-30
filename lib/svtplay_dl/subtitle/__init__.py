@@ -298,6 +298,8 @@ class subtitle:
         if self.kwargs.get("filter", False):
             self.kwargs["m3u8"] = filter_files(self.kwargs["m3u8"])
 
+        if len(self.kwargs["m3u8"].media_segment) > 100:
+            logging.info("Downloading subtitle. It might take some time.")
         for _, i in enumerate(self.kwargs["m3u8"].media_segment):
             itemurl = get_full_url(i["URI"], self.url)
             cont = self.http.get(itemurl)
