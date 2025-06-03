@@ -280,6 +280,26 @@ class HLS(VideoRetriever):
             self.output["ext"] = "audio.ts"
         else:
             self.output["ext"] = "ts"
+
+        # hack to see if we can access the key and abort early if we dont
+        # we can access the m3u8 files but not the actual key.
+        if m3u8.encrypted:
+            for i in m3u8.media_segment:
+                headers = {}
+                if self.keycookie:
+                    keycookies = self.keycookie
+                else:
+                    keycookies = cookies
+                if self.authorization:
+                    headers["authorization"] = self.authorization
+                if "EXT-X-KEY" in i:
+                    keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
+                    if keyurl and keyurl[:4] == "skd:":
+                        raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
+                    res = self.http.request("get", keyurl, cookies=keycookies, headers=headers)
+                    if not res.ok:
+                        raise HLSException(keyurl, "Can't access the key to decrypt the files. Reasons could be blocked VPN endpoint")
+
         filename = formatname(self.output, self.config)
         file_d = open(filename, "wb")
 
