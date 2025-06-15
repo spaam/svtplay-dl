@@ -76,7 +76,7 @@ class Svtplay(Service, MetadataThumbMixin):
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "smartStart" in data:
+                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"]:
                         video_data = data
                         vid = data["smartStart"]["videoSvtId"]
                         break
