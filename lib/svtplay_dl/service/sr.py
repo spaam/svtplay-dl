@@ -24,7 +24,7 @@ class Sr(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find audio info")
             return
 
-        for what in ["episode", "secondary"]:
+        for what in ["episode", "secondary", "publication"]:
             language = ""
             apiurl = f"https://sverigesradio.se/playerajax/audio?id={aid}&type={what}&publicationid={pubid}&quality=high"
             resp = self.http.request("get", apiurl)
