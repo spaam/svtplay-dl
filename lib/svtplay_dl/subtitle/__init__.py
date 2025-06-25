@@ -27,7 +27,8 @@ def subtitle_probe(config, url, **kwargs):
         http = HTTP(config)
     subdata = http.request("get", url, cookies=kwargs.get("cookies", None))
 
-    # print(f"iMMMMM {url}")
+    if subdata.content[:3] == b"\xef\xbb\xbf":
+        subdata.encoding = subdata.apparent_encoding
     if subdata.text.startswith("WEBVTT"):
         yield subtitle(config, "wrst", url, **kwargs)
     elif subdata.text.startswith("#EXTM3U"):
@@ -55,6 +56,7 @@ class subtitle:
         self.http = HTTP(config)
         self.subfix = kwargs.get("subfix", None)
         self.bom = False
+        self.name = kwargs.pop("name", None)
         self.output = kwargs.pop("output", None)
         self.kwargs = kwargs
 
