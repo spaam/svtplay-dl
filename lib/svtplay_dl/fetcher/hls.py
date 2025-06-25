@@ -112,7 +112,8 @@ def _hlsparse(config, text, url, output, **kwargs):
                             lang = "und"
                         if "CHARACTERISTICS" in i:
                             caption = True
-                        item = [i["URI"], lang, caption]
+                        name = i.get("NAME", None)
+                        item = [i["URI"], lang, caption, name]
                         if item not in subtitles[i["GROUP-ID"]]:
                             subtitles[i["GROUP-ID"]].append(item)
                 continue
@@ -229,6 +230,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                         output=copy.copy(output),
                         subfix=subfix,
                         cookies=cookies,
+                        name=n[3],
                         **kwargs,
                     )
 
