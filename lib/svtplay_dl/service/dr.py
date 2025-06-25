@@ -8,6 +8,7 @@ from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.subtitle import subtitle_probe
 
 
@@ -74,13 +75,14 @@ class Dr(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find any videos")
             return
 
+        entries = []
         for i in offerlist:
             vid, resolution = i
             url = (
                 f"{apiserver}/account/items/{vid}/videos?delivery=stream&device=web_browser&"
                 f"ff=idp%2Cldp&lang=da&resolution={resolution}&sub=Anonymous"
             )
-            res = self.http.request("get", url, headers={"authorization": f"Bearer {token}"})
+            res = self.http.request("get", url, headers={"x-authorization": f"Bearer {token}"})
             if res.status_code > 400:
                 yield ServiceError("Can't find the video or its geoblocked")
                 return
@@ -90,9 +92,31 @@ class Dr(Service, OpenGraphThumbMixin):
                     if res.status_code > 400:
                         yield ServiceError("Can't play this because the video is geoblocked or not available.")
                     else:
-                        yield from hlsparse(self.config, res, video["url"], output=self.output)
+                        hls = hlsparse(self.config, res, video["url"], output=self.output)
+                        entries.append(hls)
                         if len(video["subtitles"]) > 0:
-                            yield from subtitle_probe(copy.copy(self.config), video["subtitles"][0]["link"], output=self.output)
+                            for i in video["subtitles"]:
+                                sub = subtitle_probe(copy.copy(self.config), i["link"], name=i["language"], output=self.output)
+                                entries.append(sub)
+            subs = []
+            for entry in entries:
+                for i in entry:
+                    if isinstance(i, subtitle):
+                        subs.append(i)
+                    else:
+                        yield i
+
+            if subs:
+                if any("Dansk" == y.name for y in subs):
+                    for i in subs:
+                        if i.name == "Dansk":
+                            yield i
+                elif any("CombinedLanguageSubtitles" == y.name for y in subs):
+                    for i in subs:
+                        if i.name == "CombinedLanguageSubtitles":
+                            yield i
+                else:
+                    yield from subs
 
     def find_all_episodes(self, config):
         episodes = []
