@@ -1,4 +1,3 @@
-import codecs
 import copy
 import json
 import re
@@ -14,28 +13,17 @@ class Svt(Svtplay):
     def get(self):
         vid = None
         data = self.get_urldata()
-        match = re.search("urqlState = (.*);", data)
-        if not match:
-            match = re.search(r"stateData = JSON.parse\(\"(.*)\"\)\<\/script", data)
-            if not match:
-                yield ServiceError("Cant find video info.")
-                return
-            janson = json.loads(codecs.escape_decode(match.group(1))[0].decode("utf-8"))
-            if janson["recipe"]["content"]["data"]["videoClips"]:
-                vid = janson["recipe"]["content"]["data"]["videoClips"][0]["id"]
-            else:
-                vid = janson["recipe"]["content"]["data"]["videoEpisodes"][0]["id"]
-            res = self.http.get(f"https://api.svt.se/videoplayer-api/video/{vid}")
-        else:
-            janson = json.loads(match.group(1))
-            for key in list(janson.keys()):
-                janson2 = json.loads(janson[key]["data"])
-                if "page" in janson2 and "topMedia" in janson2["page"]:
-                    vid = janson2["page"]["topMedia"]["svtId"]
-            if not vid:
-                yield ServiceError("Can't find any videos")
-                return
-            res = self.http.get(f"https://api.svt.se/video/{vid}")
+        match = re.search("urqlState: ({.*})", data)
+
+        janson = json.loads(match.group(1))
+        for key in list(janson.keys()):
+            janson2 = json.loads(janson[key]["data"])
+            if "page" in janson2 and "topMedia" in janson2["page"]:
+                vid = janson2["page"]["topMedia"]["svtId"]
+        if not vid:
+            yield ServiceError("Can't find any videos")
+            return
+        res = self.http.get(f"https://api.svt.se/video/{vid}")
 
         janson = res.json()
         if "subtitleReferences" in janson:
