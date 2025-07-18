@@ -438,6 +438,11 @@ class Svtplay(Service, MetadataThumbMixin):
             if match:
                 return match.group(1)
 
+        if "details" in modulej and "subHeading" in modulej["details"]:
+            match = re.search(r"^(\d+)\. ", modulej["details"]["subHeading"])
+            if match:
+                return match.group(1)
+
         return None
 
     def extrametadata(self, episode):
