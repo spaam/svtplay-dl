@@ -133,7 +133,7 @@ class Svtplay(Service, MetadataThumbMixin):
             for videorfc in janson["videoReferences"]:
                 params = {}
                 special = False
-                video_resolv_url = self.http.get(videorfc["resolve"]).json()["location"]
+                video_resolv_url = pl_url = self.http.get(videorfc["resolve"]).json()["location"]
                 params["manifestUrl"] = quote_plus(video_resolv_url)
                 format = videorfc["format"]
                 if "audioDescribed" in janson["variants"] and janson["variants"]["audioDescribed"]:
@@ -150,9 +150,7 @@ class Svtplay(Service, MetadataThumbMixin):
                             params["manifestUrlSignLanguage"] = audio_resolv_url
                 if special:
                     params = _dict_to_flatstr(params)
-                    pl_url = f"https://api.svt.se/ditto/api/v1/web?{params}"
-                else:
-                    pl_url = videorfc["url"]
+                    pl_url = f"https://api.svt.se/ditto/api/v3/manifest?platform=macOS&{params}"
 
                 if "hls-ts-full" == format:
                     continue
