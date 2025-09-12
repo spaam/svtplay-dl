@@ -29,7 +29,11 @@ class Nrk(Service, OpenGraphThumbMixin):
             self.video_id = self.janson["initialState"]["program"]["prfId"]
 
         dataurl = f"https://psapi.nrk.no/playback/manifest/program/{self.video_id}?eea-portability=true"
-        janson = self.http.request("get", dataurl).json()
+        janson = self.http.request(
+            "get",
+            dataurl,
+            headers={"Accept": "application/vnd.nrk.psapi+json; version=9; player=tv-player; device=player-core"},
+        ).json()
 
         if janson["playable"]:
             if janson["playable"]["assets"][0]["format"] == "HLS":
