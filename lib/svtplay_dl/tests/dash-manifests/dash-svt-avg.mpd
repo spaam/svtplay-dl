@@ -1,0 +1,62 @@
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="static" mediaPresentationDuration="PT57M21.360107S" minBufferTime="PT2S">
+  <Period id="0">
+    <AdaptationSet id="0" contentType="video" segmentAlignment="true" frameRate="25" scanType="progressive" par="16:9" maxWidth="1920" maxHeight="1080">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <Label>Original</Label>
+      <Representation id="0" bandwidth="4449996" width="1920" height="1080" codecs="hvc1.2.4.L123.90" sar="1:1" mimeType="video/mp4">
+        <SupplementalProperty schemeIdUri="urn:se:svt:average-bitrate:2024" value="2395038"/>
+        <SegmentTemplate initialization="cmaf-video-hevc-1920x1080p25-2395/cmaf-video-hevc-1920x1080p25-2395-init.mp4" media="cmaf-video-hevc-1920x1080p25-2395/cmaf-video-hevc-1920x1080p25-2395-$Number$.mp4" startNumber="1" timescale="12800">
+          <SegmentTimeline>
+            <S t="0" d="49152" r="895"/>
+            <S t="44040192" d="9216"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="1" bandwidth="2444680" width="1280" height="720" codecs="hvc1.2.4.L123.90" sar="1:1" mimeType="video/mp4">
+        <SupplementalProperty schemeIdUri="urn:se:svt:average-bitrate:2024" value="1302083"/>
+        <SegmentTemplate initialization="cmaf-video-hevc-1280x720p25-1302/cmaf-video-hevc-1280x720p25-1302-init.mp4" media="cmaf-video-hevc-1280x720p25-1302/cmaf-video-hevc-1280x720p25-1302-$Number$.mp4" startNumber="1" timescale="12800">
+          <SegmentTimeline>
+            <S t="0" d="49152" r="895"/>
+            <S t="44040192" d="9216"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="2" contentType="audio" startWithSAP="1" lang="sv">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <Label>Svenska</Label>
+      <Representation id="10" bandwidth="196003" codecs="mp4a.40.2" audioSamplingRate="48000" mimeType="audio/mp4">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SupplementalProperty schemeIdUri="urn:se:svt:average-bitrate:2024" value="192000"/>
+        <SegmentTemplate initialization="cmaf-audio-sv-lc-aac-2ch-192/cmaf-audio-sv-lc-aac-2ch-192-init.mp4" media="cmaf-audio-sv-lc-aac-2ch-192/cmaf-audio-sv-lc-aac-2ch-192-$Number$.mp4" startNumber="1" timescale="48000">
+          <SegmentTimeline>
+            <S t="0" d="184320" r="895"/>
+            <S t="165150720" d="34560"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="11" bandwidth="66867" codecs="mp4a.40.5" audioSamplingRate="48000" mimeType="audio/mp4">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SupplementalProperty schemeIdUri="urn:se:svt:average-bitrate:2024" value="64000"/>
+        <SegmentTemplate initialization="cmaf-audio-sv-he-aac-2ch-64/cmaf-audio-sv-he-aac-2ch-64-init.mp4" media="cmaf-audio-sv-he-aac-2ch-64/cmaf-audio-sv-he-aac-2ch-64-$Number$.mp4" startNumber="1" timescale="48000">
+          <SegmentTimeline>
+            <S t="0" d="185406"/>
+            <S t="185406" d="184320" r="894"/>
+            <S t="165151806" d="33474"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="12" bandwidth="34354" codecs="mp4a.40.29" audioSamplingRate="48000" mimeType="audio/mp4">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SupplementalProperty schemeIdUri="urn:se:svt:average-bitrate:2024" value="32000"/>
+        <SegmentTemplate initialization="cmaf-audio-sv-hev2-aac-2ch-32/cmaf-audio-sv-hev2-aac-2ch-32-init.mp4" media="cmaf-audio-sv-hev2-aac-2ch-32/cmaf-audio-sv-hev2-aac-2ch-32-$Number$.mp4" startNumber="1" timescale="48000">
+          <SegmentTimeline>
+            <S t="0" d="185406"/>
+            <S t="185406" d="184320" r="894"/>
+            <S t="165151806" d="33474"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

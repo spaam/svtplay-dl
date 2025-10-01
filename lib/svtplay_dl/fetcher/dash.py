@@ -156,8 +156,14 @@ def adaptionset(attributes, elements, url, baseurl=None):
             segments = False
             filename = dirname
             mimetype = None
-            attributes.set("bandwidth", i.attrib["bandwidth"])
-            bitrate = int(i.attrib["bandwidth"]) / 1000
+            bitrate = i.attrib["bandwidth"]
+            avgbits = i.findall("{urn:mpeg:dash:schema:mpd:2011}SupplementalProperty[@schemeIdUri='urn:se:svt:average-bitrate:2024']")
+            if avgbits:
+                for avgbit in avgbits:
+                    bitrate = avgbit.attrib["value"]
+
+            attributes.set("bandwidth", bitrate)
+            bitrate = int(bitrate) / 1000
             if "mimeType" in element.attrib:
                 mimetype = element.attrib["mimeType"]
             idnumber = i.attrib["id"]

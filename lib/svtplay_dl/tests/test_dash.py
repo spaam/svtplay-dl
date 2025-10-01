@@ -53,6 +53,11 @@ def test_parse_live2():
     assert data[2892.0].segments
 
 
+def test_parse_svt_avg_bitrate():
+    data = parse("dash-svt-avg.mpd")
+    assert list(data.keys()) == [2587, 2459, 2427, 1494, 1366, 1334]
+
+
 def test_parse_live_vod():
     with requests_mock.Mocker() as mock_request:
         mock_request.get("http://localhost", text="Hello!")
