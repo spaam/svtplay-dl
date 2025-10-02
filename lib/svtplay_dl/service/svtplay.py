@@ -154,6 +154,8 @@ class Svtplay(Service, MetadataThumbMixin):
 
                 if "hls-ts-full" == format:
                     continue
+                if format.startswith("dash-hbbtv"):
+                    continue
                 if pl_url.find(".m3u8") > 0:
                     hls = hlsparse(self.config, self.http.request("get", pl_url), pl_url, output=self.output)
                     entries.append(hls)
