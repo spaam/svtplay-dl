@@ -164,7 +164,7 @@ class Dr(Service, OpenGraphThumbMixin):
 
     def _get_episodes(self, page):
         episodes = []
-        if "episodes" in page["item"]:
+        if "item" in page and "episodes" in page["item"]:
             entries = page["item"]["episodes"]["items"]
             for i in entries:
                 episodes.append(f'https://www.dr.dk/drtv{i["watchPath"]}')
