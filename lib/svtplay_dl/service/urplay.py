@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+from datetime import datetime
 from html import unescape
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -28,8 +29,8 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = unescape(match.group(1))
         jsondata = json.loads(data)
 
-        vid = jsondata["props"]["pageProps"]["program"]["id"]
-        jsondata = jsondata["props"]["pageProps"]["program"]
+        vid = jsondata["props"]["pageProps"]["productData"]["id"]
+        jsondata = jsondata["props"]["pageProps"]["productData"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
         if res.status_code == 403:
@@ -57,23 +58,17 @@ class Urplay(Service, OpenGraphThumbMixin):
             return episodes
 
         jsondata = json.loads(match.group(1))
-        seasons = jsondata["props"]["pageProps"]["superSeriesSeasons"]
+        seasons = jsondata["props"]["pageProps"]["productData"]["seasonLabels"]
         build = jsondata["buildId"]
 
         parse = urlparse(self.url)
         url = f"https://{parse.netloc}{parse.path}"
         episodes.append(url)
-        if seasons:
-            for season in seasons:
-                res = self.http.get(
-                    f'https://urplay.se/_next/data/{build}{season["link"]}.json?productType={jsondata["query"]["productType"]}&id={jsondata["props"]["pageProps"]["program"]["seriesId"]}',
-                )
-                for episode in res.json()["pageProps"]["program"]["series"]["programs"]:
-                    url = urljoin("https://urplay.se", episode["link"])
-                    if url not in episodes:
-                        episodes.append(url)
-        else:
-            for episode in jsondata["props"]["pageProps"]["accessibleEpisodes"]:
+        for season in seasons:
+            res = self.http.get(
+                f'https://urplay.se/_next/data/{build}{season["link"]}.json?productType={jsondata["query"]["productType"]}&id={jsondata["props"]["pageProps"]["productData"]["id"]}',
+            )
+            for episode in res.json()["pageProps"]["productData"]["programs"]:
                 url = urljoin("https://urplay.se", episode["link"])
                 if url not in episodes:
                     episodes.append(url)
@@ -100,12 +95,17 @@ class Urplay(Service, OpenGraphThumbMixin):
                 self.output["episodename"] = data["title"]
         if "id" in data and data["id"]:
             self.output["id"] = str(data["id"])
+        if "description" in data:
+            self.output["episodedescription"] = data["description"]
+        if "publishedAt" in data:
+            self.output["publishing_datetime"] = datetime.fromisoformat(data["publishedAt"]).timestamp()
 
         self.output["episodethumbnailurl"] = data["image"]["1280x720"]
 
-        seasonmatch = re.search(r"data-testid=\"season-name-label\">S.song (\d+)...<\/span", urldata)
-        if seasonmatch:
-            self.output["season"] = seasonmatch.group(1)
+        if "seriesLabel" in data:
+            seasonmatch = re.search(r"S.song (\d+)", data["seriesLabel"])
+            if seasonmatch:
+                self.output["season"] = seasonmatch.group(1)
         else:
             self.output["season"] = "1"  # No season info - probably show without seasons
 
