@@ -152,7 +152,7 @@ def formatname(output, config):
             tvshow = output.get("tvshow", False)
         if config.get("subfolder") and "title" in output and tvshow:
             # Add subfolder with name title
-            subfolder = sanitize(pathlib.Path(output["title"]))
+            subfolder = sanitize(pathlib.Path(filenamify(output["title"])))
         elif config.get("subfolder") and not tvshow:
             # Add subfolder with name movies
             subfolder = pathlib.Path("movies")
