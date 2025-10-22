@@ -19,7 +19,6 @@ from svtplay_dl.service import MetadataThumbMixin
 from svtplay_dl.service import Service
 from svtplay_dl.subtitle import subtitle
 from svtplay_dl.subtitle import subtitle_probe
-from svtplay_dl.utils.text import filenamify
 
 URL_VIDEO_API = "https://api.svt.se/video/"
 LIVE_CHANNELS = {
@@ -377,7 +376,7 @@ class Svtplay(Service, MetadataThumbMixin):
         elif desc:
             other += f"-{desc}"
 
-        self.output["title"] = filenamify(name)
+        self.output["title"] = name
         self.output["id"] = vid
         self.output["season"] = season
         self.output["episode"] = episode
