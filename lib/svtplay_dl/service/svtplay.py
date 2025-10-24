@@ -132,20 +132,30 @@ class Svtplay(Service, MetadataThumbMixin):
             for videorfc in janson["videoReferences"]:
                 params = {}
                 special = False
-                video_resolv_url = pl_url = self.http.get(videorfc["resolve"]).json()["location"]
+                if videorfc["resolve"]:
+                    plurl = self.http.get(videorfc["resolve"]).json()["location"]
+                else:
+                    plurl = videorfc["url"]
+                video_resolv_url = pl_url = plurl
                 params["manifestUrl"] = quote_plus(video_resolv_url)
                 format = videorfc["format"]
                 if "audioDescribed" in janson["variants"] and janson["variants"]["audioDescribed"]:
                     for audiodesc in janson["variants"]["audioDescribed"]["videoReferences"]:
                         if audiodesc["format"] == format:
                             special = True
-                            audio_resolv_url = self.http.get(audiodesc["resolve"]).json()["location"]
+                            if audiodesc["resolve"]:
+                                audio_resolv_url = self.http.get(audiodesc["resolve"]).json()["location"]
+                            else:
+                                audio_resolv_url = audiodesc["url"]
                             params["manifestUrlAudioDescription"] = audio_resolv_url
                 if "signInterpreted" in janson["variants"] and janson["variants"]["signInterpreted"]:
                     for signinter in janson["variants"]["signInterpreted"]["videoReferences"]:
                         if signinter["format"] == format:
                             special = True
-                            audio_resolv_url = self.http.get(signinter["resolve"]).json()["location"]
+                            if signinter["resolve"]:
+                                audio_resolv_url = self.http.get(signinter["resolve"]).json()["location"]
+                            else:
+                                audio_resolv_url = signinter["url"]
                             params["manifestUrlSignLanguage"] = audio_resolv_url
                 if special:
                     params = _dict_to_flatstr(params)
@@ -172,7 +182,10 @@ class Svtplay(Service, MetadataThumbMixin):
                     if "hls-ts-full" == i["format"]:
                         continue
                     if i["url"].find(".m3u8") > 0:
-                        rdr_resp_url = self.http.get(i["resolve"]).json()["location"]
+                        if i["resolve"]:
+                            rdr_resp_url = self.http.get(i["resolve"]).json()["location"]
+                        else:
+                            rdr_resp_url = i["url"]
                         hls = hlsparse(self.config, self.http.request("get", rdr_resp_url), rdr_resp_url, output=self.output)
                         entries.append(hls)
 
