@@ -112,12 +112,13 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         self.output["episodethumbnailurl"] = data["image"]["1280x720"]
 
-        if "seriesLabel" in data:
+        if "seriesLabel" in data and data["seriesLabel"]:
             seasonmatch = re.search(r"S.song (\d+)", data["seriesLabel"])
             if seasonmatch:
                 self.output["season"] = seasonmatch.group(1)
         else:
-            self.output["season"] = "1"  # No season info - probably show without seasons
+            if self.output["episode"]:
+                self.output["season"] = "1"  # No season info - probably show without seasons
 
     def get_thumbnail(self, options):
         download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
