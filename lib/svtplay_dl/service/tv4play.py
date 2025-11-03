@@ -100,8 +100,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             return None
         res = self.http.request(
             "post",
-            "https://avod-auth-alb.a2d.tv/oauth/refresh",
-            json={"client_id": "tv4-web", "refresh_token": self.config.get("token")},
+            "https://auth.tv4.a2d.tv/v2/auth/token",
+            json={"grant_type": "refresh_token", "refresh_token": self.config.get("token"), "profile_id": "default", "is_child": False},
+            headers={"client-name": "tv4-web"},
         )
         if res.status_code > 400:
             return None
