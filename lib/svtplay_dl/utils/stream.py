@@ -170,7 +170,9 @@ def select_quality(config, streams):
 
     streams = video_role(config, streams)
     if not streams:
-        raise error.UIException(f"Can't find any streams with that video role {config.get('video_role')}")
+        raise error.UIException(
+            f"Can't find any streams with that video role '{config.get('video_role')}' and format(s) '{config.get('format_preferred')}'",
+        )
 
     streams = language_prio(config, streams)
     if not streams:
