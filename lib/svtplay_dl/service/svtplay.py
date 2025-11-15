@@ -196,7 +196,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 else:
                     yield i
 
-        if check_exists(["sv", "sv-caption"], subs):
+        if not self.config.get("get_all_subtitles") and check_exists(["sv", "sv-caption"], subs):
             for i in subs:
                 if i.subfix == "sv-caption":
                     i.subfix = "sv"
