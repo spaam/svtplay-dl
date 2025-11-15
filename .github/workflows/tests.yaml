@@ -17,8 +17,8 @@ jobs:
           - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
           - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.architecture }}
@@ -51,10 +51,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.9'
           cache: 'pip'
@@ -89,10 +89,10 @@ jobs:
           - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
           - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.architecture }}
@@ -131,10 +131,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.9
           cache: 'pip'
