@@ -38,18 +38,14 @@ class Dr(Service, OpenGraphThumbMixin):
         apiserver = apimatch.group(1)
         janson = json.loads(match.group(1))
         page = janson["cache"]["page"][list(janson["cache"]["page"].keys())[0]]
-        resolution = None
         vid = None
 
         if page["key"] != "Watch":
             yield ServiceError("Wrong url, need to be video url")
             return
-        if "item" in page["entries"][0]:
-            offers = page["entries"][0]["item"]["offers"]
-        elif "item" in page:
-            offers = page["item"]["offers"]
+        vid = page["entries"][0]["item"]["id"]
 
-        self.output["id"] = page["entries"][0]["item"]["id"]
+        self.output["id"] = vid
         if "season" in page["entries"][0]["item"]:
             self.output["title"] = page["entries"][0]["item"]["season"]["title"]
             self.output["season"] = page["entries"][0]["item"]["season"]["seasonNumber"]
@@ -57,11 +53,6 @@ class Dr(Service, OpenGraphThumbMixin):
             self.output["episodename"] = page["entries"][0]["item"]["contextualTitle"]
         elif "title" in page["entries"][0]["item"]:
             self.output["title"] = page["entries"][0]["item"]["title"]
-
-        offerlist = []
-        for i in offers:
-            if i["deliveryType"] == "StreamOrDownload":
-                offerlist.append([i["scopes"][0], i["resolution"]])
 
         deviceid = uuid.uuid1()
         res = self.http.request(
@@ -71,50 +62,41 @@ class Dr(Service, OpenGraphThumbMixin):
         )
         token = res.json()[0]["value"]
 
-        if len(offerlist) == 0:
-            yield ServiceError("Can't find any videos")
-            return
-
         entries = []
-        for i in offerlist:
-            vid, resolution = i
-            url = (
-                f"{apiserver}/account/items/{vid}/videos?delivery=stream&device=web_browser&"
-                f"ff=idp%2Cldp&lang=da&resolution={resolution}&sub=Anonymous"
-            )
-            res = self.http.request("get", url, headers={"x-authorization": f"Bearer {token}"})
-            if res.status_code > 400:
-                yield ServiceError("Can't find the video or its geoblocked")
-                return
-            for video in res.json():
-                if video["accessService"] == "StandardVideo" and video["format"] == "video/hls":
-                    res = self.http.request("get", video["url"])
-                    if res.status_code > 400:
-                        yield ServiceError("Can't play this because the video is geoblocked or not available.")
-                    else:
-                        hls = hlsparse(self.config, res, video["url"], output=self.output)
-                        entries.append(hls)
-                        if len(video["subtitles"]) > 0:
-                            for i in video["subtitles"]:
-                                sub = subtitle_probe(copy.copy(self.config), i["link"], name=i["language"], output=self.output)
-                                entries.append(sub)
-            subs = []
-            for entry in entries:
-                for i in entry:
-                    if isinstance(i, subtitle):
-                        subs.append(i)
-                    else:
-                        yield i
+        url = f"{apiserver}/account/items/{vid}/videos?delivery=stream&device=web_browser&" f"ff=idp%2Cldp&lang=da&resolution=HD-1080&sub=Anonymous"
+        res = self.http.request("get", url, headers={"x-authorization": f"Bearer {token}"})
+        if res.status_code > 400:
+            yield ServiceError("Can't find the video or its geoblocked")
+            return
+        for video in res.json():
+            if video["accessService"] == "StandardVideo" and video["format"] == "video/hls":
+                res = self.http.request("get", video["url"])
+                if res.status_code > 400:
+                    yield ServiceError("Can't play this because the video is geoblocked or not available.")
+                else:
+                    hls = hlsparse(self.config, res, video["url"], output=self.output)
+                    entries.append(hls)
+                    if len(video["subtitles"]) > 0:
+                        for i in video["subtitles"]:
+                            sub = subtitle_probe(copy.copy(self.config), i["link"], name=i["language"], output=self.output)
+                            entries.append(sub)
+        subs = []
+        for entry in entries:
+            for i in entry:
+                if isinstance(i, subtitle):
+                    subs.append(i)
+                else:
+                    yield i
 
-            if subs:
-                if any("Dansk" == y.name for y in subs):
-                    for i in subs:
-                        if i.name == "Dansk":
-                            yield i
-                elif any("CombinedLanguageSubtitles" == y.name for y in subs):
-                    for i in subs:
-                        if i.name == "CombinedLanguageSubtitles":
-                            yield i
+        if subs:
+            if any("Dansk" == y.name for y in subs):
+                for i in subs:
+                    if i.name == "Dansk":
+                        yield i
+            elif any("CombinedLanguageSubtitles" == y.name for y in subs):
+                for i in subs:
+                    if i.name == "CombinedLanguageSubtitles":
+                        yield i
                 else:
                     yield from subs
 
