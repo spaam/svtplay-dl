@@ -75,16 +75,17 @@ class Svtplay(Service, MetadataThumbMixin):
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"]:
-                        video_data = data
-                        vid = data["smartStart"]["videoSvtId"]
-                        break
+                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"] and "item" in data and data["item"]:
+                        if "svtId" in data["item"] and data["item"]["svtId"]:
+                            video_data = data
+                            vid = data["item"]["svtId"]
+                            break
 
         if not vid:
             yield ServiceError("Can't find video id")
             return
 
-        self.outputfilename(video_data)
+        self.outputfilename(video_data, vid)
         self.extrametadata(video_data)
         self.chaptersdata(video_data)
 
@@ -355,7 +356,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 return episodes[: config.get("all_last")]
         return episodes
 
-    def outputfilename(self, data):
+    def outputfilename(self, data, vid):
         name = None
         desc = None
         modulej = None
@@ -366,8 +367,11 @@ class Svtplay(Service, MetadataThumbMixin):
         if modulej is None:
             return
         name = modulej["details"]["heading"]
-        other = modulej["details"]["smartStart"]["item"]["videos"][0]["name"]
-        vid = hashlib.sha256(modulej["details"]["smartStart"]["videoSvtId"].encode("utf-8")).hexdigest()[:7]
+        for i in modulej["details"]["smartStart"]["item"]["videos"]:
+            if vid in i["urls"]["svtplay"]:
+                other = i["name"]
+        # other = modulej["details"]["smartStart"]["item"]["videos"][0]["name"]
+        vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
             other = None
