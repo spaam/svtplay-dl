@@ -55,7 +55,8 @@ class Nrk(Service, OpenGraphThumbMixin):
         for season in self.janson["initialState"]["seasons"]:
             for episode in season["episodes"]:
                 if self.video_id == episode["prfId"]:
-                    self.output["season"] = episode["season"]["id"]
+                    if episode["season"]["id"] and episode["season"]["id"].isnumeric():
+                        self.output["season"] = episode["season"]["id"]
                     if "sequenceNumber" in episode:
                         self.output["episode"] = episode["sequenceNumber"]
                     self.output["episodename"] = episode["title"]
