@@ -104,7 +104,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             json={"grant_type": "refresh_token", "refresh_token": self.config.get("token"), "profile_id": "default", "is_child": False},
             headers={"client-name": "tv4-web"},
         )
-        if res.status_code > 400:
+        if res.status_code >= 400:
             return None
         return res.json()["access_token"]
 
