@@ -30,7 +30,7 @@ class Urplay(Service, OpenGraphThumbMixin):
         data = unescape(match.group(1))
         jsondata = json.loads(data)
         if "/serie/" in parse.path:
-            jsondata = jsondata["props"]["pageProps"]["productData"]["uraccessPrograms"][0]
+            jsondata = jsondata["props"]["pageProps"]["productData"]["mainProgram"]
             vid_url = f"https://urplay.se/{jsondata['link']}"
             vid_data = self.http.get(vid_url).text
             match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", vid_data)
