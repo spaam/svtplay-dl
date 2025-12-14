@@ -75,11 +75,10 @@ class Svtplay(Service, MetadataThumbMixin):
             if "data" in data_entry:
                 entry = json.loads(data_entry["data"])
                 for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"] and "item" in data and data["item"]:
-                        if "svtId" in data["item"] and data["item"]["svtId"]:
-                            video_data = data
-                            vid = data["item"]["svtId"]
-                            break
+                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"]:
+                        video_data = data
+                        vid = data["smartStart"]["videoSvtId"]
+                        break
 
         if not vid:
             yield ServiceError("Can't find video id")
@@ -360,6 +359,7 @@ class Svtplay(Service, MetadataThumbMixin):
         name = None
         desc = None
         modulej = None
+        other = None
 
         for module in data["modules"]:
             if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
@@ -368,9 +368,8 @@ class Svtplay(Service, MetadataThumbMixin):
             return
         name = modulej["details"]["heading"]
         for i in modulej["details"]["smartStart"]["item"]["videos"]:
-            if vid in i["urls"]["svtplay"]:
+            if vid == i["svtId"]:
                 other = i["name"]
-        # other = modulej["details"]["smartStart"]["item"]["videos"][0]["name"]
         vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
