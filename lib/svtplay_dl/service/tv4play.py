@@ -12,6 +12,7 @@ from svtplay_dl.fetcher.dash import dashparse
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
+from svtplay_dl.subtitle import subtitle
 from svtplay_dl.utils.http import download_thumbnails
 
 
@@ -75,21 +76,40 @@ class Tv4play(Service, OpenGraphThumbMixin):
             yield ServiceError("Cant find video id for the video")
             return
 
+        entries = []
+        subs = []
         if jansson["playbackItem"]["type"] == "hls":
-            yield from hlsparse(
+            hls = hlsparse(
                 self.config,
                 self.http.request("get", jansson["playbackItem"]["manifestUrl"]),
                 jansson["playbackItem"]["manifestUrl"],
                 output=self.output,
                 httpobject=self.http,
             )
-            yield from dashparse(
+            entries.append(hls)
+            mpd = dashparse(
                 self.config,
                 self.http.request("get", jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd")),
                 jansson["playbackItem"]["manifestUrl"].replace(".m3u8", ".mpd"),
                 output=self.output,
                 httpobject=self.http,
             )
+            entries.append(mpd)
+
+        for entry in entries:
+            for i in entry:
+                if isinstance(i, subtitle):
+                    subs.append(i)
+                else:
+                    yield i
+
+        if not self.config.get("get_all_subtitles"):
+            for i in subs:
+                if i.subfix == "sv":
+                    yield i
+        else:
+            for i in subs:
+                yield i
 
     def _getjson(self, data):
         match = re.search(r"application\/json\">(.*\})<\/script>", data)
