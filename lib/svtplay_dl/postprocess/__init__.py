@@ -1,11 +1,25 @@
+import importlib.metadata
 import logging
 import os
 import pathlib
 import platform
 import re
 import sys
+from importlib.abc import MetaPathFinder
 from random import sample
 from shutil import which
+
+
+# see utils/http.py
+class BlockZstandard(MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "zstandard" or fullname.startswith("zstandard."):
+            if importlib.metadata.version(fullname) == "0.22.0":
+                raise ModuleNotFoundError(f"Blocked import of {fullname}")
+        return None
+
+
+sys.meta_path.insert(0, BlockZstandard())
 
 from requests import codes
 from requests import post

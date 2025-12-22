@@ -1,3 +1,23 @@
+import importlib.metadata
+import sys
+from importlib.abc import MetaPathFinder
+
+
+# zstandard is broken with requests/urllib3 on ubuntu 24.04 for some reason
+# blocking the import so it wont work at all
+# see  svtplay-dl/issues/1729 and
+# https://bugs.launchpad.net/ubuntu/+source/python-urllib3/+bug/2136906
+class BlockZstandard(MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "zstandard" or fullname.startswith("zstandard."):
+            if importlib.metadata.version(fullname) == "0.22.0":
+                raise ModuleNotFoundError(f"Blocked import of {fullname}")
+        return None
+
+
+sys.meta_path.insert(0, BlockZstandard())
+
+
 import http.client
 import logging
 import re
