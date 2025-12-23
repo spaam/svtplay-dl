@@ -361,12 +361,15 @@ class Svtplay(Service, MetadataThumbMixin):
         modulej = None
         other = None
 
+        name = data["item"]["parent"]["name"]
         for module in data["modules"]:
             if "analytics" in module and module["analytics"]["json"]["moduleType"] == "Details":
                 modulej = module
         if modulej is None:
             return
-        name = modulej["details"]["heading"]
+
+        if name is None:
+            name = modulej["details"]["heading"]
         for i in modulej["details"]["smartStart"]["item"]["videos"]:
             if vid == i["svtId"]:
                 other = i["name"]
@@ -494,7 +497,7 @@ class Svtplay(Service, MetadataThumbMixin):
                 )
             self.output["publishing_datetime"] = int(date)
 
-        self.output["title_nice"] = modulej["details"]["heading"]
+        self.output["title_nice"] = episode["item"]["parent"]["name"]
 
         try:
             t = episode["item"]["parent"]["image"]["wide"]
