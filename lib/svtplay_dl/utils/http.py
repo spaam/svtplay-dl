@@ -47,7 +47,7 @@ class HTTP(Session):
         self.mount("https://", adapter)
         self.verify = config.get("ssl_verify")
         self.proxy = config.get("proxy")
-        self.timeout = config.get("timeout")
+        self.socket_timeout = config.get("socket_timeout")
         if config.get("http_headers"):
             self.headers.update(self.split_header(config.get("http_headers")))
         if config.get("cookies"):
@@ -66,7 +66,7 @@ class HTTP(Session):
             if "Range" in self.headers:  # for some reason headers is always there for each request
                 del self.headers["Range"]  # need to remove it because we dont want it
         logging.debug("HTTP getting %r", url)
-        res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, timeout=self.timeout, *args, **kwargs)
+        res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, timeout=self.socket_timeout, *args, **kwargs)
         return res
 
     def split_header(self, headers):
