@@ -294,7 +294,11 @@ class HLS(VideoRetriever):
                 if self.authorization:
                     headers["authorization"] = self.authorization
                 if "EXT-X-KEY" in i:
-                    keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
+                    if "EXT-X-KEY" in i and i["EXT-X-KEY"]["METHOD"] == "AES-128":
+                        keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
+                    elif "EXT-X-KEY" in i and i["EXT-X-KEY"]["METHOD"] == "SAMPLE-AES":
+                        keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
+                        raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
                     if keyurl and keyurl[:4] == "skd:":
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
                     res = self.http.request("get", keyurl, cookies=keycookies, headers=headers)
@@ -348,12 +352,14 @@ class HLS(VideoRetriever):
                     headers["authorization"] = self.authorization
 
                 # Update key/decryptor
-                if "EXT-X-KEY" in i:
+                if "EXT-X-KEY" in i and i["EXT-X-KEY"]["METHOD"] == "AES-128":
                     keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
                     if keyurl and keyurl[:4] == "skd:":
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
                     key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
                     key_iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else None
+                elif "EXT-X-KEY" in i and i["EXT-X-KEY"]["METHOD"] == "SAMPLE-AES":
+                    raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
 
                 if key:
                     iv = key_iv if key_iv else struct.pack(">8xq", index)
