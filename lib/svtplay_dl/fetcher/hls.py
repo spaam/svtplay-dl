@@ -301,6 +301,7 @@ class HLS(VideoRetriever):
                     res = self.http.request("get", keyurl, cookies=keycookies, headers=headers)
                     if not res.ok:
                         raise HLSException(keyurl, "Can't access the key to decrypt the files. Reasons could be blocked VPN endpoint")
+                    break
 
         filename = formatname(self.output, self.config)
         file_d = open(filename, "wb")
