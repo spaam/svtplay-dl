@@ -17,7 +17,6 @@ from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.fetcher.m3u8 import M3U8
 from svtplay_dl.subtitle import subtitle_probe
-from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import formatname
@@ -307,8 +306,6 @@ class HLS(VideoRetriever):
         file_d = open(filename, "wb")
 
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
-        if self.kwargs.get("filter", False):
-            m3u8 = filter_files(m3u8)
         decryptor = None
         size_media = len(m3u8.media_segment)
         eta = ETA(size_media)
@@ -318,6 +315,8 @@ class HLS(VideoRetriever):
         key = None
         key_iv = None
         for index, i in enumerate(m3u8.media_segment):
+            if "EXT-X-DISCONTINUITY" in i:
+                continue
             if "EXTINF" in i and "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
                 max_duration = max(max_duration, duration)
