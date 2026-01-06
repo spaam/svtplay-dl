@@ -70,6 +70,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
         if item["episodeNumber"] and item["episodeNumber"] > 0:
             self.output["episode"] = item["episodeNumber"]
         self.output["title"] = item["seriesTitle"]
+        self.output["title_nice"] = item["seriesTitle"]
         self.output["episodename"] = item["title"]
         self.output["id"] = str(vid)
         self.output["episodethumbnailurl"] = item["image"]
