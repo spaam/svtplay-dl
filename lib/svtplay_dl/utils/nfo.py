@@ -12,6 +12,7 @@ from svtplay_dl.utils.output import formatname
 def write_nfo_episode(output, config):
     if not output["title_nice"]:
         # If we don't even have the title, skip the NFO
+        logging.warning("NFO episode file generation is not supported for this service")
         return
 
     root = ET.Element("episodedetails")
@@ -45,6 +46,7 @@ def write_nfo_tvshow(output, config):
     # Config for tvshow nfo file
     if not output["title_nice"]:
         # If we don't even have the title, skip the NFO
+        logging.warning("NFO TV show file generation is not supported for this service")
         return
     root = ET.Element("tvshow")
     ET.SubElement(root, "title").text = output["title_nice"] if not None else output["title"]
