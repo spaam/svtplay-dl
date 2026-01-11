@@ -13,13 +13,20 @@ class Svt(Svtplay):
     def get(self):
         vid = None
         data = self.get_urldata()
-        match = re.search("urqlState: ({.*})", data)
+        match = re.search("urqlState = ({.*})", data)
+
+        if not match:
+            yield ServiceError("Can't find video info.")
+            return
 
         janson = json.loads(match.group(1))
         for key in list(janson.keys()):
             janson2 = json.loads(janson[key]["data"])
-            if "page" in janson2 and "topMedia" in janson2["page"]:
-                vid = janson2["page"]["topMedia"]["svtId"]
+            if "page" in janson2:
+                if "topMedia" in janson2["page"]:
+                    vid = janson2["page"]["topMedia"]["svtId"]
+                if "video" in janson2["page"]:
+                    vid = janson2["page"]["video"]["svtId"]
         if not vid:
             yield ServiceError("Can't find any videos")
             return
