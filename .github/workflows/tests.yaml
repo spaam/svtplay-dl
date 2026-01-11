@@ -70,6 +70,12 @@ jobs:
       # Build .zip fil for *nix
       - run: make
       - run: ./svtplay-dl --version
+      - name: Generate changelog
+        if: startsWith(github.ref, 'refs/heads/')
+        run: |
+          echo "Generating changelog for ${{ github.ref }}..."
+          git log --oneline ${{ github.event.before }}..${{ github.sha }} > changelog.txt
+          cat changelog.txt
       - name: cibuild
         run: python scripts/cibuild.py
         env:

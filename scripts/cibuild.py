@@ -73,14 +73,16 @@ def snapshot_folder():
 
 
 def aws_upload():
+    files_to_upload = ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]
     if tag():
         folder = "release"
         version = tag()
     else:
         folder = "snapshots"
         version = snapshot_folder()
+        files_to_upload.append("changelog.txt")
     logger.info(f"Upload to aws {folder}/{version}")
-    for file in ["svtplay-dl", "svtplay-dl-amd64.zip", "svtplay-dl-win32.zip"]:
+    for file in files_to_upload:
         if os.path.isfile(file):
             subprocess.check_call(
                 ["aws", "--region", "us-east-1", "s3", "cp", f"{file}", f"s3://svtplay-dl/{folder}/{version}/{file}"],
