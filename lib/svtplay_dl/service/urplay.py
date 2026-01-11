@@ -62,19 +62,24 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def find_all_episodes(self, config):
         episodes = []
+        seasons = []
 
         match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", self.get_urldata())
         if not match:
             logging.error("Can't find video info.")
             return episodes
 
+        parse = urlparse(self.url)
         jsondata = json.loads(match.group(1))
-        seasons = jsondata["props"]["pageProps"]["productData"]["seasonLabels"]
+
+        if "/serie" in parse.path:
+            seasons = jsondata["props"]["pageProps"]["productData"]["seasonLabels"]
+        if "/program" in parse.path:
+            if "series" in jsondata["props"]["pageProps"]["productData"] and jsondata["props"]["pageProps"]["productData"]["series"]:
+                seasons = jsondata["props"]["pageProps"]["productData"]["series"]["seasonLabels"]
+        episodes.append(self.url)
         build = jsondata["buildId"]
 
-        parse = urlparse(self.url)
-        url = f"https://{parse.netloc}{parse.path}"
-        episodes.append(url)
         for season in seasons:
             res = self.http.get(
                 f'https://urplay.se/_next/data/{build}{season["link"]}.json?productType={jsondata["query"]["productType"]}&id={jsondata["props"]["pageProps"]["productData"]["id"]}',
