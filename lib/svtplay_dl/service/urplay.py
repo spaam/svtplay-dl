@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import sys
 from datetime import datetime
 from html import unescape
 from urllib.parse import urljoin
@@ -108,7 +109,10 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "description" in data:
             self.output["episodedescription"] = data["description"]
         if "publishedAt" in data:
-            self.output["publishing_datetime"] = datetime.fromisoformat(data["publishedAt"]).timestamp()
+            published = data["publishedAt"]
+            if sys.version_info < (3, 12):  # 3.11 fix
+                published = published.replace("Z", "+00:00")
+            self.output["publishing_datetime"] = datetime.fromisoformat(published).timestamp()
 
         self.output["episodethumbnailurl"] = data["image"]["1280x720"]
 
