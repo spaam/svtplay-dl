@@ -2,7 +2,9 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import copy
 import json
+import logging
 import re
+from urllib.parse import urljoin
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.hls import hlsparse
@@ -15,6 +17,7 @@ class Nrk(Service, OpenGraphThumbMixin):
     supported_domains = ["nrk.no", "tv.nrk.no", "p3.no", "tv.nrksuper.no"]
 
     def get(self):
+        self.video_id = None
         match = re.search('({"initialState.*})', self.get_urldata())
         if match:
             self.janson = json.loads(match.group(1))
@@ -27,6 +30,9 @@ class Nrk(Service, OpenGraphThumbMixin):
             self.outputfilename()
         elif "program" in self.janson["initialState"]:
             self.video_id = self.janson["initialState"]["program"]["prfId"]
+        if not self.video_id:
+            yield ServiceError("Can't find video id.")
+            return
 
         dataurl = f"https://psapi.nrk.no/playback/manifest/program/{self.video_id}?eea-portability=true"
         janson = self.http.request(
@@ -48,6 +54,32 @@ class Nrk(Service, OpenGraphThumbMixin):
             for sub in janson["playable"]["subtitles"]:
                 if sub["defaultOn"]:
                     yield from subtitle_probe(copy.copy(self.config), sub["webVtt"], output=self.output)
+
+    def find_all_episodes(self, options):
+        episodes = []
+        janson = None
+        match = re.search('({"initialState.*})', self.get_urldata())
+        if match:
+            janson = json.loads(match.group(1))
+        else:
+            logging.error("Can't find video info.")
+            return episodes
+        seasons = []
+        if "series" not in janson["initialState"]:
+            return [self.url]
+        for season in janson["initialState"]["series"]["seasonInfo"]:
+            seasons.append(season["id"])
+        for season in janson["initialState"]["seasons"]:
+            if season["id"] in seasons:
+                for episode in season["episodes"]:
+                    if episode["availability"]["status"] == "available":
+                        episodes.append(urljoin("https://tv.nrk.no/", episode["playerPath"]))
+            elif options.get("include_clips") and season["id"] == "ekstramateriale":
+                for episode in season["episodes"]:
+                    if episode["availability"]["status"] == "available":
+                        episodes.append(urljoin("https://tv.nrk.no/", episode["playerPath"]))
+
+        return episodes
 
     def outputfilename(self):
         self.output["title"] = self.janson["initialState"]["series"]["title"]
