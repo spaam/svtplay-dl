@@ -50,7 +50,8 @@ class Dr(Service, OpenGraphThumbMixin):
             self.output["title"] = page["entries"][0]["item"]["season"]["title"]
             self.output["season"] = page["entries"][0]["item"]["season"]["seasonNumber"]
             self.output["episode"] = page["entries"][0]["item"]["episodeNumber"]
-            self.output["episodename"] = page["entries"][0]["item"]["contextualTitle"]
+            if "contextualTitle" in page["entries"][0]["item"]:
+                self.output["episodename"] = page["entries"][0]["item"]["contextualTitle"]
         elif "title" in page["entries"][0]["item"]:
             self.output["title"] = page["entries"][0]["item"]["title"]
 
