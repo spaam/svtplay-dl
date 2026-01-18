@@ -105,7 +105,7 @@ class postprocess:
                 arguments += ["-bsf:a", "aac_adtstoasc"]
         if videotrack and "dvh1" in _getcodec(streams, videotrack):
             if self.config.get("output_format") == "mkv":
-                logging.warning("HDR and mkv is not supported.")
+                arguments += ["-tag:v", "hvc1"]
             arguments += ["-strict", "unofficial"]
         cmd = [self.detect]
         if self.config.get("only_video") or (not self.config.get("only_audio") or (not self.stream.audio and self.config.get("only_audio"))):
