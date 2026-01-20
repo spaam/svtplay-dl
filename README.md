@@ -115,15 +115,13 @@ This script works for:
 
 -  aftonbladet.se
 -  bambuser.com
--  comedycentral.se
 -  di.se
+-  discoveryplus.com
 -  dn.se
--  dplay.se
 -  dr.dk
 -  efn.se
 -  expressen.se
 -  hbo.com
--  kanal9play.se
 -  nickelodeon.nl
 -  nickelodeon.no
 -  nickelodeon.se
@@ -143,7 +141,6 @@ This script works for:
 -  ur.se
 -  urplay.se
 -  vg.no
--  viagame.com
 
 ## License
 
