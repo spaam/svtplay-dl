@@ -18,13 +18,20 @@ if platform.system() == "Windows":
 else:
     xdg_config_home = os.getenv("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
     xdg_config = os.path.join(xdg_config_home, "svtplay-dl", "svtplay-dl.yaml")
-    cwd = pathlib.Path(os.getcwd()) / "svtplay-dl.yaml"
-    if os.path.isfile(cwd):
-        CONFIGFILE = cwd
-    elif os.path.isfile(xdg_config):
-        CONFIGFILE = xdg_config
-    else:
-        CONFIGFILE = os.path.expanduser("~/.svtplay-dl.yaml")
+    legacy_config = os.path.expanduser("~/.svtplay-dl.yaml")
+
+    CONFIGFILE = None
+    try:
+        cwd_path = pathlib.Path.cwd() / "kalle.yaml"
+        if cwd_path.is_file():
+            CONFIGFILE = cwd_path
+    except (FileNotFoundError, PermissionError):  # flatpak return FileNotFoundError
+        pass
+    if not CONFIGFILE:
+        if os.path.isfile(xdg_config):
+            CONFIGFILE = xdg_config
+        else:
+            CONFIGFILE = legacy_config
 
 FILENAME = "{title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext}"
 
