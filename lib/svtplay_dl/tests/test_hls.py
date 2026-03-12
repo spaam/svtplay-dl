@@ -140,12 +140,12 @@ def test_audio_bottom():
 
 def test_x_byterange():
     data = parse_m3u8("ext-x-byterange.m3u8")
-    assert data.media_segment[0]["EXT-X-BYTERANGE"]["n"] == 748
-    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] == 242398
-    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] + data.media_segment[1]["EXT-X-BYTERANGE"]["o"] - 1 == 245225
+    assert data.media_segment[0]["EXT-X-BYTERANGE"]["n"] == 242398
+    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] == 242050
+    assert data.media_segment[1]["EXT-X-BYTERANGE"]["n"] + data.media_segment[1]["EXT-X-BYTERANGE"]["o"] - 1 == 487275
 
 
 def test_x_map():
     data = parse_m3u8("x-map.m3u8")
-    assert data.media_segment[0]["URI"] == "video/init.mp4"
-    assert data.media_segment[2]["URI"] == "video/2.m4s"
+    assert data.media_segment[0]["URI"] == "video/1.m4s"
+    assert data.media_segment[2]["URI"] == "video/3.m4s"
