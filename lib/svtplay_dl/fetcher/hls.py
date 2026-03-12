@@ -17,6 +17,7 @@ from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.fetcher.m3u8 import M3U8
 from svtplay_dl.subtitle import subtitle_probe
+from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.output import ETA
 from svtplay_dl.utils.output import formatname
@@ -310,6 +311,8 @@ class HLS(VideoRetriever):
         file_d = open(filename, "wb")
 
         hls_time_stamp = self.kwargs.pop("hls_time_stamp", False)
+        if self.kwargs.get("filter", False):
+            m3u8 = filter_files(m3u8)
         decryptor = None
         size_media = len(m3u8.media_segment)
         eta = ETA(size_media)
@@ -318,9 +321,8 @@ class HLS(VideoRetriever):
         max_duration = 0
         key = None
         key_iv = None
+        mapdata = None
         for index, i in enumerate(m3u8.media_segment):
-            if "EXT-X-DISCONTINUITY" in i:
-                continue
             if "EXTINF" in i and "duration" in i["EXTINF"]:
                 duration = i["EXTINF"]["duration"]
                 max_duration = max(max_duration, duration)
@@ -335,6 +337,15 @@ class HLS(VideoRetriever):
                     progressbar(size_media, index + 1, "".join(["ETA: ", str(eta)]))
 
             headers = {}
+            if "EXT-X-MAP" in i:
+                xmap = i["EXT-X-MAP"]
+                init_file = get_full_url(xmap["URI"], url)
+                if "EXT-X-BYTERANGE" in xmap:
+                    headers["Range"] = f'bytes={xmap["EXT-X-BYTERANGE"]["o"]}-{xmap["EXT-X-BYTERANGE"]["o"] + xmap["EXT-X-BYTERANGE"]["n"] - 1}'
+                resb = self.http.request("get", init_file, cookies=cookies, headers=headers)
+                mapdata = resb.content
+                file_d.write(mapdata)
+
             if "EXT-X-BYTERANGE" in i:
                 headers["Range"] = f'bytes={i["EXT-X-BYTERANGE"]["o"]}-{i["EXT-X-BYTERANGE"]["o"] + i["EXT-X-BYTERANGE"]["n"] - 1}'
             resb = self.http.request("get", item, cookies=cookies, headers=headers)

@@ -23,6 +23,7 @@ class M3U8:
         self.version = None
 
         self.media_segment = []
+        self.xmap = {}
         self.media_playlist = {}
         self.master_playlist = []
 
@@ -104,10 +105,8 @@ class M3U8:
                                 info["EXT-X-BYTERANGE"] = {}
                                 info["EXT-X-BYTERANGE"]["n"] = int(attr)
                                 info["EXT-X-BYTERANGE"]["o"] = 0
-                        if "BYTERANGE" not in info:
-                            info["EXTINF"] = {}
-                            info["EXTINF"]["duration"] = 0
-                        self.media_segment.insert(0, info)
+
+                        self.xmap = info
 
                     # 4.3.2.6.  EXT-X-PROGRAM-DATE-TIME"
                     elif tag == "EXT-X-PROGRAM-DATE-TIME":
