@@ -22,7 +22,7 @@ else:
 
     CONFIGFILE = None
     try:
-        cwd_path = pathlib.Path.cwd() / "kalle.yaml"
+        cwd_path = pathlib.Path.cwd() / "svtplay-dl.yaml"
         if cwd_path.is_file():
             CONFIGFILE = cwd_path
     except (FileNotFoundError, PermissionError):  # flatpak return FileNotFoundError
