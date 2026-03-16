@@ -32,7 +32,7 @@ LIVE_CHANNELS = {
 
 class Svtplay(Service, MetadataThumbMixin):
     supported_domains = ["svtplay.se", "svt.se", "beta.svtplay.se", "svtflow.se"]
-    info_search_expr = r"<script id=\"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>"
+    info_search_expr = r"URQL_DATA = ({.+});"
     access = None
 
     def get(self):
@@ -71,14 +71,12 @@ class Svtplay(Service, MetadataThumbMixin):
         janson = json.loads(match.group(1))
         video_data = None
         vid = None
-        for data_entry in janson["props"]["urqlState"].values():
-            if "data" in data_entry:
-                entry = json.loads(data_entry["data"])
-                for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "smartStart" in data and data["smartStart"]:
-                        video_data = data
-                        vid = data["smartStart"]["videoSvtId"]
-                        break
+        for _, data in janson.items():
+            janson2 = json.loads(data["data"])
+            if "detailsPageByPath" in janson2 and "smartStart" in janson2["detailsPageByPath"] and janson2["detailsPageByPath"]["smartStart"]:
+                video_data = janson2["detailsPageByPath"]
+                vid = video_data["smartStart"]["videoSvtId"]
+                break
 
         if not vid:
             yield ServiceError("Can't find video id")
@@ -213,35 +211,19 @@ class Svtplay(Service, MetadataThumbMixin):
             return videos
         janson = json.loads(match.group(1))
         data = None
-        for data_entry in janson["props"]["urqlState"].values():
-            if "data" in data_entry:
-                entry = json.loads(data_entry["data"])
-                if "selectionById" in entry:
-                    data = entry
+        for _, data in janson.items():
+            entry = json.loads(data["data"])
+            if "selectionById" in entry:
+                data = entry
+                break
 
         if data:
             for i in data["selectionById"]["items"]:
-                videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
-        return videos
-
-    def _last_chance(self):
-        videos = []
-        match = re.search(self.info_search_expr, self.get_urldata())
-        if not match:
-            logging.error("Can't find video info.")
-            return videos
-        janson = json.loads(match.group(1))
-        video_data = None
-        for data_entry in janson["props"]["urqlState"].values():
-            entry = json.loads(data_entry["data"])
-            for key, data in entry.items():
-                if key == "startForSvtPlay":
-                    video_data = data
-        if not video_data:
-            return videos
-        for section in video_data["selections"]:
-            for i in section["items"]:
-                videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+                if i["item"]["__typename"] == "TvSeries":
+                    vids = self._all_episodes(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
+                    videos.extend(vids)
+                else:
+                    videos.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
         return videos
 
     def _genre(self):
@@ -257,12 +239,11 @@ class Svtplay(Service, MetadataThumbMixin):
             return episodes
         janson = json.loads(match.group(1))
         video_data = None
-        for data_entry in janson["props"]["urqlState"].values():
-            entry = json.loads(data_entry["data"])
-            for key, data in entry.items():
-                if key == "categoryPage":
-                    if "lazyLoadedTabs" in data:
-                        video_data = data["lazyLoadedTabs"]
+        for _, data in janson.items():
+            entry = json.loads(data["data"])
+            if "categoryPage" in entry:
+                video_data = entry["categoryPage"]["lazyLoadedTabs"]
+
         if not video_data:
             return episodes
 
@@ -298,13 +279,11 @@ class Svtplay(Service, MetadataThumbMixin):
 
         janson = json.loads(match.group(1))
         video_data = None
-        for data_entry in janson["props"]["urqlState"].values():
-            if "data" in data_entry:
-                entry = json.loads(data_entry["data"])
-                for key, data in entry.items():
-                    if key == "detailsPageByPath" and data and "smartStart" in data:
-                        video_data = data
-                        break
+        for _, data in janson.items():
+            janson2 = json.loads(data["data"])
+            if "detailsPageByPath" in janson2 and "smartStart" in janson2["detailsPageByPath"] and janson2["detailsPageByPath"]["smartStart"]:
+                video_data = janson2["detailsPageByPath"]
+                break
 
         collections = []
         if video_data is None:
@@ -336,9 +315,7 @@ class Svtplay(Service, MetadataThumbMixin):
         parse = urlparse(self._url)
 
         episodes = []
-        if re.search("^/sista-chansen", parse.path):
-            episodes = self._last_chance()
-        elif re.search("^/kategori", parse.path):
+        if re.search("^/kategori", parse.path):
             episodes = self._genre()
         elif re.search("^/lista", parse.path):
             episodes = self._lists()
