@@ -48,7 +48,7 @@ class Plutotv(Service, OpenGraphThumbMixin):
                                 self.output["episodename"] = episode["name"]
                                 for stich in episode["stitched"]["paths"]:
                                     if stich["type"] == "hls":
-                                        HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
+                                        HLSplaylist = f"{self.mediaserver}/v2{stich['path']}?{self.stitcherParams}&jwt={self.sessionToken}&masterJWTPassthrough=true"
                                         if self.http.request("get", HLSplaylist).status_code < 400:
                                             break
             if "stitched" in vod and "paths" in vod["stitched"]:
@@ -64,7 +64,7 @@ class Plutotv(Service, OpenGraphThumbMixin):
 
         playlists = hlsparse(
             self.config,
-            self.http.request("get", HLSplaylist, headers={"Authorization": f"Bearer {self.sessionToken}"}),
+            self.http.request("get", HLSplaylist),
             HLSplaylist,
             self.output,
             filter=True,
@@ -102,20 +102,24 @@ class Plutotv(Service, OpenGraphThumbMixin):
         return episodes
 
     def _janson(self) -> None:
+        self.playbackid = uuid.uuid1()
         self.appversion = re.search('appVersion" content="([^"]+)"', self.data)
         self.query = {
             "appName": "web",
             "appVersion": self.appversion.group(1) if self.appversion else "na",
-            "deviceVersion": "119.0.0",
+            "deviceVersion": "145.0.0",
             "deviceModel": "web",
-            "deviceMake": "firefox",
+            "deviceMake": "chrome",
             "deviceType": "web",
-            "clientID": uuid.uuid1(),
+            "clientID": self.playbackid,
             "clientModelNumber": "1.0.0",
             "seriesIDs": self.slug,
             "serverSideAds": "false",
-            "constraints": "",
             "drmCapabilities": "widevine%3AL3",
+            "blockingMode": "",
+            "notificationVersion": 1,
+            "appLaunchCount": 0,
+            "lastAppLaunchDate": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "clientTime": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
         res = self.http.request("get", "https://boot.pluto.tv/v4/start", params=self.query)
