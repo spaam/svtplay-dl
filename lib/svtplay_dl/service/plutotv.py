@@ -54,7 +54,7 @@ class Plutotv(Service, OpenGraphThumbMixin):
             if "stitched" in vod and "paths" in vod["stitched"]:
                 for stich in vod["stitched"]["paths"]:
                     if stich["type"] == "hls":
-                        HLSplaylist = f"{self.mediaserver}{stich['path']}?{self.stitcherParams}"
+                        HLSplaylist = f"{self.mediaserver}/v2{stich['path']}?{self.stitcherParams}&jwt={self.sessionToken}&masterJWTPassthrough=true"
                         if self.http.request("get", HLSplaylist).status_code < 400:
                             break
 
