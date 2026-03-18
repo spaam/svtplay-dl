@@ -342,17 +342,14 @@ class HLS(VideoRetriever):
                 init_file = get_full_url(xmap["URI"], url)
                 if "EXT-X-BYTERANGE" in xmap:
                     headers["Range"] = f'bytes={xmap["EXT-X-BYTERANGE"]["o"]}-{xmap["EXT-X-BYTERANGE"]["o"] + xmap["EXT-X-BYTERANGE"]["n"] - 1}'
-                resb = self.http.request("get", init_file, cookies=cookies, headers=headers)
-                mapdata = resb.content
+                mapdata = self.http.get_content(init_file, cookies=cookies, headers=headers)
                 file_d.write(mapdata)
 
             if "EXT-X-BYTERANGE" in i:
                 headers["Range"] = f'bytes={i["EXT-X-BYTERANGE"]["o"]}-{i["EXT-X-BYTERANGE"]["o"] + i["EXT-X-BYTERANGE"]["n"] - 1}'
-            resb = self.http.request("get", item, cookies=cookies, headers=headers)
-            if resb.status_code == 404:
+            data = self.http.get_content(item, cookies=cookies, headers=headers)
+            if data is None:
                 break
-
-            data = resb.content
             if m3u8.encrypted:
                 headers = {}
                 if self.keycookie:
@@ -367,7 +364,7 @@ class HLS(VideoRetriever):
                     keyurl = get_full_url(i["EXT-X-KEY"]["URI"], url)
                     if keyurl and keyurl[:4] == "skd:":
                         raise HLSException(keyurl, "Can't decrypt beacuse of DRM")
-                    key = self.http.request("get", keyurl, cookies=keycookies, headers=headers).content
+                    key = self.http.get_content(keyurl, cookies=keycookies, headers=headers)
                     key_iv = binascii.unhexlify(i["EXT-X-KEY"]["IV"][2:].zfill(32)) if "IV" in i["EXT-X-KEY"] else None
                 elif "EXT-X-KEY" in i and i["EXT-X-KEY"]["METHOD"] == "SAMPLE-AES":
                     raise HLSException(keyurl, "Can't decrypt beacuse of DRM")

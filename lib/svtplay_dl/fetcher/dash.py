@@ -383,12 +383,10 @@ class DASH(VideoRetriever):
                 eta.increment()
                 progressbar(len(files), n, "".join(["ETA: ", str(eta)]))
                 n += 1
-            data = self.http.request("get", i, cookies=cookies)
-
-            if data.status_code == 404:
+            chunk = self.http.get_content(i, cookies=cookies)
+            if chunk is None:
                 break
-            data = data.content
-            file_d.write(data)
+            file_d.write(chunk)
 
         file_d.close()
         if not self.config.get("silent"):
@@ -397,14 +395,15 @@ class DASH(VideoRetriever):
 
     def _download_url(self, url, audio=False, total_size=None):
         cookies = self.kwargs["cookies"]
-        data = self.http.request("get", url, cookies=cookies, headers={"Range": "bytes=0-8192"})
         if not total_size:
+            data = self.http.request("get", url, cookies=cookies, headers={"Range": "bytes=0-8192"})
             try:
                 total_size = data.headers["Content-Range"]
                 total_size = total_size[total_size.find("/") + 1 :]
                 total_size = int(total_size)
             except KeyError:
                 raise KeyError("Can't get the total size.")
+        chunk = self.http.get_content(url, cookies=cookies, headers={"Range": "bytes=0-8192"})
 
         bytes_so_far = 8192
         if audio:
@@ -414,7 +413,7 @@ class DASH(VideoRetriever):
         filename = formatname(self.output, self.config)
         file_d = open(filename, "wb")
 
-        file_d.write(data.content)
+        file_d.write(chunk)
         eta = ETA(total_size)
         while bytes_so_far < total_size:
             if not self.config.get("silent"):
@@ -426,8 +425,7 @@ class DASH(VideoRetriever):
 
             bytes_range = f"bytes={old}-{bytes_so_far}"
 
-            data = self.http.request("get", url, cookies=cookies, headers={"Range": bytes_range})
-            file_d.write(data.content)
+            file_d.write(self.http.get_content(url, cookies=cookies, headers={"Range": bytes_range}))
 
         file_d.close()
         progressbar(bytes_so_far, total_size, "ETA: complete")
