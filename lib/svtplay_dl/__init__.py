@@ -39,6 +39,9 @@ def setup_log(silent, verbose=False):
 
 
 def main():
+    from charset_normalizer import __version__ as charset_normalizer_version
+
+    print(charset_normalizer_version)
     """Main program"""
     parse, options = parser(__version__)
 
