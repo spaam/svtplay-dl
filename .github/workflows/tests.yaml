@@ -114,6 +114,10 @@ jobs:
           pip install -r requirements-dev.txt
       - name: set version
         run: python setversion.py
+      - name: KOOLLLA
+        run: python -c "import requests; print(requests.get('https://httpbin.org/uuid').text)"
+      - name: tesst?
+        run: python -c "from charset_normalizer import __version__ as charset_normalizer_version"; print(charset_normalizer_version)"
       - name: build .exe
         run: python setup.py build_exe
       - name: run the .exe file
