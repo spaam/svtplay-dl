@@ -77,6 +77,6 @@ setup(
         "Topic :: Utilities",
     ],
     # cx_freeze info for Windows builds with Python embedded
-    options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"], "includes": "_cffi_backend,charset_normalizer.md__mypyc"}},
+    options={"build_exe": {"packages": ["cffi", "cryptography", "idna", "queue"], "includes": "_cffi_backend,81d243bd2c585b0f4821__mypyc"}},
     executables=executable,
 )
