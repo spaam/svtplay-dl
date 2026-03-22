@@ -12,4 +12,7 @@ if __package__ is None and not hasattr(sys, "frozen"):
 import svtplay_dl
 
 if __name__ == "__main__":
+    from charset_normalizer import __version__ as charset_normalizer_version
+
+    print(charset_normalizer_version)
     svtplay_dl.main()
