@@ -74,8 +74,13 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/')
         run: |
           echo "Generating changelog for ${{ github.ref }}..."
-          git log --oneline ${{ github.event.before }}..${{ github.sha }} > changelog.txt
-          cat changelog.txt
+          BEFORE="${{ github.event.before }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            git fetch origin master
+            git log --oneline origin/master..${{ github.sha }} > changelog.txt
+          else
+            git log --oneline $BEFORE..${{ github.sha }} > changelog.txt
+          fi
       - name: cibuild
         run: python scripts/cibuild.py
         env:
@@ -117,7 +122,7 @@ jobs:
       - name: KOOLLLA
         run: python -c "import requests; print(requests.get('https://httpbin.org/uuid').text)"
       - name: tesst?
-        run: python -c "from charset_normalizer import __version__ as charset_normalizer_version"; print(charset_normalizer_version)"
+        run: python -c "from charset_normalizer import __version__ as charset_normalizer_version; print(charset_normalizer_version)"
       - name: build .exe
         run: python setup.py build_exe
       - name: run the .exe file
