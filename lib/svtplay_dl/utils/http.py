@@ -28,6 +28,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.adapters import Retry
 from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.parser import Options
 
@@ -49,6 +50,7 @@ class HTTP(Session):
         self.verify = config.get("ssl_verify")
         self.proxy = config.get("proxy")
         self.socket_timeout = config.get("socket_timeout")
+        self.max_retries = config.get("max_retries") or 5
         if config.get("http_headers"):
             self.headers.update(self.split_header(config.get("http_headers")))
         if config.get("cookies"):
@@ -70,17 +72,17 @@ class HTTP(Session):
         res = Session.request(self, method, url, verify=self.verify, proxies=self.proxy, timeout=self.socket_timeout, *args, **kwargs)
         return res
 
-    def get_content(self, url, max_retries=5, **kwargs):
-        for attempt in range(max_retries):
+    def get_content(self, url, **kwargs):
+        for attempt in range(self.max_retries):
             try:
                 resp = self.request("get", url, **kwargs)
                 if resp.status_code == 404:
                     return None
                 return resp.content
-            except ChunkedEncodingError:
-                if attempt == max_retries - 1:
+            except (ChunkedEncodingError, RequestsConnectionError):
+                if attempt == self.max_retries - 1:
                     raise
-                logging.debug("ChunkedEncodingError, retrying (%d/%d)", attempt + 1, max_retries)
+                logging.debug("Connection error, retrying (%d/%d)", attempt + 1, self.max_retries)
 
     def split_header(self, headers):
         return dict(x.split("=") for x in headers.split(";") if x)

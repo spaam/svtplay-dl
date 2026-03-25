@@ -191,6 +191,14 @@ def gen_parser(version="unknown"):
         type=float,
         help="Time to wait before giving up in seconds",
     )
+    general.add_argument(
+        "--max-retries",
+        dest="max_retries",
+        metavar="N",
+        default=5,
+        type=int,
+        help="Number of times to retry a failed download",
+    )
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
@@ -405,6 +413,7 @@ def setup_defaults():
     options.set("reverse_list", False)
     options.set("chapters", False)
     options.set("socket_timeout", 20)
+    options.set("max_retries", 5)
     return _special_settings(options)
 
 
@@ -463,6 +472,7 @@ def parsertoconfig(config, parser):
     config.set("reverse_list", parser.reverse_list)
     config.set("chapters", parser.chapters)
     config.set("socket_timeout", parser.socket_timeout)
+    config.set("max_retries", parser.max_retries)
     return _special_settings(config)
 
 
