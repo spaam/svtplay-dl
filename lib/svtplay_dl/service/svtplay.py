@@ -250,8 +250,8 @@ class Svtplay(Service, MetadataThumbMixin):
         for lazytab in video_data:
             if lazytab["slug"] == "all":
                 for module in lazytab["modules"]:
-                    if "selection" in module:
-                        for i in module["selection"]["items"]:
+                    if "gridSelection" in module and module["gridSelection"]:
+                        for i in module["gridSelection"]["items"]:
                             if i["item"]["__typename"] == "Single":
                                 singles.append(urljoin("http://www.svtplay.se", i["item"]["urls"]["svtplay"]))
                             else:
