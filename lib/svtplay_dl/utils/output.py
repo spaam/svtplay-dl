@@ -178,33 +178,54 @@ def formatname(output, config):
 
 def _formatname(output, config):
     name = config.get("filename")
-    for key in output:
-        if key == "title" and output[key]:
-            name = name.replace("{title}", filenamify(output[key]))
-        if key == "season" and output[key]:
-            number = f"{int(output[key]):02d}"
-            name = name.replace("{season}", number)
-        if key == "episode" and output[key]:
-            number = f"{int(output[key]):02d}"
-            name = name.replace("{episode}", number)
-        if key == "episodename" and output[key]:
-            name = name.replace("{episodename}", filenamify(output[key]))
-        if key == "id" and output[key]:
-            name = name.replace("{id}", output[key])
-        if key == "service" and output[key]:
-            name = name.replace("{service}", output[key])
-        if key == "ext" and output[key]:
-            if "{ext}" in name:
-                name = name.replace("{ext}", output[key])
-            else:
-                name = f"{name}.{output[key]}"
+    # Handle the s{season}e{episode} block as a single unit (only when both present together)
+    season = f"{int(output['season']):02d}" if output.get("season") else None
+    episode = f"{int(output['episode']):02d}" if output.get("episode") else None
 
-    # Remove all {text} we cant replace with something
-    for item in re.findall(r"([\.\-]?(([^\.\-]+\w+)?\{[\w\-]+\}))", name):
-        if "season" in output and output["season"] and re.search(r"(e\{[\w\-]+\})", name):
-            name = name.replace(re.search(r"(e\{[\w\-]+\})", name).group(1), "")
+    if season and episode:
+        name = re.sub(r"([sS])\{season\}([eE])\{episode\}", lambda m: f"{m.group(1)}{season}{m.group(2)}{episode}", name)
+    elif season:
+        name = re.sub(r"([sS])\{season\}([eE])\{episode\}", lambda m: f"{m.group(1)}{season}", name)
+    elif episode:
+        name = re.sub(r"([sS])\{season\}([eE])\{episode\}", lambda m: f"{m.group(2)}{episode}", name)
+    else:
+        name = re.sub(r"[\s\-\.]+[sS]\{season\}[eE]\{episode\}", "", name)
+
+    if season:
+        name = re.sub(r"([sS])?\{season\}", lambda m: f"{m.group(1) or ''}{season}", name)
+    else:
+        name = re.sub(r"[\s\-\.]*[sS]?\{season\}", "", name)
+
+    if episode:
+        name = re.sub(r"([eE])?\{episode\}", lambda m: f"{m.group(1) or ''}{episode}", name)
+    else:
+        name = re.sub(r"[\s\-\.]*[eE]?\{episode\}", "", name)
+
+    if output.get("ext"):
+        if "{ext}" in name:
+            name = name.replace("{ext}", output["ext"])
         else:
-            name = name.replace(item[0], "")
+            name = f"{name}.{output['ext']}"
+
+    replacements = {}
+    if output.get("title"):
+        replacements["title"] = filenamify(output["title"])
+    if output.get("episodename"):
+        replacements["episodename"] = filenamify(output["episodename"])
+    if output.get("id"):
+        replacements["id"] = output["id"]
+    if output.get("service"):
+        replacements["service"] = output["service"]
+
+    for key, value in replacements.items():
+        name = name.replace(f"{{{key}}}", value)
+
+    # Remove any remaining unavailable placeholders and their separators
+    name = re.sub(r"[\s\-\.]+\{[\w\-]+\}|\{[\w\-]+\}[\s\-\.]*", "", name)
+
+    # Clean up duplicate or leading/trailing separators
+    name = re.sub(r"[\s\-]{2,}", " ", name)
+    name = re.sub(r"^[\s\-\.]+|[\s\-\.]+$", "", name)
 
     return name
 
