@@ -216,7 +216,7 @@ class formatnameTest(unittest.TestCase):
         [
             "{id}-{season}{ext}-{episode}{episodename}-{title}-{service}",
             {"title": "title", "season": 99, "id": "0xdeadface", "ext": "ext"},
-            "0xdeadface-99mp4-title-service",
+            "0xdeadface-99mp4title-service",
         ],
         [
             "{id}-{season}{ext}-{episode}{episodename}-{title}-{service}",
@@ -312,7 +312,7 @@ class formatnameTest2(unittest.TestCase):
         config = setup_defaults()
         service = Service(config, "http://localhost")
         service.output["ext"] = "mp4"
-        assert str(formatname(service.output, config).name) == "-service.mp4"
+        assert str(formatname(service.output, config).name) == "service.mp4"
 
     def test_formatnameOutput(self):
         config = setup_defaults()
@@ -320,19 +320,19 @@ class formatnameTest2(unittest.TestCase):
             config.set("output", "c:\\Users")
             service = Service(config, "http://localhost")
             service.output["ext"] = "mp4"
-            assert str(formatname(service.output, config)) == "c:\\Users\\-service.mp4"
+            assert str(formatname(service.output, config)) == "c:\\Users\\service.mp4"
         else:
             config.set("output", "/tmp")
             service = Service(config, "http://localhost")
             service.output["ext"] = "mp4"
-            assert str(formatname(service.output, config)) == "/tmp/-service.mp4"
+            assert str(formatname(service.output, config)) == "/tmp/service.mp4"
 
     def test_formatnameBasedir(self):
         config = setup_defaults()
         service = Service(config, "http://localhost")
         service.output["basedir"] = True
         service.output["ext"] = "mp4"
-        assert str(formatname(service.output, config).name) == "-service.mp4"
+        assert str(formatname(service.output, config).name) == "service.mp4"
 
     def test_formatnameTvshow(self):
         config = setup_defaults()
