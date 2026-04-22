@@ -82,9 +82,7 @@ class Ruv(MetadataThumbMixin, Service):
 
         sub_url = ep.get("subtitles_url")
         if sub_url:
-            yield from subtitle_probe(
-                copy.copy(self.config), sub_url, output=copy.copy(self.output)
-            )
+            yield from subtitle_probe(copy.copy(self.config), sub_url, output=copy.copy(self.output))
 
         yield from hlsparse(
             self.config,
@@ -107,11 +105,7 @@ class Ruv(MetadataThumbMixin, Service):
 
         prog = resp.json()
         episodes = prog.get("episodes", [])
-        return [
-            f"https://www.ruv.is{base_path}/{ep['id']}"
-            for ep in episodes
-            if ep.get("file")
-        ]
+        return [f"https://www.ruv.is{base_path}/{ep['id']}" for ep in episodes if ep.get("file")]
 
     def _fetch_episode(self, sid, pid):
         resp = self.http.request("get", RUV_API.format(sid=sid))
@@ -121,13 +115,7 @@ class Ruv(MetadataThumbMixin, Service):
         if not prog or "episodes" not in prog:
             return None, None
         ep = next(
-            (
-                e
-                for e in prog["episodes"]
-                if str(e.get("id")) == pid
-                or e.get("slug") == pid
-                or str(e.get("event", "")) == pid
-            ),
+            (e for e in prog["episodes"] if str(e.get("id")) == pid or e.get("slug") == pid or str(e.get("event", "")) == pid),
             None,
         )
         return prog, ep
@@ -147,9 +135,7 @@ class Ruv(MetadataThumbMixin, Service):
         self.output["episodethumbnailurl"] = _highres_image_url(ep.get("image"))
 
         if self.output["tvshow"]:
-            self.output["season"] = _parse_season(
-                prog.get("title"), prog.get("foreign_title"), ep_desc
-            )
+            self.output["season"] = _parse_season(prog.get("title"), prog.get("foreign_title"), ep_desc)
             ep_num = ep.get("number")
             if ep_num is not None:
                 try:
