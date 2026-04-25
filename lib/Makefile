@@ -3,6 +3,7 @@ all: svtplay-dl
 clean:
 	find . -name '*.pyc' -exec rm {} \;
 	rm -f svtplay-dl
+	rm -rf .build
 
 pylint:
 	pylint $(PYLINT_OPTS) svtplay_dl
