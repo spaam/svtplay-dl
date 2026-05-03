@@ -5,9 +5,7 @@ import logging
 import re
 import sys
 from datetime import datetime
-from html import unescape
 from urllib.parse import urljoin
-from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
@@ -22,31 +20,20 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def get(self):
         urldata = self.get_urldata()
-        match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", urldata)
-        if not match:
-            yield ServiceError("Can't find video info.")
+
+        jsondata = self._get_janson(urldata)
+        if not jsondata:
+            yield ServiceError("Could not find video data.")
             return
 
-        parse = urlparse(self.url)
-        data = unescape(match.group(1))
-        jsondata = json.loads(data)
-        if "/serie/" in parse.path:
-            jsondata = jsondata["props"]["pageProps"]["productData"]["mainProgram"]
-            vid_url = f"https://urplay.se/{jsondata['link']}"
-            vid_data = self.http.get(vid_url).text
-            match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", vid_data)
-            data = unescape(match.group(1))
-            jsondata = json.loads(data)
-
-        vid = jsondata["props"]["pageProps"]["productData"]["id"]
-        jsondata = jsondata["props"]["pageProps"]["productData"]
+        vid = jsondata["program"]["id"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
         if res.status_code == 403:
             yield ServiceError("The video is geoblocked. Can't download this video")
             return
 
-        self.outputfilename(jsondata, urldata)
+        self.outputfilename(jsondata["program"])
 
         if "dash" in res.json()["sources"]:
             yield from dashparse(
@@ -58,33 +45,31 @@ class Urplay(Service, OpenGraphThumbMixin):
         if "hls" in res.json()["sources"]:
             yield from hlsparse(self.config, self.http.request("get", res.json()["sources"]["hls"]), res.json()["sources"]["hls"], output=self.output)
 
-        self.outputfilename(jsondata, urldata)
-
     def find_all_episodes(self, config):
         episodes = []
         seasons = []
 
-        match = re.search(r"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>", self.get_urldata())
-        if not match:
+        urldata = self.get_urldata()
+        jsondata = self._get_janson(urldata)
+
+        if not jsondata:
             logging.error("Can't find video info.")
             return episodes
 
-        parse = urlparse(self.url)
-        jsondata = json.loads(match.group(1))
-
-        if "/serie" in parse.path:
-            seasons = jsondata["props"]["pageProps"]["productData"]["seasonLabels"]
-        if "/program" in parse.path:
-            if "series" in jsondata["props"]["pageProps"]["productData"] and jsondata["props"]["pageProps"]["productData"]["series"]:
-                seasons = jsondata["props"]["pageProps"]["productData"]["series"]["seasonLabels"]
-        episodes.append(self.url)
-        build = jsondata["buildId"]
+        if "program" in jsondata and "series" in jsondata["program"] and jsondata["program"]["series"]:
+            if "seasonLabels" in jsondata["program"]["series"]:
+                if jsondata["program"]["series"]["seasonLabels"]:
+                    seasons = jsondata["program"]["series"]["seasonLabels"]
+                else:
+                    seasons.append({"id": jsondata["program"]["series"]["id"]})
+        else:
+            episodes.append(self.url)
 
         for season in seasons:
             res = self.http.get(
-                f'https://urplay.se/_next/data/{build}{season["link"]}.json?productType={jsondata["query"]["productType"]}&id={jsondata["props"]["pageProps"]["productData"]["id"]}',
+                f'https://urplay.se/api/v1/seasonEpisodes?seriesId={season["id"]}',
             )
-            for episode in res.json()["pageProps"]["productData"]["programs"]:
+            for episode in res.json()["accessibleEpisodes"]:
                 url = urljoin("https://urplay.se", episode["link"])
                 if url not in episodes:
                     episodes.append(url)
@@ -98,7 +83,7 @@ class Urplay(Service, OpenGraphThumbMixin):
             n += 1
         return episodes_new
 
-    def outputfilename(self, data, urldata):
+    def outputfilename(self, data):
         if "seriesTitle" in data:
             self.output["title"] = data["seriesTitle"]
             self.output["title_nice"] = data["seriesTitle"]
@@ -131,3 +116,38 @@ class Urplay(Service, OpenGraphThumbMixin):
 
     def get_thumbnail(self, options):
         download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
+
+    def _get_janson(self, urldata):
+        match = re.findall(r"__next_f\.push\((.+?)\)</scri", urldata, re.DOTALL)
+        for i in match:
+            janson = json.loads(i)
+            for jsonlist in janson:
+                if isinstance(jsonlist, str):
+                    index = jsonlist.find(":")
+                    if index > 0:
+                        if jsonlist[index + 1 :].startswith("["):
+                            rawdata = jsonlist[index + 1 :]
+                            try:
+                                json_raw = json.loads(rawdata)
+                            except json.JSONDecodeError:
+                                continue
+                            result = self.find_dict_with_keys(json_raw, ["isAudio", "isAccessibleOnUrPlay", "program"])
+                            if result:
+                                return result
+
+        return None
+
+    def find_dict_with_keys(self, obj, required_keys):
+        if isinstance(obj, dict):
+            if all(k in obj for k in required_keys):
+                return obj
+            for value in obj.values():
+                result = self.find_dict_with_keys(value, required_keys)
+                if result is not None:
+                    return result
+        elif isinstance(obj, list):
+            for item in obj:
+                result = self.find_dict_with_keys(item, required_keys)
+                if result is not None:
+                    return result
+        return None
