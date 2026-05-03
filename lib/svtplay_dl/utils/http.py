@@ -56,6 +56,16 @@ class HTTP(Session):
         if config.get("cookies"):
             self.cookies.update(self.split_header(config.get("cookies")))
         self.headers.update({"User-Agent": FIREFOX_UA})
+        # Get around Akamai bot protection
+        self.headers.update(
+            {
+                "sec-ch-ua": 'Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"',
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "none",
+                "sec-fetch-user": "?1",
+            },
+        )
 
     def check_redirect(self, url):
         return self.get(url, stream=True).url
