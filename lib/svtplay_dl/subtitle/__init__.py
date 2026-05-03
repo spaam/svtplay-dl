@@ -59,6 +59,7 @@ class subtitle:
         self.name = kwargs.pop("name", None)
         self.output = kwargs.pop("output", None)
         self.kwargs = kwargs
+        self.format = self.subtype
 
     def __repr__(self):
         return f"<Subtitle(type={self.subtype}, url={self.url} subfix={self.subfix}>"
