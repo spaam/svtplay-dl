@@ -135,6 +135,8 @@ def adaptionset(attributes, elements, url, baseurl=None):
         represtation = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Representation")
         role_elemets = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Role")
         accessibility = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Accessibility[@schemeIdUri='urn:se:svt:accessibility']")
+        if not accessibility:
+            accessibility = element.findall(".//{urn:mpeg:dash:schema:mpd:2011}Accessibility[@schemeIdUri='urn:se:ur:accessibility']")
 
         codecs = None
         if "codecs" in element.attrib:

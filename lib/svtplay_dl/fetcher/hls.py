@@ -77,14 +77,8 @@ def _hlsparse(config, text, url, output, **kwargs):
                         media[i["GROUP-ID"]] = []
                     if i["TYPE"] == "VIDEO":
                         video_group = i["GROUP-ID"]
-
                     if "URI" in i:
-                        if segments is None:
-                            segments = True
                         uri = i["URI"]
-                    else:
-                        segments = False
-
                     if "CHANNELS" in i:
                         if i["CHANNELS"] == "6":
                             chans = "51"
@@ -97,7 +91,7 @@ def _hlsparse(config, text, url, output, **kwargs):
                     else:
                         role = "alternate"
                         if "CHARACTERISTICS" in i:
-                            role = f'{role}-{i["CHARACTERISTICS"].replace("se.svt.accessibility.", "")}'
+                            role = f'{role}-{i["CHARACTERISTICS"].replace("se.svt.accessibility.", "").replace("se.ur.accessibility.", "")}'
 
                     media[i["GROUP-ID"]].append([uri, chans, language, role, segments])
 
@@ -152,7 +146,6 @@ def _hlsparse(config, text, url, output, **kwargs):
                             audio_url = get_full_url(group[0], url)
                             chans = group[1] if audio_url else channels
                             codec = vcodec if vcodec else codec
-
                             yield HLS(
                                 copy.copy(config),
                                 vurl,
@@ -257,7 +250,7 @@ class HLS(VideoRetriever):
 
     def download(self):
         self.output_extention = "ts"
-        if self.segments:
+        if self.audio:
             if self.audio and not self.config.get("only_video"):
                 # self._download(self.audio, file_name=(copy.copy(self.output), "audio.ts"))
                 self._download(self.audio, True)
