@@ -139,7 +139,7 @@ def adaptionset(attributes, elements, url, baseurl=None):
         codecs = None
         if "codecs" in element.attrib:
             codecs = element.attrib["codecs"]
-        lang = ""
+        lang = "und"
         if "lang" in element.attrib:
             lang = element.attrib["lang"]
         if role_elemets:
