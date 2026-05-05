@@ -74,7 +74,11 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/')
         run: |
           echo "Generating changelog for ${{ github.ref }}..."
-          git log --oneline ${{ github.event.before }}..${{ github.sha }} > changelog.txt
+          BEFORE="${{ github.event.before }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git merge-base HEAD origin/master || echo "origin/master")
+          fi
+          git log --oneline ${BEFORE}..${{ github.sha }} > changelog.txt
           cat changelog.txt
       - name: cibuild
         run: python scripts/cibuild.py
