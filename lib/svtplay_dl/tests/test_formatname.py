@@ -387,3 +387,39 @@ class formatnameTest2(unittest.TestCase):
             assert str(formatname(service.output, config)) == "c:\\kalle.s02e02-service.mp4"
         else:
             assert str(formatname(service.output, config)) == "/tmp/kalle.s02e02-service.mp4"
+
+    def test_formatnameMovie(self):
+        config = setup_defaults()
+        if platform.system() == "Windows":
+            config.set("path", "c:\\")
+        else:
+            config.set("path", "/tmp")
+        service = Service(config, "http://localhost")
+        service.output = {
+            "title": "tetris",
+            "season": None,
+            "episode": None,
+            "episodename": None,
+            "id": "40043f0",
+            "service": "svtplay",
+            "ext": "mp4",
+        }
+        if platform.system() == "Windows":
+            assert str(formatname(service.output, config)) == "c:\\tetris-40043f0-svtplay.mp4"
+        else:
+            assert str(formatname(service.output, config)) == "/tmp/tetris-40043f0-svtplay.mp4"
+
+    def test_formatnameCustomTemplateNoSeasonEpisode(self):
+        config = setup_defaults()
+        config.set("filename", "{title} S{season}E{episode} - {episodename}")
+        service = Service(config, "http://localhost")
+        service.output = {
+            "title": "tetris",
+            "season": None,
+            "episode": None,
+            "episodename": None,
+            "id": "40043f0",
+            "service": "svtplay",
+            "ext": "m4a",
+        }
+        assert str(_formatname(service.output, config)) == "tetris.m4a"
