@@ -1,6 +1,7 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import copy
+import json
 import re
 
 from svtplay_dl.error import ServiceError
@@ -14,13 +15,25 @@ class Sr(Service, OpenGraphThumbMixin):
 
     def get(self):
         data = self.get_urldata()
+        janson = self._get_janson(data)
 
-        match = re.search(r'data-audio-id="(\d+)"', data)
-        match2 = re.search(r'data-publication-id="(\w+)"', data)
-        if match and match2:
-            aid = match.group(1)
-            pubid = match2.group(1)
-            yield from self.ajax(aid, pubid)
+        if janson and "episode" in janson:
+            audio_types = [
+                ("podcast", ""),
+                ("broadcast", "musik"),
+            ]
+            for audio_type, lang in audio_types:
+                quality = janson["episode"]["audio"].get(audio_type)
+                if quality:
+                    url = (quality["qualities"].get("high") or quality["qualities"].get("standard") or {}).get("url")
+                    if url:
+                        yield HTTP(copy.copy(self.config), url, 128, output=self.output, language=lang)
+            return
+        elif janson and "article" in janson:
+            quality = janson["article"]["playAudio"]
+            url = (quality["qualities"].get("high") or quality["qualities"].get("standard") or {}).get("url")
+            if url:
+                yield HTTP(copy.copy(self.config), url, 128, output=self.output)
             return
 
         match = re.search(r'content="sesrplay://play/(\w+)/(\d+)"', data)
@@ -30,18 +43,6 @@ class Sr(Service, OpenGraphThumbMixin):
 
         yield ServiceError("Can't find audio info")
         return
-
-    def ajax(self, aid, pubid):
-        for what in ["episode", "secondary", "publication"]:
-            language = ""
-            apiurl = f"https://sverigesradio.se/playerajax/audio?id={aid}&type={what}&publicationid={pubid}&quality=high"
-            resp = self.http.request("get", apiurl)
-            if resp.status_code > 400:
-                continue
-            playerinfo = resp.json()
-            if what == "secondary":
-                language = "musik"
-            yield HTTP(copy.copy(self.config), playerinfo["audioUrl"], 128, output=self.output, language=language)
 
     def webapi(self, aid, what):
         res = self.http.get(f"https://web-api.sr.se/v1/player/ondemand?id={aid}&type={what}")
@@ -58,3 +59,43 @@ class Sr(Service, OpenGraphThumbMixin):
         if line.endswith("-lo"):
             return 2
         return 1
+
+    def _get_janson(self, urldata):
+        match = re.findall(r"__next_f\.push\((.+?)\)</script>", urldata, re.DOTALL)
+        for i in match:
+            janson = json.loads(i)
+            for jsonlist in janson:
+                if isinstance(jsonlist, str):
+                    index = jsonlist.find(":")
+                    if index > 0:
+                        if jsonlist[index + 1 :].startswith("["):
+                            rawdata = jsonlist[index + 1 :]
+                            try:
+                                json_raw = json.loads(rawdata)
+                            except json.JSONDecodeError:
+                                continue
+                            # news
+                            found = self.find_dict_with_keys(json_raw, ["showSurvey", "article"])
+                            if found:
+                                return found
+                            # episodes
+                            found = self.find_dict_with_keys(json_raw, ["episode", "episodeCollections", "trackList"])
+                            if found:
+                                return found
+
+        return None
+
+    def find_dict_with_keys(self, obj, required_keys):
+        if isinstance(obj, dict):
+            if all(k in obj for k in required_keys):
+                return obj
+            for value in obj.values():
+                result = self.find_dict_with_keys(value, required_keys)
+                if result is not None:
+                    return result
+        elif isinstance(obj, list):
+            for item in obj:
+                result = self.find_dict_with_keys(item, required_keys)
+                if result is not None:
+                    return result
+        return None
