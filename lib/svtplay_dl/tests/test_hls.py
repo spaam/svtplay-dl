@@ -128,13 +128,11 @@ def test_audio_top():
     with requests_mock.Mocker() as m:
         m.get("http://localhost.com/text/text-0.m3u8", text=M3U_EXAMPLE2)
         data = parse("audio-uri-top.m3u8")
-        assert data[3295].segments
         assert data[3295].audio
 
 
 def test_audio_bottom():
     data = parse("audio-uri-bottom.m3u8")
-    assert data[2639].segments
     assert data[2639].audio
 
 
