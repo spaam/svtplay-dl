@@ -302,7 +302,7 @@ class Tv4play(Service, OpenGraphThumbMixin):
             janson = res.json()
             total = janson["data"]["season"]["episodes"]["pageInfo"]["totalCount"]
             for mediatype in janson["data"]["season"]["episodes"]["items"]:
-                if not mediatype["video"]["access"]["hasAccess"]:
+                if mediatype["video"] and not mediatype["video"]["access"]["hasAccess"]:
                     continue
                 if time.time() < int(mediatype["playableFrom"]["timestamp"]) / 1000:
                     continue
