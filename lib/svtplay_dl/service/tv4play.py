@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.fetcher.dash import dashparse
+from svtplay_dl.fetcher.hls import HLS
 from svtplay_dl.fetcher.hls import hlsparse
 from svtplay_dl.service import OpenGraphThumbMixin
 from svtplay_dl.service import Service
@@ -96,12 +97,24 @@ class Tv4play(Service, OpenGraphThumbMixin):
             )
             entries.append(mpd)
 
+        m3u8 = []
         for entry in entries:
             for i in entry:
                 if isinstance(i, subtitle):
                     subs.append(i)
                 else:
-                    yield i
+                    if isinstance(i, HLS):
+                        m3u8.append(i)
+                    else:
+                        yield i
+
+        # For some reason non-swedish videos have a dub audio as default when it should be the other one
+        for i in m3u8:
+            if i.audio_role == "main" and i.language == "qas":
+                i.audio_role = "alternate"
+            elif i.audio_role == "alternate" and i.language != "qas":
+                i.audio_role = "main"
+            yield i
 
         if not self.config.get("get_all_subtitles"):
             for i in subs:
