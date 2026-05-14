@@ -1,5 +1,6 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+import datetime
 import json
 import logging
 import re
@@ -302,8 +303,11 @@ class Tv4play(Service, OpenGraphThumbMixin):
         while nr <= total:
             data = {
                 "operationName": "SeasonEpisodes",
-                "query": "query SeasonEpisodes($seasonId: ID!, $input: SeasonEpisodesInput!) {\n  season(id: $seasonId) {\n    __typename\n    numberOfEpisodes\n    episodes(input: $input) {\n      __typename\n      initialSortOrder\n      pageInfo {\n        __typename\n        ...PageInfoFields\n      }\n      items {\n        __typename\n        ...EpisodeFields\n      }\n    }\n  }\n}\nfragment PageInfoFields on PageInfo {\n  __typename\n  hasNextPage\n  nextPageOffset\n  totalCount\n}\nfragment EpisodeFields on Episode {\n  __typename\n  id\n  title\n  playableFrom {\n    __typename\n    readableDistance\n    timestamp\n    isoString\n    humanDateTime\n  }\n  playableUntil {\n    __typename\n    readableDistance(type: DAYS_LEFT)\n    timestamp\n    isoString\n    humanDateTime\n  }\n  liveEventEnd {\n    __typename\n    isoString\n    humanDateTime\n    timestamp\n  }\n  progress {\n    __typename\n    percent\n    position\n  }\n  episodeNumber\n  synopsis {\n    __typename\n    short\n    brief\n    medium\n  }\n  seasonId\n  series {\n    __typename\n    id\n    title\n    images {\n      __typename\n      main16x9Annotated {\n        __typename\n        source\n      }\n    }\n  }\n  images {\n    __typename\n    main16x9 {\n      __typename\n      ...ImageFieldsFull\n    }\n  }\n  video {\n    __typename\n    ...VideoFields\n  }\n  isPollFeatureEnabled\n  parentalRating {\n    __typename\n    finland {\n      __typename\n      ageRestriction\n      reason\n      containsProductPlacement\n    }\n  }\n}\nfragment ImageFieldsFull on Image {\n  __typename\n  source\n  meta {\n    __typename\n    muteBgColor {\n      __typename\n      hex\n    }\n  }\n}\nfragment VideoFields on Video {\n  __typename\n  duration {\n    __typename\n    readableShort\n    seconds\n  }\n  id\n  isDrmProtected\n  isLiveContent\n  vimondId\n  access {\n    __typename\n    hasAccess\n  }\n}",
-                "variables": {"input": {"limit": 16, "offset": nr, "sortOrder": "ASC"}, "seasonId": show},
+                "extensions": {
+                    "clientLibrary": {"name": "@apollo/client", "version": "4.1.6"},
+                    "persistedQuery": {"version": 1, "sha256Hash": "899adcd82ba7f5772ac9ec4bc20a35f7867237f3fa75cb04714d894a6166e444"},
+                },
+                "variables": {"input": {"limit": 12, "offset": nr, "sortOrder": "ASC"}, "seasonId": show},
             }
 
             res = self.http.request(
@@ -315,9 +319,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
             janson = res.json()
             total = janson["data"]["season"]["episodes"]["pageInfo"]["totalCount"]
             for mediatype in janson["data"]["season"]["episodes"]["items"]:
-                if not mediatype["video"]["access"]["hasAccess"]:
+                if mediatype["upsell"]:
                     continue
-                if time.time() < int(mediatype["playableFrom"]["timestamp"]) / 1000:
+                if time.time() < int(datetime.datetime.fromisoformat(mediatype["playableFrom"]["isoString"].replace("Z", "+00:00")).timestamp()):
                     continue
                 items.append(mediatype["id"])
             nr += 12
