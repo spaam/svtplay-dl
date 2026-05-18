@@ -347,9 +347,6 @@ class Svtplay(Service, MetadataThumbMixin):
 
         if name is None:
             name = modulej["details"]["heading"]
-        for i in modulej["details"]["smartStart"]["item"]["videos"]:
-            if vid == i["svtId"]:
-                other = i["name"]
         vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
