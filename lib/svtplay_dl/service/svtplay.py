@@ -425,6 +425,10 @@ class Svtplay(Service, MetadataThumbMixin):
         if match:
             return match.group(1)
 
+        match = re.search(r"^(\d+)\. ", data["item"]["name"])
+        if match:
+            return match.group(1)
+
         if "description" in data:
             match = re.search(r"Del (\d+) av (\d+)", data["description"])
             if match:
