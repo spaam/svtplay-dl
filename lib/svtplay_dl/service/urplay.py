@@ -26,14 +26,14 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Could not find video data.")
             return
 
-        vid = jsondata["program"]["id"]
+        vid = jsondata["currentProduct"]["id"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
         if res.status_code == 403:
             yield ServiceError("The video is geoblocked. Can't download this video")
             return
 
-        self.outputfilename(jsondata["program"])
+        self.outputfilename(jsondata["currentProduct"])
 
         if "dash" in res.json()["sources"]:
             yield from dashparse(
@@ -131,7 +131,8 @@ class Urplay(Service, OpenGraphThumbMixin):
                                 json_raw = json.loads(rawdata)
                             except json.JSONDecodeError:
                                 continue
-                            result = self.find_dict_with_keys(json_raw, ["isAudio", "isAccessibleOnUrPlay", "program"])
+                            result = self.find_dict_with_keys(json_raw, ["isAudio", "currentProduct"])
+
                             if result:
                                 return result
 
