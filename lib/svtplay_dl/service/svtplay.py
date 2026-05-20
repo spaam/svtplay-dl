@@ -345,8 +345,7 @@ class Svtplay(Service, MetadataThumbMixin):
         if modulej is None:
             return
 
-        if name is None:
-            name = modulej["details"]["heading"]
+        other = modulej["details"]["heading"]
         vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
@@ -354,8 +353,6 @@ class Svtplay(Service, MetadataThumbMixin):
         elif name is None:
             name = other
             other = None
-        elif other is None:
-            pass
 
         season, episode = self.seasoninfo(data)
         if "accessibility" in data:
