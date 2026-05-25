@@ -14,6 +14,7 @@ from svtplay_dl.error import UIException
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import format_speed
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
 from svtplay_dl.utils.output import progressbar
@@ -383,9 +384,15 @@ class DASH(VideoRetriever):
         for i in files:
             if not self.config.get("silent"):
                 eta.increment()
-                progressbar(len(files), n, "".join(["ETA: ", str(eta)]))
+                msg = "".join(["ETA: ", str(eta)])
+                elapsed = time.time() - self._dl_start
+                if self._dl_bytes > 0 and elapsed > 0:
+                    msg += " | " + format_speed(self._dl_bytes / elapsed)
+                progressbar(len(files), n, msg)
                 n += 1
             chunk = self.http.get_content(i, cookies=cookies)
+            if chunk:
+                self._dl_bytes += len(chunk)
             if chunk is None:
                 break
             file_d.write(chunk)

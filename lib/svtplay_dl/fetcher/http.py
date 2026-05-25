@@ -1,9 +1,11 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 import os
+import time
 
 from svtplay_dl.fetcher import VideoRetriever
 from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import format_speed
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progressbar
 
@@ -34,10 +36,15 @@ class HTTP(VideoRetriever):
         eta = ETA(total_size)
         for i in data.iter_content(8192):
             bytes_so_far += len(i)
+            self._dl_bytes += len(i)
             file_d.write(i)
             if not self.config.get("silent"):
                 eta.update(bytes_so_far)
-                progressbar(total_size, bytes_so_far, "".join(["ETA: ", str(eta)]))
+                elapsed = time.time() - self._dl_start
+                msg = "".join(["ETA: ", str(eta)])
+                if elapsed > 0:
+                    msg += " | " + format_speed(self._dl_bytes / elapsed)
+                progressbar(total_size, bytes_so_far, msg)
 
         file_d.close()
         self.finished = True

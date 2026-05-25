@@ -40,7 +40,7 @@ class progressTest(unittest.TestCase):
 class progressbarTest(unittest.TestCase):
     def setUp(self):
         self.old_termsiz = svtplay_dl.utils.output.get_terminal_size
-        svtplay_dl.utils.output.get_terminal_size = lambda: (50, 25)
+        svtplay_dl.utils.output.get_terminal_size = lambda: (70, 25)
 
         self.mockfile = mockfile()
         svtplay_dl.utils.output.progress_stream = self.mockfile
@@ -73,7 +73,7 @@ class progressbarTest(unittest.TestCase):
         assert self.mockfile.read() == "\r[020/100][==........] msg"
 
     def test_progress_20_100_termwidth(self):
-        svtplay_dl.utils.output.get_terminal_size = lambda: (75, 25)
+        svtplay_dl.utils.output.get_terminal_size = lambda: (95, 25)
         svtplay_dl.utils.output.progressbar(100, 20)
         assert self.mockfile.read() == "\r[020/100][=======............................] "
 

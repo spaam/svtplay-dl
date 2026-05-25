@@ -77,6 +77,14 @@ class ETA:
         return str(timedelta(seconds=int(elm_time * self.left)))
 
 
+def format_speed(bps):
+    if bps >= 1024 * 1024:
+        return f"{bps / (1024 * 1024):.1f} MB/s"
+    if bps >= 1024:
+        return f"{bps / 1024:.0f} KB/s"
+    return f"{bps:.0f} B/s"
+
+
 def progress(byte, total, extra=""):
     """Print some info about how much we have downloaded"""
     if total == 0:
@@ -103,7 +111,7 @@ def progressbar(total, pos, msg=""):
     Of course, the ETA part should be supplied be the calling
     function.
     """
-    width = get_terminal_size()[0] - 40
+    width = get_terminal_size()[0] - 60
     rel_pos = int(float(pos) / total * width)
     bar = "".join(["=" * rel_pos, "." * (width - rel_pos)])
 

@@ -20,6 +20,7 @@ from svtplay_dl.subtitle import subtitle_probe
 from svtplay_dl.utils.fetcher import filter_files
 from svtplay_dl.utils.http import get_full_url
 from svtplay_dl.utils.output import ETA
+from svtplay_dl.utils.output import format_speed
 from svtplay_dl.utils.output import formatname
 from svtplay_dl.utils.output import progress_stream
 from svtplay_dl.utils.output import progressbar
@@ -324,10 +325,14 @@ class HLS(VideoRetriever):
 
             if not self.config.get("silent"):
                 if self.config.get("live"):
-                    progressbar(size_media, index + 1, "".join(["DU: ", str(timedelta(seconds=int(total_duration)))]))
+                    msg = "".join(["DU: ", str(timedelta(seconds=int(total_duration)))])
                 else:
                     eta.increment()
-                    progressbar(size_media, index + 1, "".join(["ETA: ", str(eta)]))
+                    msg = "".join(["ETA: ", str(eta)])
+                elapsed = time.time() - self._dl_start
+                if self._dl_bytes > 0 and elapsed > 0:
+                    msg += " | " + format_speed(self._dl_bytes / elapsed)
+                progressbar(size_media, index + 1, msg)
 
             headers = {}
             if "EXT-X-MAP" in i:
@@ -341,6 +346,8 @@ class HLS(VideoRetriever):
             if "EXT-X-BYTERANGE" in i:
                 headers["Range"] = f'bytes={i["EXT-X-BYTERANGE"]["o"]}-{i["EXT-X-BYTERANGE"]["o"] + i["EXT-X-BYTERANGE"]["n"] - 1}'
             data = self.http.get_content(item, cookies=cookies, headers=headers)
+            if data:
+                self._dl_bytes += len(data)
             if data is None:
                 break
             if m3u8.encrypted:
