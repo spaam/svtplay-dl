@@ -15,7 +15,6 @@ jobs:
           - {name: '3.10', python: '3.10', os: ubuntu-latest, architecture: 'x64', cibuild: "no"}
           - {name: '3.9', python: '3.9', os: ubuntu-latest, architecture: 'x64', cibuild: "yes"}
           - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
-          - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -97,7 +96,6 @@ jobs:
       matrix:
         include:
           - {name: Windows, python: '3.13', os: windows-latest, architecture: 'x64', arch-cx: 'win-amd64', cx_name: 'amd64', cibuild: "yes"}
-          - {name: WindowsX86, python: '3.13', os: windows-latest, architecture: 'x86', arch-cx: 'win32', cx_name: 'win32', cibuild: "yes"}
     steps:
       - uses: actions/checkout@v5
         with:
