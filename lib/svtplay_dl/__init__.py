@@ -64,6 +64,7 @@ def main():
             get_multiple_media(urls, config)
     except KeyboardInterrupt:
         print("")
+        sys.exit(2)
     except (yaml.YAMLError, yaml.MarkedYAMLError) as e:
         logging.error("Your settings file(s) contain invalid YAML syntax! Please fix and restart!, %s", str(e))
         sys.exit(2)

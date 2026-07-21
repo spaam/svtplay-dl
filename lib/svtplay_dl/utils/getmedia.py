@@ -129,6 +129,8 @@ def get_one_media(stream):
             logging.error("Run again and add --verbose as an argument, to get more information")
             logging.error("If the error persists, you can report it at https://github.com/spaam/svtplay-dl/issues")
             logging.error("Include the URL used, the stack trace and the output of svtplay-dl --version in the issue")
+        if stream.config.get("abort_on_error"):
+            sys.exit(2)
         return
 
     try:
@@ -170,6 +172,8 @@ def get_one_media(stream):
             logging.error("No videos found. %s", errormsg)
         else:
             logging.error("No videos found.")
+        if stream.config.get("abort_on_error"):
+            sys.exit(2)
     else:
         if stream.config.get("list_quality"):
             list_quality(videos)

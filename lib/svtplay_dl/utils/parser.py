@@ -199,6 +199,13 @@ def gen_parser(version="unknown"):
         type=int,
         help="Number of times to retry a failed download",
     )
+    general.add_argument(
+        "--abort-on-error",
+        dest="abort_on_error",
+        action="store_true",
+        default=False,
+        help="Abort on error, it won't continue downloading more videos",
+    )
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
@@ -414,6 +421,7 @@ def setup_defaults():
     options.set("chapters", False)
     options.set("socket_timeout", 20)
     options.set("max_retries", 5)
+    options.set("abort_on_error", False)
     return _special_settings(options)
 
 
@@ -473,6 +481,7 @@ def parsertoconfig(config, parser):
     config.set("chapters", parser.chapters)
     config.set("socket_timeout", parser.socket_timeout)
     config.set("max_retries", parser.max_retries)
+    config.set("abort_on_error", parser.abort_on_error)
     return _special_settings(config)
 
 
