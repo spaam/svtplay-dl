@@ -7,6 +7,7 @@ import struct
 import time
 from datetime import datetime
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import algorithms
@@ -54,6 +55,7 @@ def _hlsparse(config, text, url, output, **kwargs):
     cookies = kwargs.pop("cookies", None)
     authorization = kwargs.pop("authorization", None)
     loutput = copy.copy(output)
+    query_pass = kwargs.pop("query_pass", False)
     loutput["ext"] = "ts"
     channels = kwargs.pop("channels", None)
     codec = kwargs.pop("codec", "h264")
@@ -147,6 +149,10 @@ def _hlsparse(config, text, url, output, **kwargs):
                             audio_url = get_full_url(group[0], url)
                             chans = group[1] if audio_url else channels
                             codec = vcodec if vcodec else codec
+                            if query_pass:
+                                query = urlsplit(url).query
+                                audio_url = f"{audio_url}?{query}" if query else audio_url
+                                vurl = f"{vurl}?{query}" if query else vurl
                             yield HLS(
                                 copy.copy(config),
                                 vurl,
@@ -173,7 +179,10 @@ def _hlsparse(config, text, url, output, **kwargs):
                             audio_url = get_full_url(group[0], url)
                         chans = group[1] if audio_url else channels
                         codec = vcodec if vcodec else codec
-
+                        if query_pass:
+                            query = urlsplit(url).query
+                            audio_url = f"{audio_url}?{query}" if query else audio_url
+                            vurl = f"{vurl}?{query}" if query else vurl
                         yield HLS(
                             copy.copy(config),
                             vurl,
@@ -195,6 +204,10 @@ def _hlsparse(config, text, url, output, **kwargs):
             else:
                 chans = channels
                 codec = vcodec if vcodec else codec
+                if query_pass:
+                    query = urlsplit(url).query
+                    audio_url = f"{audio_url}?{query}" if query else audio_url
+                    vurl = f"{vurl}?{query}" if query else vurl
                 yield HLS(
                     copy.copy(config),
                     urls,

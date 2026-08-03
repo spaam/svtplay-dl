@@ -25,6 +25,7 @@ class VideoRetriever:
         self.audio_role = kwargs.pop("role", "main")
         self.video_role = kwargs.pop("video_role", "main")
         self.format = f"{codec}-{channels}" if channels else codec
+        self.query_pass = kwargs.pop("query_pass", False)
         self._dl_start = time.time()
         self._dl_bytes = 0
 
