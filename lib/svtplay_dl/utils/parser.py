@@ -206,6 +206,13 @@ def gen_parser(version="unknown"):
         default=False,
         help="Abort on error, it won't continue downloading more videos",
     )
+    general.add_argument(
+        "--tydligare-tal",
+        dest="tydligare_tal",
+        action="store_true",
+        default=False,
+        help="only download videos with 'tydligare tal' independent on language",
+    )
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
@@ -422,6 +429,7 @@ def setup_defaults():
     options.set("socket_timeout", 20)
     options.set("max_retries", 5)
     options.set("abort_on_error", False)
+    options.set("tydligare_tal", False)
     return _special_settings(options)
 
 
@@ -482,6 +490,7 @@ def parsertoconfig(config, parser):
     config.set("socket_timeout", parser.socket_timeout)
     config.set("max_retries", parser.max_retries)
     config.set("abort_on_error", parser.abort_on_error)
+    config.set("tydligare_tal", parser.tydligare_tal)
     return _special_settings(config)
 
 

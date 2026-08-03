@@ -59,6 +59,10 @@ def format_prio(streams, priolist) -> list:
 
 
 def language_prio(config, streams) -> list:
+    if config.get("tydligare_tal"):
+        streams = [s for s in streams if "tydligaretal" in s.language]
+        return streams
+
     if config.get("audio_language"):
         language = config.get("audio_language")
         prioritized = [s for s in streams if s.language == language]
@@ -176,6 +180,8 @@ def select_quality(config, streams):
 
     streams = language_prio(config, streams)
     if not streams:
+        if config.get("tydligare_tal"):
+            raise error.UIException("Can't find any streams with 'tydligare tal'")
         raise error.UIException(f"Can't find any streams with that audio language {config.get('audio_language')}")
 
     if config.get("resolution"):
