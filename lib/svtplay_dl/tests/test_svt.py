@@ -1,6 +1,7 @@
 import unittest
 
 from svtplay_dl.error import ServiceError
+from svtplay_dl.service.svt import _all_videos
 from svtplay_dl.service.svt import _page
 from svtplay_dl.service.svt import _stream_data
 from svtplay_dl.service.svt import Svt
@@ -23,6 +24,10 @@ CYCLIC = ['[{\\"_1\\":2},\\"loaderData\\",{\\"_1\\":2}]']
 # A full article, everything _set_metadata reads.
 FULL = [
     '[{\\"_1\\":2},\\"loaderData\\",{\\"_3\\":4},\\"layouts/RootLayout\\",{\\"_5\\":6},\\"page\\",{\\"_7\\":8,\\"_9\\":10,\\"_11\\":12,\\"_13\\":14,\\"_15\\":17},\\"__typename\\",\\"NewsArticle\\",\\"title\\",\\"Appar tar over barnens fritid\\",\\"published\\",\\"2026-08-28T05:30:05+02:00\\",\\"section\\",{\\"_29\\":16},\\"topMedia\\",\\"Gavleborg\\",{\\"_7\\":18,\\"_19\\":20,\\"_21\\":22,\\"_23\\":24,\\"_25\\":26},\\"Video\\",\\"svtId\\",\\"eZx7Y99\\",\\"metadataTitle\\",\\"Barnens kompisar ersatts av appar\\",\\"description\\",\\"Instagram, TikTok och Snapchat.\\",\\"poster\\",{\\"_27\\":28},\\"metaImage\\",\\"https://www.svtstatic.se/image-news/1280/16:9/x/y/z\\",\\"name\\"]',
+]
+# topMedia plus a clip in the body and one on a live report post.
+MANY = [
+    '[{\\"_1\\":2},\\"loaderData\\",{\\"_3\\":4},\\"layouts/RootLayout\\",{\\"_5\\":6},\\"page\\",{\\"_7\\":8,\\"_9\\":10,\\"_12\\":13,\\"_17\\":18},\\"__typename\\",\\"BreakingArticle\\",\\"topMedia\\",{\\"_11\\":22},\\"svtId\\",\\"body\\",[14],{\\"_15\\":16},\\"video\\",{\\"_11\\":23},\\"liveStream\\",{\\"_19\\":20},\\"posts\\",[21],{\\"_24\\":25},\\"eZx7Y99\\",\\"KxgaW2Z\\",\\"attachment\\",{\\"_11\\":26},\\"jR5GJ4y\\"]',
 ]
 
 
@@ -92,3 +97,38 @@ class metadataTest(unittest.TestCase):
         assert output["id"] == "eZx7Y99"
         assert output["episodethumbnailurl"] is None
         assert output["publishing_datetime"] is None
+
+
+class allVideosTest(unittest.TestCase):
+    def videos(self, chunks):
+        return _all_videos(_page(_stream_data(page_data(chunks))))
+
+    def test_many(self):
+        # The main video first, then the rest in the order the page has them.
+        assert self.videos(MANY) == ["eZx7Y99", "KxgaW2Z", "jR5GJ4y"]
+
+    def test_one(self):
+        assert self.videos(ARTICLE) == ["eZx7Y99"]
+
+    def test_none(self):
+        assert self.videos(NO_VIDEO) == []
+
+    def test_episodes(self):
+        svt = Svt(setup_defaults(), URL)
+        svt._urldata = page_data(MANY)
+        assert svt.find_all_episodes(svt.config) == [
+            "https://www.svtplay.se/video/jR5GJ4y",
+            "https://www.svtplay.se/video/KxgaW2Z",
+            "https://www.svtplay.se/video/eZx7Y99",
+        ]
+
+    def test_episodes_no_payload(self):
+        svt = Svt(setup_defaults(), URL)
+        svt._urldata = "<html></html>"
+        assert svt.find_all_episodes(svt.config) == []
+
+    def test_cyclic(self):
+        # _stream_data can hand back a structure that points at itself.
+        page = {"topMedia": {"svtId": "eZx7Y99"}}
+        page["self"] = page
+        assert _all_videos(page) == ["eZx7Y99"]

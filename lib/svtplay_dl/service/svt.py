@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 
 from svtplay_dl.error import ServiceError
@@ -15,13 +16,7 @@ class Svt(Svtplay):
             yield ServiceError("Can't find video info.")
             return
 
-        video = None
-        for key in ["topMedia", "media", "video"]:
-            data = page.get(key)
-            if isinstance(data, dict) and data.get("svtId"):
-                video = data
-                break
-
+        video = _main_video(page)
         if not video:
             yield ServiceError("Can't find any videos")
             return
@@ -46,6 +41,24 @@ class Svt(Svtplay):
 
         if page.get("published"):
             self.output["publishing_datetime"] = timestamp(page["published"])
+
+    def find_all_episodes(self, config):
+        page = _page(_stream_data(self.get_urldata()))
+        if page is None:
+            logging.error("Can't find video info.")
+            return []
+
+        videos = [f"https://www.svtplay.se/video/{svt_id}" for svt_id in _all_videos(page)]
+        if not videos:
+            logging.error("Can't find any videos.")
+            return videos
+
+        if not self.config.get("reverse_list"):
+            videos = videos[::-1]
+
+        if config.get("all_last") > 0:
+            return videos[: config.get("all_last")]
+        return videos
 
 
 def _stream_data(data):
@@ -99,3 +112,41 @@ def _page(janson):
         if isinstance(data, dict) and isinstance(data.get("page"), dict):
             return data["page"]
     return None
+
+
+def _main_video(page):
+    """The video the page url is about, as opposed to anything else it embeds."""
+    for key in ["topMedia", "media", "video"]:
+        data = page.get(key)
+        if isinstance(data, dict) and data.get("svtId"):
+            return data
+    return None
+
+
+def _all_videos(page):
+    """Every video on the page, the main one first.
+
+    They turn up in a lot of places: topMedia on articles, body on longer ones,
+    liveStream posts on live reports and tagFeed on topic pages.
+    """
+    ids = []
+    seen = set()
+
+    def find(data):
+        if id(data) in seen:
+            return
+        seen.add(id(data))
+
+        if isinstance(data, dict):
+            svt_id = data.get("svtId")
+            if svt_id and svt_id not in ids:
+                ids.append(svt_id)
+            for value in data.values():
+                find(value)
+        elif isinstance(data, list):
+            for value in data:
+                find(value)
+
+    find(_main_video(page))
+    find(page)
+    return ids
