@@ -1,10 +1,8 @@
-import copy
 import json
 import re
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay
-from svtplay_dl.subtitle import subtitle_probe
 
 
 class Svt(Svtplay):
@@ -29,13 +27,7 @@ class Svt(Svtplay):
 
         res = self.http.get(f"https://api.svt.se/video/{video['svtId']}")
 
-        janson = res.json()
-        if "subtitleReferences" in janson:
-            for i in janson["subtitleReferences"]:
-                if "url" in i:
-                    yield from subtitle_probe(copy.copy(self.config), i["url"], output=self.output)
-
-        yield from self._get_video(janson)
+        yield from self._get_video(res.json())
 
 
 def _stream_data(data):
