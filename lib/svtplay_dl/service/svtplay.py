@@ -447,30 +447,7 @@ class Svtplay(Service, MetadataThumbMixin):
             return
         self.output["tvshow"] = self.output["season"] is not None and self.output["episode"] is not None
         if "validFrom" in episode["item"]:
-
-            def _fix_broken_timezone_implementation(value):
-                # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
-                if "+" in value and ":" == value[-3:-2]:
-                    value = value[:-3] + value[-2:]
-                return value
-
-            validfrom = episode["item"]["validFrom"]
-            if "+" in validfrom:
-                timeformat = "%Y-%m-%dT%H:%M:%S.%f%z" if "." in episode["item"]["validFrom"] else "%Y-%m-%dT%H:%M:%S%z"
-                date = time.mktime(
-                    datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["item"]["validFrom"].replace("Z", "")),
-                        timeformat,
-                    ).timetuple(),
-                )
-            else:
-                date = time.mktime(
-                    datetime.datetime.strptime(
-                        _fix_broken_timezone_implementation(episode["item"]["validFrom"].replace("Z", "")),
-                        "%Y-%m-%dT%H:%M:%S",
-                    ).timetuple(),
-                )
-            self.output["publishing_datetime"] = int(date)
+            self.output["publishing_datetime"] = timestamp(episode["item"]["validFrom"])
 
         self.output["title_nice"] = episode["item"]["parent"]["name"]
 
@@ -509,6 +486,20 @@ class Svtplay(Service, MetadataThumbMixin):
             chap = {"title": chapter["name"], "startime": chapter["positionInSeconds"] * 1000}
             chapters.append(chap)
         self.output["chapters"] = chapters
+
+
+def timestamp(value):
+    # cx_freeze cant include .zip file for dateutil and < py37 have issues with timezones with : in it
+    value = value.replace("Z", "")
+    if "+" in value and ":" == value[-3:-2]:
+        value = value[:-3] + value[-2:]
+
+    if "+" in value:
+        timeformat = "%Y-%m-%dT%H:%M:%S.%f%z" if "." in value else "%Y-%m-%dT%H:%M:%S%z"
+    else:
+        timeformat = "%Y-%m-%dT%H:%M:%S"
+
+    return int(time.mktime(datetime.datetime.strptime(value, timeformat).timetuple()))
 
 
 def _dict_to_flatstr(flat):

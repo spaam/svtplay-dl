@@ -3,6 +3,7 @@ import re
 
 from svtplay_dl.error import ServiceError
 from svtplay_dl.service.svtplay import Svtplay
+from svtplay_dl.service.svtplay import timestamp
 
 
 class Svt(Svtplay):
@@ -25,9 +26,26 @@ class Svt(Svtplay):
             yield ServiceError("Can't find any videos")
             return
 
+        self._set_metadata(page, video)
+
         res = self.http.get(f"https://api.svt.se/video/{video['svtId']}")
 
         yield from self._get_video(res.json())
+
+    def _set_metadata(self, page, video):
+        section = page.get("section") or {}
+        poster = video.get("poster") or {}
+
+        self.output["title"] = section.get("name") or page.get("title")
+        self.output["title_nice"] = self.output["title"]
+        self.output["episodename"] = video.get("metadataTitle") or video.get("title") or page.get("title")
+        self.output["id"] = video["svtId"]
+        self.output["episodedescription"] = video.get("description")
+        self.output["episodethumbnailurl"] = poster.get("metaImage")
+        self.output["tvshow"] = False
+
+        if page.get("published"):
+            self.output["publishing_datetime"] = timestamp(page["published"])
 
 
 def _stream_data(data):
