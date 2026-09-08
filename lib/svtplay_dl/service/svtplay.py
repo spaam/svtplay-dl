@@ -304,9 +304,9 @@ class Svtplay(Service, MetadataThumbMixin):
                     collections.append(i)
 
         for i in collections:
-            if not i["selection"]:
+            if not i["defaultSelection"]:
                 continue
-            for epi in i["selection"]["items"]:
+            for epi in i["defaultSelection"]["itemsAdult"]:
                 if epi["item"]["urls"]["svtplay"] not in videos:
                     videos.append(urljoin("http://www.svtplay.se", epi["item"]["urls"]["svtplay"]))
         return videos
