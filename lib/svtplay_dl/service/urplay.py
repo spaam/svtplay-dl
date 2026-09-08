@@ -56,18 +56,21 @@ class Urplay(Service, OpenGraphThumbMixin):
             logging.error("Can't find video info.")
             return episodes
 
-        if "program" in jsondata and "series" in jsondata["program"] and jsondata["program"]["series"]:
-            if "seasonLabels" in jsondata["program"]["series"]:
-                if jsondata["program"]["series"]["seasonLabels"]:
-                    seasons = jsondata["program"]["series"]["seasonLabels"]
-                else:
-                    seasons.append({"id": jsondata["program"]["series"]["id"]})
-        else:
+        seasondata = self._get_seasondata(urldata)
+        if seasondata:
+            superseries = seasondata["superSeriesSeasons"]
+            if isinstance(superseries, list) and superseries:
+                # Show split over several series ids, one per season.
+                seasons = [season["id"] for season in superseries]
+            elif isinstance(seasondata["seriesId"], int):
+                seasons.append(seasondata["seriesId"])
+
+        if not seasons:
             episodes.append(self.url)
 
-        for season in seasons:
+        for seriesid in seasons:
             res = self.http.get(
-                f'https://urplay.se/api/v1/seasonEpisodes?seriesId={season["id"]}',
+                f"https://urplay.se/api/v1/season_episodes?seriesId={seriesid}",
             )
             for episode in res.json()["accessibleEpisodes"]:
                 url = urljoin("https://urplay.se", episode["link"])
@@ -106,8 +109,12 @@ class Urplay(Service, OpenGraphThumbMixin):
 
         self.output["episodethumbnailurl"] = data["image"]["1280x720"]
 
-        if "seriesLabel" in data and data["seriesLabel"]:
-            seasonmatch = re.search(r"S.song (\d+)", data["seriesLabel"])
+        # The RSC payload encodes a missing value as the string "$undefined",
+        # so check the type instead of just truthiness.
+        series = data.get("series")
+        serieslabel = series.get("label") if isinstance(series, dict) else None
+        if serieslabel:
+            seasonmatch = re.search(r"S.song (\d+)", serieslabel)
             if seasonmatch:
                 self.output["season"] = seasonmatch.group(1)
         else:
@@ -118,23 +125,40 @@ class Urplay(Service, OpenGraphThumbMixin):
         download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
 
     def _get_janson(self, urldata):
-        match = re.findall(r"__next_f\.push\((.+?)\)</scri", urldata, re.DOTALL)
-        for i in match:
-            janson = json.loads(i)
-            for jsonlist in janson:
-                if isinstance(jsonlist, str):
-                    index = jsonlist.find(":")
-                    if index > 0:
-                        if jsonlist[index + 1 :].startswith("["):
-                            rawdata = jsonlist[index + 1 :]
-                            try:
-                                json_raw = json.loads(rawdata)
-                            except json.JSONDecodeError:
-                                continue
-                            result = self.find_dict_with_keys(json_raw, ["isAudio", "currentProduct"])
+        return self._find_flight_data(urldata, ["isAudio", "currentProduct"])
 
-                            if result:
-                                return result
+    def _get_seasondata(self, urldata):
+        return self._find_flight_data(urldata, ["superSeriesSeasons", "seriesId"])
+
+    def _find_flight_data(self, urldata, required_keys):
+        # The RSC payload is streamed as a series of __next_f.push() calls that each
+        # append a chunk to one big buffer. A single flight row can be split across
+        # two pushes, so glue everything together before splitting it into rows.
+        buffer = ""
+        for chunk in re.findall(r"__next_f\.push\((\[.*?\])\)</scri", urldata, re.DOTALL):
+            try:
+                janson = json.loads(chunk)
+            except json.JSONDecodeError:
+                continue
+            for item in janson:
+                if isinstance(item, str):
+                    buffer += item
+
+        # Each row looks like "<hex id>:<payload>", one per line.
+        for row in re.split(r"\n(?=[0-9a-f]+:)", buffer):
+            index = row.find(":")
+            if index < 0:
+                continue
+            rawdata = row[index + 1 :]
+            if not rawdata.startswith(("[", "{")):
+                continue
+            try:
+                json_raw = json.loads(rawdata)
+            except json.JSONDecodeError:
+                continue
+            result = self.find_dict_with_keys(json_raw, required_keys)
+            if result:
+                return result
 
         return None
 
