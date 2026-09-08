@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import time
 from shutil import which
 
 from svtplay_dl.error import UIException
@@ -97,7 +96,6 @@ class FFMPEG(VideoRetriever):
             os.remove(playlist_file_audio)
 
     def _run_with_progress(self, cmd, total_duration):
-        start_time = time.time()
         eta = ETA(int(total_duration)) if total_duration else None
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
@@ -109,11 +107,10 @@ class FFMPEG(VideoRetriever):
 
             if not self.config.get("silent") and total_duration:
                 pos = min(int(out_time), int(total_duration))
-                elapsed = time.time() - start_time
-                msg = f"speed: {out_time / elapsed:.2f}x" if elapsed > 0 else ""
+                msg = ""
                 if eta:
                     eta.update(pos)
-                    msg = f"ETA: {eta} | {msg}" if msg else f"ETA: {eta}"
+                    msg = f"ETA: {eta}"
                 progressbar(int(total_duration), pos, msg)
 
         process.wait()
