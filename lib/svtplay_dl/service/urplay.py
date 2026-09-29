@@ -144,12 +144,7 @@ class Urplay(Service, OpenGraphThumbMixin):
                 if isinstance(item, str):
                     buffer += item
 
-        # Each row looks like "<hex id>:<payload>", one per line.
-        for row in re.split(r"\n(?=[0-9a-f]+:)", buffer):
-            index = row.find(":")
-            if index < 0:
-                continue
-            rawdata = row[index + 1 :]
+        for rawdata in self._flight_rows(buffer):
             if not rawdata.startswith(("[", "{")):
                 continue
             try:
@@ -161,6 +156,30 @@ class Urplay(Service, OpenGraphThumbMixin):
                 return result
 
         return None
+
+    def _flight_rows(self, buffer):
+        # Rows look like "<hex id>:<payload>\n", except text rows "<hex id>:T<hex len>,<text>"
+        # which are sized in UTF-8 bytes and have no trailing newline, so the next
+        # row follows the text directly and can't be found by splitting on newlines.
+        data = buffer.encode("utf-8")
+        pos = 0
+        while pos < len(data):
+            match = re.compile(rb"([0-9a-f]+):(T([0-9a-f]+),)?").match(data, pos)
+            if not match:
+                # Not a row start, skip to the next line.
+                end = data.find(b"\n", pos)
+                pos = len(data) if end < 0 else end + 1
+                continue
+            if match.group(2):
+                end = match.end() + int(match.group(3), 16)
+                yield data[match.end() : end].decode("utf-8", errors="replace")
+                pos = end
+                continue
+            end = data.find(b"\n", match.end())
+            if end < 0:
+                end = len(data)
+            yield data[match.end() : end].decode("utf-8", errors="replace")
+            pos = end + 1
 
     def find_dict_with_keys(self, obj, required_keys):
         if isinstance(obj, dict):
