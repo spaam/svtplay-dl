@@ -180,6 +180,8 @@ def adaptionset(attributes, elements, url, baseurl=None):
                 codec = "hevc"
             elif codecs and codecs[:3] == "dvh":
                 codec = "dvhevc"
+            elif codecs and codecs[:3] == "av1":
+                codec = "av1"
             else:
                 codec = codecs
             if not resolution and "maxWidth" in i.attrib and "maxHeight" in i.attrib:
