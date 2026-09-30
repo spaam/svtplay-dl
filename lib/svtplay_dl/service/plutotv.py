@@ -31,7 +31,6 @@ class Plutotv(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find what video it is or live is not supported")
             return
 
-        self._janson()
         episodeid = urlmatch.group(4)
         if episodeid is None:
             urlmatch = re.search(self.urlreg2, parse.path)
@@ -39,6 +38,53 @@ class Plutotv(Service, OpenGraphThumbMixin):
                 yield ServiceError("Can't find what video it is or live is not supported")
                 return
             episodeid = urlmatch.group(2)
+
+        match = re.search(r'cript src="(/_next/static/chunks/pages/_app-[a-f0-9]+\.js)" defer="', self.data)
+        if not match:
+            yield ServiceError("Can't find app js file")
+            return
+        self._janson()
+        self.appversion = janson_nn["props"]["globalAppVersion"]
+        appres = self.http.request("get", f"https://pluto.tv{match.group(1)}").text
+
+        match = re.search(r'(query StreamingUrl\(\$params[^"]+)"', appres)
+        if not match:
+            yield ServiceError("Can't find stream query")
+            return
+        query = json.loads('"' + match.group(1) + '"')
+
+        payload = {
+            "operationName": "StreamingUrl",
+            "query": query,
+            "variables": {
+                "params": {
+                    "appVersion": self.appversion,
+                    "contentId": episodeid,
+                    "contentType": "vod",
+                    "drm": "widevine",
+                    "drmLevel": "L3",
+                    "streamType": "stitcher",
+                },
+            },
+        }
+
+        gql_res = self.http.request(
+            "post",
+            "https://pluto.tv/api/tn/video/graphql/",
+            json=payload,
+        )
+
+        path = None
+        for i in gql_res.json()["data"]["streamingUrl"]["stitcherPaths"]:
+            if i["type"] == "hls":
+                path = i["path"]
+        if path is None:
+            yield ServiceError("Can't find hls playlist. this video is not supported")
+            return
+
+        videoserver = janson_nn["props"]["stitcherBaseUrl"]
+        playlist = f"{videoserver}{path[1:]}"
+
         if "movieMetadata" in janson_nn["props"]["pageProps"] and janson_nn["props"]["pageProps"]["movieMetadata"]:
             self.output["title"] = janson_nn["props"]["pageProps"]["movieMetadata"]["title"]
         if "episodeMetadata" in janson_nn["props"]["pageProps"] and janson_nn["props"]["pageProps"]["episodeMetadata"]:
@@ -50,7 +96,6 @@ class Plutotv(Service, OpenGraphThumbMixin):
             self.output["season"] = janson_nn["props"]["pageProps"]["episodeMetadata"]["seasonNum"]
             self.output["episode"] = janson_nn["props"]["pageProps"]["episodeMetadata"]["episodeNum"]
         self.output["id"] = episodeid[:8]
-        url = f"https://cfd-v4-service-channel-stitcher-use1-1.prd.pluto.tv/v2/stitch/hls/episode/{episodeid}/master.m3u8"
         sid = str(uuid.uuid1())
         params = {
             "advertisingId": "",
@@ -76,14 +121,14 @@ class Plutotv(Service, OpenGraphThumbMixin):
             "jwt": self.sessionToken,
             "includeExtendedEvents": "true",
         }
-        res = self.http.request("get", url, params)
+        res = self.http.request("get", playlist, params)
         playlists = hlsparse(
             self.config,
             res,
             res.request.url,
             self.output,
+            authorization=f"Bearer {self.sessionToken}",
             filter=True,
-            query_pass=True,
             fetcher=FFMPEG,
         )
 
@@ -142,7 +187,6 @@ class Plutotv(Service, OpenGraphThumbMixin):
 
     def _janson(self) -> None:
         self.playbackid = str(uuid.uuid1())
-        self.appversion = re.search('appVersion" content="([^"]+)"', self.data)
         self.query = {
             "query": "query PtvStart($params: StartParameters!) {\n  ptvStart(params: $params) {\n    deviceId\n    session {\n      id\n      jwt\n    }\n    refreshInSec\n  }\n}",
             "variables": {
