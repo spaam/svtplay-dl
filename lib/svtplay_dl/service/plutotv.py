@@ -26,6 +26,10 @@ class Plutotv(Service, OpenGraphThumbMixin):
             yield ServiceError("Can't find video info")
             return
         janson_nn = json.loads(match.group(1))
+        if janson_nn["page"] == "/404":
+            yield ServiceError("Can't find video.")
+            return
+
         urlmatch = re.search(self.urlreg, parse.path)
         if not urlmatch:
             yield ServiceError("Can't find what video it is or live is not supported")
@@ -75,7 +79,8 @@ class Plutotv(Service, OpenGraphThumbMixin):
         )
 
         path = None
-        for i in gql_res.json()["data"]["streamingUrl"]["stitcherPaths"]:
+        gql_json = gql_res.json()
+        for i in gql_json["data"]["streamingUrl"]["stitcherPaths"]:
             if i["type"] == "hls":
                 path = i["path"]
         if path is None:
