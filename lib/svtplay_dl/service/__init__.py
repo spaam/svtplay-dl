@@ -15,6 +15,7 @@ from svtplay_dl.utils.parser import setup_defaults
 class Service:
     supported_domains = []
     supported_domains_re = []
+    urldata_headers = None
 
     def __init__(self, config, _url, http=None):
         self._url = _url
@@ -64,7 +65,7 @@ class Service:
 
     def get_urldata(self):
         if self._urldata is None:
-            self._urldata = self.http.request("get", self.url).text
+            self._urldata = self.http.request("get", self.url, headers=self.urldata_headers).text
         return self._urldata
 
     @classmethod

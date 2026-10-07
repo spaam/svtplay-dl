@@ -16,6 +16,8 @@ class Plutotv(Service, OpenGraphThumbMixin):
     supported_domains = ["pluto.tv"]
     urlreg = r"/(movies|shows)/([^/]+)(/episode/([^/]+))?"
     urlreg2 = r"/(movies|shows)/([^/]+)"
+    # pluto.tv redirects browsers to the local region, eg /us/ -> /se/
+    urldata_headers = {"User-Agent": "curl/8.5.0"}
 
     def get(self):
         self.data = self.get_urldata()
