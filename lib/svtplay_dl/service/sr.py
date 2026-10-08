@@ -62,28 +62,50 @@ class Sr(Service, OpenGraphThumbMixin):
 
     def _get_janson(self, urldata):
         match = re.findall(r"__next_f\.push\((.+?)\)</script>", urldata, re.DOTALL)
+        payload = ""
         for i in match:
-            janson = json.loads(i)
-            for jsonlist in janson:
+            for jsonlist in json.loads(i):
                 if isinstance(jsonlist, str):
-                    index = jsonlist.find(":")
-                    if index > 0:
-                        if jsonlist[index + 1 :].startswith("["):
-                            rawdata = jsonlist[index + 1 :]
-                            try:
-                                json_raw = json.loads(rawdata)
-                            except json.JSONDecodeError:
-                                continue
-                            # news
-                            found = self.find_dict_with_keys(json_raw, ["showSurvey", "article"])
-                            if found:
-                                return found
-                            # episodes
-                            found = self.find_dict_with_keys(json_raw, ["episode", "episodeCollections", "trackList"])
-                            if found:
-                                return found
+                    payload += jsonlist
+
+        for row in self._rsc_rows(payload):
+            if not row.startswith("["):
+                continue
+            try:
+                json_raw = json.loads(row)
+            except json.JSONDecodeError:
+                continue
+            # news
+            found = self.find_dict_with_keys(json_raw, ["article"])
+            if found and isinstance(found["article"], dict) and "playAudio" in found["article"]:
+                return found
+            # episodes
+            found = self.find_dict_with_keys(json_raw, ["episode", "episodeCollections", "trackList"])
+            if found:
+                return found
 
         return None
+
+    def _rsc_rows(self, payload):
+        # react server components payload: "id:value\n" rows, except text rows "id:T<hexlen>,<text>"
+        # which are length prefixed (in utf-8 bytes), may contain newlines and have no row terminator
+        data = payload.encode("utf-8")
+        pos = 0
+        while pos < len(data):
+            colon = data.find(b":", pos)
+            if colon < 0:
+                return
+            match = re.match(rb"T([0-9a-fA-F]+),", data[colon + 1 : colon + 20])
+            if match:
+                start = colon + 1 + match.end()
+                pos = start + int(match.group(1), 16)
+                yield data[start:pos].decode("utf-8", errors="replace")
+                continue
+            end = data.find(b"\n", colon)
+            if end < 0:
+                end = len(data)
+            yield data[colon + 1 : end].decode("utf-8", errors="replace")
+            pos = end + 1
 
     def find_dict_with_keys(self, obj, required_keys):
         if isinstance(obj, dict):
