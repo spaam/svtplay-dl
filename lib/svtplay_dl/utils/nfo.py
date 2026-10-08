@@ -63,9 +63,10 @@ def write_nfo_tvshow(output, config):
     cconfig.set("output", config.get("output"))
     cconfig.set("path", config.get("path"))
     cconfig.set("subfolder", config.get("subfolder"))
-    cconfig.set("filename", "tvshow.nfo")
+    cconfig.set("filename", "tvshow")
 
     loutput = output.copy()
+    loutput["ext"] = "nfo"
     filename = formatname(loutput, cconfig)
     dupe, fileame = find_dupes(loutput, cconfig, False)
     if dupe and not cconfig.get("force_nfo"):
