@@ -1,0 +1,35 @@
+WEBVTT
+
+STYLE
+::cue {
+    color: #DFDFDF;
+}
+::cue(.huvudpratare) {
+    color: #00FFFF;
+}
+::cue(.ljud) {
+    color: #FF00FF;
+}
+::cue(.ljudskylt) {
+    color: #FF00FF;
+}
+::cue(.relivemark) {
+    color: #FF0000;
+}
+::cue(.sang) {
+    color: #00FF00;
+}
+
+srt1
+00:00:02.280 --> 00:00:05.200 align:left position:22%
+<c.teletext>Agnes.</c>
+
+srt2
+00:00:05.360 --> 00:00:08.640 align:left position:22%
+<c.teletext>–Kom inte in, jag är naken!
+–Men sjukhuset, då?</c>
+
+srt3
+00:00:08.800 --> 00:00:12.000 align:left position:22%
+<c.teletext>–Jag ska göra mig klar.
+–Du får 20 minuter max.</c>

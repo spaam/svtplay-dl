@@ -1,0 +1,13 @@
+WEBVTT
+
+se-2-0
+00:01:04.480 --> 00:01:06.480 align:left position:22%
+<c.teletext>subtitel line 1</c>
+
+se-3-0
+00:01:06.640 --> 00:01:14.560 align:left position:22%
+<c.teletext>subtitel line 2</c>
+
+se-4-0
+00:01:14.720 --> 00:01:21.120 align:left position:22%
+<c.teletext>subtitel line 3</c>

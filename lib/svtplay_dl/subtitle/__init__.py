@@ -55,7 +55,6 @@ class subtitle:
         self.subtype = subtype
         self.http = HTTP(config)
         self.subfix = kwargs.get("subfix", None)
-        self.bom = False
         self.name = kwargs.pop("name", None)
         self.output = kwargs.pop("output", None)
         self.kwargs = kwargs
@@ -82,7 +81,6 @@ class subtitle:
         data = None
         if "mtgx" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
             subdata.encoding = "utf-8"
-            self.bom = True
 
         if self.subtype == "tt":
             data = self.tt(subdata)
@@ -93,8 +91,6 @@ class subtitle:
         if self.subtype == "smi":
             data = self.smi(subdata)
         if self.subtype == "wrst":
-            if "tv4play" in self.url and subdata.content[:3] == b"\xef\xbb\xbf":
-                self.bom = True
             subdata.encoding = subdata.apparent_encoding
             data = self.wrst(subdata)
         if self.subtype == "wrstsegment":
@@ -238,63 +234,10 @@ class subtitle:
         return self._wrst(subdata.text)
 
     def _wrst(self, data):
-        ssubdata = StringIO(data)
-        srt = ""
-        subtract = False
-        number_b = 1
-        number = 0
-        block = 0
-        subnr = False
-        cuetime = False
-
-        for i in ssubdata.readlines():
-            match = re.search(r"^[\r\n]+", i)
-            match2 = re.search(r"([\d:\.]+ --> [\d:\.]+)", i)
-            match3 = re.search(r"^(\d+)\s", i)
-            if match and number_b == 1 and self.bom:
-                continue
-            elif match and number_b > 1:
-                block = 0
-                srt += "\n"
-                cuetime = False
-            elif match2:
-                cuetime = True
-                if not subnr:
-                    srt += f"{number_b}\n"
-                matchx = re.search(r"(?P<h1>\d+):(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<h2>\d+):(?P<m2>\d+):(?P<s2>[\d\.]+)", i)
-                if matchx:
-                    hour1 = int(matchx.group("h1"))
-                    hour2 = int(matchx.group("h2"))
-                    if int(number) == 1:
-                        if hour1 > 9:
-                            subtract = True
-                    if subtract:
-                        hour1 -= 10
-                        hour2 -= 10
-                else:
-                    matchx = re.search(r"(?P<m1>\d+):(?P<s1>[\d\.]+) --> (?P<m2>\d+):(?P<s2>[\d\.]+)", i)
-                    hour1 = 0
-                    hour2 = 0
-                time = (
-                    f"{hour1:02d}:{matchx.group('m1')}:{matchx.group('s1').replace('.', ',')} --> "
-                    f"{hour2:02d}:{matchx.group('m2')}:{matchx.group('s2').replace('.', ',')}\n"
-                )
-                srt += time
-                block = 1
-                subnr = False
-                number_b += 1
-            elif match3 and block == 0:
-                number = match3.group(1)
-                srt += f"{number}\n"
-                subnr = True
-            else:
-                if not cuetime:
-                    continue
-                sub = _wsrt_colors(self.config.get("convert_subtitle_colors"), i)
-                srt += sub.strip()
-                srt += "\n"
-        srt = decode_html_entities(srt)
-        return srt
+        cues = _wsrt_cues(data, self.config.get("convert_subtitle_colors"))
+        if cues and cues[0][0] >= 36000:  # some services start the timeline at 10:00:00
+            cues = [[start - 36000, end - 36000, text] for start, end, text in cues]
+        return _wsrt_srt(cues)
 
     def wrstsegment(self, subdata):
         pretext = []
@@ -357,61 +300,45 @@ class subtitle:
 
 def _wrstsegments(entries: list, convert=False) -> str:
     time = 0
-    subs = []
+    cues = []
     for cont in entries:
-        cont = re.sub(r"\n\n[-0-9a-f\d]+\n", "\n", cont)  # remove sequence numbers
-        text = cont.split("\n")
-        for t in text:  # is in text[1] for tv4play, but this should be more future proof
-            if "X-TIMESTAMP-MAP=MPEGTS" in t:
-                time = float(re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", t).group(1)) / 90000
-                if time > 0:
-                    time -= 10
-        itmes = []
-        if len(text) > 1:
-            for n in text:
-                if n:  # don't get the empty lines.
-                    itmes.append(n)
+        timestamp_map = re.search(r"X-TIMESTAMP-MAP=MPEGTS:(\d+)", cont)
+        if timestamp_map:
+            time = float(timestamp_map.group(1)) / 90000
+            if time > 0:
+                time -= 10
+        for cue in _wsrt_cues(cont, convert, time):
+            # a cue that spans two segments is repeated in both of them
+            if cues and cue[2] and cue[2] == cues[-1][2]:
+                cues[-1][1] = cue[1]
+            else:
+                cues.append(cue)
+    return _wsrt_srt(cues)
 
-        several_items = False
-        skip = False
-        pre_date_skip = True
-        sub = []
-        for x in range(len(itmes)):
-            item = itmes[x].rstrip()
-            if not item.rstrip():
-                continue
-            if strdate(item) and len(subs) > 0:
-                if len(subs[-1]) > 1 and len(itmes) > x + 1 and itmes[x + 1] == subs[-1][1]:
-                    ha = strdate(subs[-1][0])
-                    ha3 = strdate(item)
-                    second = str2sec(ha3.group(4)) + time
-                    subs[-1][0] = f"{ha.group(1).replace('.', ',')} --> {sec2str(second).replace('.', ',')}"
-                    skip = True
-                    pre_date_skip = False
-                    continue
-            has_date = strdate(item)
-            if has_date:
-                if several_items:
-                    subs.append(sub)
-                    sub = []
-                skip = False
-                first = str2sec(has_date.group(1)) + time
-                second = str2sec(has_date.group(4)) + time
-                sub.append(f"{sec2str(first).replace('.', ',')} --> {sec2str(second).replace('.', ',')}")
-                several_items = True
-                pre_date_skip = False
-            elif has_date is None and skip is False and pre_date_skip is False:
-                sub.append(_wsrt_colors(convert, item))
-        if sub:
-            subs.append(sub)
-    string = ""
-    nr = 1
-    for sub in subs:
-        string += "{}\n{}\n\n".format(nr, "\n".join(sub))
-        nr += 1
 
-    string = re.sub("\r", "", string)
-    return string
+def _wsrt_cues(data: str, convert=False, offset=0.0) -> list:
+    """Parse WebVTT into a list of [start, end, lines], skipping cue identifiers, STYLE and NOTE blocks."""
+    cues = []
+    for block in re.split(r"\n[ \t]*\n", data.lstrip("\ufeff").replace("\r", "")):
+        lines = block.strip("\n").split("\n")
+        # the timestamp is on the first line, or the second one if the cue has an identifier
+        for index, line in enumerate(lines[:2]):
+            timestamp = re.search(r"^((?:\d+:)?\d+:\d+[.,]\d+) --> ((?:\d+:)?\d+:\d+[.,]\d+)", line)
+            if timestamp:
+                text = [decode_html_entities(_wsrt_colors(convert, i).rstrip()) for i in lines[index + 1 :]]
+                start = str2sec(timestamp.group(1).replace(",", ".")) + offset
+                end = str2sec(timestamp.group(2).replace(",", ".")) + offset
+                cues.append([start, end, [i for i in text if i]])
+                break
+    return cues
+
+
+def _wsrt_srt(cues: list) -> str:
+    blocks = []
+    for nr, (start, end, text) in enumerate(cues, 1):
+        timestamp = f"{sec2str(start)} --> {sec2str(end)}".replace(".", ",")
+        blocks.append("\n".join([str(nr), timestamp, *text]))
+    return "\n\n".join(blocks) + "\n" if blocks else ""
 
 
 def _resolv(entries):

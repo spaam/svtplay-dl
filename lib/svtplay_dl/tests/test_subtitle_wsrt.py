@@ -45,13 +45,29 @@ def test_wsrt_style_hash():
     )
 
 
+def test_wsrt_style_text():
+    data = [parse("wsrt-style-text.srt")]
+    assert (
+        svtplay_dl.subtitle._wrstsegments(data)
+        == "1\n00:00:02,280 --> 00:00:05,200\nAgnes.\n\n2\n00:00:05,360 --> 00:00:08,640\n–Kom inte in, jag är naken!\n–Men sjukhuset, då?\n\n3\n00:00:08,800 --> 00:00:12,000\n–Jag ska göra mig klar.\n–Du får 20 minuter max.\n"
+    )
+
+
+def test_wsrt_cue_identifier():
+    data = [parse("wsrt-cue-identifier.srt")]
+    assert (
+        svtplay_dl.subtitle._wrstsegments(data)
+        == "1\n00:01:04,480 --> 00:01:06,480\nsubtitel line 1\n\n2\n00:01:06,640 --> 00:01:14,560\nsubtitel line 2\n\n3\n00:01:14,720 --> 00:01:21,120\nsubtitel line 3\n"
+    )
+
+
 def test_wrst_segment():
     dataj = json.loads(parse("wsrt-segments.json"))
-    data = parse2("wrst-correct.srt") + "\n"  # last \n to fix UT with extra new line
+    data = parse2("wrst-correct.srt")
     assert svtplay_dl.subtitle._wrstsegments(dataj) == data
 
 
 def test_wrst_segment2():
     dataj = json.loads(parse("wsrt-segments-2.json"))
-    data = parse2("wrst-correct-2.srt") + "\n"  # last \n to fix UT with extra new line
+    data = parse2("wrst-correct-2.srt")
     assert svtplay_dl.subtitle._wrstsegments(dataj) == data
