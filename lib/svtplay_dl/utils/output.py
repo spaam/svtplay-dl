@@ -136,6 +136,12 @@ def filename(stream):
     return True
 
 
+def _namepart(value):
+    """Keep a filename template substitution from escaping the output directory."""
+    value = re.sub(r"[/\\\0]", "", value)
+    return re.sub(r"\.{2,}", ".", value)
+
+
 def sanitize(name):
     dirname = name.parent
     basename = str(name.name)
@@ -221,9 +227,9 @@ def _formatname(output, config):
     if output.get("episodename"):
         replacements["episodename"] = filenamify(output["episodename"])
     if output.get("id"):
-        replacements["id"] = output["id"]
+        replacements["id"] = _namepart(output["id"])
     if output.get("service"):
-        replacements["service"] = output["service"]
+        replacements["service"] = _namepart(output["service"])
 
     for key, value in replacements.items():
         name = name.replace(f"{{{key}}}", value)
