@@ -423,3 +423,41 @@ class formatnameTest2(unittest.TestCase):
             "ext": "m4a",
         }
         assert str(_formatname(service.output, config)) == "tetris.m4a"
+
+
+class formatnameIdTest(unittest.TestCase):
+    """The id comes from the service, which often reads it straight off the page."""
+
+    def _name(self, value):
+        config = setup_defaults()
+        service = Service(config, "http://localhost")
+        service.output["title"] = "kalle"
+        service.output["id"] = value
+        service.output["ext"] = "mp4"
+        return str(_formatname(service.output, config))
+
+    def test_formatnameIdRelative(self):
+        assert self._name("../../../../../../tmp/pwned") == "kalle-.tmppwned-service.mp4"
+
+    def test_formatnameIdAbsolute(self):
+        assert self._name("/etc/passwd") == "kalle-etcpasswd-service.mp4"
+
+    def test_formatnameIdBackslash(self):
+        assert self._name("..\\..\\windows") == "kalle-.windows-service.mp4"
+
+    def test_formatnameIdUntouched(self):
+        assert self._name("eZx7Y99") == "kalle-eZx7Y99-service.mp4"
+
+    def test_formatnameIdStaysInPath(self):
+        config = setup_defaults()
+        if platform.system() == "Windows":
+            config.set("path", "c:\\")
+            parent = "c:\\"
+        else:
+            config.set("path", "/tmp")
+            parent = "/tmp"
+        service = Service(config, "http://localhost")
+        service.output["title"] = "kalle"
+        service.output["id"] = "../../../../../../tmp/pwned"
+        service.output["ext"] = "mp4"
+        assert str(formatname(service.output, config).parent) == parent
