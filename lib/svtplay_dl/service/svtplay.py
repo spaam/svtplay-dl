@@ -346,6 +346,9 @@ class Svtplay(Service, MetadataThumbMixin):
             return
 
         other = modulej["details"]["heading"]
+        # The details heading is nowadays the show name, the episode name is in item.name
+        if other == name:
+            other = data["item"].get("name")
         vid = hashlib.sha256(vid.encode("utf-8")).hexdigest()[:7]
 
         if name == other:
