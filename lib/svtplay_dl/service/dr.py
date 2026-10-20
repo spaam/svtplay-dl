@@ -90,16 +90,14 @@ class Dr(Service, OpenGraphThumbMixin):
                     yield i
 
         if subs:
-            if any("Dansk" == y.name for y in subs):
-                for i in subs:
-                    if i.name == "Dansk":
-                        yield i
-            elif any("CombinedLanguageSubtitles" == y.name for y in subs):
-                for i in subs:
-                    if i.name == "CombinedLanguageSubtitles":
-                        yield i
-                else:
-                    yield from subs
+            preferred = ["Dansk", "CombinedLanguageSubtitles", "DanishLanguageSubtitles", "Fremmedsprogstekster", "ForeignLanguageSubtitles"]
+            for name in preferred:
+                sub = next((i for i in subs if i.name == name), None)
+                if sub is not None:
+                    yield sub
+                    break
+            else:
+                yield from subs
 
     def find_all_episodes(self, config):
         episodes = []
