@@ -22,6 +22,9 @@ class Tv4play(Service, OpenGraphThumbMixin):
     supported_domains = ["tv4play.se"]
 
     def get(self):
+        if self.config.get("token") is None:
+            yield ServiceError("You need a token to access the website. see https://svtplay-dl.se/tv4play/")
+            return
         token = self._login()
         if token is None:
             yield ServiceError("You need a token to access the website. see https://svtplay-dl.se/tv4play/")
@@ -131,8 +134,6 @@ class Tv4play(Service, OpenGraphThumbMixin):
         return match
 
     def _login(self):
-        if self.config.get("token") is None:
-            return None
         res = self.http.request(
             "post",
             "https://auth.tv4.a2d.tv/v2/auth/token",
