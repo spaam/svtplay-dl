@@ -1,16 +1,25 @@
 # ex:ts=4:sw=4:sts=4:et
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
+import sys
 
 
 class UIException(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(message)
+        sys.exit(1)
 
 
 class ServiceError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        sys.exit(128)
+
+
+class NRPException(Exception):
     pass
 
 
-class NoRequestedProtocols(UIException):
+class NoRequestedProtocols(NRPException):
     """
     This excpetion is thrown when the service provides streams,
     but not using any accepted protocol (as decided by
