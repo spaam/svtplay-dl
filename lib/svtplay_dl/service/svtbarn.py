@@ -10,6 +10,7 @@ URL_VIDEO_API = "https://api.svt.se/video/"
 
 class Svtbarn(Svtplay):
     supported_domains = ["svtbarn.se"]
+    info_search_expr = r"<script id=\"__NEXT_DATA__\" type=\"application\/json\">({.+})<\/script>"
 
     def get(self):
         urldata = self.get_urldata()
