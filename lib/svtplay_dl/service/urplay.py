@@ -26,14 +26,14 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Could not find video data.")
             return
 
-        vid = jsondata["currentProduct"]["id"]
+        vid = jsondata["id"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
         if res.status_code == 403:
             yield ServiceError("The video is geoblocked. Can't download this video")
             return
 
-        self.outputfilename(jsondata["currentProduct"])
+        self.outputfilename(jsondata)
 
         if "dash" in res.json()["sources"]:
             yield from dashparse(
@@ -125,12 +125,18 @@ class Urplay(Service, OpenGraphThumbMixin):
         download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
 
     def _get_janson(self, urldata):
-        return self._find_flight_data(urldata, ["isAudio", "currentProduct"])
+        current_product = self._find_flight_data(urldata, ["isAudio", "currentProduct"])
+        if current_product:
+            return current_product["currentProduct"]
+        product_id = re.search(r"/program/(\d+)(?:-|/|$)", self.url)
+        if product_id:
+            return self._find_flight_data(urldata, ["id", "title", "image"], int(product_id.group(1)))
+        return self._find_flight_data(urldata, ["id", "title", "image"])
 
     def _get_seasondata(self, urldata):
         return self._find_flight_data(urldata, ["superSeriesSeasons", "seriesId"])
 
-    def _find_flight_data(self, urldata, required_keys):
+    def _find_flight_data(self, urldata, required_keys, target_id=None):
         # The RSC payload is streamed as a series of __next_f.push() calls that each
         # append a chunk to one big buffer. A single flight row can be split across
         # two pushes, so glue everything together before splitting it into rows.
@@ -151,7 +157,7 @@ class Urplay(Service, OpenGraphThumbMixin):
                 json_raw = json.loads(rawdata)
             except json.JSONDecodeError:
                 continue
-            result = self.find_dict_with_keys(json_raw, required_keys)
+            result = self.find_dict_with_keys(json_raw, required_keys, target_id)
             if result:
                 return result
 
@@ -181,17 +187,17 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield data[match.end() : end].decode("utf-8", errors="replace")
             pos = end + 1
 
-    def find_dict_with_keys(self, obj, required_keys):
+    def find_dict_with_keys(self, obj, required_keys, target_id=None):
         if isinstance(obj, dict):
-            if all(k in obj for k in required_keys):
+            if all(k in obj for k in required_keys) and (target_id is None or obj.get("id") == target_id):
                 return obj
             for value in obj.values():
-                result = self.find_dict_with_keys(value, required_keys)
+                result = self.find_dict_with_keys(value, required_keys, target_id)
                 if result is not None:
                     return result
         elif isinstance(obj, list):
             for item in obj:
-                result = self.find_dict_with_keys(item, required_keys)
+                result = self.find_dict_with_keys(item, required_keys, target_id)
                 if result is not None:
                     return result
         return None
