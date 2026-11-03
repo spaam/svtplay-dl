@@ -213,6 +213,14 @@ def gen_parser(version="unknown"):
         default=False,
         help="only download videos with 'tydligare tal' independent on language",
     )
+    general.add_argument(
+        "--season-modifier",
+        dest="season_modifier",
+        metavar="N",
+        default=0,
+        type=int,
+        help="add N to the season number we get from the service",
+    )
 
     quality = parser.add_argument_group("Quality")
     quality.add_argument(
@@ -430,6 +438,7 @@ def setup_defaults():
     options.set("max_retries", 5)
     options.set("abort_on_error", False)
     options.set("tydligare_tal", False)
+    options.set("season_modifier", 0)
     return _special_settings(options)
 
 
@@ -491,6 +500,7 @@ def parsertoconfig(config, parser):
     config.set("max_retries", parser.max_retries)
     config.set("abort_on_error", parser.abort_on_error)
     config.set("tydligare_tal", parser.tydligare_tal)
+    config.set("season_modifier", parser.season_modifier)
     return _special_settings(config)
 
 

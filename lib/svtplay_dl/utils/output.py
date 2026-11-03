@@ -190,10 +190,16 @@ def formatname(output, config):
         return name.expanduser()
 
 
+def get_season(output, config):
+    if not output.get("season"):
+        return output.get("season")
+    return int(output["season"]) + (config.get("season_modifier") or 0)
+
+
 def _formatname(output, config):
     name = config.get("filename")
     # Handle the s{season}e{episode} block as a single unit (only when both present together)
-    season = f"{int(output['season']):02d}" if output.get("season") else None
+    season = f"{get_season(output, config):02d}" if output.get("season") else None
     episode = f"{int(output['episode']):02d}" if output.get("episode") else None
 
     if season and episode:

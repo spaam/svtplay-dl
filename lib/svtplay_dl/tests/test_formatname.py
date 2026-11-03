@@ -424,6 +424,20 @@ class formatnameTest2(unittest.TestCase):
         }
         assert str(_formatname(service.output, config)) == "tetris.m4a"
 
+    def test_formatnameSeasonModifier(self):
+        config = setup_defaults()
+        config.set("season_modifier", 2)
+        service = Service(config, "http://localhost")
+        service.output.update({"title": "tetris", "season": 3, "episode": 1, "id": "40043f0", "service": "svtplay", "ext": "mp4"})
+        assert str(_formatname(service.output, config)) == "tetris.s05e01-40043f0-svtplay.mp4"
+
+    def test_formatnameSeasonModifierNoSeason(self):
+        config = setup_defaults()
+        config.set("season_modifier", 2)
+        service = Service(config, "http://localhost")
+        service.output.update({"title": "tetris", "season": None, "episode": None, "id": "40043f0", "service": "svtplay", "ext": "mp4"})
+        assert str(_formatname(service.output, config)) == "tetris-40043f0-svtplay.mp4"
+
 
 class formatnameIdTest(unittest.TestCase):
     """The id comes from the service, which often reads it straight off the page."""

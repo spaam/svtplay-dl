@@ -5,6 +5,7 @@ from datetime import datetime
 
 from svtplay_dl.utils.output import find_dupes
 from svtplay_dl.utils.output import formatname
+from svtplay_dl.utils.output import get_season
 
 # https://kodi.wiki/view/NFO_files/TV_shows#nfo_Tags
 
@@ -20,7 +21,7 @@ def write_nfo_episode(output, config):
     if output["episodename"]:
         ET.SubElement(root, "title").text = output["episodename"]
     if output["season"]:
-        ET.SubElement(root, "season").text = str(output["season"])
+        ET.SubElement(root, "season").text = str(get_season(output, config))
     if output["episode"]:
         ET.SubElement(root, "episode").text = str(output["episode"])
     ET.SubElement(root, "plot").text = output["episodedescription"]
