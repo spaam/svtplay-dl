@@ -3,6 +3,7 @@
 # -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*-
 # The unittest framwork doesn't play nice with pylint:
 #   pylint: disable-msg=C0103
+import pathlib
 import unittest
 from unittest.mock import patch
 
@@ -109,3 +110,15 @@ class EtaTest(unittest.TestCase):
         eta.update(90)
         assert eta.left == 10
         assert str(eta) == "0:00:10"
+
+
+class SanitizeTest(unittest.TestCase):
+    def test_keep_ellipsis(self):
+        name = pathlib.Path("Movie with ... in title (2019).mp4")
+        assert svtplay_dl.utils.output.sanitize(name) == name
+
+    def test_collapse_double_dot(self):
+        assert svtplay_dl.utils.output.sanitize(pathlib.Path("foo..mp4")) == pathlib.Path("foo.mp4")
+
+    def test_blocklist(self):
+        assert svtplay_dl.utils.output.sanitize(pathlib.Path("a/b:c?.mp4")) == pathlib.Path("a/bc.mp4")

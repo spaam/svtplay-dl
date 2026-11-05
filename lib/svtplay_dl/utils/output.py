@@ -150,7 +150,9 @@ def sanitize(name):
         if i in basename:
             basename = basename.replace(i, "")
 
-    return dirname.joinpath(basename.replace("..", "."))
+    # Collapse accidental double dots (e.g. "name..mp4"), but keep ellipses ("...") intact
+    basename = re.sub(r"(?<!\.)\.\.(?!\.)", ".", basename)
+    return dirname.joinpath(basename)
 
 
 def formatname(output, config):

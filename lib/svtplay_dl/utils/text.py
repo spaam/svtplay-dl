@@ -45,13 +45,18 @@ def filenamify(title):
     # Drop any non ascii letters/digits
     # Drop any leading/trailing whitespace that may have appeared
     title = title.replace("æ", "ae").replace("ø", "oe")
+    title = title.replace("…", "...")
     title = re.sub(r"[^a-z0-9 .-]", "", title.lower().strip())
+
+    # Keep dots from the title as-is, and let surrounding whitespace merge into them
+    title = re.sub(r"\s*(\.+)\s*", r"\1", title)
 
     # Replace whitespace with dot
     title = re.sub(r"\s+", ".", title)
     title = re.sub(r"\.-\.", "-", title)
 
-    return title.replace("..", ".")
+    # Trailing dots would clash with the separator that follows in the filename
+    return title.rstrip(".")
 
 
 def exclude(config, name):

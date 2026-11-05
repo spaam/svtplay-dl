@@ -21,6 +21,14 @@ class filenamifyTest(unittest.TestCase):
         ['Jason "Timbuktu" Diakité', "jason.timbuktu.diakite"],
         ["Matlagning del 1 av 10 - R\xe4ksm\xf6rg\xe5s | SVT Play", "matlagning.del.1.av.10-raksmorgas.svt.play"],
         ["$FOOBAR", "foobar"],
+        ["Mr. Smith", "mr.smith"],
+        ["Movie with ... in title (2019)", "movie.with...in.title.2019"],
+        ["Movie with... in title (2019)", "movie.with...in.title.2019"],
+        ["Movie with ...in title (2019)", "movie.with...in.title.2019"],
+        ["Wait...what (2019)", "wait...what.2019"],
+        ["Wait for it...", "wait.for.it"],
+        ["Wait for it ...", "wait.for.it"],
+        ["Movie with … in title (2019)", "movie.with...in.title.2019"],
     ]
 
     def test(self):
