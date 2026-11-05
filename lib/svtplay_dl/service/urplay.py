@@ -26,14 +26,14 @@ class Urplay(Service, OpenGraphThumbMixin):
             yield ServiceError("Could not find video data.")
             return
 
-        vid = jsondata["currentProduct"]["id"]
+        vid = jsondata["id"]
 
         res = self.http.get(f"https://media-api.urplay.se/config-streaming/v1/urplay/sources/{vid}")
         if res.status_code == 403:
             yield ServiceError("The video is geoblocked. Can't download this video")
             return
 
-        self.outputfilename(jsondata["currentProduct"])
+        self.outputfilename(jsondata)
 
         if "dash" in res.json()["sources"]:
             yield from dashparse(
@@ -101,8 +101,12 @@ class Urplay(Service, OpenGraphThumbMixin):
             self.output["id"] = str(data["id"])
         if "description" in data:
             self.output["episodedescription"] = data["description"]
-        if "publishedAt" in data:
-            published = data["publishedAt"]
+        published = data.get("publishedAt")
+        if not published:
+            platforms = data.get("accessiblePlatforms")
+            if isinstance(platforms, dict) and isinstance(platforms.get("urplay"), dict):
+                published = platforms["urplay"].get("startTime")
+        if published:
             if sys.version_info < (3, 12):  # 3.11 fix
                 published = published.replace("Z", "+00:00")
             self.output["publishing_datetime"] = datetime.fromisoformat(published).timestamp()
@@ -125,7 +129,22 @@ class Urplay(Service, OpenGraphThumbMixin):
         download_thumbnails(self.output, options, [(False, self.output["episodethumbnailurl"])])
 
     def _get_janson(self, urldata):
-        return self._find_flight_data(urldata, ["isAudio", "currentProduct"])
+        player = self._find_flight_data(urldata, ["isAudio", "playlist"])
+        if not player:
+            return None
+        playlist = player["playlist"]
+        products = playlist.get("products")
+        if not products:
+            return None
+        product = products[playlist.get("startIndex") or 0]
+
+        # The description isn't part of the playlist product anymore.
+        programinfo = self._find_flight_data(urldata, ["programInfoSSR"])
+        if programinfo and "description" not in product:
+            about = programinfo["programInfoSSR"].get("about")
+            if isinstance(about, dict) and about.get("description"):
+                product["description"] = about["description"]
+        return product
 
     def _get_seasondata(self, urldata):
         return self._find_flight_data(urldata, ["superSeriesSeasons", "seriesId"])
