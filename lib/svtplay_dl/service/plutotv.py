@@ -76,9 +76,13 @@ class Plutotv(Service, OpenGraphThumbMixin):
 
         gql_res = self.http.request(
             "post",
-            "https://pluto.tv/api/tn/video/graphql/",
+            "https://pluto.tv/api/tn/app-shell/graphql/",
             json=payload,
         )
+
+        if gql_res.status_code != 200:
+            yield ServiceError(f"Can't get streaming url, got http status {gql_res.status_code}")
+            return
 
         path = None
         gql_json = gql_res.json()
