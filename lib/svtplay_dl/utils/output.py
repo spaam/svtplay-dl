@@ -112,6 +112,11 @@ def progressbar(total, pos, msg=""):
     function.
     """
     width = get_terminal_size()[0] - 60
+    if total <= 0:
+        # Total size unknown (e.g. no Content-Length header): report the
+        # byte count instead of dividing by zero.
+        progress(pos, total, msg)
+        return
     rel_pos = int(float(pos) / total * width)
     bar = "".join(["=" * rel_pos, "." * (width - rel_pos)])
 
