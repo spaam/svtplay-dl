@@ -78,6 +78,10 @@ class progressbarTest(unittest.TestCase):
         svtplay_dl.utils.output.progressbar(100, 20)
         assert self.mockfile.read() == "\r[020/100][=======............................] "
 
+    def test_progress_unknown_total(self):
+        svtplay_dl.utils.output.progressbar(0, 8192)
+        assert self.mockfile.read() == "Downloaded 8kB bytes\r"
+
 
 class EtaTest(unittest.TestCase):
     @patch("time.time")
